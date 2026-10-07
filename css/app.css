@@ -1,0 +1,391 @@
+/* Smart Grocery & Budget Safety Tracker - Core Mobile CSS */
+:root {
+  --primary: #10B981;
+  --primary-dark: #059669;
+  --primary-light: #D1FAE5;
+  --amber: #F59E0B;
+  --amber-dark: #D97706;
+  --amber-light: #FEF3C7;
+  --rose: #EF4444;
+  --rose-dark: #DC2626;
+  --rose-light: #FEE2E2;
+  --slate-bg: #F8FAFC;
+  --slate-card: #FFFFFF;
+  --slate-text: #0F172A;
+  --slate-sub: #64748B;
+  --border: #E2E8F0;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 20px -3px rgba(16, 185, 129, 0.4);
+  --shadow-danger: 0 0 20px -2px rgba(239, 68, 68, 0.5);
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #0F172A;
+  color: var(--slate-text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Outer Desktop Frame */
+.desktop-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem 0;
+}
+
+@media (min-width: 640px) {
+  .desktop-wrapper {
+    padding: 1.5rem;
+    background: radial-gradient(circle at 50% 20%, #1E293B 0%, #0F172A 100%);
+  }
+}
+
+/* Mobile Frame Mockup */
+.mobile-container {
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  max-height: 100vh;
+  background: var(--slate-bg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 640px) {
+  .mobile-container {
+    height: 890px;
+    max-height: 94vh;
+    border-radius: 44px;
+    border: 9px solid #1E293B;
+    box-shadow: 
+      0 0 0 2px #334155,
+      0 25px 60px -15px rgba(0, 0, 0, 0.7),
+      0 0 40px rgba(16, 185, 129, 0.15);
+  }
+}
+
+/* Dynamic Notch simulation on desktop */
+.mobile-notch {
+  display: none;
+}
+@media (min-width: 640px) {
+  .mobile-notch {
+    display: block;
+    width: 115px;
+    height: 24px;
+    background: #0F172A;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px;
+    z-index: 60;
+    pointer-events: none;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Scroll area */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: calc(88px + var(--safe-bottom));
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+.app-content::-webkit-scrollbar {
+  width: 4px;
+}
+.app-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.app-content::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+/* Bottom Navigation Bar (Floating & Fixed) */
+.bottom-nav-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 14px calc(10px + var(--safe-bottom));
+  pointer-events: none;
+  z-index: 50;
+}
+
+.bottom-nav {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 26px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 6px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border-radius: 18px;
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 48px;
+  position: relative;
+}
+
+.nav-item.active {
+  color: #059669;
+  background: #ECFDF5;
+}
+
+.nav-item.active svg {
+  transform: scale(1.1);
+  stroke: #059669;
+}
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  transition: transform 0.2s ease;
+}
+
+.nav-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 18px);
+  background: #EF4444;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+}
+
+/* Animations */
+@keyframes pulseDanger {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes flashBorder {
+  0%, 100% {
+    border-color: #EF4444;
+    background-color: #FEF2F2;
+  }
+  50% {
+    border-color: #DC2626;
+    background-color: #FEE2E2;
+  }
+}
+
+.animate-pulse-danger {
+  animation: pulseDanger 1.6s infinite ease-in-out;
+}
+
+.animate-flash-border {
+  animation: flashBorder 1.2s infinite ease-in-out;
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1.05); opacity: 0; }
+}
+
+/* Stepper Touch Buttons */
+.stepper-btn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: #FFFFFF;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.stepper-btn:active {
+  transform: scale(0.90);
+  background: #F1F5F9;
+}
+
+/* Modal Bottom Sheet */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 430px;
+  background: #FFFFFF;
+  border-radius: 28px 28px 0 0;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
+.modal-overlay.active .modal-sheet {
+  transform: translateY(0);
+}
+
+.sheet-handle {
+  width: 42px;
+  height: 5px;
+  background: #CBD5E1;
+  border-radius: 4px;
+  margin: 12px auto 8px;
+}
+
+/* Buttons Touch Ergonomics */
+.btn-primary {
+  min-height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+/* Toast Notification */
+.toast-container {
+  position: absolute;
+  top: 72px;
+  left: 16px;
+  right: 16px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(15, 23, 42, 0.95);
+  color: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  animation: slideDownToast 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto;
+}
+
+.toast.toast-danger {
+  background: #DC2626;
+  border: 1px solid #EF4444;
+}
+
+.toast.toast-success {
+  background: #065F46;
+  border: 1px solid #10B981;
+}
+
+@keyframes slideDownToast {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

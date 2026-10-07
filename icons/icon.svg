@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#064E3B" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#grad)" />
+  <g filter="url(#shadow)" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Cart Body -->
+    <path d="M120 150 h50 l38 180 h170 l36 -130 H180" />
+    <!-- Wheels -->
+    <circle cx="215" cy="380" r="22" fill="#FFFFFF" />
+    <circle cx="365" cy="380" r="22" fill="#FFFFFF" />
+    <!-- Shield / Safety Check -->
+    <path d="M280 180 Q320 180 320 220 Q320 270 280 290 Q240 270 240 220 Q240 180 280 180 Z" fill="#F59E0B" stroke="#FFFFFF" stroke-width="12" />
+    <path d="M265 235 L276 246 L298 220" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
