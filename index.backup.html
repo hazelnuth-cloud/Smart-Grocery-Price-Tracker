@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Smart Grocery & Budget Safety Tracker</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#10B981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SmartGrocery">
+  <link rel="apple-touch-icon" href="./icons/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="alternate icon" type="image/png" href="./icons/icon-192.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Core Mobile CSS -->
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body class="bg-slate-900 text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- Desktop Presentation Wrapper (Centered Max 430px Frame) -->
+  <div class="desktop-wrapper">
+    <main class="mobile-container">
+      
+      <!-- Simulated Mobile Notch for Desktop View -->
+      <div class="mobile-notch"></div>
+
+      <!-- Toast Container -->
+      <div id="toast-container" class="toast-container"></div>
+
+      <!-- APP HEADER (Fixed Top) -->
+      <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/90 pt-3 pb-2.5 px-4 sticky top-0 z-30">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+              <!-- Smart Grocery Cart & Shield Icon -->
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 class="text-sm font-extrabold text-slate-900 tracking-tight leading-none">Smart Grocery</h1>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase tracking-wider">Tracker</span>
+              </div>
+              <p class="text-[11px] text-slate-500 font-medium">Asisten Belanja Kos: <span class="text-emerald-700 font-semibold">Rian</span></p>
+            </div>
+          </div>
+
+          <!-- Header Right Utilities: Sound Toggle & Quick Reset -->
+          <div class="flex items-center gap-1">
+            <button id="btn-sound-toggle" onclick="toggleSound()" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors" title="Toggle Sound / Haptic">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+            <button onclick="resetToInitialMockData()" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors" title="Muat Ulang Mock Data Awal">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- STICKY BUDGET SAFETY CAP WIDGET (F-05) -->
+        <div id="budget-safety-header" class="mt-2.5 bg-slate-50 border border-slate-200 rounded-2xl p-3 transition-all duration-300">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-500 font-medium">Uang Saku Tunai:</span>
+              <span id="header-budget-limit" onclick="promptBudgetEdit()" class="font-bold text-slate-800 cursor-pointer hover:text-emerald-700 underline decoration-dotted" title="Klik untuk ubah cepat uang saku">Rp 300.000</span>
+              <button onclick="promptBudgetEdit()" class="text-slate-400 hover:text-emerald-600 ml-0.5" title="Ubah Anggaran">
+                <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              </button>
+            </div>
+            <!-- Dynamic Safety Badge -->
+            <div id="header-safety-badge" class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>Aman</span>
+            </div>
+          </div>
+
+          <!-- Total Belanja & Sisa Tunai -->
+          <div class="flex items-baseline justify-between mb-2">
+            <div>
+              <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Total Saat Ini</span>
+              <span id="header-total-belanja" class="text-xl font-black text-slate-900 tracking-tight">Rp 0</span>
+            </div>
+            <div class="text-right">
+              <span id="header-sisa-label" class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Sisa Tunai</span>
+              <span id="header-sisa-budget" class="text-sm font-bold text-slate-800">Rp 300.000</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Progress Bar -->
+          <div class="relative w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden">
+            <div id="budget-progress-bar" class="h-full rounded-full bg-emerald-500 transition-all duration-300" style="width: 0%;"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1 font-medium">
+            <span>0%</span>
+            <span class="text-slate-500 font-semibold">Batas Waspada 80%</span>
+            <span id="budget-progress-percent" class="font-bold text-slate-700">0%</span>
+          </div>
+
+          <!-- Warning Banner (flashing if overbudget) -->
+          <div id="header-warning-banner" class="hidden mt-2 px-3 py-2 rounded-xl text-xs flex items-center justify-between">
+            <span id="header-warning-text"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- SCROLLABLE APP CONTENT AREA -->
+      <div class="app-content px-4 py-3">
+
+        <!-- ============================================== -->
+        <!-- TAB 1: BELANJA (Active Shopping Cart)          -->
+        <!-- ============================================== -->
+        <section id="tab-view-belanja" class="space-y-3">
+          
+          <!-- Search & Filter Controls -->
+          <div class="space-y-2">
+            <!-- Search Input -->
+            <div class="relative">
+              <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input 
+                type="text" 
+                id="search-input" 
+                oninput="handleSearch(this.value)" 
+                placeholder="Cari item di keranjang belanja..." 
+                class="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              >
+            </div>
+
+            <!-- Horizontal Scrollable Category Pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+              <button onclick="setCategoryFilter('all')" data-category="all" class="category-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white whitespace-nowrap shadow-sm transition-all">Semua</button>
+              <button onclick="setCategoryFilter('Kebutuhan Pokok')" data-category="Kebutuhan Pokok" class="category-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition-all">Sembako</button>
+              <button onclick="setCategoryFilter('Makanan')" data-category="Makanan" class="category-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition-all">Makanan</button>
+              <button onclick="setCategoryFilter('Minuman')" data-category="Minuman" class="category-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition-all">Minuman</button>
+              <button onclick="setCategoryFilter('Perlengkapan Mandi')" data-category="Perlengkapan Mandi" class="category-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition-all">Mandi</button>
+              <button onclick="setCategoryFilter('Kebersihan & Rumah')" data-category="Kebersihan & Rumah" class="category-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap transition-all">Kebersihan</button>
+            </div>
+
+            <!-- Quick Add Suggestions from Last Month Catalog -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+              <span class="text-[10px] text-slate-400 font-semibold shrink-0">Cepat:</span>
+              <button onclick="openAddItemModal('Minyak Goreng')" class="text-[10px] font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg whitespace-nowrap border border-emerald-200 transition-colors">+ Minyak</button>
+              <button onclick="openAddItemModal('Beras 5kg')" class="text-[10px] font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg whitespace-nowrap border border-emerald-200 transition-colors">+ Beras</button>
+              <button onclick="openAddItemModal('Telur Ayam 1kg')" class="text-[10px] font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg whitespace-nowrap border border-emerald-200 transition-colors">+ Telur</button>
+              <button onclick="openAddItemModal('Sabun Mandi')" class="text-[10px] font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg whitespace-nowrap border border-emerald-200 transition-colors">+ Sabun</button>
+              <button onclick="openAddItemModal('Mi Instan Dus')" class="text-[10px] font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg whitespace-nowrap border border-emerald-200 transition-colors">+ Mi Dus</button>
+              <button onclick="openAddItemModal('Susu UHT 1L')" class="text-[10px] font-semibold px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg whitespace-nowrap border border-emerald-200 transition-colors">+ Susu</button>
+            </div>
+          </div>
+
+          <!-- Action Bar: Add Item Button & Realtime Comparator Counter (F-04) -->
+          <div class="flex items-center justify-between pt-1">
+            <div class="flex items-center gap-2">
+              <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Troli Belanja</h3>
+              <div id="cart-comparator-pill" class="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"></div>
+            </div>
+            <button onclick="openAddItemModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-emerald-500/20 active:scale-95 transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+              <span>Tambah Item</span>
+            </button>
+          </div>
+
+          <!-- CART ITEMS CARD LIST CONTAINER (NO DESKTOP TABLES) -->
+          <div id="cart-items-container" class="space-y-3">
+            <!-- Dynamically populated via JS -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="cart-empty-state" class="hidden text-center py-10 px-4 bg-white rounded-3xl border border-dashed border-slate-300">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-3">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800">Troli Belanja Kosong</h3>
+            <p class="text-xs text-slate-500 max-w-xs mx-auto mt-1 mb-4">Tambahkan barang belanjaan supermarket Anda untuk memantau harga & batasan uang saku realtime.</p>
+            <button onclick="resetToInitialMockData()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-500/20 active:scale-95 transition-all">
+              Muat Contoh Belanjaan Rian
+            </button>
+          </div>
+
+          <!-- Floating Sticky Footer for Cart Checkout -->
+          <div id="cart-floating-footer" class="bg-white rounded-2xl border border-slate-200/90 p-3 shadow-lg shadow-slate-900/5 mt-4">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span id="footer-items-count" class="text-slate-500 font-semibold">0 item</span>
+              <span id="footer-total-savings" class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Hemat Rp 0</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold uppercase block">Total Bayar</span>
+                <span id="footer-total-belanja" class="text-base font-extrabold text-slate-900">Rp 0</span>
+              </div>
+              <button onclick="handleCheckout()" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 active:scale-95 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                <span>Selesaikan Belanja (F-06)</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 2: RIWAYAT (Past Receipts & Storage)       -->
+        <!-- ============================================== -->
+        <section id="tab-view-riwayat" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Riwayat Belanja</h3>
+              <p class="text-[11px] text-slate-500">Arsip struk belanja bulanan tersimpan di LocalStorage</p>
+            </div>
+          </div>
+
+          <!-- Search in Receipts -->
+          <div class="relative">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input 
+              type="text" 
+              id="search-receipts-input" 
+              oninput="handleReceiptsSearch(this.value)" 
+              placeholder="Cari transaksi riwayat (bulan atau nama produk)..." 
+              class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+          </div>
+
+          <!-- Receipts Container -->
+          <div id="receipts-list-container" class="space-y-3">
+            <!-- Dynamically populated via JS -->
+          </div>
+
+          <!-- Receipts Empty State -->
+          <div id="receipts-empty-state" class="hidden text-center py-10 px-4 bg-white rounded-3xl border border-dashed border-slate-300">
+            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 mx-auto flex items-center justify-center mb-3">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800">Belum Ada Riwayat Belanja</h3>
+            <p class="text-xs text-slate-500 max-w-xs mx-auto mt-1 mb-4">Setelah menyelesaikan belanja di tab Belanja, struk akan otomatis tersimpan di sini.</p>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 3: ANGGARAN & ANALYTICS (Budget Cap Setting)-->
+        <!-- ============================================== -->
+        <section id="tab-view-anggaran" class="hidden space-y-4">
+          
+          <!-- Pengaturan Batas Anggaran (F-05) -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Pengendali Anggaran (Budget Safety Cap)</h3>
+            <p class="text-xs text-slate-500 mb-3">Tentukan batas maksimal uang tunai di dompet Anda untuk sesi belanja ini.</p>
+
+            <div class="mb-3">
+              <label class="text-xs font-semibold text-slate-700 block mb-1">Batas Uang Saku (Rp)</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</span>
+                <input 
+                  type="number" 
+                  id="input-budget-cap" 
+                  class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 text-base focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                  placeholder="300000"
+                >
+              </div>
+            </div>
+
+            <!-- Quick Budget Presets -->
+            <div class="flex items-center gap-1.5 flex-wrap mb-4">
+              <span class="text-[10px] text-slate-400 font-semibold">Pilih Cepat:</span>
+              <button onclick="setQuickBudget(150000)" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">150k</button>
+              <button onclick="setQuickBudget(250000)" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">250k</button>
+              <button onclick="setQuickBudget(300000)" class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-200 rounded-lg transition-colors">300k (Std)</button>
+              <button onclick="setQuickBudget(500000)" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">500k</button>
+              <button onclick="setQuickBudget(750000)" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">750k</button>
+            </div>
+
+            <!-- Warning Threshold Slider -->
+            <div class="pt-2 border-t border-slate-100">
+              <div class="flex justify-between items-center text-xs mb-1.5">
+                <span class="font-semibold text-slate-700">Sensitivitas Peringatan (Kuning/Oranye):</span>
+                <span id="threshold-slider-val" class="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">80%</span>
+              </div>
+              <input 
+                type="range" 
+                id="input-threshold-slider" 
+                min="50" 
+                max="95" 
+                step="5" 
+                value="80" 
+                class="w-full accent-emerald-600 cursor-pointer"
+              >
+              <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                <span>50% (Sangat Waspada)</span>
+                <span>80% (Standar SRS)</span>
+                <span>95% (Mepet)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Breakdown Belanja Per Kategori -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Proporsi Kategori Belanja</h3>
+            <p class="text-xs text-slate-500 mb-3">Distribusi uang saku pada keranjang aktif saat ini.</p>
+            <div id="category-breakdown-container">
+              <!-- Dynamically rendered bars -->
+            </div>
+          </div>
+
+          <!-- Komparasi Tren Harga & Katalog Acuan Bulan Lalu -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Katalog Acuan Supermarket</h3>
+                <p class="text-xs text-slate-500">Harga riwayat bulan lalu sebagai pembanding F-04</p>
+              </div>
+            </div>
+
+            <div id="price-trend-stats" class="my-2"></div>
+            
+            <div id="price-history-catalog" class="max-h-56 overflow-y-auto space-y-1.5 pr-1 mt-2">
+              <!-- Dynamically rendered reference catalog -->
+            </div>
+          </div>
+
+          <!-- Tips Belanja Siswa Rantau (Rian) -->
+          <div class="bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-4 text-white shadow-md">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="p-1 rounded-lg bg-white/20">💡</span>
+              <h4 class="font-bold text-xs uppercase tracking-wider">Tips Cerdas Belanja Rian</h4>
+            </div>
+            <ul class="text-xs text-emerald-50 space-y-1.5 list-disc pl-4 mt-2">
+              <li>Cek diskon bertumpuk <b>50+20</b>: harga akhir jadi <b>40%</b> (diskon efektif 60%), bukan 70%!</li>
+              <li>Perhatikan komparator warna merah <b>↑ Naik</b>: pertimbangkan beli kemasan ekonomis atau merek alternatif.</li>
+              <li>Jaga bar anggaran tetap di zona <b>Hijau (&lt;80%)</b> untuk cadangan uang transport & darurat.</li>
+            </ul>
+          </div>
+
+          <!-- Reset Button -->
+          <div class="text-center pt-2">
+            <button onclick="resetToInitialMockData()" class="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 px-3 py-2 rounded-xl border border-rose-200 transition-colors">
+              Reset ke Mock Data Awal (SRS Demo)
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ============================================== -->
+      <!-- BOTTOM NAVIGATION BAR (FIXED FLOATING DOCK)    -->
+      <!-- ============================================== -->
+      <div class="bottom-nav-wrapper">
+        <nav class="bottom-nav">
+          <!-- Tab 1: Belanja -->
+          <button onclick="switchTab('belanja')" data-tab="belanja" class="nav-item active" aria-label="Tab Belanja">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span>Belanja</span>
+            <span id="nav-cart-badge" class="nav-badge" style="display: none;">0</span>
+          </button>
+
+          <!-- Tab 2: Riwayat -->
+          <button onclick="switchTab('riwayat')" data-tab="riwayat" class="nav-item" aria-label="Tab Riwayat">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <span>Riwayat</span>
+          </button>
+
+          <!-- Tab 3: Anggaran -->
+          <button onclick="switchTab('anggaran')" data-tab="anggaran" class="nav-item" aria-label="Tab Anggaran">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>
+            </svg>
+            <span>Anggaran</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- MODAL / BOTTOM SHEET: ADD & EDIT ITEM          -->
+      <!-- ============================================== -->
+      <div id="item-modal" class="modal-overlay" onclick="if(event.target===this) closeItemModal()">
+        <div class="modal-sheet">
+          <div class="sheet-handle"></div>
+          
+          <div class="px-5 pt-1 pb-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 id="modal-title" class="text-base font-bold text-slate-900">Tambah Item Belanja</h3>
+              <button onclick="closeItemModal()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <form id="item-form" onsubmit="handleItemFormSubmit(event)" class="mt-4 space-y-3.5">
+              
+              <!-- Nama Barang & Autocomplete (F-01) -->
+              <div>
+                <label class="text-xs font-bold text-slate-700 block mb-1">Nama Barang *</label>
+                <input 
+                  type="text" 
+                  id="input-nama" 
+                  required
+                  list="item-suggestions"
+                  placeholder="Contoh: Minyak Goreng, Beras 5kg" 
+                  class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                <datalist id="item-suggestions">
+                  <option value="Minyak Goreng">
+                  <option value="Beras 5kg">
+                  <option value="Sabun Mandi">
+                  <option value="Telur Ayam 1kg">
+                  <option value="Mi Instan Dus">
+                  <option value="Susu UHT 1L">
+                  <option value="Kopi Bubuk 200g">
+                  <option value="Deterjen Cair 800ml">
+                </datalist>
+              </div>
+
+              <!-- Kategori & Satuan (Grid & Quick Pills) -->
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-xs font-bold text-slate-700">Kategori</label>
+                  </div>
+                  <select id="input-kategori" onchange="syncCategoryChips(this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="Kebutuhan Pokok">Kebutuhan Pokok</option>
+                    <option value="Makanan">Makanan</option>
+                    <option value="Minuman">Minuman</option>
+                    <option value="Perlengkapan Mandi">Perlengkapan Mandi</option>
+                    <option value="Kebersihan & Rumah">Kebersihan & Rumah</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                  <!-- Quick Category Chips -->
+                  <div class="flex items-center gap-1 overflow-x-auto mt-1.5 pb-0.5 no-scrollbar">
+                    <button type="button" onclick="setCategoryChoice('Kebutuhan Pokok')" class="modal-cat-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">Pokok</button>
+                    <button type="button" onclick="setCategoryChoice('Makanan')" class="modal-cat-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">Makanan</button>
+                    <button type="button" onclick="setCategoryChoice('Minuman')" class="modal-cat-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">Minuman</button>
+                    <button type="button" onclick="setCategoryChoice('Perlengkapan Mandi')" class="modal-cat-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">Mandi</button>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-xs font-bold text-slate-700">Satuan Unit</label>
+                  </div>
+                  <select id="input-satuan" onchange="syncUnitChips(this.value)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="pcs">pcs</option>
+                    <option value="kg">kg</option>
+                    <option value="liter">liter</option>
+                    <option value="pack">pack</option>
+                  </select>
+                  <!-- Quick Unit Pills -->
+                  <div class="flex items-center gap-1 overflow-x-auto mt-1.5 pb-0.5">
+                    <button type="button" onclick="setUnitChoice('pcs')" class="modal-unit-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">pcs</button>
+                    <button type="button" onclick="setUnitChoice('kg')" class="modal-unit-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">kg</button>
+                    <button type="button" onclick="setUnitChoice('liter')" class="modal-unit-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">liter</button>
+                    <button type="button" onclick="setUnitChoice('pack')" class="modal-unit-chip text-[10px] px-2 py-0.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">pack</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Qty & Harga Satuan Asli (F-01, F-02) -->
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Kuantitas (Qty) *</label>
+                  <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
+                    <button type="button" onclick="adjustModalQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 font-black text-sm flex items-center justify-center active:scale-95">−</button>
+                    <input 
+                      type="number" 
+                      id="input-qty" 
+                      min="1" 
+                      value="1" 
+                      required 
+                      class="w-full bg-transparent font-extrabold text-sm text-center focus:outline-none"
+                    >
+                    <button type="button" onclick="adjustModalQty(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 font-black text-sm flex items-center justify-center active:scale-95">+</button>
+                  </div>
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-slate-700 block mb-1">Harga Satuan (Rp) *</label>
+                  <div class="relative">
+                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rp</span>
+                    <input 
+                      type="number" 
+                      id="input-harga-satuan" 
+                      min="1" 
+                      step="100" 
+                      required 
+                      placeholder="20000" 
+                      class="w-full pl-8 pr-2.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tipe Diskon (F-03) -->
+              <div>
+                <label class="text-xs font-bold text-slate-700 block mb-1.5">Tipe Diskon Promosi</label>
+                <div id="discount-type-group" class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl text-xs">
+                  <label class="cursor-pointer">
+                    <input type="radio" name="diskonTipe" value="none" class="peer sr-only" checked>
+                    <span class="block py-1.5 text-center rounded-lg font-semibold peer-checked:bg-white peer-checked:text-emerald-700 peer-checked:shadow-xs transition-all">Tanpa Diskon</span>
+                  </label>
+                  <label class="cursor-pointer">
+                    <input type="radio" name="diskonTipe" value="single" class="peer sr-only">
+                    <span class="block py-1.5 text-center rounded-lg font-semibold peer-checked:bg-white peer-checked:text-emerald-700 peer-checked:shadow-xs transition-all">Tunggal (%)</span>
+                  </label>
+                  <label class="cursor-pointer">
+                    <input type="radio" name="diskonTipe" value="tiered" class="peer sr-only">
+                    <span class="block py-1.5 text-center rounded-lg font-semibold peer-checked:bg-white peer-checked:text-emerald-700 peer-checked:shadow-xs transition-all">Bertingkat (A+B)</span>
+                  </label>
+                </div>
+
+                <!-- Input Diskon Tunggal -->
+                <div id="group-discount-single" class="hidden mt-2">
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[11px] text-slate-600 font-medium">Besar Diskon Tunggal (%)</label>
+                    <div class="flex gap-1">
+                      <button type="button" onclick="setSinglePreset(10)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold hover:bg-amber-100 hover:text-amber-800">10%</button>
+                      <button type="button" onclick="setSinglePreset(25)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold hover:bg-amber-100 hover:text-amber-800">25%</button>
+                      <button type="button" onclick="setSinglePreset(50)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold hover:bg-amber-100 hover:text-amber-800">50%</button>
+                    </div>
+                  </div>
+                  <div class="relative">
+                    <input type="number" id="input-discount-single" min="0" max="100" placeholder="Contoh: 25" class="w-full pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">%</span>
+                  </div>
+                </div>
+
+                <!-- Input Diskon Bertingkat (Tiered) -->
+                <div id="group-discount-tiered" class="hidden mt-2">
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[11px] text-slate-600 font-medium">Format Diskon Bertumpuk (misal: <code>50% + 20%</code>)</label>
+                  </div>
+                  <div class="flex items-center gap-1.5 mb-1.5">
+                    <button type="button" onclick="setTieredPreset('50% + 20%')" class="text-[10px] px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 font-bold border border-purple-200 hover:bg-purple-100">50% + 20%</button>
+                    <button type="button" onclick="setTieredPreset('70% + 10%')" class="text-[10px] px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 font-bold border border-purple-200 hover:bg-purple-100">70% + 10%</button>
+                    <button type="button" onclick="setTieredPreset('30% + 20%')" class="text-[10px] px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 font-bold border border-purple-200 hover:bg-purple-100">30% + 20%</button>
+                    <button type="button" onclick="setTieredPreset('50% + 10%')" class="text-[10px] px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 font-bold border border-purple-200 hover:bg-purple-100">50% + 10%</button>
+                  </div>
+                  <input type="text" id="input-discount-tiered" placeholder="50% + 20% atau 50+20" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:ring-2 focus:ring-emerald-500">
+                  <p class="text-[10px] text-slate-400 mt-1">Formula: <code>Harga Awal × (1 - d1) × (1 - d2)</code></p>
+                </div>
+              </div>
+
+              <!-- Harga Acuan Bulan Lalu (F-04) -->
+              <div>
+                <label class="text-xs font-bold text-slate-700 block mb-1">Harga Riwayat Bulan Lalu (Rp)</label>
+                <div class="relative">
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rp</span>
+                  <input 
+                    type="number" 
+                    id="input-harga-lalu" 
+                    min="0" 
+                    step="100" 
+                    placeholder="Opsional (terisi otomatis jika ada acuan)" 
+                    class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                </div>
+              </div>
+
+              <!-- LIVE PREVIEW CARD DALAM MODAL (F-02, F-03, F-04) -->
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs space-y-1.5">
+                <div class="font-bold text-slate-600 text-[10px] uppercase tracking-wider">Preview Perhitungan Realtime</div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Harga Akhir / Satuan:</span>
+                  <span id="preview-final-unit" class="font-bold text-slate-900 text-sm">Rp 0</span>
+                </div>
+                <div id="preview-savings" class="text-emerald-600 font-semibold text-[11px] hidden"></div>
+                <ul id="preview-steps-log" class="text-[10px] text-purple-700 bg-purple-50 p-2 rounded-lg list-disc pl-4 hidden space-y-0.5"></ul>
+                
+                <div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
+                  <span class="text-slate-500">Status vs Bulan Lalu:</span>
+                  <div id="preview-comparator-badge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-xs font-bold bg-slate-100 text-slate-600">
+                    Produk Baru
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
+                  <span class="font-bold text-slate-700">Subtotal Baris:</span>
+                  <span id="preview-subtotal" class="font-black text-slate-900 text-base">Rp 0</span>
+                </div>
+              </div>
+
+              <!-- Submit Buttons -->
+              <div class="pt-2 flex items-center gap-2">
+                <button type="button" onclick="closeItemModal()" class="w-1/3 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50">
+                  Batal
+                </button>
+                <button type="submit" id="btn-submit-item" class="btn-primary w-2/3 text-xs">
+                  Tambahkan ke Keranjang
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- MODAL: STRUK CHECKOUT BERHASIL (CELEBRATION)   -->
+      <!-- ============================================== -->
+      <div id="checkout-modal" class="modal-overlay" onclick="if(event.target===this) closeCheckoutModal()">
+        <div class="modal-sheet">
+          <div class="sheet-handle"></div>
+          
+          <div class="px-5 pt-2 pb-6 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-2">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            
+            <h3 class="text-base font-extrabold text-slate-900">Belanja Berhasil Diselesaikan!</h3>
+            <p id="checkout-modal-title" class="text-xs text-slate-500 mt-0.5"></p>
+
+            <div class="my-3 flex justify-center">
+              <span id="checkout-modal-status" class="px-3 py-1 rounded-full text-xs font-bold"></span>
+            </div>
+
+            <!-- Receipt Breakdown -->
+            <div class="bg-slate-50 rounded-2xl p-3 text-left border border-slate-200 text-xs mb-3">
+              <div class="flex justify-between py-1 text-slate-500">
+                <span>Batas Uang Saku:</span>
+                <span id="checkout-modal-budget" class="font-bold text-slate-800"></span>
+              </div>
+              <div class="flex justify-between py-1 text-slate-500">
+                <span>Penghematan Diskon:</span>
+                <span id="checkout-modal-savings" class="font-bold text-emerald-600"></span>
+              </div>
+              <div class="flex justify-between py-1.5 border-t border-slate-200 text-slate-900 font-black text-sm">
+                <span>Total Belanja:</span>
+                <span id="checkout-modal-total" class="text-emerald-700"></span>
+              </div>
+
+              <div class="mt-2 pt-2 border-t border-slate-200">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Daftar Item Dibeli:</span>
+                <div id="checkout-modal-items" class="max-h-36 overflow-y-auto space-y-1"></div>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 mb-4">
+              Data harga belanjaan ini telah diperbarui menjadi acuan bulan depan secara otomatis di LocalStorage!
+            </p>
+
+            <button onclick="closeCheckoutModal()" class="btn-primary w-full text-xs">
+              Lihat di Tab Riwayat Belanja
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="./js/app.js"></script>
+</body>
+</html>

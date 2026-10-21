@@ -1,65 +1,59 @@
-const CACHE_NAME = 'smart-grocery-v1';
+/**
+ * Service Worker for Smart Grocery Tracker & Budget Planner
+ * Offline caching support for supermarket in-store experience
+ */
+const CACHE_NAME = 'sgt-cache-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/app.css',
-  './js/app.js',
-  './manifest.json',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
 ];
 
-// Install event: cache core assets
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
-        console.warn('Cache addAll warning:', err);
-      });
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(ASSETS_TO_CACHE))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Activate event: cleanup old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then(keys => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+        keys.map(k => {
+          if (k !== CACHE_NAME) return caches.delete(k);
         })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event: Network-first with cache fallback
-self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
+self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-
+  
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        // Update cache if valid response
+    caches.match(event.request).then(cachedResponse => {
+      if (cachedResponse) {
+        fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse));
+          }
+        }).catch(() => {});
+        return cachedResponse;
+      }
+
+      return fetch(event.request).then(networkResponse => {
         if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return networkResponse;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) return cachedResponse;
-          if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('./index.html');
-          }
-        });
-      })
+      }).catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
+    })
   );
 });
