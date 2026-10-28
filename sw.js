@@ -1,18 +1,28 @@
 /**
  * Service Worker for Smart Grocery Tracker & Budget Planner
- * Offline caching support for supermarket in-store experience
+ * Production-ready offline caching for supermarket in-store experience
  */
-const CACHE_NAME = 'sgt-cache-v2';
+const CACHE_NAME = 'sgt-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
+  './manifest.json',
+  './css/app.css',
+  './js/app.js',
+  './icons/icon.svg',
+  'https://cdn.tailwindcss.com',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS_TO_CACHE))
+      .then(cache => {
+        return Promise.allSettled(
+          ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => console.warn('Cache add warning for', url, err)))
+        );
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -35,6 +45,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       if (cachedResponse) {
+        // Fetch in background to update cache (Stale-While-Revalidate)
         fetch(event.request).then(networkResponse => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse));

@@ -3,1387 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Smart Grocery Tracker & Budget Planner</title>
+  <title>Smart Grocery Tracker &amp; Budget Planner</title>
   
   <!-- SEO & Mobile Meta Tags -->
-  <meta name="description" content="Smart Grocery Tracker & Budget Planner PWA dengan Favicon elegan, Dark Mode, WhatsApp Sharing, Single Smart Input, Bottom Nav Bar (Icon-Only), dan Pantry Expiry Tracker.">
-  <meta name="theme-color" content="#FCE7F3">
+  <meta name="description" content="Smart Grocery Tracker &amp; Budget Safety Planner PWA dengan Dark Mode, WhatsApp Sharing, Single Smart Input, Bottom Nav Bar Icon-Only, dan Pantry Expiry Tracker.">
+  <meta id="themeColorMeta" name="theme-color" content="#FCE7F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Smart Grocery">
 
-  <!-- A.1 INLINE SVG FAVICON (ELEGANT MINIMAL RIBBON MOTIF) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23F472B6'/%3E%3Cstop offset='100%25' stop-color='%239D174D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='10' fill='%23FFF0F5' stroke='%23FBCFE8' stroke-width='1.5'/%3E%3Cpath d='M16 14.2c-2.2-2.4-5.5-3.4-7.5-1.4-2 2-1 5.5 1.5 7.5l6 4.9 6-4.9c2.5-2 3.5-5.5 1.5-7.5-2-2-5.3-1-7.5 1.4z' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='15' r='2.2' fill='%239D174D'/%3E%3C/svg%3E">
+  <!-- INLINE SVG FAVICON (ELEGANT RIBBON & CREST MOTIF) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23F472B6'/%3E%3Cstop offset='100%25' stop-color='%239D174D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='%23FFF5F8' stroke='%23FBCFE8' stroke-width='1.5'/%3E%3Cpath d='M16 13.5c-2.4-2.5-5.8-3.6-7.8-1.5-2 2.1-.9 5.8 1.6 7.8l6.2 5.2 6.2-5.2c2.5-2 3.6-5.7 1.6-7.8-2-2.1-5.4-1-7.8 1.5z' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='14.5' r='2.2' fill='%239D174D'/%3E%3C/svg%3E">
 
-  <!-- A.1 PWA WEB APP MANIFEST (INLINE DATA URI FOR INSTALLABILITY) -->
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Smart%20Grocery%20Tracker%22%2C%22short_name%22%3A%22SmartGrocery%22%2C%22start_url%22%3A%22.%2Findex.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23FFFDFD%22%2C%22theme_color%22%3A%22%23FCE7F3%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%253E%253Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27128%27%20fill%3D%27%2523FFF0F5%27%2F%253E%253Cpath%20d%3D%27M256%20220c-35-40-88-56-120-24-32%2032-16%2088%2024%20120l96%2080%2096-80c40-32%2056-88%2024-120-32-32-85-16-120%2024z%27%20fill%3D%27%25239D174D%27%2F%253E%253Ccircle%20cx%3D%27256%27%20cy%3D%27230%27%20r%3D%2735%27%20fill%3D%27%2523F472B6%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+  <!-- PWA MANIFEST -->
+  <link rel="manifest" href="./manifest.json">
 
   <!-- Google Fonts: Playfair Display (Serif) & Plus Jakarta Sans (Sans-Serif) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    /* ==========================================================================
-       1. COLOR SYSTEM & DESIGN TOKENS (LIGHT & DARK MODES)
-       ========================================================================== */
-    :root {
-      /* Backgrounds & Canvas (Light Theme: Warm Cream & Soft Pastel) */
-      --canvas-bg: #FFFDFD;
-      --surface-white: #FFFFFF;
-      --surface-soft: #FFF5F8;
-      
-      /* Color Harmony */
-      --pastel-light-1: #FCE7F3;
-      --pastel-light-2: #FBCFE8;
-      --blush-accent: #F472B6;
-      --rose-contrast: #9D174D;
-      --rose-dark: #831843;
-      --border-accent: #E5A4B4;
-      
-      /* Typography Colors */
-      --text-headline: #3F1523;
-      --text-subtle: #86556B;
-      --text-faint: #B28399;
-      
-      /* Semantic Status */
-      --status-safe: #059669;
-      --status-safe-bg: #D1FAE5;
-      --status-warn: #D97706;
-      --status-warn-bg: #FEF3C7;
-      --status-danger: #BE123C;
-      --status-danger-bg: #FFE4E6;
-
-      /* Radii (Rounded 2xl / 3xl) & Atmospheric Shadows */
-      --radius-sm: 12px;
-      --radius-md: 20px;          /* rounded-2xl */
-      --radius-lg: 28px;          /* rounded-3xl */
-      --radius-pill: 9999px;
-
-      --shadow-soft: 0 4px 14px rgba(244, 114, 182, 0.12);
-      --shadow-card: 0 10px 30px rgba(244, 114, 182, 0.16);
-      --shadow-floating: 0 16px 40px rgba(157, 23, 77, 0.22);
-
-      --font-serif: 'Playfair Display', Georgia, serif;
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    /* A.2 ELEGANT DARK MODE (DEEP BURGUNDY & NIGHT ROSE PALETTE) */
-    body.theme-dark {
-      --canvas-bg: #1A0C13;
-      --surface-white: #27121D;
-      --surface-soft: #351927;
-      
-      --pastel-light-1: #4A1E34;
-      --pastel-light-2: #672647;
-      --blush-accent: #F472B6;
-      --rose-contrast: #FBCFE8;
-      --rose-dark: #F472B6;
-      --border-accent: #782D53;
-      
-      --text-headline: #FFF1F4;
-      --text-subtle: #E2B8CA;
-      --text-faint: #A67389;
-
-      --status-safe: #34D399;
-      --status-safe-bg: #064E3B;
-      --status-warn: #FBBF24;
-      --status-warn-bg: #78350F;
-      --status-danger: #FB7185;
-      --status-danger-bg: #881337;
-
-      --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.35);
-      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.45);
-      --shadow-floating: 0 16px 40px rgba(0, 0, 0, 0.65);
-
-      background-color: #160810;
-      background-image: 
-        radial-gradient(circle at 12% 10%, rgba(103, 38, 71, 0.35) 0%, transparent 45%),
-        radial-gradient(circle at 88% 88%, rgba(74, 30, 52, 0.4) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, #1A0C13 0%, #13070E 100%);
-      color: var(--text-headline);
-    }
-
-    /* Reset & Base */
-    html {
-      scroll-behavior: smooth;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: #FDF4F7;
-      background-image: 
-        radial-gradient(circle at 12% 10%, rgba(252, 231, 243, 0.8) 0%, transparent 45%),
-        radial-gradient(circle at 88% 88%, rgba(251, 207, 232, 0.7) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, #FFFDFD 0%, #FFF8FA 100%);
-      background-attachment: fixed;
-      color: var(--text-headline);
-      font-family: var(--font-sans);
-      font-size: 14px;
-      line-height: 1.5;
-      min-height: 100vh;
-      overflow-x: hidden;
-      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-    }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #FFF0F5; }
-    body.theme-dark ::-webkit-scrollbar-track { background: #27121D; }
-    ::-webkit-scrollbar-thumb { background: var(--pastel-light-2); border-radius: var(--radius-pill); }
-    ::-webkit-scrollbar-thumb:hover { background: var(--blush-accent); }
-
-    /* Layout Viewport Wrapper */
-    .app-viewport {
-      max-width: 820px;
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      background-color: var(--canvas-bg);
-      box-shadow: 0 0 50px rgba(157, 23, 77, 0.08);
-      border-left: 1px solid rgba(251, 207, 232, 0.5);
-      border-right: 1px solid rgba(251, 207, 232, 0.5);
-      padding-bottom: 92px; /* Space for Persistent Bottom Navigation Bar */
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    body.theme-dark .app-viewport {
-      border-left-color: rgba(103, 38, 71, 0.4);
-      border-right-color: rgba(103, 38, 71, 0.4);
-      box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-    }
-
-    h1, h2, h3, h4, .serif-font {
-      font-family: var(--font-serif);
-      color: var(--rose-contrast);
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    /* ==========================================================================
-       2. LOGIN & AUTH GATE SCREEN (SINGLE-USER VIA LOCALSTORAGE)
-       ========================================================================== */
-    .auth-gate-wrapper {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, #FFF0F5 0%, #FCE7F3 50%, #FDF4F7 100%);
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-    }
-
-    body.theme-dark .auth-gate-wrapper {
-      background: linear-gradient(135deg, #1A0C13 0%, #2D131F 50%, #160810 100%);
-    }
-
-    .auth-card {
-      background: var(--surface-white);
-      width: 100%;
-      max-width: 420px;
-      border-radius: var(--radius-lg);
-      border: 2px solid var(--pastel-light-2);
-      box-shadow: var(--shadow-floating);
-      padding: 30px 24px;
-      position: relative;
-      text-align: center;
-      animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .auth-badge-icon {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, var(--pastel-light-1) 0%, var(--blush-accent) 100%);
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      margin: 0 auto 14px;
-      box-shadow: 0 6px 18px rgba(244, 114, 182, 0.35);
-      border: 2px solid #FFFFFF;
-    }
-
-    body.theme-dark .auth-badge-icon {
-      border-color: var(--pastel-light-2);
-    }
-
-    .auth-title {
-      font-size: 1.45rem;
-      margin-bottom: 4px;
-    }
-
-    .auth-subtitle {
-      font-size: 0.82rem;
-      color: var(--text-subtle);
-      margin-bottom: 22px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      text-align: left;
-      margin-bottom: 12px;
-    }
-
-    .form-label {
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: var(--text-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .form-control {
-      width: 100%;
-      min-height: 44px;
-      padding: 10px 14px;
-      border: 1.5px solid var(--pastel-light-1);
-      border-radius: var(--radius-md);
-      font-family: var(--font-sans);
-      font-size: 0.88rem;
-      color: var(--text-headline);
-      background: var(--surface-white);
-      outline: none;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .form-control:focus {
-      border-color: var(--blush-accent);
-      box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
-    }
-
-    .btn-primary {
-      width: 100%;
-      min-height: 46px;
-      background: linear-gradient(135deg, var(--rose-contrast) 0%, #D946EF 100%);
-      color: #FFFFFF;
-      border: none;
-      border-radius: var(--radius-md);
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 14px rgba(157, 23, 77, 0.28);
-      transition: all 0.3s ease-in-out;
-      margin-top: 8px;
-    }
-
-    body.theme-dark .btn-primary {
-      background: linear-gradient(135deg, #BE185D 0%, #D946EF 100%);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1.5px);
-      box-shadow: 0 6px 20px rgba(157, 23, 77, 0.38);
-    }
-
-    .btn-demo-quick {
-      width: 100%;
-      margin-top: 10px;
-      min-height: 42px;
-      background: var(--surface-white);
-      border: 1.5px dashed var(--blush-accent);
-      color: var(--rose-contrast);
-      border-radius: var(--radius-md);
-      font-size: 0.82rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .btn-demo-quick:hover {
-      background: var(--pastel-light-1);
-    }
-
-    /* ==========================================================================
-       3. PETITE & AESTHETIC HEADER BAR (BRANDING, DARK MODE & ASMR)
-       ========================================================================== */
-    .app-header {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1.5px solid var(--pastel-light-1);
-      padding: 10px 16px;
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    body.theme-dark .app-header {
-      background: rgba(39, 18, 29, 0.94);
-      border-bottom-color: var(--pastel-light-2);
-    }
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .brand-logo-badge {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--pastel-light-1) 0%, var(--blush-accent) 100%);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 8px rgba(244, 114, 182, 0.28);
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      line-height: 1.1;
-      color: var(--rose-contrast);
-      letter-spacing: -0.01em;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* A.2 Dark Mode & Sound Toggle Buttons */
-    .btn-action-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: var(--radius-pill);
-      background: var(--surface-soft);
-      border: 1px solid var(--pastel-light-2);
-      color: var(--rose-contrast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.3s ease-in-out;
-      flex-shrink: 0;
-    }
-
-    .btn-action-icon:hover {
-      background: var(--pastel-light-1);
-      transform: scale(1.06);
-    }
-
-    .user-pill {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface-white);
-      padding: 3px 5px 3px 10px;
-      border-radius: var(--radius-pill);
-      border: 1.5px solid var(--pastel-light-1);
-      box-shadow: var(--shadow-soft);
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    .user-pill-info {
-      text-align: right;
-      line-height: 1.15;
-    }
-
-    .user-greeting {
-      font-weight: 700;
-      font-size: 0.76rem;
-      color: var(--rose-contrast);
-      white-space: nowrap;
-    }
-
-    .user-email-badge {
-      font-size: 0.64rem;
-      color: var(--text-faint);
-      max-width: 80px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .btn-logout {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-pill);
-      background: var(--surface-soft);
-      border: 1px solid var(--pastel-light-2);
-      color: var(--rose-contrast);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-      flex-shrink: 0;
-    }
-
-    .btn-logout:hover {
-      background: var(--rose-contrast);
-      color: #FFFFFF;
-    }
-
-    /* ==========================================================================
-       4. BOTTOM NAVIGATION BAR (ICON-ONLY WITH CLEAR VISUAL INDICATOR)
-       ========================================================================== */
-    .bottom-nav-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-top: 1.5px solid var(--pastel-light-2);
-      box-shadow: 0 -4px 22px rgba(157, 23, 77, 0.08);
-      display: flex;
-      justify-content: center;
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    body.theme-dark .bottom-nav-bar {
-      background: rgba(39, 18, 29, 0.95);
-      border-top-color: var(--pastel-light-2);
-    }
-
-    .bottom-nav-container {
-      width: 100%;
-      max-width: 820px;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 6px 16px calc(6px + env(safe-area-inset-bottom, 0px));
-      min-height: 56px;
-    }
-
-    .bottom-nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      background: transparent;
-      border: none;
-      color: var(--text-faint);
-      cursor: pointer;
-      padding: 4px 0;
-      border-radius: var(--radius-md);
-      transition: all 0.3s ease-in-out;
-      min-height: 48px;
-      position: relative;
-    }
-
-    .nav-icon-wrap {
-      width: 44px;
-      height: 32px;
-      border-radius: var(--radius-pill);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .nav-icon-wrap svg {
-      stroke: var(--text-subtle);
-      transition: all 0.3s ease-in-out;
-    }
-
-    .nav-active-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: var(--radius-pill);
-      background: transparent;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .bottom-nav-item:hover .nav-icon-wrap {
-      background: rgba(252, 231, 243, 0.5);
-    }
-
-    body.theme-dark .bottom-nav-item:hover .nav-icon-wrap {
-      background: rgba(103, 38, 71, 0.4);
-    }
-
-    /* Active Tab */
-    .bottom-nav-item.active .nav-icon-wrap {
-      background: var(--pastel-light-1);
-      transform: translateY(-2px);
-      box-shadow: 0 3px 10px rgba(244, 114, 182, 0.28);
-    }
-
-    .bottom-nav-item.active .nav-icon-wrap svg {
-      stroke: var(--rose-contrast);
-      stroke-width: 2.3;
-    }
-
-    .bottom-nav-item.active .nav-active-dot {
-      background: var(--rose-contrast);
-      transform: scale(1.2);
-    }
-
-    /* ==========================================================================
-       5. CONTENT TABS WITH SMOOTH FADE & SLIDE-UP ANIMATIONS
-       ========================================================================== */
-    .content-tab {
-      display: none;
-      padding: 16px 18px 24px;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-    }
-
-    .content-tab.active {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-      animation: tabFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes tabFadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ==========================================================================
-       6. SINGLE SMART INPUT BAR & WHATSAPP SHARING BUTTON
-       ========================================================================== */
-    .smart-input-card {
-      background: var(--surface-white);
-      border-radius: var(--radius-lg);
-      border: 1.5px solid var(--pastel-light-1);
-      box-shadow: var(--shadow-card);
-      padding: 16px;
-      margin-bottom: 16px;
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    .smart-input-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .smart-input-title {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: var(--rose-contrast);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .smart-input-badge {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: var(--text-subtle);
-      background: var(--surface-soft);
-      border: 1px solid var(--pastel-light-2);
-      padding: 2px 8px;
-      border-radius: var(--radius-pill);
-    }
-
-    .smart-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface-white);
-      border: 1.5px solid var(--pastel-light-2);
-      border-radius: var(--radius-pill);
-      padding: 4px 6px 4px 16px;
-      box-shadow: var(--shadow-soft);
-      transition: all 0.3s ease-in-out;
-    }
-
-    .smart-input-wrap:focus-within {
-      border-color: var(--blush-accent);
-      box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.22);
-    }
-
-    .smart-input-field {
-      flex: 1;
-      border: none;
-      outline: none;
-      font-family: var(--font-sans);
-      font-size: 0.92rem;
-      color: var(--text-headline);
-      background: transparent;
-      min-height: 42px;
-    }
-
-    .smart-input-field::placeholder {
-      color: var(--text-faint);
-      font-size: 0.85rem;
-    }
-
-    .btn-smart-submit {
-      width: 42px;
-      height: 42px;
-      border-radius: var(--radius-pill);
-      border: none;
-      background: linear-gradient(135deg, var(--rose-contrast) 0%, #D946EF 100%);
-      color: #FFFFFF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1.15rem;
-      flex-shrink: 0;
-      box-shadow: 0 3px 10px rgba(157, 23, 77, 0.3);
-      transition: all 0.3s ease-in-out;
-    }
-
-    body.theme-dark .btn-smart-submit {
-      background: linear-gradient(135deg, #BE185D 0%, #D946EF 100%);
-    }
-
-    .btn-smart-submit:hover {
-      transform: scale(1.06);
-      box-shadow: 0 5px 14px rgba(157, 23, 77, 0.4);
-    }
-
-    /* A.3 Share to WhatsApp Aesthetic Button */
-    .planner-actions-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 14px;
-      margin-bottom: 6px;
-      gap: 10px;
-    }
-
-    .btn-share-wa {
-      background: var(--surface-white);
-      border: 1px solid var(--pastel-light-2);
-      color: var(--rose-contrast);
-      padding: 6px 14px;
-      border-radius: var(--radius-pill);
-      font-size: 0.76rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: var(--shadow-soft);
-      transition: all 0.3s ease-in-out;
-      min-height: 34px;
-    }
-
-    .btn-share-wa:hover {
-      background: #25D366;
-      color: #FFFFFF;
-      border-color: #25D366;
-      transform: translateY(-1.5px);
-      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
-    }
-
-    /* Frequently Bought Carousel */
-    .frequently-bought-section {
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px dashed var(--pastel-light-2);
-    }
-
-    .frequently-bought-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-subtle);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .frequently-carousel {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-    .frequently-carousel::-webkit-scrollbar { display: none; }
-
-    .frequent-chip {
-      background: var(--surface-soft);
-      border: 1px solid var(--pastel-light-2);
-      border-radius: var(--radius-pill);
-      padding: 6px 12px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--rose-contrast);
-      white-space: nowrap;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.3s ease-in-out;
-      min-height: 32px;
-    }
-
-    .frequent-chip:hover {
-      background: var(--pastel-light-1);
-      border-color: var(--blush-accent);
-      transform: translateY(-1.5px);
-      box-shadow: var(--shadow-soft);
-    }
-
-    /* ==========================================================================
-       7. CLEAN EMPTY STATES (ELEGANT & USER-FRIENDLY)
-       ========================================================================== */
-    .clean-empty-state {
-      text-align: center;
-      padding: 42px 20px;
-      background: var(--surface-white);
-      border-radius: var(--radius-lg);
-      border: 1.5px dashed var(--pastel-light-2);
-      box-shadow: var(--shadow-soft);
-      margin: 14px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      animation: tabFadeIn 0.35s ease-out;
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    .empty-icon-circle {
-      width: 58px;
-      height: 58px;
-      border-radius: var(--radius-pill);
-      background: var(--surface-soft);
-      border: 1.5px solid var(--pastel-light-1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .empty-title {
-      font-size: 1.15rem;
-      margin-bottom: 6px;
-      color: var(--rose-contrast);
-    }
-
-    .empty-subtitle {
-      font-size: 0.82rem;
-      color: var(--text-subtle);
-      max-width: 360px;
-      line-height: 1.45;
-    }
-
-    /* ==========================================================================
-       8. FLOATING ACTION BUTTON (FAB) FOR IN-STORE MODE
-       ========================================================================== */
-    .fab-store-mode {
-      position: fixed;
-      bottom: 74px;
-      right: 20px;
-      z-index: 45;
-      background: linear-gradient(135deg, var(--rose-contrast) 0%, #BE185D 100%);
-      color: #FFFFFF;
-      border: none;
-      border-radius: var(--radius-pill);
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-sans);
-      font-size: 0.86rem;
-      font-weight: 700;
-      box-shadow: 0 8px 24px rgba(157, 23, 77, 0.42);
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      min-height: 50px;
-    }
-
-    body.theme-dark .fab-store-mode {
-      background: linear-gradient(135deg, #BE185D 0%, #9D174D 100%);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    }
-
-    .fab-store-mode:hover {
-      transform: translateY(-2px) scale(1.04);
-      box-shadow: 0 10px 28px rgba(157, 23, 77, 0.5);
-    }
-
-    .fab-store-mode.in-store-active {
-      background: linear-gradient(135deg, #059669 0%, #10B981 100%);
-      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.42);
-    }
-
-    .fab-icon {
-      font-size: 1.25rem;
-      line-height: 1;
-    }
-
-    /* ==========================================================================
-       9. SMART AISLE HEADERS & GROCERY ITEM CARDS
-       ========================================================================== */
-    .aisle-header {
-      background: linear-gradient(135deg, #FFF5F8 0%, #FCE7F3 100%);
-      border: 1px solid var(--pastel-light-2);
-      border-radius: var(--radius-md);
-      padding: 8px 14px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--rose-contrast);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 14px;
-      margin-bottom: 6px;
-    }
-
-    body.theme-dark .aisle-header {
-      background: linear-gradient(135deg, #351927 0%, #4A1E34 100%);
-      border-color: var(--pastel-light-2);
-    }
-
-    .grocery-items-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .grocery-card {
-      background: var(--surface-white);
-      border: 1.5px solid var(--pastel-light-1);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      box-shadow: var(--shadow-soft);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transition: all 0.3s ease-in-out;
-      animation: itemSlideFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .grocery-card:hover {
-      border-color: var(--pastel-light-2);
-      box-shadow: var(--shadow-card);
-    }
-
-    .grocery-card.checked {
-      background: #FFF9FB;
-      border-color: var(--blush-accent);
-    }
-
-    body.theme-dark .grocery-card.checked {
-      background: #331625;
-    }
-
-    .grocery-card.in-store-active {
-      cursor: pointer;
-    }
-
-    .checkbox-box {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      border: 2px solid var(--pastel-light-2);
-      background: var(--surface-white);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-weight: bold;
-      flex-shrink: 0;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .grocery-card.checked .checkbox-box {
-      background: var(--rose-contrast);
-      border-color: var(--rose-contrast);
-      color: #FFFFFF;
-    }
-
-    .item-name {
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: var(--text-headline);
-    }
-
-    .grocery-card.checked .item-name {
-      text-decoration: line-through;
-      color: var(--text-faint);
-    }
-
-    /* Fluctuation Badges */
-    .fluct-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: var(--radius-pill);
-      margin-top: 3px;
-    }
-
-    .fluct-down { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
-    .fluct-up { background: #FFF1F2; color: #BE123C; border: 1px solid #FECDD3; }
-    .fluct-same { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
-    .fluct-new { background: var(--pastel-light-1); color: var(--rose-contrast); border: 1px solid var(--pastel-light-2); }
-
-    body.theme-dark .fluct-down { background: #064E3B; color: #34D399; border-color: #047857; }
-    body.theme-dark .fluct-up { background: #881337; color: #FB7185; border-color: #BE123C; }
-    body.theme-dark .fluct-same { background: #1E293B; color: #94A3B8; border-color: #334155; }
-
-    .btn-item-delete {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--pastel-light-1);
-      background: var(--surface-white);
-      color: var(--text-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .btn-item-delete:hover {
-      background: var(--status-danger-bg);
-      color: var(--status-danger);
-    }
-
-    /* ==========================================================================
-       10. FLOATING RUNNING CART BAR (IN-STORE MODE)
-       ========================================================================== */
-    .running-cart-bar {
-      position: fixed;
-      bottom: 58px;
-      left: 0;
-      right: 0;
-      z-index: 44;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-top: 1.5px solid var(--pastel-light-2);
-      padding: 10px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 -6px 22px rgba(244, 114, 182, 0.24);
-      transition: all 0.3s ease-in-out;
-    }
-
-    body.theme-dark .running-cart-bar {
-      background: rgba(39, 18, 29, 0.95);
-      border-top-color: var(--pastel-light-2);
-      box-shadow: 0 -6px 22px rgba(0, 0, 0, 0.5);
-    }
-
-    .running-cart-container {
-      width: 100%;
-      max-width: 820px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .btn-finish-shopping {
-      background: var(--rose-contrast);
-      color: #FFFFFF;
-      border: none;
-      padding: 8px 16px;
-      border-radius: var(--radius-pill);
-      font-size: 0.82rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      min-height: 40px;
-      box-shadow: 0 4px 14px rgba(157, 23, 77, 0.3);
-      transition: all 0.3s ease-in-out;
-    }
-
-    body.theme-dark .btn-finish-shopping {
-      background: #BE185D;
-    }
-
-    .btn-finish-shopping:hover {
-      background: var(--rose-dark);
-      transform: scale(1.03);
-    }
-
-    /* ==========================================================================
-       11. BUDGET OVERVIEW WIDGET & BREAKDOWN (TAB 1: BUDGET)
-       ========================================================================== */
-    .budget-card {
-      background: var(--surface-white);
-      border-radius: var(--radius-lg);
-      border: 1.5px solid var(--pastel-light-1);
-      box-shadow: var(--shadow-card);
-      padding: 16px;
-      margin-bottom: 16px;
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    .budget-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .btn-edit-budget {
-      background: var(--surface-white);
-      border: 1px solid var(--pastel-light-2);
-      color: var(--rose-contrast);
-      padding: 6px 12px;
-      border-radius: var(--radius-pill);
-      font-size: 0.74rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.3s ease-in-out;
-      min-height: 36px;
-    }
-
-    .btn-edit-budget:hover {
-      background: var(--pastel-light-1);
-      border-color: var(--blush-accent);
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    @media (max-width: 540px) {
-      .metrics-grid { grid-template-columns: 1fr; gap: 8px; }
-    }
-
-    .metric-box {
-      background: var(--surface-white);
-      border: 1px solid var(--pastel-light-1);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      box-shadow: var(--shadow-soft);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    }
-
-    .metric-label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--text-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 4px;
-    }
-
-    .metric-val {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--text-headline);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .metric-val.budget { color: var(--rose-contrast); }
-    .metric-val.spent { color: var(--blush-accent); }
-    .metric-val.balance { color: var(--status-safe); }
-    .metric-val.balance.warning { color: var(--status-warn); }
-    .metric-val.balance.danger { color: var(--status-danger); }
-
-    .progress-section {
-      background: var(--surface-soft);
-      border: 1px solid var(--pastel-light-1);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-    }
-
-    .progress-labels {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.74rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .progress-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: var(--radius-pill);
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .badge-safe { background: var(--status-safe-bg); color: var(--status-safe); }
-    .badge-warn { background: var(--status-warn-bg); color: var(--status-warn); }
-    .badge-danger { background: var(--status-danger-bg); color: var(--status-danger); }
-
-    .progress-track {
-      width: 100%;
-      height: 10px;
-      background: var(--surface-white);
-      border: 1px solid var(--pastel-light-1);
-      border-radius: var(--radius-pill);
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--blush-accent);
-      border-radius: var(--radius-pill);
-      transition: width 0.4s ease, background-color 0.4s ease;
-    }
-
-    /* ==========================================================================
-       12. MY PANTRY & EXPIRY TRACKER (TAB 3: PANTRY)
-       ========================================================================== */
-    .pantry-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    @media (max-width: 540px) {
-      .pantry-summary-grid { grid-template-columns: 1fr; }
-    }
-
-    .pantry-card {
-      background: var(--surface-white);
-      border: 1.5px solid var(--pastel-light-1);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      box-shadow: var(--shadow-soft);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transition: all 0.3s ease-in-out;
-      animation: itemSlideFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .pantry-card:hover {
-      box-shadow: var(--shadow-card);
-      border-color: var(--pastel-light-2);
-    }
-
-    .expiry-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: var(--radius-pill);
-    }
-
-    .expiry-fresh { background: var(--status-safe-bg); color: var(--status-safe); }
-    .expiry-soon { background: var(--status-warn-bg); color: var(--status-warn); }
-    .expiry-expired { background: var(--status-danger-bg); color: var(--status-danger); }
-
-    .btn-consume {
-      background: var(--surface-soft);
-      border: 1px solid var(--pastel-light-2);
-      color: var(--rose-contrast);
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: var(--radius-pill);
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-      min-height: 32px;
-    }
-
-    .btn-consume:hover {
-      background: var(--rose-contrast);
-      color: #FFFFFF;
-    }
-
-    /* ==========================================================================
-       13. MODAL DIALOGS (SMOOTH FADE-IN & SLIDE-UP WITH BACKDROP BLUR)
-       ========================================================================== */
-    .modal-backdrop {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(63, 21, 35, 0.45);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease-in-out;
-    }
-
-    body.theme-dark .modal-backdrop {
-      background: rgba(10, 4, 7, 0.65);
-    }
-
-    .modal-backdrop.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-card {
-      background: var(--surface-white);
-      width: 100%;
-      max-width: 440px;
-      border-radius: var(--radius-lg);
-      border: 2px solid var(--pastel-light-2);
-      box-shadow: var(--shadow-floating);
-      padding: 22px;
-      transform: translateY(24px) scale(0.96);
-      opacity: 0;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-in-out;
-    }
-
-    .modal-backdrop.show .modal-card {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-    }
-
-    @keyframes modalSlideUp {
-      from { transform: translateY(24px) scale(0.96); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-      border-bottom: 1.5px solid var(--pastel-light-1);
-      padding-bottom: 10px;
-    }
-
-    .modal-close-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--pastel-light-1);
-      background: var(--surface-white);
-      color: var(--text-subtle);
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-    }
-
-    .modal-close-btn:hover {
-      background: var(--pastel-light-1);
-      color: var(--rose-contrast);
-      transform: rotate(90deg);
-    }
-
-    /* Animation Utilities */
-    .item-anim-out {
-      opacity: 0 !important;
-      transform: scale(0.92) translateY(-8px) !important;
-      max-height: 0 !important;
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-      overflow: hidden !important;
-      border-width: 0 !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    .item-pulse {
-      animation: softItemPulse 0.3s ease-in-out;
-    }
-
-    @keyframes softItemPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(0.97); background-color: var(--pastel-light-1); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes itemSlideFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    /* Toast Notifications */
-    .toast-container {
-      position: fixed;
-      bottom: 74px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 90%;
-      max-width: 360px;
-      pointer-events: none;
-    }
-
-    .toast-msg {
-      background: var(--surface-white);
-      border: 1.5px solid var(--blush-accent);
-      border-radius: var(--radius-pill);
-      padding: 10px 18px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--rose-contrast);
-      box-shadow: var(--shadow-card);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .d-none { display: none !important; }
-  </style>
+  <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Daily Test 2 Ergonomics) -->
+  <link rel="stylesheet" href="./css/app.css">
+
+  <!-- Firebase SDK CDN (SRS F-06B: Cloud Firestore Realtime Sync) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
+  <!-- ========================================================================
+       SUPERMARKET OFFLINE BANNER (PWA OFFLINE RESILIENCE)
+       ======================================================================== -->
+  <div id="offlineBanner" class="offline-badge">
+    📡 Mode Offline Aktif • Akses &amp; kalkulasi belanja tetap berfungsi lancar tanpa sinyal
+  </div>
+
+  <!-- ========================================================================
+       OVERBUDGET FIRM RED BANNER (> 100% Limit) - SRS F-05
+       ======================================================================== -->
+  <div id="overbudget-firm-banner" class="hidden overbudget-firm-banner">
+    <span style="font-size: 16px;">🚨</span>
+    <p style="flex: 1; margin: 0;">
+      Total belanja melebihi batas saldo dompet! Kurangi kuantitas atau batalkan barang sekunder.
+    </p>
+  </div>
 
   <!-- ========================================================================
        1. LOGIN / WELCOME SCREEN (SINGLE-USER VIA LOCALSTORAGE)
@@ -1392,7 +56,7 @@
     <div class="auth-card">
       <div class="auth-badge-icon">🛒</div>
       <h1 class="auth-title serif-font">Smart Grocery Tracker</h1>
-      <p class="auth-subtitle">Kelola Rencana Belanja & Anggaran Pribadi</p>
+      <p class="auth-subtitle">Kelola Rencana Belanja &amp; Anggaran Pribadi</p>
 
       <form id="authForm" onsubmit="handleAuthSubmit(event)">
         <div class="form-group">
@@ -1426,7 +90,7 @@
        ======================================================================== -->
   <div id="mainDashboard" class="app-viewport" style="display: none;">
 
-    <!-- B.1 PETITE & AESTHETIC HEADER BAR WITH BRAND LOGO, THEME & ASMR TOGGLES -->
+    <!-- HEADER BAR: BRAND LOGO, PWA INSTALL, DARK MODE, SOUND & GREETING -->
     <header class="app-header">
       <div class="header-content">
         <div class="brand-wrap">
@@ -1440,28 +104,35 @@
           </div>
         </div>
 
-        <!-- Header Actions: Dark Mode, Sound Toggle & User Greeting -->
+        <!-- Header Actions: Install PWA, Dark Mode, Sound Toggle & User Greeting -->
         <div class="header-actions">
-          <!-- A.2 Dark Mode Toggle Switch -->
-          <button id="btnThemeToggle" class="btn-action-icon" onclick="toggleTheme()" title="Mode Gelap / Terang">
+          <!-- PWA Install Button -->
+          <button id="btnInstallPwa" class="btn-install-pwa" onclick="installPwa()" title="Pasang ke Layar Utama (PWA)">
+            <span>📲</span>
+            <span>Install</span>
+          </button>
+
+          <!-- Dark Mode Toggle Switch -->
+          <button id="btnThemeToggle" class="btn-action-icon touch-target" onclick="toggleTheme()" title="Mode Gelap / Terang">
             🌙
           </button>
 
-          <!-- ASMR Sound Toggle -->
-          <button id="btnSoundToggle" class="btn-action-icon" onclick="toggleAudio()" title="Suara Feedback (ASMR)">
+          <!-- Audio Toggle -->
+          <button id="btnSoundToggle" class="btn-action-icon touch-target" onclick="toggleAudio()" title="Suara Feedback">
             🔊
           </button>
 
+          <!-- User Greeting & Logout -->
           <div class="user-pill">
             <div class="user-pill-info">
               <div class="user-greeting">
-                <span>Welcome back, </span>
+                <span>Halo, </span>
                 <span id="headerUserName">Pengguna</span>
-                <span>🎀</span>
+                <span>✨</span>
               </div>
               <div class="user-email-badge" id="headerUserEmail">user@email.com</div>
             </div>
-            <button class="btn-logout" onclick="promptLogout()" title="Keluar Akun">
+            <button class="btn-logout touch-target" onclick="promptLogout()" title="Keluar Akun">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
               </svg>
@@ -1472,48 +143,63 @@
     </header>
 
     <!-- ========================================================================
-         TAB 1: BUDGET & RINGKASAN ANGGARAN
+         TAB 1: BUDGET & RINGKASAN ANGGARAN (SRS F-05)
          ======================================================================== -->
     <section id="tabBudget" class="content-tab">
+      
+      <!-- BUDGET SAFETY CAP CARD (SRS F-05) -->
       <div class="budget-card">
         <div class="budget-header">
           <div>
-            <h3 class="serif-font" style="font-size: 1.15rem; color: var(--rose-contrast);">📊 Ringkasan Anggaran</h3>
-            <p style="font-size: 0.76rem; color: var(--text-subtle);">Pantau alokasi belanja dan pengeluaran aktual</p>
+            <h3 class="serif-font" style="font-size: 1.15rem; color: var(--rose-contrast);">📊 Ringkasan Anggaran &amp; Safety Cap</h3>
+            <p style="font-size: 0.76rem; color: var(--text-subtle);">Batas Waspada &ge; 90% (Kuning) &amp; Melebihi &gt; 100% (Banner Merah)</p>
           </div>
-          <button class="btn-edit-budget" onclick="openBudgetModal()">✏️ Ubah Anggaran</button>
+          <button class="btn-edit-budget touch-target" onclick="openBudgetModal()">✏️ Ubah Batas</button>
         </div>
 
         <div class="metrics-grid">
           <div class="metric-box">
-            <span class="metric-label">Alokasi Anggaran</span>
-            <span class="metric-val budget" id="metricTotalBudget">Rp 0</span>
+            <span class="metric-label">Batas Saldo Dompet</span>
+            <span class="metric-val budget" id="metricTotalBudget">Rp 100.000</span>
           </div>
           <div class="metric-box">
-            <span class="metric-label">Realisasi Belanja</span>
+            <span class="metric-label">Total Belanja Saat Ini</span>
             <span class="metric-val spent" id="metricActualSpent">Rp 0</span>
           </div>
           <div class="metric-box">
-            <span class="metric-label">Sisa Anggaran</span>
-            <span class="metric-val balance" id="metricRemainingBudget">Rp 0</span>
+            <span class="metric-label" id="labelRemainingBudget">Sisa Saldo Tunai</span>
+            <span class="metric-val balance" id="metricRemainingBudget">Rp 100.000</span>
           </div>
         </div>
 
+        <!-- Dynamic Safety Progress Bar -->
         <div class="progress-section">
           <div class="progress-labels">
             <span id="budgetProgressPercent">Pengeluaran: 0%</span>
             <span id="budgetSafetyBadge" class="progress-status-badge badge-safe">● Aman</span>
           </div>
           <div class="progress-track">
-            <div id="budgetProgressBar" class="progress-fill"></div>
+            <div id="budgetProgressBar" class="progress-fill" style="width: 0%;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-faint); margin-top: 4px;">
+            <span>0%</span>
+            <span style="font-weight: 700; color: #D97706;">Batas Waspada &ge; 90%</span>
+            <span>100%</span>
           </div>
         </div>
       </div>
 
-      <!-- Config & Breakdown -->
+      <!-- Quick Preset & Cycle Config -->
       <div class="budget-card">
-        <h4 class="serif-font" style="font-size: 0.95rem; margin-bottom: 12px; color: var(--rose-contrast);">⚙️ Pengaturan Siklus Anggaran</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+        <h4 class="serif-font" style="font-size: 0.95rem; margin-bottom: 8px; color: var(--rose-contrast);">⚙️ Pengaturan Batas Saldo Dompet</h4>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
+          <span style="font-size: 0.75rem; color: var(--text-subtle); font-weight: 600;">Pilih Cepat:</span>
+          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(50000)">50k</button>
+          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(100000)" style="font-weight: 800; border-color: var(--accent-blush);">100k (DT2)</button>
+          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(200000)">200k</button>
+          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(300000)">300k</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label class="form-label">Siklus</label>
             <select id="configBudgetPeriod" class="form-control" onchange="updateBudgetConfig()">
@@ -1522,9 +208,20 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Nominal (Rp)</label>
-            <input type="number" id="configBudgetAmount" class="form-control" min="10000" step="5000" onchange="updateBudgetConfig()">
+            <label class="form-label">Batas Anggaran (Rp)</label>
+            <input type="number" inputmode="numeric" id="configBudgetAmount" class="form-control" min="10000" step="5000" onchange="updateBudgetConfig()">
           </div>
+        </div>
+      </div>
+
+      <!-- Cloud Sync & Multi-Device Settings (SRS F-06B) -->
+      <div class="budget-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h4 class="serif-font" style="font-size: 0.95rem; color: var(--rose-contrast);">☁️ Sinkronisasi Multi-Device</h4>
+            <p style="font-size: 0.75rem; color: var(--text-subtle);">Firebase Firestore onSnapshot (&le; 2 detik)</p>
+          </div>
+          <button class="btn-edit-budget touch-target" onclick="openCloudSyncModal()">Konfigurasi</button>
         </div>
       </div>
 
@@ -1549,6 +246,40 @@
          ======================================================================== -->
     <main id="tabPlanner" class="content-tab active">
       
+      <!-- SESI TOKO & TANGGAL (SRS F-01 & F-06B) -->
+      <div class="session-info-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--rose-contrast); display: flex; align-items: center; gap: 6px;">
+            <span>🏬</span>
+            <span>Sesi Toko &amp; Tanggal Belanja</span>
+          </div>
+          <!-- Live Cloud Sync Status Pill -->
+          <div id="cloud-sync-status-pill" class="cloud-sync-pill" onclick="openCloudSyncModal()" title="Pengaturan Cloud Firestore Realtime Sync">
+            <span id="cloud-sync-dot" class="cloud-sync-dot"></span>
+            <span id="cloud-sync-text">Live Sync (onSnapshot)</span>
+          </div>
+        </div>
+
+        <div class="session-info-grid">
+          <div>
+            <label class="form-label">Toko Belanja *</label>
+            <select id="session-store-select" class="form-control" onchange="handleStoreChange(this.value)">
+              <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
+              <option value="Superindo - Kebon Jeruk">Superindo - Kebon Jeruk</option>
+              <option value="Grand Lucky - SCBD">Grand Lucky - SCBD</option>
+              <option value="Hypermart - Puri Mall">Hypermart - Puri Mall</option>
+              <option value="Alfamart / Indomaret">Alfamart / Indomaret</option>
+              <option value="custom">-- Toko Lainnya (Ketik Manual) --</option>
+            </select>
+            <input type="text" id="custom-store-input" onchange="handleStoreChange(this.value)" placeholder="Ketik nama toko..." class="form-control" style="display: none; margin-top: 6px;">
+          </div>
+          <div>
+            <label class="form-label">Tanggal Belanja *</label>
+            <input type="date" id="session-date-picker" class="form-control" onchange="handleDateChange(this.value)">
+          </div>
+        </div>
+      </div>
+
       <!-- SINGLE SMART INPUT BAR -->
       <div class="smart-input-card">
         <div class="smart-input-header">
@@ -1556,7 +287,9 @@
             <span>✨</span>
             <span>Tambah Cepat Kebutuhan</span>
           </div>
-          <span class="smart-input-badge">Ketik & Enter</span>
+          <button type="button" class="btn-edit-budget" onclick="openDetailedItemModal()" style="font-size: 0.72rem; padding: 4px 10px;">
+            + Rinci (Diskon DT2)
+          </button>
         </div>
 
         <form id="smartInputForm" onsubmit="handleSmartInputSubmit(event)">
@@ -1569,38 +302,44 @@
               autocomplete="off" 
               required
             >
-            <button type="submit" class="btn-smart-submit" title="Tambahkan ke checklist">
+            <button type="submit" class="btn-smart-submit touch-target" title="Tambahkan ke checklist">
               ➔
             </button>
           </div>
         </form>
 
-        <!-- Carousel / List "Frequently Bought" -->
+        <!-- Carousel "Frequently Bought" -->
         <div class="frequently-bought-section">
           <div class="frequently-bought-label">
             <span>⭐</span>
-            <span>Frequently Bought (1-Klik):</span>
+            <span>Frequently Bought:</span>
           </div>
           <div class="frequently-carousel">
-            <span class="frequent-chip" onclick="quickAddFavorite('Tepung Tapioka', 1, 'pack', 'Pantry')">🌾 Tepung Tapioka</span>
-            <span class="frequent-chip" onclick="quickAddFavorite('Tepung Terigu', 1, 'kg', 'Pantry')">🌾 Tepung Terigu</span>
-            <span class="frequent-chip" onclick="quickAddFavorite('Telur', 1, 'kg', 'Dairy')">🥚 Telur</span>
-            <span class="frequent-chip" onclick="quickAddFavorite('Susu UHT', 1, 'liter', 'Dairy')">🥛 Susu UHT</span>
+            <span class="frequent-chip" onclick="quickAddFavorite('Tepung Tapioka', 1, 'pack', 'Pantry', 12000)">🌾 Tepung Tapioka</span>
+            <span class="frequent-chip" onclick="quickAddFavorite('Tepung Terigu', 1, 'kg', 'Pantry', 13000)">🌾 Tepung Terigu</span>
+            <span class="frequent-chip" onclick="quickAddFavorite('Telur Ayam 1kg', 1, 'kg', 'Kebutuhan Pokok', 28000)">🥚 Telur</span>
+            <span class="frequent-chip" onclick="quickAddFavorite('Susu UHT 1L', 1, 'liter', 'Minuman', 19500)">🥛 Susu UHT</span>
           </div>
         </div>
       </div>
 
-      <!-- A.3 Planner Actions Bar: Item Count & Share to WhatsApp Button -->
+      <!-- Planner Actions Bar: Item Count, Share WhatsApp, & Manage Blacklist -->
       <div class="planner-actions-bar">
         <span style="font-size: 0.8rem; font-weight: 700; color: var(--rose-contrast);">
           Daftar Belanja (<span id="unboughtItemCount">0</span>)
         </span>
-        <button class="btn-share-wa" onclick="shareToWhatsApp()" title="Kirim daftar kebutuhan belanja ke WhatsApp">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-          </svg>
-          <span>Share ke WhatsApp</span>
-        </button>
+        <div class="planner-actions-right">
+          <button class="btn-manage-blacklist touch-target" onclick="openBlacklistManagerModal()" title="Kelola daftar pantangan (Anti-List)">
+            <span>🛑</span>
+            <span>Anti-List</span>
+          </button>
+          <button class="btn-share-wa touch-target" onclick="shareToWhatsApp()" title="Kirim daftar kebutuhan belanja ke WhatsApp">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+            <span>Share ke WhatsApp</span>
+          </button>
+        </div>
       </div>
 
       <!-- Checklist Items Container (Sorted by Aisle in In-Store mode) -->
@@ -1619,7 +358,7 @@
             <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">🧺 My Pantry Stock</h3>
             <p style="font-size: 0.76rem; color: var(--text-subtle);">Pantau ketersediaan bahan di rumah dan estimasi masa simpan</p>
           </div>
-          <button class="btn-edit-budget" onclick="openAddPantryModal()">+ Tambah Manual</button>
+          <button class="btn-edit-budget touch-target" onclick="openAddPantryModal()">+ Tambah Manual</button>
         </div>
 
         <div class="pantry-summary-grid">
@@ -1646,7 +385,7 @@
     <!-- ========================================================================
          FLOATING ACTION BUTTON (FAB): IN-STORE MODE TOGGLE
          ======================================================================== -->
-    <button id="fabStoreMode" class="fab-store-mode" onclick="toggleShoppingMode()" title="Beralih Mode Belanja Toko">
+    <button id="fabStoreMode" class="fab-store-mode touch-target" onclick="toggleShoppingMode()" title="Beralih Mode Belanja Toko">
       <span id="fabIcon" class="fab-icon">🛒</span>
       <span id="fabText">Mulai Belanja</span>
     </button>
@@ -1664,19 +403,19 @@
           </div>
         </div>
 
-        <button class="btn-finish-shopping" onclick="confirmFinishShopping()">
+        <button class="btn-finish-shopping touch-target" onclick="confirmFinishShopping()">
           <span>Selesai Belanja 🛍️</span>
         </button>
       </div>
     </div>
 
     <!-- ========================================================================
-         B.2 BOTTOM NAVIGATION BAR (ICON-ONLY WITH CLEAR VISUAL INDICATOR)
+         BOTTOM NAVIGATION BAR (ICON-ONLY WITH CLEAR VISUAL INDICATOR)
          ======================================================================== -->
     <nav class="bottom-nav-bar">
       <div class="bottom-nav-container">
         <!-- Tab 1: Budget (Icon-Only) -->
-        <button class="bottom-nav-item" onclick="switchTab('budget')" title="Ringkasan Anggaran" aria-label="Budget">
+        <button class="bottom-nav-item touch-target" onclick="switchTab('budget')" title="Ringkasan Anggaran" aria-label="Budget">
           <span class="nav-icon-wrap">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -1688,7 +427,7 @@
         </button>
 
         <!-- Tab 2: Planner (Icon-Only, Active by default) -->
-        <button class="bottom-nav-item active" onclick="switchTab('planner')" title="Checklist Rencana Belanja" aria-label="Planner">
+        <button class="bottom-nav-item active touch-target" onclick="switchTab('planner')" title="Checklist Rencana Belanja" aria-label="Planner">
           <span class="nav-icon-wrap">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 11l3 3L22 4"></path>
@@ -1699,7 +438,7 @@
         </button>
 
         <!-- Tab 3: Pantry (Icon-Only) -->
-        <button class="bottom-nav-item" onclick="switchTab('pantry')" title="My Pantry & Expiry Tracker" aria-label="Pantry">
+        <button class="bottom-nav-item touch-target" onclick="switchTab('pantry')" title="My Pantry &amp; Expiry Tracker" aria-label="Pantry">
           <span class="nav-icon-wrap">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9H4v10z"></path>
@@ -1715,44 +454,169 @@
   </div>
 
   <!-- ========================================================================
-       MODAL 1: REAL-TIME PRICE INPUT (IN-STORE MODE)
+       MODAL: ITEM DETAIL FORM & DISKON KOMPOUND (SRS F-01 & F-03)
        ======================================================================== -->
-  <div id="priceInputModal" class="modal-backdrop">
+  <div id="itemDetailModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
         <div>
-          <h3 id="modalItemTitle" class="serif-font" style="font-size: 1.1rem;">Harga Aktual</h3>
-          <p id="modalItemSubtitle" style="font-size: 0.76rem; color: var(--text-subtle);">Input harga riil di lorong supermarket</p>
+          <h3 id="itemModalTitle" class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">Tambah / Ubah Item Belanja</h3>
+          <p style="font-size: 0.74rem; color: var(--text-subtle);">Lengkapi detail barang &amp; kalkulasi diskon kompound</p>
         </div>
-        <button class="modal-close-btn" onclick="closePriceModal()">&times;</button>
+        <button class="modal-close-btn touch-target" onclick="closeDetailedItemModal()">&times;</button>
       </div>
 
-      <div style="background: var(--surface-soft); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 14px; border: 1px solid var(--pastel-light-1);">
-        <div style="font-size: 0.72rem; color: var(--text-subtle); font-weight: 600;">Riwayat Harga Sebelumnya:</div>
-        <div id="modalHistoryRefText" style="font-size: 0.88rem; font-weight: 700; color: var(--rose-contrast);">Rp 0 / pcs</div>
-      </div>
-
-      <form onsubmit="handlePriceSubmit(event)">
+      <form id="detailedItemForm" onsubmit="handleDetailedItemFormSubmit(event)">
+        <!-- Nama Barang (SRS F-01) -->
         <div class="form-group">
-          <label class="form-label">Harga Satuan Aktual (Rp)</label>
-          <input type="number" id="modalRealPriceInput" class="form-control" placeholder="Contoh: 28000" min="0" step="500" required autofocus>
+          <label class="form-label">Nama Barang *</label>
+          <input type="text" id="detailInputName" class="form-control" placeholder="Contoh: Minyak Goreng, Sabun Mandi" required list="detail-item-suggestions" oninput="handleDetailNameInput(this.value)">
+          <datalist id="detail-item-suggestions">
+            <option value="Minyak Goreng">
+            <option value="Beras 5kg">
+            <option value="Sabun Mandi">
+            <option value="Telur Ayam 1kg">
+            <option value="Susu UHT 1L">
+            <option value="Mi Instan Dus">
+            <option value="Tepung Terigu">
+          </datalist>
         </div>
 
-        <button type="submit" class="btn-primary" style="margin-top: 14px;">
-          <span>✓ Simpan & Masukkan Keranjang</span>
-        </button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label class="form-label">Kategori</label>
+            <select id="detailInputCategory" class="form-control">
+              <option value="Kebutuhan Pokok">Kebutuhan Pokok</option>
+              <option value="Makanan">Makanan</option>
+              <option value="Minuman">Minuman</option>
+              <option value="Perlengkapan Mandi">Perlengkapan Mandi</option>
+              <option value="Kebersihan & Rumah">Kebersihan & Rumah</option>
+              <option value="Pantry">Pantry</option>
+              <option value="Dairy">Dairy</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Satuan Unit *</label>
+            <select id="detailInputUnit" class="form-control">
+              <option value="pcs">pcs</option>
+              <option value="liter">liter</option>
+              <option value="karung/5kg">karung/5kg</option>
+              <option value="kg">kg</option>
+              <option value="pack">pack</option>
+              <option value="dus">dus</option>
+              <option value="ikat">ikat</option>
+              <option value="botol">botol</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label class="form-label">Kuantitas (Qty) *</label>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <button type="button" class="stepper-btn" onclick="adjustDetailModalQty(-1)">&minus;</button>
+              <input type="number" inputmode="numeric" id="detailInputQty" class="form-control" min="1" value="1" required style="text-align: center; font-weight: 800;" oninput="updateDetailModalPreview()">
+              <button type="button" class="stepper-btn" onclick="adjustDetailModalQty(1)">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Harga Satuan (Rp) *</label>
+            <input type="number" inputmode="numeric" id="detailInputPrice" class="form-control" min="1" step="100" placeholder="Contoh: 20000" required oninput="updateDetailModalPreview()">
+          </div>
+        </div>
+
+        <!-- Tipe Diskon (SRS F-03: Kompound Bertingkat & Tunggal) -->
+        <div class="form-group" style="margin-top: 6px;">
+          <label class="form-label">Tipe Diskon Promosi (SRS F-03)</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+            <button type="button" id="btnDiscountNone" class="frequent-chip" style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('none')">Tanpa Diskon</button>
+            <button type="button" id="btnDiscountSingle" class="frequent-chip" style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('single')">Tunggal (%)</button>
+            <button type="button" id="btnDiscountTiered" class="frequent-chip" style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('tiered')">Bertingkat (A+B)</button>
+          </div>
+
+          <!-- Input Diskon Tunggal -->
+          <div id="groupDiscountSingle" style="display: none; margin-bottom: 8px;">
+            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 0.72rem; color: var(--text-subtle);">Preset:</span>
+              <button type="button" class="frequent-chip" onclick="setSinglePreset(10)">10%</button>
+              <button type="button" class="frequent-chip" onclick="setSinglePreset(25)">25%</button>
+              <button type="button" class="frequent-chip" onclick="setSinglePreset(50)">50%</button>
+            </div>
+            <input type="number" inputmode="numeric" id="inputDiscountSingle" class="form-control" min="0" max="100" placeholder="Besar diskon % (contoh: 25)" oninput="updateDetailModalPreview()">
+          </div>
+
+          <!-- Input Diskon Bertingkat Kompound -->
+          <div id="groupDiscountTiered" style="display: none; margin-bottom: 8px;">
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px;">
+              <span style="font-size: 0.72rem; color: var(--text-subtle);">Preset:</span>
+              <button type="button" class="frequent-chip" onclick="setTieredPreset('50+20')">50% + 20%</button>
+              <button type="button" class="frequent-chip" onclick="setTieredPreset('70+10')">70% + 10%</button>
+              <button type="button" class="frequent-chip" onclick="setTieredPreset('30+20')">30% + 20%</button>
+            </div>
+            <input type="text" id="inputDiscountTiered" class="form-control" placeholder="Contoh: 50+20 atau 50% + 20%" oninput="updateDetailModalPreview()">
+            <p style="font-size: 0.68rem; color: var(--text-faint); margin-top: 3px;">
+              Formula Bertahap: <code>Harga &times; (1 - d1) &times; (1 - d2)</code> (Bukan 70%)
+            </p>
+          </div>
+        </div>
+
+        <!-- Harga Acuan Bulan Lalu (SRS F-04) -->
+        <div class="form-group">
+          <label class="form-label">Harga Riwayat Toko Bulan Lalu (Rp)</label>
+          <input type="number" inputmode="numeric" id="detailInputHistoryPrice" class="form-control" placeholder="Acuan komparasi fluktuasi (SRS F-04)" oninput="updateDetailModalPreview()">
+        </div>
+
+        <!-- Live Preview Perhitungan Realtime -->
+        <div style="background: var(--surface-soft); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 14px; border: 1px solid var(--pastel-light-1); font-size: 0.76rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="color: var(--text-subtle);">Harga Akhir Satuan:</span>
+            <span id="previewFinalPriceText" style="font-weight: 800; color: var(--rose-contrast);">Rp 0</span>
+          </div>
+          <div id="previewSavingsText" style="color: #059669; font-weight: 700; margin-bottom: 4px; display: none;"></div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--pastel-light-1); padding-top: 4px; margin-top: 4px;">
+            <span style="color: var(--text-subtle);">Komparasi vs Histori:</span>
+            <span id="previewFluctBadge" class="fluctuation-badge fluctuation-stable">= Rp 0</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 6px; margin-top: 6px; font-weight: 800; font-size: 0.9rem;">
+            <span>Subtotal Baris:</span>
+            <span id="previewSubtotalText" style="color: var(--rose-contrast);">Rp 0</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+          <button type="button" class="btn-demo-quick" style="margin-top: 0;" onclick="closeDetailedItemModal()">Batal</button>
+          <button type="submit" id="btnSubmitDetailedItem" class="btn-primary" style="margin-top: 0;">Tambahkan ke Daftar</button>
+        </div>
       </form>
     </div>
   </div>
 
   <!-- ========================================================================
-       MODAL 2: ANTI-LIST / BLACKLIST WARNING MODAL
+       MODAL: KONFIRMASI HAPUS ITEM (SRS F-06A & UX)
+       ======================================================================== -->
+  <div id="deleteConfirmModal" class="modal-backdrop">
+    <div class="modal-card" style="text-align: center;">
+      <div style="font-size: 36px; margin-bottom: 8px;">🗑️</div>
+      <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast); margin-bottom: 6px;">Hapus Item Belanja?</h3>
+      <p style="font-size: 0.8rem; color: var(--text-subtle); margin-bottom: 16px;">
+        Apakah Anda yakin ingin menghapus <strong id="deleteConfirmItemName" style="color: var(--rose-contrast);"></strong> dari daftar belanja? Tindakan ini otomatis memperbarui total bayar.
+      </p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button type="button" class="btn-demo-quick" style="margin-top: 0;" onclick="closeDeleteConfirmModal()">Batal</button>
+        <button type="button" class="btn-primary" style="margin-top: 0; background: var(--status-danger);" onclick="executeDeleteItem()">Ya, Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: ANTI-LIST / BLACKLIST WARNING MODAL
        ======================================================================== -->
   <div id="blacklistWarningModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
         <h3 class="serif-font" style="font-size: 1.1rem; color: var(--status-danger);">⚠️ Peringatan Anti-List</h3>
-        <button class="modal-close-btn" onclick="cancelBlacklistAdd()">&times;</button>
+        <button class="modal-close-btn touch-target" onclick="cancelBlacklistAdd()">&times;</button>
       </div>
 
       <div style="text-align: center; padding: 12px 0 16px;">
@@ -1761,7 +625,7 @@
           Are you sure? You usually avoid this item.
         </p>
         <p style="font-size: 0.8rem; color: var(--text-subtle);">
-          Bahan <strong id="blacklistWarningItemName" style="color: var(--rose-contrast);">"Item"</strong> terdaftar di daftar pantangan atau bahan yang kamu hindari.
+          Bahan <strong id="blacklistWarningItemName" style="color: var(--rose-contrast);">"Item"</strong> terdaftar di daftar pantangan atau bahan yang biasanya kamu hindari.
         </p>
       </div>
 
@@ -1777,13 +641,81 @@
   </div>
 
   <!-- ========================================================================
-       MODAL 3: TAMBAH PANTRY MANUAL
+       MODAL: KELOLA DAFTAR ANTI-LIST (BLACKLIST MANAGER)
+       ======================================================================== -->
+  <div id="blacklistManagerModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">🛑 Kelola Daftar Anti-List</h3>
+        <button class="modal-close-btn touch-target" onclick="closeBlacklistManagerModal()">&times;</button>
+      </div>
+
+      <p style="font-size: 0.78rem; color: var(--text-subtle); margin-bottom: 12px;">
+        Daftar bahan yang otomatis memicu peringatan saat diketik pada input belanja.
+      </p>
+
+      <form onsubmit="handleAddNewBlacklistItem(event)" style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <input type="text" id="newBlacklistItemInput" class="form-control" placeholder="Contoh: Pare, Jengkol, Labu Siam" style="flex: 1;" required>
+        <button type="submit" class="btn-primary touch-target" style="width: auto; margin-top: 0; padding: 0 16px;">+ Tambah</button>
+      </form>
+
+      <div id="blacklistItemsList" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 200px; overflow-y: auto;">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: CLOUD FIRESTORE REALTIME SYNC (SRS F-06B)
+       ======================================================================== -->
+  <div id="cloudSyncModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">☁️ Sinkronisasi Cloud Firestore</h3>
+          <p style="font-size: 0.74rem; color: var(--text-subtle);">Listener onSnapshot() Realtime Multi-Device (&le; 2 detik)</p>
+        </div>
+        <button class="modal-close-btn touch-target" onclick="closeCloudSyncModal()">&times;</button>
+      </div>
+
+      <form onsubmit="handleSaveCloudSession(event)" style="margin-top: 8px;">
+        <div class="form-group">
+          <label class="form-label">ID Sesi Belanja (Room Session)</label>
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
+            <span style="font-size: 0.72rem; color: var(--text-subtle);">Preset:</span>
+            <button type="button" class="frequent-chip" onclick="document.getElementById('cloudSessionInput').value='lotte-mart-puri-01'">lotte-mart-puri-01</button>
+            <button type="button" class="frequent-chip" onclick="document.getElementById('cloudSessionInput').value='keluarga-belanja'">keluarga-belanja</button>
+          </div>
+          <input type="text" id="cloudSessionInput" class="form-control" value="lotte-mart-puri-01" required>
+          <p style="font-size: 0.68rem; color: var(--text-faint); margin-top: 3px;">
+            Buka aplikasi di perangkat/tab lain dengan ID sesi sama untuk menguji sync realtime tanpa reload.
+          </p>
+        </div>
+
+        <details style="background: var(--surface-soft); padding: 8px 10px; border-radius: var(--radius-md); font-size: 0.74rem; margin-bottom: 12px; border: 1px solid var(--pastel-light-1);">
+          <summary style="font-weight: 700; cursor: pointer;">Pengaturan Custom Firebase JSON (Opsional)</summary>
+          <div style="margin-top: 6px;">
+            <p style="font-size: 0.68rem; color: var(--text-subtle); margin-bottom: 4px;">Secara default, aplikasi menggunakan Firebase Demo &amp; BroadcastChannel multi-tab.</p>
+            <textarea id="customFirebaseJson" rows="3" class="form-control" placeholder='{"apiKey":"...","projectId":"..."}' style="font-family: monospace; font-size: 0.7rem;"></textarea>
+          </div>
+        </details>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+          <button type="button" class="btn-demo-quick" style="margin-top: 0;" onclick="closeCloudSyncModal()">Batal</button>
+          <button type="submit" class="btn-primary" style="margin-top: 0;">Terapkan &amp; Sinkronkan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: TAMBAH PANTRY MANUAL
        ======================================================================== -->
   <div id="addPantryModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="serif-font" style="font-size: 1.1rem;">🧺 Tambah Bahan ke Pantry</h3>
-        <button class="modal-close-btn" onclick="closeAddPantryModal()">&times;</button>
+        <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">🧺 Tambah Bahan ke Pantry</h3>
+        <button class="modal-close-btn touch-target" onclick="closeAddPantryModal()">&times;</button>
       </div>
 
       <form onsubmit="handleManualPantrySubmit(event)">
@@ -1795,7 +727,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label class="form-label">Jumlah (Qty)</label>
-            <input type="number" id="pantryInputQty" class="form-control" value="1" min="1" required>
+            <input type="number" inputmode="numeric" id="pantryInputQty" class="form-control" value="1" min="1" required>
           </div>
           <div class="form-group">
             <label class="form-label">Satuan</label>
@@ -1805,7 +737,7 @@
 
         <div class="form-group">
           <label class="form-label">Estimasi Masa Simpan (Hari)</label>
-          <input type="number" id="pantryInputDays" class="form-control" value="7" min="1" required>
+          <input type="number" inputmode="numeric" id="pantryInputDays" class="form-control" value="7" min="1" required>
         </div>
 
         <button type="submit" class="btn-primary" style="margin-top: 12px;">
@@ -1816,13 +748,13 @@
   </div>
 
   <!-- ========================================================================
-       MODAL 4: EDIT BUDGET
+       MODAL: EDIT BUDGET
        ======================================================================== -->
   <div id="budgetModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="serif-font" style="font-size: 1.05rem;">💰 Atur Alokasi Anggaran</h3>
-        <button class="modal-close-btn" onclick="closeBudgetModal()">&times;</button>
+        <h3 class="serif-font" style="font-size: 1.05rem; color: var(--rose-contrast);">💰 Atur Batas Saldo Dompet (SRS F-05)</h3>
+        <button class="modal-close-btn touch-target" onclick="closeBudgetModal()">&times;</button>
       </div>
 
       <form onsubmit="handleQuickBudgetSave(event)">
@@ -1835,8 +767,8 @@
         </div>
 
         <div class="form-group" style="margin-bottom: 16px;">
-          <label class="form-label">Nominal Anggaran (Rp)</label>
-          <input type="number" id="modalBudgetAmount" class="form-control" min="10000" step="5000" required>
+          <label class="form-label">Nominal Batas Anggaran (Rp)</label>
+          <input type="number" inputmode="numeric" id="modalBudgetAmount" class="form-control" min="10000" step="5000" required>
         </div>
 
         <button type="submit" class="btn-primary">
@@ -1849,74 +781,11 @@
   <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- ==========================================================================
-       VANILLA JAVASCRIPT LOGIC, PWA, DARK MODE, SHARE WA & LOCALSTORAGE
-       ========================================================================== -->
+  <!-- Application Logic -->
+  <script src="./js/app.js"></script>
+
+  <!-- Service Worker Registration -->
   <script>
-    /**
-     * Smart Grocery Tracker & Budget Planner
-     * Complete Engine: Auth, Single Smart Input Bar, Bottom Nav Bar (Icon-Only),
-     * PWA Service Worker, Elegant Dark Mode, Share to WhatsApp,
-     * In-Store FAB & Aisle Sorting, Fluctuation Detector, Blacklist Guard,
-     * Pantry & Expiry Tracker, and Native Web Audio API Micro-Interactions.
-     */
-
-    const STORAGE_KEYS = {
-      USER: 'sgt_app_user_v4',
-      BUDGET: 'sgt_app_budget_v4',
-      ITEMS: 'sgt_app_items_v4',
-      HISTORY: 'sgt_app_history_v4',
-      PRICE_CATALOG: 'sgt_app_prices_v4',
-      PANTRY: 'sgt_app_pantry_v4',
-      SHOPPING_MODE: 'sgt_app_mode_v4',
-      SOUND_ENABLED: 'sgt_app_sound_v4',
-      BLACKLIST: 'sgt_app_blacklist_v4',
-      THEME: 'sgt_app_theme_v4'
-    };
-
-    // Default Seed Data
-    const DEFAULT_BLACKLIST = ['labu siam', 'bitter melon', 'sayur pare'];
-
-    const DEFAULT_PRICE_CATALOG = {
-      'tepung tapioka': 12000,
-      'tepung terigu': 14000,
-      'telur': 28000,
-      'susu uht': 19000,
-      'beras 5kg': 68000,
-      'minyak goreng 2l': 36000,
-      'fresh milk 1l': 21000,
-      'sayur bayam segar': 6000,
-      'dada ayam fillet': 45000,
-      'deterjen cair': 18000
-    };
-
-    // Global State
-    let state = {
-      user: null,
-      budget: { amount: 300000, period: 'weekly' },
-      items: [
-        { id: 'item-1', name: 'Tepung Terigu', qty: 1, unit: 'kg', category: 'Pantry', checked: false, actualPrice: null },
-        { id: 'item-2', name: 'Susu UHT', qty: 1, unit: 'liter', category: 'Dairy', checked: false, actualPrice: null },
-        { id: 'item-3', name: 'Telur', qty: 1, unit: 'kg', category: 'Dairy', checked: false, actualPrice: null }
-      ],
-      pantry: [
-        { id: 'pan-1', name: 'Tepung Tapioka', qty: 1, unit: 'pack', category: 'Pantry', addedDate: new Date().toISOString(), expiryDate: getOffsetDateString(60) },
-        { id: 'pan-2', name: 'Susu UHT', qty: 1, unit: 'liter', category: 'Dairy', addedDate: new Date().toISOString(), expiryDate: getOffsetDateString(5) }
-      ],
-      history: [],
-      priceCatalog: { ...DEFAULT_PRICE_CATALOG },
-      blacklist: [...DEFAULT_BLACKLIST],
-      inStoreMode: false,
-      soundEnabled: true,
-      darkMode: false,
-      pendingBlacklistItem: null,
-      activeItemForPrice: null,
-      currentTab: 'planner'
-    };
-
-    // =========================================================================
-    // A.1 PWA SERVICE WORKER REGISTRATION
-    // =========================================================================
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
@@ -1924,1123 +793,6 @@
           .catch(err => console.warn('PWA ServiceWorker note:', err));
       });
     }
-
-    // =========================================================================
-    // A.2 ELEGANT DARK MODE TOGGLE & PERSISTENCE
-    // =========================================================================
-    function toggleTheme() {
-      state.darkMode = !state.darkMode;
-      localStorage.setItem(STORAGE_KEYS.THEME, JSON.stringify(state.darkMode));
-      applyTheme();
-      playSoftRustle();
-      showToast(state.darkMode ? 'Mode gelap aktif 🌙' : 'Mode terang aktif ☀️');
-    }
-
-    function applyTheme() {
-      const btn = document.getElementById('btnThemeToggle');
-      if (state.darkMode) {
-        document.body.classList.add('theme-dark');
-        if (btn) btn.textContent = '☀️';
-      } else {
-        document.body.classList.remove('theme-dark');
-        if (btn) btn.textContent = '🌙';
-      }
-    }
-
-    // =========================================================================
-    // A.3 SHARE TO WHATSAPP EXPORTER
-    // =========================================================================
-    function shareToWhatsApp() {
-      const unbought = state.items.filter(i => !i.checked);
-      if (unbought.length === 0) {
-        showToast('Semua item sudah terbeli atau checklist masih kosong');
-        return;
-      }
-
-      let text = `🛒 *Daftar Belanja - Smart Grocery Tracker*\n`;
-      text += `_Rencana kebutuhan belanja:_\n\n`;
-
-      unbought.forEach((item, idx) => {
-        text += `${idx + 1}. *${item.name}* (${item.qty} ${item.unit}) [${item.category || 'Pantry'}]\n`;
-      });
-
-      text += `\n*Total:* ${unbought.length} item`;
-      text += `\n_Dibuat dengan Smart Grocery Tracker_`;
-
-      const encoded = encodeURIComponent(text);
-      const waUrl = `https://wa.me/?text=${encoded}`;
-
-      playSoftRustle();
-      window.open(waUrl, '_blank');
-      showToast('Membuka WhatsApp untuk membagikan daftar 📲');
-    }
-
-    // =========================================================================
-    // CALMING ASMR AUDIO SYNTHESIS (WEB AUDIO API - ZERO EXTERNAL MP3 DEPENDENCY)
-    // =========================================================================
-    let audioCtx = null;
-
-    function getAudioContext() {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) audioCtx = new AudioContextClass();
-      }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      return audioCtx;
-    }
-
-    function playCalmChime() {
-      if (!state.soundEnabled) return;
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-
-        const now = ctx.currentTime;
-        [528, 792].forEach((freq, idx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now);
-
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.09, now + 0.05 + (idx * 0.04));
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
-
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-
-          osc.start(now + (idx * 0.04));
-          osc.stop(now + 0.9);
-        });
-      } catch (err) {
-        console.warn('AudioContext notice:', err);
-      }
-    }
-
-    function playSoftPop() {
-      if (!state.soundEnabled) return;
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.exponentialRampToValueAtTime(90, now + 0.08);
-
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.09);
-      } catch (err) {
-        console.warn('AudioContext notice:', err);
-      }
-    }
-
-    function playSoftRustle() {
-      if (!state.soundEnabled) return;
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(380, now);
-        osc.frequency.exponentialRampToValueAtTime(280, now + 0.06);
-
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.07);
-      } catch (err) {
-        console.warn('AudioContext notice:', err);
-      }
-    }
-
-    function toggleAudio() {
-      state.soundEnabled = !state.soundEnabled;
-      localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(state.soundEnabled));
-      const btn = document.getElementById('btnSoundToggle');
-      if (btn) btn.textContent = state.soundEnabled ? '🔊' : '🔇';
-      showToast(state.soundEnabled ? 'Suara feedback aktif' : 'Suara feedback dibisukan');
-      if (state.soundEnabled) playCalmChime();
-    }
-
-    // =========================================================================
-    // LOCALSTORAGE PERSISTENCE
-    // =========================================================================
-    function loadStorage() {
-      try {
-        const u = localStorage.getItem(STORAGE_KEYS.USER);
-        if (u) state.user = JSON.parse(u);
-
-        const b = localStorage.getItem(STORAGE_KEYS.BUDGET);
-        if (b) state.budget = JSON.parse(b);
-
-        const it = localStorage.getItem(STORAGE_KEYS.ITEMS);
-        if (it) state.items = JSON.parse(it);
-
-        const pt = localStorage.getItem(STORAGE_KEYS.PANTRY);
-        if (pt) state.pantry = JSON.parse(pt);
-
-        const h = localStorage.getItem(STORAGE_KEYS.HISTORY);
-        if (h) state.history = JSON.parse(h);
-
-        const pc = localStorage.getItem(STORAGE_KEYS.PRICE_CATALOG);
-        if (pc) state.priceCatalog = { ...DEFAULT_PRICE_CATALOG, ...JSON.parse(pc) };
-
-        const bl = localStorage.getItem(STORAGE_KEYS.BLACKLIST);
-        if (bl) state.blacklist = JSON.parse(bl);
-
-        const snd = localStorage.getItem(STORAGE_KEYS.SOUND_ENABLED);
-        if (snd !== null) state.soundEnabled = JSON.parse(snd);
-
-        const thm = localStorage.getItem(STORAGE_KEYS.THEME);
-        if (thm !== null) state.darkMode = JSON.parse(thm);
-
-        const m = localStorage.getItem(STORAGE_KEYS.SHOPPING_MODE);
-        if (m) state.inStoreMode = JSON.parse(m);
-      } catch (e) {
-        console.error('Storage reading error:', e);
-      }
-    }
-
-    function saveStorage() {
-      if (state.user) localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(state.user));
-      else localStorage.removeItem(STORAGE_KEYS.USER);
-
-      localStorage.setItem(STORAGE_KEYS.BUDGET, JSON.stringify(state.budget));
-      localStorage.setItem(STORAGE_KEYS.ITEMS, JSON.stringify(state.items));
-      localStorage.setItem(STORAGE_KEYS.PANTRY, JSON.stringify(state.pantry));
-      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
-      localStorage.setItem(STORAGE_KEYS.PRICE_CATALOG, JSON.stringify(state.priceCatalog));
-      localStorage.setItem(STORAGE_KEYS.BLACKLIST, JSON.stringify(state.blacklist));
-      localStorage.setItem(STORAGE_KEYS.SHOPPING_MODE, JSON.stringify(state.inStoreMode));
-    }
-
-    // =========================================================================
-    // AUTHENTICATION & SINGLE-USER FLOW
-    // =========================================================================
-    function checkAuth() {
-      const authGate = document.getElementById('authGate');
-      const dashboard = document.getElementById('mainDashboard');
-
-      if (!state.user) {
-        authGate.style.display = 'flex';
-        dashboard.style.display = 'none';
-      } else {
-        authGate.style.display = 'none';
-        dashboard.style.display = 'flex';
-        document.getElementById('headerUserName').textContent = state.user.name;
-        document.getElementById('headerUserEmail').textContent = state.user.email;
-      }
-    }
-
-    function handleAuthSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById('authNameInput').value.trim();
-      const email = document.getElementById('authEmailInput').value.trim();
-      const pass = document.getElementById('authPassInput').value.trim();
-
-      state.user = { name, email, pass };
-      saveStorage();
-      checkAuth();
-      renderAll();
-      playCalmChime();
-      showToast(`Welcome back, ${name}! 🎀`);
-    }
-
-    function loginDemoAccount() {
-      state.user = {
-        name: 'Audrey',
-        email: 'audrey@domain.com',
-        pass: 'demo1234'
-      };
-      saveStorage();
-      checkAuth();
-      renderAll();
-      playCalmChime();
-      showToast('Welcome back, Audrey! 🎀');
-    }
-
-    function promptLogout() {
-      if (confirm('Apakah kamu ingin keluar akun? Seluruh catatan belanja dan pantry tetap aman tersimpan di perangkat ini.')) {
-        state.user = null;
-        saveStorage();
-        checkAuth();
-        showToast('Berhasil keluar akun');
-      }
-    }
-
-    // =========================================================================
-    // BUDGET CALCULATIONS & METRICS
-    // =========================================================================
-    function calculateSpending() {
-      const historyTotal = state.history.reduce((sum, h) => sum + (h.total || 0), 0);
-      const currentCart = state.items
-        .filter(i => i.checked && i.actualPrice)
-        .reduce((sum, i) => sum + (i.actualPrice * i.qty), 0);
-
-      const totalSpent = historyTotal + currentCart;
-      const remaining = state.budget.amount - totalSpent;
-      return { totalSpent, remaining, currentCart };
-    }
-
-    function renderBudget() {
-      const { totalSpent, remaining } = calculateSpending();
-      const budgetAmount = state.budget.amount;
-
-      document.getElementById('metricTotalBudget').textContent = formatRupiah(budgetAmount);
-      document.getElementById('metricActualSpent').textContent = formatRupiah(totalSpent);
-
-      const balanceEl = document.getElementById('metricRemainingBudget');
-      balanceEl.textContent = formatRupiah(remaining);
-
-      const pct = budgetAmount > 0 ? Math.round((totalSpent / budgetAmount) * 100) : 0;
-      const progressPercentEl = document.getElementById('budgetProgressPercent');
-      const progressBarEl = document.getElementById('budgetProgressBar');
-      const safetyBadgeEl = document.getElementById('budgetSafetyBadge');
-
-      progressPercentEl.textContent = `Pengeluaran: ${pct}%`;
-      progressBarEl.style.width = `${Math.min(pct, 100)}%`;
-
-      if (pct < 70) {
-        progressBarEl.style.backgroundColor = 'var(--blush-accent)';
-        safetyBadgeEl.className = 'progress-status-badge badge-safe';
-        safetyBadgeEl.textContent = '● Aman';
-        balanceEl.className = 'metric-val balance';
-      } else if (pct <= 90) {
-        progressBarEl.style.backgroundColor = 'var(--status-warn)';
-        safetyBadgeEl.className = 'progress-status-badge badge-warn';
-        safetyBadgeEl.textContent = '⚠️ Waspada';
-        balanceEl.className = 'metric-val balance warning';
-      } else {
-        progressBarEl.style.backgroundColor = 'var(--status-danger)';
-        safetyBadgeEl.className = 'progress-status-badge badge-danger';
-        safetyBadgeEl.textContent = '🚨 Melebihi';
-        balanceEl.className = 'metric-val balance danger';
-      }
-    }
-
-    function openBudgetModal() {
-      document.getElementById('modalBudgetCycle').value = state.budget.period;
-      document.getElementById('modalBudgetAmount').value = state.budget.amount;
-      document.getElementById('budgetModal').classList.add('show');
-    }
-
-    function closeBudgetModal() {
-      document.getElementById('budgetModal').classList.remove('show');
-    }
-
-    function handleQuickBudgetSave(e) {
-      e.preventDefault();
-      const period = document.getElementById('modalBudgetCycle').value;
-      const amount = parseFloat(document.getElementById('modalBudgetAmount').value) || 300000;
-
-      state.budget.period = period;
-      state.budget.amount = amount;
-
-      saveStorage();
-      renderBudget();
-      closeBudgetModal();
-      playSoftRustle();
-      showToast('Anggaran berhasil diperbarui');
-    }
-
-    function updateBudgetConfig() {
-      state.budget.period = document.getElementById('configBudgetPeriod').value;
-      state.budget.amount = parseFloat(document.getElementById('configBudgetAmount').value) || 300000;
-      saveStorage();
-      renderBudget();
-      playSoftRustle();
-      showToast('Konfigurasi anggaran diperbarui');
-    }
-
-    // =========================================================================
-    // SINGLE SMART INPUT BAR (NATURAL LANGUAGE PARSER)
-    // =========================================================================
-    function parseSmartInput(raw) {
-      let text = raw.trim();
-      if (!text) return null;
-
-      let qty = 1;
-      let unit = 'pcs';
-
-      const unitRegex = /\b(liter|ltr|lt|l|kg|kilogram|gram|gr|g|pack|bungkus|bks|ikat|botol|kaleng|pcs|buah|kotak|dus|lembar|porsi)\b/i;
-      const endNumRegex = /^(.*?)\s+(\d+(?:[.,]\d+)?)\s*([a-zA-Z]+)?$/i;
-      const startNumRegex = /^(\d+(?:[.,]\d+)?)\s*([a-zA-Z]+)?\s+(.*?)$/i;
-
-      let match = text.match(startNumRegex);
-      if (match) {
-        qty = parseFloat(match[1].replace(',', '.')) || 1;
-        if (match[2] && unitRegex.test(match[2])) {
-          unit = match[2].toLowerCase();
-          text = match[3];
-        } else if (match[2]) {
-          text = match[2] + ' ' + match[3];
-        } else {
-          text = match[3];
-        }
-      } else {
-        match = text.match(endNumRegex);
-        if (match) {
-          qty = parseFloat(match[2].replace(',', '.')) || 1;
-          if (match[3]) {
-            unit = match[3].toLowerCase();
-          }
-          text = match[1];
-        }
-      }
-
-      if (['l', 'ltr', 'lt'].includes(unit)) unit = 'liter';
-      if (['g', 'gr'].includes(unit)) unit = 'gr';
-      if (['kilogram'].includes(unit)) unit = 'kg';
-      if (['bks'].includes(unit)) unit = 'pack';
-
-      const name = text.trim();
-      if (!name) return null;
-
-      const category = detectCategory(name);
-      return { name, qty, unit, category };
-    }
-
-    function detectCategory(name) {
-      const n = name.toLowerCase();
-      if (/susu|milk|keju|cheese|yogurt|telur|egg|butter|mentega/i.test(n)) return 'Dairy';
-      if (/sayur|bayam|kangkung|wortel|tomat|bawang|cabai|cabe|buah|apel|pisang|jeruk|produce|salad|labu/i.test(n)) return 'Produce';
-      if (/ayam|chicken|daging|meat|beef|ikan|fish|fillet|udang|sosis/i.test(n)) return 'Meat';
-      if (/roti|bread|sourdough|cake|croissant|pastry|bakery/i.test(n)) return 'Bakery';
-      if (/deterjen|sabun|shampoo|sikat|pasta|household|tissue|tisu|pembersih/i.test(n)) return 'Household';
-      if (/snack|keripik|biskuit|cokelat|wafer|kacang/i.test(n)) return 'Snacks';
-      return 'Pantry';
-    }
-
-    function checkBlacklist(name) {
-      const cleanName = name.toLowerCase().trim();
-      return state.blacklist.some(badItem => cleanName.includes(badItem.toLowerCase().trim()));
-    }
-
-    function handleSmartInputSubmit(e) {
-      e.preventDefault();
-      const inputEl = document.getElementById('smartInputField');
-      const parsed = parseSmartInput(inputEl.value);
-      if (!parsed) return;
-
-      const { name, qty, unit, category } = parsed;
-
-      // Check Anti-List / Blacklist Guard (e.g. "Labu Siam")
-      if (checkBlacklist(name)) {
-        state.pendingBlacklistItem = { name, qty, unit, category };
-        document.getElementById('blacklistWarningItemName').textContent = `"${name}"`;
-        document.getElementById('blacklistWarningModal').classList.add('show');
-        return;
-      }
-
-      insertItemToPlanner(name, qty, unit, category);
-      inputEl.value = '';
-    }
-
-    function insertItemToPlanner(name, qty, unit, category) {
-      state.items.unshift({
-        id: 'item-' + Date.now(),
-        name,
-        qty,
-        unit,
-        category,
-        checked: false,
-        actualPrice: null
-      });
-
-      saveStorage();
-      renderItems();
-      renderBudget();
-      playSoftRustle();
-      showToast(`"${name}" ditambahkan ke checklist 📝`);
-    }
-
-    function proceedBlacklistAdd() {
-      if (state.pendingBlacklistItem) {
-        const { name, qty, unit, category } = state.pendingBlacklistItem;
-        insertItemToPlanner(name, qty, unit, category);
-        const inputEl = document.getElementById('smartInputField');
-        if (inputEl) inputEl.value = '';
-      }
-      cancelBlacklistAdd();
-    }
-
-    function cancelBlacklistAdd() {
-      document.getElementById('blacklistWarningModal').classList.remove('show');
-      state.pendingBlacklistItem = null;
-    }
-
-    function quickAddFavorite(name, qty, unit, category) {
-      if (checkBlacklist(name)) {
-        state.pendingBlacklistItem = { name, qty, unit, category };
-        document.getElementById('blacklistWarningItemName').textContent = `"${name}"`;
-        document.getElementById('blacklistWarningModal').classList.add('show');
-        return;
-      }
-      insertItemToPlanner(name, qty, unit, category);
-    }
-
-    function deleteItem(id) {
-      const card = document.querySelector(`[data-item-id="${id}"]`);
-      if (card) {
-        card.classList.add('item-anim-out');
-        setTimeout(() => {
-          state.items = state.items.filter(i => i.id !== id);
-          saveStorage();
-          renderItems();
-          renderBudget();
-          updateRunningBar();
-          playSoftRustle();
-          showToast('Item dihapus');
-        }, 280);
-      } else {
-        state.items = state.items.filter(i => i.id !== id);
-        saveStorage();
-        renderItems();
-        renderBudget();
-        updateRunningBar();
-        playSoftRustle();
-        showToast('Item dihapus');
-      }
-    }
-
-    // =========================================================================
-    // IN-STORE MODE & FLOATING ACTION BUTTON (FAB)
-    // =========================================================================
-    function toggleShoppingMode() {
-      state.inStoreMode = !state.inStoreMode;
-      saveStorage();
-      renderShoppingMode();
-      playSoftRustle();
-      showToast(state.inStoreMode ? 'Mode Belanja Toko Aktif 🛒' : 'Keluar Mode Belanja');
-    }
-
-    function renderShoppingMode() {
-      const fabBtn = document.getElementById('fabStoreMode');
-      const fabIcon = document.getElementById('fabIcon');
-      const fabText = document.getElementById('fabText');
-      const runningBar = document.getElementById('runningCartBar');
-
-      // FAB only appears on planner tab
-      if (state.currentTab === 'planner') {
-        fabBtn.style.display = 'flex';
-      } else {
-        fabBtn.style.display = 'none';
-      }
-
-      if (state.inStoreMode) {
-        fabBtn.classList.add('in-store-active');
-        fabIcon.textContent = '🏪';
-        fabText.textContent = 'Mode Toko Aktif';
-        runningBar.classList.remove('d-none');
-      } else {
-        fabBtn.classList.remove('in-store-active');
-        fabIcon.textContent = '🛒';
-        fabText.textContent = 'Mulai Belanja';
-        runningBar.classList.add('d-none');
-      }
-
-      renderItems();
-      updateRunningBar();
-    }
-
-    function handleItemClick(itemId) {
-      const item = state.items.find(i => i.id === itemId);
-      if (!item) return;
-
-      if (!state.inStoreMode) {
-        item.checked = !item.checked;
-        saveStorage();
-        renderItems();
-        renderBudget();
-        if (item.checked) playSoftPop();
-        else playSoftRustle();
-      } else {
-        if (!item.checked) {
-          openPriceModal(item);
-        } else {
-          item.checked = false;
-          item.actualPrice = null;
-          saveStorage();
-          renderItems();
-          renderBudget();
-          updateRunningBar();
-          playSoftRustle();
-        }
-      }
-    }
-
-    function openPriceModal(item) {
-      state.activeItemForPrice = item;
-      document.getElementById('modalItemTitle').textContent = item.name;
-      document.getElementById('modalItemSubtitle').textContent = `${item.qty} ${item.unit} • Lorong ${item.category}`;
-
-      const key = item.name.toLowerCase().trim();
-      const pastPrice = state.priceCatalog[key];
-      const refText = document.getElementById('modalHistoryRefText');
-
-      if (pastPrice) {
-        refText.textContent = `${formatRupiah(pastPrice)} / ${item.unit} (Belanja Sebelumnya)`;
-        document.getElementById('modalRealPriceInput').value = pastPrice;
-      } else {
-        refText.textContent = 'Belum ada riwayat harga (Item Baru)';
-        document.getElementById('modalRealPriceInput').value = '';
-      }
-
-      document.getElementById('priceInputModal').classList.add('show');
-      setTimeout(() => document.getElementById('modalRealPriceInput').focus(), 150);
-    }
-
-    function closePriceModal() {
-      document.getElementById('priceInputModal').classList.remove('show');
-      state.activeItemForPrice = null;
-    }
-
-    function handlePriceSubmit(e) {
-      e.preventDefault();
-      if (!state.activeItemForPrice) return;
-
-      const price = parseFloat(document.getElementById('modalRealPriceInput').value) || 0;
-      state.activeItemForPrice.actualPrice = price;
-      state.activeItemForPrice.checked = true;
-
-      saveStorage();
-      closePriceModal();
-      renderItems();
-      renderBudget();
-      updateRunningBar();
-      playSoftPop();
-      showToast(`Harga "${state.activeItemForPrice.name}" dicatat: ${formatRupiah(price)}`);
-    }
-
-    function updateRunningBar() {
-      const checked = state.items.filter(i => i.checked);
-      const total = checked.reduce((sum, i) => sum + ((i.actualPrice || 0) * i.qty), 0);
-      document.getElementById('runningCartCheckedCount').textContent = checked.length;
-      document.getElementById('runningCartTotalVal').textContent = formatRupiah(total);
-    }
-
-    // =========================================================================
-    // FINISH SHOPPING, RECEIPT ARCHIVE & PANTRY TRANSFER
-    // =========================================================================
-    function confirmFinishShopping() {
-      const checked = state.items.filter(i => i.checked);
-      if (checked.length === 0) {
-        showToast('Belum ada item yang dicentang di keranjang');
-        return;
-      }
-
-      const total = checked.reduce((sum, i) => sum + ((i.actualPrice || 0) * i.qty), 0);
-      const remainingDrafts = state.items.filter(i => !i.checked);
-
-      if (confirm(`Selesaikan belanja untuk ${checked.length} item terbeli (Total: ${formatRupiah(total)})? Barang terbeli otomatis dipindahkan ke riwayat dan My Pantry. ${remainingDrafts.length} item belum terbeli tetap tersimpan sebagai draft.`)) {
-        
-        // Animasi fade-out & scale-down untuk item yang terbeli
-        checked.forEach(i => {
-          const el = document.querySelector(`[data-item-id="${i.id}"]`);
-          if (el) el.classList.add('item-anim-out');
-        });
-
-        setTimeout(() => {
-          // 1. Simpan struk ke riwayat transaksi
-          state.history.unshift({
-            id: 'rec-' + Date.now(),
-            date: new Date().toISOString(),
-            total,
-            items: checked.map(i => ({
-              name: i.name,
-              qty: i.qty,
-              unit: i.unit,
-              price: i.actualPrice,
-              subtotal: (i.actualPrice || 0) * i.qty
-            }))
-          });
-
-          // 2. Perbarui katalog harga acuan
-          checked.forEach(i => {
-            if (i.actualPrice) {
-              state.priceCatalog[i.name.toLowerCase().trim()] = i.actualPrice;
-            }
-          });
-
-          // 3. Pindahkan barang terbeli ke "My Pantry" dengan estimasi kedaluwarsa otomatis
-          checked.forEach(i => {
-            const daysShelfLife = getEstimatedShelfLifeDays(i.category);
-            state.pantry.unshift({
-              id: 'pan-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
-              name: i.name,
-              qty: i.qty,
-              unit: i.unit,
-              category: i.category || 'Pantry',
-              addedDate: new Date().toISOString(),
-              expiryDate: getOffsetDateString(daysShelfLife)
-            });
-          });
-
-          // 4. Sisakan draft yang belum terbeli
-          state.items = remainingDrafts;
-          state.inStoreMode = false;
-
-          saveStorage();
-          renderShoppingMode();
-          renderAll();
-          playCalmChime();
-          showToast('Belanja selesai! Barang terbeli dipindahkan ke My Pantry 🧺');
-          
-          // Transisi mulus langsung ke tab My Pantry
-          switchTab('pantry');
-        }, 320);
-      }
-    }
-
-    function getEstimatedShelfLifeDays(category) {
-      switch (category) {
-        case 'Produce': return 5;
-        case 'Dairy': return 7;
-        case 'Meat': return 3;
-        case 'Bakery': return 4;
-        case 'Snacks': return 30;
-        case 'Household': return 180;
-        default: return 60; // Pantry staples
-      }
-    }
-
-    function getOffsetDateString(days) {
-      const d = new Date();
-      d.setDate(d.getDate() + days);
-      return d.toISOString();
-    }
-
-    // =========================================================================
-    // PANTRY & EXPIRY TRACKER (TAB 3: PANTRY)
-    // =========================================================================
-    function renderPantry() {
-      const container = document.getElementById('pantryItemsContainer');
-      const totalCountEl = document.getElementById('pantryTotalCount');
-      const soonCountEl = document.getElementById('pantryExpiringSoonCount');
-      const freshCountEl = document.getElementById('pantryFreshCount');
-
-      let soon = 0;
-      let fresh = 0;
-      const today = new Date();
-
-      if (state.pantry.length === 0) {
-        container.innerHTML = `
-          <div class="clean-empty-state">
-            <div class="empty-icon-circle">🧺</div>
-            <h3 class="serif-font empty-title">Your pantry is beautifully quiet</h3>
-            <p class="empty-subtitle">Items marked as purchased in your shopping trip will be neatly stored here with fresh shelf-life tracking.</p>
-          </div>
-        `;
-        totalCountEl.textContent = '0';
-        soonCountEl.textContent = '0';
-        freshCountEl.textContent = '0';
-        return;
-      }
-
-      let html = '';
-      state.pantry.forEach(item => {
-        const expDate = new Date(item.expiryDate);
-        const diffTime = expDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        let tagClass = 'expiry-fresh';
-        let tagText = `${diffDays} hari lagi`;
-
-        if (diffDays <= 0) {
-          tagClass = 'expiry-expired';
-          tagText = 'Kedaluwarsa';
-        } else if (diffDays <= 3) {
-          tagClass = 'expiry-soon';
-          tagText = `⚠️ ${diffDays} hari lagi`;
-          soon++;
-        } else {
-          fresh++;
-        }
-
-        const dateFormatted = expDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-
-        html += `
-          <div class="pantry-card" data-pantry-id="${item.id}">
-            <div>
-              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-headline);">${escapeHtml(item.name)}</div>
-              <div style="font-size: 0.76rem; color: var(--text-subtle); margin-top: 2px;">
-                Stok: <strong>${item.qty} ${escapeHtml(item.unit)}</strong> • Estimasi ED: ${dateFormatted}
-              </div>
-              <div style="margin-top: 4px;">
-                <span class="expiry-tag ${tagClass}">${tagText}</span>
-              </div>
-            </div>
-
-            <button class="btn-consume" onclick="consumePantryItem('${item.id}')" title="Tandai bahan telah digunakan">
-              ✓ Pakai
-            </button>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-      totalCountEl.textContent = state.pantry.length;
-      soonCountEl.textContent = soon;
-      freshCountEl.textContent = fresh;
-    }
-
-    function consumePantryItem(id) {
-      const item = state.pantry.find(p => p.id === id);
-      if (!item) return;
-
-      const card = document.querySelector(`[data-pantry-id="${id}"]`);
-      if (item.qty <= 1 && card) {
-        card.classList.add('item-anim-out');
-        setTimeout(() => {
-          state.pantry = state.pantry.filter(p => p.id !== id);
-          saveStorage();
-          renderPantry();
-          playSoftRustle();
-          showToast(`"${item.name}" telah habis dikonsumsi 🥣`);
-        }, 280);
-      } else {
-        if (card) {
-          card.classList.add('item-pulse');
-          setTimeout(() => card.classList.remove('item-pulse'), 300);
-        }
-        item.qty -= 1;
-        saveStorage();
-        renderPantry();
-        playSoftRustle();
-        showToast(`1 ${item.unit} "${item.name}" digunakan 🥣`);
-      }
-    }
-
-    function openAddPantryModal() {
-      document.getElementById('addPantryModal').classList.add('show');
-    }
-
-    function closeAddPantryModal() {
-      document.getElementById('addPantryModal').classList.remove('show');
-    }
-
-    function handleManualPantrySubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById('pantryInputName').value.trim();
-      const qty = parseInt(document.getElementById('pantryInputQty').value) || 1;
-      const unit = document.getElementById('pantryInputUnit').value.trim() || 'pcs';
-      const days = parseInt(document.getElementById('pantryInputDays').value) || 7;
-
-      if (!name) return;
-
-      state.pantry.unshift({
-        id: 'pan-' + Date.now(),
-        name,
-        qty,
-        unit,
-        category: detectCategory(name),
-        addedDate: new Date().toISOString(),
-        expiryDate: getOffsetDateString(days)
-      });
-
-      saveStorage();
-      closeAddPantryModal();
-      renderPantry();
-      playSoftRustle();
-      showToast(`"${name}" ditambahkan ke pantry`);
-      document.getElementById('pantryInputName').value = '';
-    }
-
-    // =========================================================================
-    // RENDERING ITEMS, AISLE GROUPING & HISTORY
-    // =========================================================================
-    function renderItems() {
-      const container = document.getElementById('groceryItemsContainer');
-      const unboughtEl = document.getElementById('unboughtItemCount');
-
-      const unboughtCount = state.items.filter(i => !i.checked).length;
-      if (unboughtEl) unboughtEl.textContent = unboughtCount;
-
-      if (state.items.length === 0) {
-        container.innerHTML = `
-          <div class="clean-empty-state">
-            <div class="empty-icon-circle">📋</div>
-            <h3 class="serif-font empty-title">Your list is beautifully empty</h3>
-            <p class="empty-subtitle">Let's plan your groceries. Type an item above (e.g. <em>"Susu UHT 2 liter"</em>) or tap a frequent staple.</p>
-          </div>
-        `;
-        return;
-      }
-
-      let html = '';
-
-      // JIKA IN-STORE MODE AKTIF: KELOMPOKKAN ITEM BERDASARKAN LORONG TOKO
-      if (state.inStoreMode) {
-        const aisleGroups = {};
-        state.items.forEach(item => {
-          const cat = item.category || 'Pantry';
-          if (!aisleGroups[cat]) aisleGroups[cat] = [];
-          aisleGroups[cat].push(item);
-        });
-
-        for (const [aisle, items] of Object.entries(aisleGroups)) {
-          html += `
-            <div class="aisle-header">
-              <span>Lorong: ${aisle}</span>
-              <span style="font-size: 0.72rem; opacity: 0.85;">${items.length} item</span>
-            </div>
-          `;
-          items.forEach(item => {
-            html += renderItemCardHtml(item);
-          });
-        }
-      } else {
-        state.items.forEach(item => {
-          html += renderItemCardHtml(item);
-        });
-      }
-
-      container.innerHTML = html;
-    }
-
-    function renderItemCardHtml(item) {
-      const isChecked = item.checked;
-      const key = item.name.toLowerCase().trim();
-      const pastPrice = state.priceCatalog[key];
-
-      let priceInfo = '';
-      let fluctBadge = '';
-
-      if (isChecked && item.actualPrice) {
-        priceInfo = `<div style="font-weight: 800; color: var(--rose-contrast);">${formatRupiah(item.actualPrice * item.qty)}</div>
-                     <div style="font-size: 0.68rem; color: var(--text-subtle);">@ ${formatRupiah(item.actualPrice)}/${item.unit}</div>`;
-        
-        if (pastPrice) {
-          const diff = item.actualPrice - pastPrice;
-          if (diff > 0) fluctBadge = `<span class="fluct-badge fluct-up">🔺 Naik ${formatRupiah(diff)}</span>`;
-          else if (diff < 0) fluctBadge = `<span class="fluct-badge fluct-down">🔻 Turun ${formatRupiah(Math.abs(diff))}</span>`;
-          else fluctBadge = `<span class="fluct-badge fluct-same">● Stabil</span>`;
-        } else {
-          fluctBadge = `<span class="fluct-badge fluct-new">✨ Baru</span>`;
-        }
-      } else if (pastPrice) {
-        priceInfo = `<div style="font-size: 0.72rem; color: var(--text-faint);">Acuan: ${formatRupiah(pastPrice)}/${item.unit}</div>`;
-      }
-
-      return `
-        <div class="grocery-card ${isChecked ? 'checked' : ''} ${state.inStoreMode ? 'in-store-active' : ''}" data-item-id="${item.id}" onclick="handleItemClick('${item.id}')">
-          <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-            <div class="checkbox-box">${isChecked ? '✓' : ''}</div>
-            <div>
-              <div class="item-name">${escapeHtml(item.name)}</div>
-              <div style="font-size: 0.75rem; color: var(--text-subtle);">
-                <strong style="color: var(--rose-contrast);">${item.qty} ${escapeHtml(item.unit)}</strong> • <span style="font-weight: 600;">${item.category || 'Pantry'}</span>
-              </div>
-              ${fluctBadge}
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: center; gap: 8px;" onclick="event.stopPropagation()">
-            <div style="text-align: right;">${priceInfo}</div>
-            <button class="btn-item-delete" onclick="deleteItem('${item.id}')" title="Hapus">✕</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderHistory() {
-      const container = document.getElementById('receiptHistoryContainer');
-      if (state.history.length === 0) {
-        container.innerHTML = `
-          <div class="clean-empty-state" style="padding: 24px 14px; margin: 0;">
-            <div class="empty-icon-circle" style="width: 44px; height: 44px; font-size: 20px;">📜</div>
-            <h4 class="serif-font" style="font-size: 0.95rem; margin-bottom: 4px;">Belum Ada Struk</h4>
-            <p class="empty-subtitle" style="font-size: 0.76rem;">Selesaikan belanja di mode toko untuk mengarsipkan struk.</p>
-          </div>
-        `;
-        return;
-      }
-
-      let html = '';
-      state.history.forEach(h => {
-        const d = new Date(h.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        html += `
-          <div style="background: var(--surface-white); border: 1.5px solid var(--pastel-light-1); border-radius: var(--radius-md); padding: 14px; box-shadow: var(--shadow-soft);">
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--pastel-light-2); padding-bottom: 8px; margin-bottom: 8px;">
-              <div>
-                <div style="font-size: 0.72rem; color: var(--text-subtle);">${d}</div>
-                <div style="font-weight: 700; color: var(--rose-contrast);">Belanja Selesai (${h.items.length} Item)</div>
-              </div>
-              <div style="font-size: 1.1rem; font-weight: 800; color: var(--rose-contrast);">${formatRupiah(h.total)}</div>
-            </div>
-            <div style="font-size: 0.78rem; display: flex; flex-direction: column; gap: 4px;">
-              ${h.items.map(it => `
-                <div style="display: flex; justify-content: space-between;">
-                  <span>${escapeHtml(it.name)} (${it.qty} ${escapeHtml(it.unit)})</span>
-                  <strong>${formatRupiah(it.subtotal)}</strong>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    function renderCategoryBreakdown() {
-      const container = document.getElementById('budgetCategoryBreakdown');
-      if (!container) return;
-
-      const totals = {};
-      let grand = 0;
-
-      state.history.forEach(h => {
-        h.items.forEach(it => {
-          totals['Bahan Makanan'] = (totals['Bahan Makanan'] || 0) + it.subtotal;
-          grand += it.subtotal;
-        });
-      });
-
-      state.items.forEach(it => {
-        if (it.checked && it.actualPrice) {
-          const sub = it.actualPrice * it.qty;
-          const cat = it.category || 'Pantry';
-          totals[cat] = (totals[cat] || 0) + sub;
-          grand += sub;
-        }
-      });
-
-      if (grand === 0) {
-        container.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-subtle);">Belum ada data pengeluaran aktual.</p>';
-        return;
-      }
-
-      let html = '';
-      for (const [cat, amt] of Object.entries(totals)) {
-        const pct = Math.round((amt / grand) * 100);
-        html += `
-          <div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 3px;">
-              <span>${cat}</span>
-              <span>${formatRupiah(amt)} (${pct}%)</span>
-            </div>
-            <div style="width: 100%; height: 8px; background: var(--surface-soft); border-radius: var(--radius-pill); overflow: hidden;">
-              <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, var(--blush-accent), var(--rose-contrast)); border-radius: var(--radius-pill);"></div>
-            </div>
-          </div>
-        `;
-      }
-      container.innerHTML = html;
-    }
-
-    function clearHistory() {
-      if (confirm('Hapus seluruh riwayat pengeluaran belanja?')) {
-        state.history = [];
-        saveStorage();
-        renderHistory();
-        renderBudget();
-        renderCategoryBreakdown();
-        playSoftRustle();
-        showToast('Riwayat pengeluaran dibersihkan');
-      }
-    }
-
-    // =========================================================================
-    // B.2 BOTTOM NAVIGATION BAR (ICON-ONLY TAB SWITCHING)
-    // =========================================================================
-    function switchTab(tab) {
-      state.currentTab = tab;
-      document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.content-tab').forEach(c => c.classList.remove('active'));
-
-      playSoftRustle();
-
-      const fabBtn = document.getElementById('fabStoreMode');
-
-      if (tab === 'budget') {
-        document.querySelector('.bottom-nav-item:nth-child(1)').classList.add('active');
-        document.getElementById('tabBudget').classList.add('active');
-        document.getElementById('configBudgetPeriod').value = state.budget.period;
-        document.getElementById('configBudgetAmount').value = state.budget.amount;
-        renderBudget();
-        renderCategoryBreakdown();
-        renderHistory();
-        fabBtn.style.display = 'none';
-      } else if (tab === 'planner') {
-        document.querySelector('.bottom-nav-item:nth-child(2)').classList.add('active');
-        document.getElementById('tabPlanner').classList.add('active');
-        renderItems();
-        fabBtn.style.display = 'flex';
-      } else if (tab === 'pantry') {
-        document.querySelector('.bottom-nav-item:nth-child(3)').classList.add('active');
-        document.getElementById('tabPantry').classList.add('active');
-        renderPantry();
-        fabBtn.style.display = 'none';
-      }
-    }
-
-    function renderAll() {
-      applyTheme();
-      renderBudget();
-      renderShoppingMode();
-      renderItems();
-      renderPantry();
-      renderHistory();
-    }
-
-    // =========================================================================
-    // UTILITIES
-    // =========================================================================
-    function formatRupiah(num) {
-      if (isNaN(num)) return 'Rp 0';
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    function showToast(msg) {
-      const container = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = 'toast-msg';
-      t.innerHTML = `<span>ℹ️</span><span>${escapeHtml(msg)}</span>`;
-      container.appendChild(t);
-      setTimeout(() => {
-        t.style.opacity = '0';
-        t.style.transition = 'opacity 0.3s';
-        setTimeout(() => t.remove(), 300);
-      }, 3000);
-    }
-
-    // Initialize DOM
-    function init() {
-      loadStorage();
-      checkAuth();
-      renderAll();
-      const btn = document.getElementById('btnSoundToggle');
-      if (btn) btn.textContent = state.soundEnabled ? '🔊' : '🔇';
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
