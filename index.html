@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Smart Grocery Tracker &amp; Budget Planner</title>
-  
+
   <!-- SEO & Mobile Meta Tags -->
-  <meta name="description" content="Smart Grocery Tracker &amp; Budget Safety Planner PWA dengan Dark Mode, WhatsApp Sharing, Single Smart Input, Bottom Nav Bar Icon-Only, dan Pantry Expiry Tracker.">
+  <meta name="description"
+    content="Smart Grocery Tracker &amp; Budget Safety Planner PWA dengan Dark Mode, WhatsApp Sharing, Single Smart Input, Bottom Nav Bar Icon-Only, dan Pantry Expiry Tracker.">
   <meta id="themeColorMeta" name="theme-color" content="#FCE7F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Smart Grocery">
 
   <!-- INLINE SVG FAVICON (ELEGANT RIBBON & CREST MOTIF) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23F472B6'/%3E%3Cstop offset='100%25' stop-color='%239D174D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='%23FFF5F8' stroke='%23FBCFE8' stroke-width='1.5'/%3E%3Cpath d='M16 13.5c-2.4-2.5-5.8-3.6-7.8-1.5-2 2.1-.9 5.8 1.6 7.8l6.2 5.2 6.2-5.2c2.5-2 3.6-5.7 1.6-7.8-2-2.1-5.4-1-7.8 1.5z' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='14.5' r='2.2' fill='%239D174D'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23F472B6'/%3E%3Cstop offset='100%25' stop-color='%239D174D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='%23FFF5F8' stroke='%23FBCFE8' stroke-width='1.5'/%3E%3Cpath d='M16 13.5c-2.4-2.5-5.8-3.6-7.8-1.5-2 2.1-.9 5.8 1.6 7.8l6.2 5.2 6.2-5.2c2.5-2 3.6-5.7 1.6-7.8-2-2.1-5.4-1-7.8 1.5z' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='14.5' r='2.2' fill='%239D174D'/%3E%3C/svg%3E">
 
   <!-- PWA MANIFEST -->
   <link rel="manifest" href="./manifest.json">
@@ -21,15 +25,21 @@
   <!-- Google Fonts: Playfair Display (Serif) & Plus Jakarta Sans (Sans-Serif) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
-  <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Daily Test 2 Ergonomics) -->
+  <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
   <link rel="stylesheet" href="./css/app.css">
 
-  <!-- Firebase SDK CDN (SRS F-06B: Cloud Firestore Realtime Sync) -->
+  <!-- Firebase SDK CDN (SRS F-06B, Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Firebase Project Configuration -->
+  <script src="./js/firebase-config.js"></script>
 </head>
+
 <body>
 
   <!-- ========================================================================
@@ -40,17 +50,7 @@
   </div>
 
   <!-- ========================================================================
-       OVERBUDGET FIRM RED BANNER (> 100% Limit) - SRS F-05
-       ======================================================================== -->
-  <div id="overbudget-firm-banner" class="hidden overbudget-firm-banner">
-    <span style="font-size: 16px;">🚨</span>
-    <p style="flex: 1; margin: 0;">
-      Total belanja melebihi batas saldo dompet! Kurangi kuantitas atau batalkan barang sekunder.
-    </p>
-  </div>
-
-  <!-- ========================================================================
-       1. LOGIN / WELCOME SCREEN (SINGLE-USER VIA LOCALSTORAGE)
+       1. LOGIN / WELCOME SCREEN (GOOGLE AUTH + SIGN IN / SIGN UP TABS)
        ======================================================================== -->
   <div id="authGate" class="auth-gate-wrapper">
     <div class="auth-card">
@@ -58,28 +58,72 @@
       <h1 class="auth-title serif-font">Smart Grocery Tracker</h1>
       <p class="auth-subtitle">Kelola Rencana Belanja &amp; Anggaran Pribadi</p>
 
+      <!-- Segmented Tab: Masuk (Sign In) vs Daftar (Sign Up) -->
+      <div class="auth-segmented-tabs">
+        <button type="button" id="tabAuthSignIn" class="auth-tab-btn active" onclick="switchAuthMode('signin')">
+          Masuk (Sign In)
+        </button>
+        <button type="button" id="tabAuthSignUp" class="auth-tab-btn" onclick="switchAuthMode('signup')">
+          Daftar (Sign Up)
+        </button>
+      </div>
+
+      <!-- Google Sign In Button -->
+      <button type="button" class="btn-google-auth touch-target" onclick="loginWithGoogle()"
+        title="Masuk cepat menggunakan akun Google">
+        <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+          <path fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+        </svg>
+        <span id="googleBtnText">Lanjutkan dengan Google</span>
+      </button>
+
+      <!-- Auth Divider -->
+      <div class="auth-divider">
+        <span id="authDividerText">atau masuk dengan email</span>
+      </div>
+
+      <!-- Auth Form (Sign In & Sign Up) -->
       <form id="authForm" onsubmit="handleAuthSubmit(event)">
-        <div class="form-group">
-          <label class="form-label">Nama Panggilan</label>
-          <input type="text" id="authNameInput" class="form-control" placeholder="Contoh: Clara, Audrey, Rian" required>
+        <!-- Name field (shown on Sign Up mode) -->
+        <div id="authNameGroup" class="form-group" style="display: none;">
+          <label class="form-label">Nama Lengkap / Panggilan *</label>
+          <input type="text" id="authNameInput" class="form-control" placeholder="Contoh: Clara, Audrey, Rian">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Email Pribadi</label>
+          <label class="form-label">Email Pribadi *</label>
           <input type="email" id="authEmailInput" class="form-control" placeholder="nama@email.com" required>
         </div>
 
         <div class="form-group" style="margin-bottom: 16px;">
-          <label class="form-label">Kata Sandi</label>
-          <input type="password" id="authPassInput" class="form-control" placeholder="Minimal 4 karakter" minlength="4" required>
+          <label class="form-label">Kata Sandi *</label>
+          <input type="password" id="authPassInput" class="form-control" placeholder="Minimal 6 karakter" minlength="6"
+            required>
         </div>
 
-        <button type="submit" class="btn-primary">
+        <button type="submit" id="authSubmitBtn" class="btn-primary touch-target">
           <span>Masuk ke Dashboard</span>
         </button>
       </form>
 
-      <button type="button" class="btn-demo-quick" onclick="loginDemoAccount()">
+      <!-- Switch mode footer link -->
+      <div class="auth-switch-prompt" style="margin-top: 14px; font-size: 0.8rem; color: var(--text-subtle);">
+        <span id="authSwitchPromptText">Belum punya akun?</span>
+        <button type="button" id="authSwitchBtn" onclick="toggleAuthMode()"
+          style="background: none; border: none; color: var(--rose-contrast); font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">
+          Daftar di sini
+        </button>
+      </div>
+
+      <!-- Demo Account Quick Access -->
+      <button type="button" class="btn-demo-quick touch-target" onclick="loginDemoAccount()">
         <span>✨ Masuk Cepat dengan Akun Demo</span>
       </button>
     </div>
@@ -90,13 +134,25 @@
        ======================================================================== -->
   <div id="mainDashboard" class="app-viewport" style="display: none;">
 
+    <!-- OVERBUDGET FIRM RED BANNER (> 100% Limit) - STICKY TOP APP BANNER (SRS F-05) -->
+    <div id="overbudget-firm-banner" class="hidden overbudget-firm-banner">
+      <span style="font-size: 18px;">🚨</span>
+      <div style="flex: 1;">
+        <div style="font-weight: 900; line-height: 1.2;">Total belanja melebihi batas saldo dompet!</div>
+        <div id="overbudget-detail-text" style="font-size: 0.72rem; opacity: 0.95; font-weight: 600; margin-top: 2px;">
+          Kurangi kuantitas atau batalkan barang sekunder.
+        </div>
+      </div>
+    </div>
+
     <!-- HEADER BAR: BRAND LOGO, PWA INSTALL, DARK MODE, SOUND & GREETING -->
     <header class="app-header">
       <div class="header-content">
         <div class="brand-wrap">
           <div class="brand-logo-badge">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke="var(--rose-contrast)" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke="var(--rose-contrast)" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
           </div>
           <div>
@@ -113,17 +169,21 @@
           </button>
 
           <!-- Dark Mode Toggle Switch -->
-          <button id="btnThemeToggle" class="btn-action-icon touch-target" onclick="toggleTheme()" title="Mode Gelap / Terang">
+          <button id="btnThemeToggle" class="btn-action-icon touch-target" onclick="toggleTheme()"
+            title="Mode Gelap / Terang">
             🌙
           </button>
 
           <!-- Audio Toggle -->
-          <button id="btnSoundToggle" class="btn-action-icon touch-target" onclick="toggleAudio()" title="Suara Feedback">
+          <button id="btnSoundToggle" class="btn-action-icon touch-target" onclick="toggleAudio()"
+            title="Suara Feedback">
             🔊
           </button>
 
           <!-- User Greeting & Logout -->
           <div class="user-pill">
+            <img id="headerUserAvatar" src="" alt="Avatar"
+              style="display: none; width: 22px; height: 22px; border-radius: 50%; object-fit: cover;">
             <div class="user-pill-info">
               <div class="user-greeting">
                 <span>Halo, </span>
@@ -134,322 +194,559 @@
             </div>
             <button class="btn-logout touch-target" onclick="promptLogout()" title="Keluar Akun">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
           </div>
         </div>
       </div>
     </header>
+    <!-- PWA Install Button -->
+    <button id="btnInstallPwa" class="btn-install-pwa" onclick="installPwa()" title="Pasang ke Layar Utama (PWA)">
+      <span>📲</span>
+      <span>Install</span>
+    </button>
 
-    <!-- ========================================================================
+    <!-- Dark Mode Toggle Switch -->
+    <button id="btnThemeToggle" class="btn-action-icon touch-target" onclick="toggleTheme()"
+      title="Mode Gelap / Terang">
+      🌙
+    </button>
+
+    <!-- Audio Toggle -->
+    <button id="btnSoundToggle" class="btn-action-icon touch-target" onclick="toggleAudio()" title="Suara Feedback">
+      🔊
+    </button>
+
+    <!-- User Greeting & Logout -->
+    <div class="user-pill">
+      <div class="user-pill-info">
+        <div class="user-greeting">
+          <span>Halo, </span>
+          <span id="headerUserName">Pengguna</span>
+          <span>✨</span>
+        </div>
+        <div class="user-email-badge" id="headerUserEmail">user@email.com</div>
+      </div>
+      <button class="btn-logout touch-target" onclick="promptLogout()" title="Keluar Akun">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  </div>
+  </header>
+
+  <!-- ========================================================================
          TAB 1: BUDGET & RINGKASAN ANGGARAN (SRS F-05)
          ======================================================================== -->
-    <section id="tabBudget" class="content-tab">
-      
-      <!-- BUDGET SAFETY CAP CARD (SRS F-05) -->
-      <div class="budget-card">
-        <div class="budget-header">
-          <div>
-            <h3 class="serif-font" style="font-size: 1.15rem; color: var(--rose-contrast);">📊 Ringkasan Anggaran &amp; Safety Cap</h3>
-            <p style="font-size: 0.76rem; color: var(--text-subtle);">Batas Waspada &ge; 90% (Kuning) &amp; Melebihi &gt; 100% (Banner Merah)</p>
-          </div>
-          <button class="btn-edit-budget touch-target" onclick="openBudgetModal()">✏️ Ubah Batas</button>
-        </div>
+  <section id="tabBudget" class="content-tab">
 
-        <div class="metrics-grid">
+      <!-- HERO HEADER PENGENDALI ANGGARAN -->
+      <div class="budget-controller-hero">
+        <div class="controller-hero-top">
+          <div class="controller-title-wrap">
+            <div class="controller-icon-badge">🛡️</div>
+            <div>
+              <h2 class="serif-font" style="font-size: 1.25rem; color: var(--rose-contrast); margin: 0;">Pengendali Anggaran</h2>
+              <p style="font-size: 0.78rem; color: var(--text-subtle); margin: 2px 0 0;">Proteksi Saldo Dompet &amp; Ambang Waspada Realtime</p>
+            </div>
+          </div>
+          <button type="button" class="btn-primary touch-target" onclick="openBudgetModal()" style="padding: 6px 14px; font-size: 0.76rem; width: auto; margin: 0;">
+            ✏️ Atur Limit
+          </button>
+        </div>
+      </div>
+
+      <!-- DYNAMIC SAFETY STATUS BANNER -->
+      <div id="budgetTabStatusBox" class="planner-budget-alert safe" style="margin-bottom: 14px;">
+        <div class="planner-alert-left">
+          <span id="budgetTabStatusIcon" class="planner-alert-icon">💚</span>
+          <div>
+            <div id="budgetTabStatusTitle" class="planner-alert-title" style="font-size: 0.92rem;">Status Saldo: Terkendali</div>
+            <div id="budgetTabStatusDesc" class="planner-alert-desc" style="font-size: 0.75rem;">Pengeluaran belanja masih dalam batas aman anggaran Anda.</div>
+          </div>
+        </div>
+        <div id="budgetTabStatusBadge" class="planner-alert-badge badge-safe">Aman</div>
+      </div>
+
+      <!-- 4-METRIC SAFETY DASHBOARD -->
+      <div class="budget-card">
+        <div class="budget-metrics-4grid">
           <div class="metric-box">
             <span class="metric-label">Batas Saldo Dompet</span>
             <span class="metric-val budget" id="metricTotalBudget">Rp 100.000</span>
+            <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px;">Limit Saldo</span>
           </div>
           <div class="metric-box">
             <span class="metric-label">Total Belanja Saat Ini</span>
             <span class="metric-val spent" id="metricActualSpent">Rp 0</span>
+            <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px;">Keranjang Aktif</span>
           </div>
           <div class="metric-box">
             <span class="metric-label" id="labelRemainingBudget">Sisa Saldo Tunai</span>
             <span class="metric-val balance" id="metricRemainingBudget">Rp 100.000</span>
+            <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px;" id="sublabelRemaining">Saldo Tersisa</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Ambang Waspada (90%)</span>
+            <span class="metric-val" id="metricWarningThreshold" style="color: #D97706;">Rp 90.000</span>
+            <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px;">Batas Siaga</span>
           </div>
         </div>
 
-        <!-- Dynamic Safety Progress Bar -->
-        <div class="progress-section">
+        <!-- Dynamic Multi-Zone Progress Track -->
+        <div class="progress-section" style="margin-top: 14px;">
           <div class="progress-labels">
-            <span id="budgetProgressPercent">Pengeluaran: 0%</span>
+            <span id="budgetProgressPercent" style="font-weight: 700;">Pengeluaran: 0%</span>
             <span id="budgetSafetyBadge" class="progress-status-badge badge-safe">● Aman</span>
           </div>
-          <div class="progress-track">
-            <div id="budgetProgressBar" class="progress-fill" style="width: 0%;"></div>
+          <div class="progress-track" style="height: 12px; border-radius: var(--radius-pill); background: var(--surface-soft); position: relative; overflow: hidden;">
+            <div id="budgetProgressBar" class="progress-fill" style="width: 0%; height: 100%; transition: width 0.35s ease, background 0.35s ease;"></div>
           </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-faint); margin-top: 4px;">
-            <span>0%</span>
-            <span style="font-weight: 700; color: #D97706;">Batas Waspada &ge; 90%</span>
-            <span>100%</span>
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-faint); margin-top: 6px;">
+            <span>0% (Awal)</span>
+            <span style="font-weight: 700; color: #D97706;">⚠️ Ambang Waspada (90%)</span>
+            <span style="font-weight: 800; color: #DC2626;">🚨 Overbudget (> 100%)</span>
           </div>
         </div>
       </div>
 
-      <!-- Quick Preset & Cycle Config -->
+      <!-- INTERACTIVE BUDGET CONTROLLER CARD -->
       <div class="budget-card">
-        <h4 class="serif-font" style="font-size: 0.95rem; margin-bottom: 8px; color: var(--rose-contrast);">⚙️ Pengaturan Batas Saldo Dompet</h4>
-        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
-          <span style="font-size: 0.75rem; color: var(--text-subtle); font-weight: 600;">Pilih Cepat:</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div>
+            <h4 class="serif-font" style="font-size: 0.98rem; color: var(--rose-contrast); margin: 0;">🎛️ Kendali Batas Saldo Dompet</h4>
+            <p style="font-size: 0.74rem; color: var(--text-subtle); margin-top: 2px;">Ubah limit seketika dengan slider atau preset cepat</p>
+          </div>
+          <span id="budgetLiveValueDisplay" style="font-size: 1.05rem; font-weight: 900; color: var(--rose-contrast);">Rp 100.000</span>
+        </div>
+
+        <!-- Slider Range -->
+        <div style="margin: 14px 0 16px;">
+          <input 
+            type="range" 
+            id="budgetSlider" 
+            min="20000" 
+            max="500000" 
+            step="5000" 
+            value="100000" 
+            oninput="handleBudgetSliderChange(this.value)"
+            style="width: 100%; accent-color: var(--rose-contrast); cursor: pointer;"
+          >
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-faint); margin-top: 4px;">
+            <span>Rp 20.000</span>
+            <span>Rp 250.000</span>
+            <span>Rp 500.000</span>
+          </div>
+        </div>
+
+        <!-- Preset Chips -->
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px;">
+          <span style="font-size: 0.74rem; color: var(--text-subtle); font-weight: 700;">Pilih Cepat:</span>
           <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(50000)">50k</button>
-          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(100000)" style="font-weight: 800; border-color: var(--accent-blush);">100k (DT2)</button>
+          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(100000)" style="font-weight: 800; border-color: var(--accent-blush);">100k</button>
+          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(150000)">150k</button>
           <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(200000)">200k</button>
           <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(300000)">300k</button>
+          <button type="button" class="frequent-chip" onclick="setQuickBudgetAmount(500000)">500k</button>
         </div>
+
+        <!-- Direct Increment / Decrement Steppers -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px;">
+          <button type="button" class="frequent-chip" onclick="adjustBudgetByDelta(-50000)" style="justify-content: center; font-size: 0.72rem;">&minus; 50k</button>
+          <button type="button" class="frequent-chip" onclick="adjustBudgetByDelta(-10000)" style="justify-content: center; font-size: 0.72rem;">&minus; 10k</button>
+          <button type="button" class="frequent-chip" onclick="adjustBudgetByDelta(10000)" style="justify-content: center; font-size: 0.72rem;">+ 10k</button>
+          <button type="button" class="frequent-chip" onclick="adjustBudgetByDelta(50000)" style="justify-content: center; font-size: 0.72rem;">+ 50k</button>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
-            <label class="form-label">Siklus</label>
+            <label class="form-label">Siklus Anggaran</label>
             <select id="configBudgetPeriod" class="form-control" onchange="updateBudgetConfig()">
+              <option value="session">Per Sesi Belanja</option>
               <option value="weekly">Mingguan</option>
               <option value="monthly">Bulanan</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Batas Anggaran (Rp)</label>
+            <label class="form-label">Ketik Manual (Rp)</label>
             <input type="number" inputmode="numeric" id="configBudgetAmount" class="form-control" min="10000" step="5000" onchange="updateBudgetConfig()">
           </div>
         </div>
       </div>
 
-      <!-- Cloud Sync & Multi-Device Settings (SRS F-06B) -->
+      <!-- SMART SAFETY RULES CARD -->
       <div class="budget-card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <h4 class="serif-font" style="font-size: 0.95rem; color: var(--rose-contrast);">☁️ Sinkronisasi Multi-Device</h4>
-            <p style="font-size: 0.75rem; color: var(--text-subtle);">Firebase Firestore onSnapshot (&le; 2 detik)</p>
+        <h4 class="serif-font" style="font-size: 0.98rem; color: var(--rose-contrast); margin-bottom: 10px;">🛡️ Aturan Proteksi Pengendali</h4>
+        <div class="safety-rules-list" style="display: flex; flex-direction: column; gap: 10px; font-size: 0.78rem;">
+          <div class="safety-rule-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-soft); border-radius: var(--radius-md); border: 1px solid var(--pastel-light-1);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.1rem;">⚠️</span>
+              <div>
+                <div style="font-weight: 700; color: var(--text-headline);">Sensor Ambang Waspada (&ge; 90%)</div>
+                <div style="font-size: 0.7rem; color: var(--text-subtle);">Ubah bar &amp; kartu menjadi kuning saat belanja menyentuh 90%</div>
+              </div>
+            </div>
+            <span class="progress-status-badge badge-warning" style="font-size: 0.68rem; padding: 2px 8px;">Aktif</span>
           </div>
-          <button class="btn-edit-budget touch-target" onclick="openCloudSyncModal()">Konfigurasi</button>
+
+          <div class="safety-rule-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-soft); border-radius: var(--radius-md); border: 1px solid var(--pastel-light-1);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.1rem;">🚨</span>
+              <div>
+                <div style="font-weight: 700; color: var(--text-headline);">Sticky Banner Overbudget (&gt; 100%)</div>
+                <div style="font-size: 0.7rem; color: var(--text-subtle);">Kunci banner merah tegas di atas layar saat defisit</div>
+              </div>
+            </div>
+            <span class="progress-status-badge badge-danger" style="font-size: 0.68rem; padding: 2px 8px;">Aktif</span>
+          </div>
+
+          <div class="safety-rule-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-soft); border-radius: var(--radius-md); border: 1px solid var(--pastel-light-1);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.1rem;">🔊</span>
+              <div>
+                <div style="font-weight: 700; color: var(--text-headline);">Alarm Audio Sintetis Web Audio</div>
+                <div style="font-size: 0.7rem; color: var(--text-subtle);">Umpan balik audio lembut saat melewati ambang batas</div>
+              </div>
+            </div>
+            <span class="progress-status-badge badge-safe" style="font-size: 0.68rem; padding: 2px 8px;">Aktif</span>
+          </div>
         </div>
+
+        <button type="button" class="btn-demo-quick touch-target" onclick="switchTab('planner')" style="margin-top: 14px; width: 100%;">
+          <span>🛒 Buka Keranjang &amp; Sesuaikan Belanja</span>
+        </button>
       </div>
 
-      <!-- Category Breakdown -->
-      <div class="budget-card">
-        <h4 class="serif-font" style="font-size: 0.95rem; margin-bottom: 12px; color: var(--rose-contrast);">📈 Alokasi Belanja per Kategori</h4>
-        <div id="budgetCategoryBreakdown" style="display: flex; flex-direction: column; gap: 8px;"></div>
-      </div>
-
-      <!-- Receipts History Archive -->
-      <div class="budget-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h4 class="serif-font" style="font-size: 0.95rem; color: var(--rose-contrast);">📜 Riwayat Struk Belanja</h4>
-          <button class="btn-edit-budget" onclick="clearHistory()" style="font-size: 0.7rem; color: var(--status-danger);">Bersihkan</button>
+      <!-- Cloud Sync & Multi-Device Settings (SRS F-06B) -->
+    <div class="budget-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h4 class="serif-font" style="font-size: 0.95rem; color: var(--rose-contrast);">☁️ Sinkronisasi Multi-Device
+          </h4>
+          <p style="font-size: 0.75rem; color: var(--text-subtle);">Firebase Firestore onSnapshot (&le; 2 detik)</p>
         </div>
-        <div id="receiptHistoryContainer" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <button class="btn-edit-budget touch-target" onclick="openCloudSyncModal()">Konfigurasi</button>
       </div>
-    </section>
+    </div>
 
-    <!-- ========================================================================
+    <!-- Category Breakdown -->
+    <div class="budget-card">
+      <h4 class="serif-font" style="font-size: 0.95rem; margin-bottom: 12px; color: var(--rose-contrast);">📈 Alokasi
+        Belanja per Kategori</h4>
+      <div id="budgetCategoryBreakdown" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    </div>
+
+    <!-- Receipts History Archive -->
+    <div class="budget-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h4 class="serif-font" style="font-size: 0.95rem; color: var(--rose-contrast);">📜 Riwayat Struk Belanja</h4>
+        <button class="btn-edit-budget" onclick="clearHistory()"
+          style="font-size: 0.7rem; color: var(--status-danger);">Bersihkan</button>
+      </div>
+      <div id="receiptHistoryContainer" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
          TAB 2: SHOPPING PLANNER & LIST (ACTIVE BY DEFAULT)
          ======================================================================== -->
-    <main id="tabPlanner" class="content-tab active">
-      
-      <!-- SESI TOKO & TANGGAL (SRS F-01 & F-06B) -->
-      <div class="session-info-card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-size: 0.8rem; font-weight: 700; color: var(--rose-contrast); display: flex; align-items: center; gap: 6px;">
-            <span>🏬</span>
-            <span>Sesi Toko &amp; Tanggal Belanja</span>
-          </div>
-          <!-- Live Cloud Sync Status Pill -->
-          <div id="cloud-sync-status-pill" class="cloud-sync-pill" onclick="openCloudSyncModal()" title="Pengaturan Cloud Firestore Realtime Sync">
-            <span id="cloud-sync-dot" class="cloud-sync-dot"></span>
-            <span id="cloud-sync-text">Live Sync (onSnapshot)</span>
-          </div>
-        </div>
+  <main id="tabPlanner" class="content-tab active">
 
-        <div class="session-info-grid">
-          <div>
-            <label class="form-label">Toko Belanja *</label>
-            <select id="session-store-select" class="form-control" onchange="handleStoreChange(this.value)">
-              <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
-              <option value="Superindo - Kebon Jeruk">Superindo - Kebon Jeruk</option>
-              <option value="Grand Lucky - SCBD">Grand Lucky - SCBD</option>
-              <option value="Hypermart - Puri Mall">Hypermart - Puri Mall</option>
-              <option value="Alfamart / Indomaret">Alfamart / Indomaret</option>
-              <option value="custom">-- Toko Lainnya (Ketik Manual) --</option>
-            </select>
-            <input type="text" id="custom-store-input" onchange="handleStoreChange(this.value)" placeholder="Ketik nama toko..." class="form-control" style="display: none; margin-top: 6px;">
-          </div>
-          <div>
-            <label class="form-label">Tanggal Belanja *</label>
-            <input type="date" id="session-date-picker" class="form-control" onchange="handleDateChange(this.value)">
-          </div>
-        </div>
-      </div>
-
-      <!-- SINGLE SMART INPUT BAR -->
-      <div class="smart-input-card">
-        <div class="smart-input-header">
-          <div class="smart-input-title serif-font">
-            <span>✨</span>
-            <span>Tambah Cepat Kebutuhan</span>
-          </div>
-          <button type="button" class="btn-edit-budget" onclick="openDetailedItemModal()" style="font-size: 0.72rem; padding: 4px 10px;">
-            + Rinci (Diskon DT2)
-          </button>
-        </div>
-
-        <form id="smartInputForm" onsubmit="handleSmartInputSubmit(event)">
-          <div class="smart-input-wrap">
-            <input 
-              type="text" 
-              id="smartInputField" 
-              class="smart-input-field" 
-              placeholder="Contoh: Susu UHT 2 liter, Telur 1 kg, Tepung Terigu..." 
-              autocomplete="off" 
-              required
-            >
-            <button type="submit" class="btn-smart-submit touch-target" title="Tambahkan ke checklist">
-              ➔
-            </button>
-          </div>
-        </form>
-
-        <!-- Carousel "Frequently Bought" -->
-        <div class="frequently-bought-section">
-          <div class="frequently-bought-label">
-            <span>⭐</span>
-            <span>Frequently Bought:</span>
-          </div>
-          <div class="frequently-carousel">
-            <span class="frequent-chip" onclick="quickAddFavorite('Tepung Tapioka', 1, 'pack', 'Pantry', 12000)">🌾 Tepung Tapioka</span>
-            <span class="frequent-chip" onclick="quickAddFavorite('Tepung Terigu', 1, 'kg', 'Pantry', 13000)">🌾 Tepung Terigu</span>
-            <span class="frequent-chip" onclick="quickAddFavorite('Telur Ayam 1kg', 1, 'kg', 'Kebutuhan Pokok', 28000)">🥚 Telur</span>
-            <span class="frequent-chip" onclick="quickAddFavorite('Susu UHT 1L', 1, 'liter', 'Minuman', 19500)">🥛 Susu UHT</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Planner Actions Bar: Item Count, Share WhatsApp, & Manage Blacklist -->
-      <div class="planner-actions-bar">
-        <span style="font-size: 0.8rem; font-weight: 700; color: var(--rose-contrast);">
-          Daftar Belanja (<span id="unboughtItemCount">0</span>)
-        </span>
-        <div class="planner-actions-right">
-          <button class="btn-manage-blacklist touch-target" onclick="openBlacklistManagerModal()" title="Kelola daftar pantangan (Anti-List)">
-            <span>🛑</span>
-            <span>Anti-List</span>
-          </button>
-          <button class="btn-share-wa touch-target" onclick="shareToWhatsApp()" title="Kirim daftar kebutuhan belanja ke WhatsApp">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            </svg>
-            <span>Share ke WhatsApp</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Checklist Items Container (Sorted by Aisle in In-Store mode) -->
-      <div id="groceryItemsContainer" class="grocery-items-list">
-        <!-- Rendered via JS -->
-      </div>
-    </main>
-
-    <!-- ========================================================================
-         TAB 3: MY PANTRY & EXPIRY TRACKER
-         ======================================================================== -->
-    <section id="tabPantry" class="content-tab">
-      <div class="smart-input-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div>
-            <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">🧺 My Pantry Stock</h3>
-            <p style="font-size: 0.76rem; color: var(--text-subtle);">Pantau ketersediaan bahan di rumah dan estimasi masa simpan</p>
-          </div>
-          <button class="btn-edit-budget touch-target" onclick="openAddPantryModal()">+ Tambah Manual</button>
-        </div>
-
-        <div class="pantry-summary-grid">
-          <div class="metric-box">
-            <span class="metric-label">📦 Total Bahan</span>
-            <span class="metric-val" id="pantryTotalCount">0</span>
-          </div>
-          <div class="metric-box">
-            <span class="metric-label">⚠️ Segera Habis</span>
-            <span class="metric-val warning" id="pantryExpiringSoonCount">0</span>
-          </div>
-          <div class="metric-box">
-            <span class="metric-label">🟢 Stok Aman</span>
-            <span class="metric-val balance" id="pantryFreshCount">0</span>
-          </div>
-        </div>
-      </div>
-
-      <div id="pantryItemsContainer" style="display: flex; flex-direction: column; gap: 10px;">
-        <!-- Rendered via JS -->
-      </div>
-    </section>
-
-    <!-- ========================================================================
-         FLOATING ACTION BUTTON (FAB): IN-STORE MODE TOGGLE
-         ======================================================================== -->
-    <button id="fabStoreMode" class="fab-store-mode touch-target" onclick="toggleShoppingMode()" title="Beralih Mode Belanja Toko">
-      <span id="fabIcon" class="fab-icon">🛒</span>
-      <span id="fabText">Mulai Belanja</span>
-    </button>
-
-    <!-- ========================================================================
-         RUNNING CART BAR (IN-STORE MODE FLOATING BAR)
-         ======================================================================== -->
-    <div id="runningCartBar" class="running-cart-bar d-none">
-      <div class="running-cart-container">
+    <!-- DYNAMIC PLANNER BUDGET ALERT (CLICKABLE TO OPEN PENGENDALI ANGGARAN) -->
+    <div id="plannerBudgetAlert" class="planner-budget-alert safe" onclick="switchTab('budget')" style="cursor: pointer;" title="Buka Halaman Pengendali Anggaran">
+      <div class="planner-alert-left">
+        <span id="plannerAlertIcon" class="planner-alert-icon">💚</span>
         <div>
-          <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-subtle); text-transform: uppercase;">Keranjang Toko</div>
-          <div style="font-weight: 800; font-size: 1.05rem; color: var(--rose-contrast);">
-            <span id="runningCartTotalVal">Rp 0</span>
-            <span style="font-size: 0.72rem; color: var(--text-subtle); font-weight: 600;">(<span id="runningCartCheckedCount">0</span> item)</span>
+          <div id="plannerAlertTitle" class="planner-alert-title">Status Saldo: Terkendali</div>
+          <div id="plannerAlertDesc" class="planner-alert-desc">Total belanja: Rp 0 • Sisa saldo dompet: Rp 100.000</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <div id="plannerAlertBadge" class="planner-alert-badge badge-safe">0%</div>
+        <span style="font-size: 0.74rem; font-weight: 800; color: var(--rose-contrast); margin-left: 2px;">Atur ➔</span>
+      </div>
+    </div>
+
+    <!-- SESI TOKO & TANGGAL (SRS F-01 & F-06B) -->
+    <div class="session-info-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div
+          style="font-size: 0.8rem; font-weight: 700; color: var(--rose-contrast); display: flex; align-items: center; gap: 6px;">
+          <span>🏬</span>
+          <span>Sesi Toko &amp; Tanggal Belanja</span>
+        </div>
+        <!-- Live Cloud Sync Status Pill -->
+        <div id="cloud-sync-status-pill" class="cloud-sync-pill" onclick="openCloudSyncModal()"
+          title="Pengaturan Cloud Firestore Realtime Sync">
+          <span id="cloud-sync-dot" class="cloud-sync-dot"></span>
+          <span id="cloud-sync-text">Live Sync (onSnapshot)</span>
+        </div>
+      </div>
+
+      <div class="session-info-grid">
+        <div>
+          <label class="form-label">Toko Belanja *</label>
+          <select id="session-store-select" class="form-control" onchange="handleStoreChange(this.value)">
+            <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
+            <option value="Superindo - Kebon Jeruk">Superindo - Kebon Jeruk</option>
+            <option value="Grand Lucky - SCBD">Grand Lucky - SCBD</option>
+            <option value="Hypermart - Puri Mall">Hypermart - Puri Mall</option>
+            <option value="Alfamart / Indomaret">Alfamart / Indomaret</option>
+            <option value="custom">-- Toko Lainnya (Ketik Manual) --</option>
+          </select>
+          <input type="text" id="custom-store-input" onchange="handleStoreChange(this.value)"
+            placeholder="Ketik nama toko..." class="form-control" style="display: none; margin-top: 6px;">
+        </div>
+        <div>
+          <label class="form-label">Tanggal Belanja *</label>
+          <input type="date" id="session-date-picker" class="form-control" onchange="handleDateChange(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- SINGLE SMART INPUT BAR -->
+    <div class="smart-input-card">
+      <div class="smart-input-header">
+        <div class="smart-input-title serif-font">
+          <span>✨</span>
+          <span>Tambah Cepat Kebutuhan</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="btn-scan-header touch-target" onclick="openProductScannerModal()"
+            title="Scan Barcode Produk Supermarket">
+            📷 Scan Barcode
+          </button>
+          <button type="button" class="btn-edit-budget" onclick="openDetailedItemModal()"
+            style="font-size: 0.72rem; padding: 4px 10px;">
+            + Tambah Rinci
+          </button>
+        </div>
+      </div>
+
+      <form id="smartInputForm" onsubmit="handleSmartInputSubmit(event)">
+        <div class="smart-input-wrap">
+          <button type="button" class="btn-scanner-icon touch-target" onclick="openProductScannerModal()"
+            title="Scan Barcode Produk dengan Kamera">
+            📷
+          </button>
+          <input type="text" id="smartInputField" class="smart-input-field"
+            placeholder="Ketik kebutuhan belanja atau scan barcode..." autocomplete="off" required>
+          <button type="submit" class="btn-smart-submit touch-target" title="Tambahkan ke checklist">
+            ➔
+          </button>
+        </div>
+      </form>
+
+      <!-- Carousel "Frequently Bought" -->
+      <div class="frequently-bought-section">
+        <div class="frequently-bought-label">
+          <span>⭐</span>
+          <span>Frequently Bought:</span>
+        </div>
+        <div class="frequently-carousel">
+          <span class="frequent-chip" onclick="quickAddFavorite('Tepung Tapioka', 1, 'pack', 'Pantry', 12000)">🌾 Tepung
+            Tapioka</span>
+          <span class="frequent-chip" onclick="quickAddFavorite('Tepung Terigu', 1, 'kg', 'Pantry', 13000)">🌾 Tepung
+            Terigu</span>
+          <span class="frequent-chip" onclick="quickAddFavorite('Telur Ayam 1kg', 1, 'kg', 'Kebutuhan Pokok', 28000)">🥚
+            Telur</span>
+          <span class="frequent-chip" onclick="quickAddFavorite('Susu UHT 1L', 1, 'liter', 'Minuman', 19500)">🥛 Susu
+            UHT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IN-STORE ACTIVE COMPANION CARD (PANDUAN BELANJA DI SUPERMARKET) -->
+    <div id="inStoreCompanionCard" class="instore-companion-card" style="display: none;">
+      <div class="instore-companion-header">
+        <div class="instore-store-info">
+          <span class="instore-pulse-dot"></span>
+          <div>
+            <div style="font-size: 0.68rem; font-weight: 700; color: var(--rose-contrast); text-transform: uppercase; letter-spacing: 0.5px;">Mode Toko Aktif</div>
+            <div id="instoreCurrentStoreName" style="font-size: 0.86rem; font-weight: 800; color: var(--text-headline);">Lotte Mart Grocery - Puri Indah</div>
           </div>
         </div>
+        <button type="button" class="btn-edit-budget" onclick="toggleShoppingMode()" style="font-size: 0.68rem; padding: 3px 8px;">
+          Batal Toko
+        </button>
+      </div>
 
-        <button class="btn-finish-shopping touch-target" onclick="confirmFinishShopping()">
-          <span>Selesai Belanja 🛍️</span>
+      <div class="instore-progress-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.72rem; font-weight: 700; color: var(--text-subtle);">
+          <span id="instoreProgressRatio">0 / 0 barang di keranjang</span>
+          <span id="instoreProgressPercent">0%</span>
+        </div>
+        <div class="instore-progress-bar-bg">
+          <div id="instoreProgressBar" class="instore-progress-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="instore-quick-actions">
+        <button type="button" class="instore-action-btn primary touch-target" onclick="openProductScannerModal()">
+          <span>📷</span>
+          <span>Scan Barcode Produk</span>
+        </button>
+        <button type="button" class="instore-action-btn secondary touch-target" onclick="confirmFinishShopping()">
+          <span>🛍️</span>
+          <span>Selesai Belanja</span>
         </button>
       </div>
     </div>
 
-    <!-- ========================================================================
-         BOTTOM NAVIGATION BAR (ICON-ONLY WITH CLEAR VISUAL INDICATOR)
-         ======================================================================== -->
-    <nav class="bottom-nav-bar">
-      <div class="bottom-nav-container">
-        <!-- Tab 1: Budget (Icon-Only) -->
-        <button class="bottom-nav-item touch-target" onclick="switchTab('budget')" title="Ringkasan Anggaran" aria-label="Budget">
-          <span class="nav-icon-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-          </span>
-          <span class="nav-active-dot"></span>
+    <!-- Planner Actions Bar: Item Count, Share WhatsApp, & Manage Blacklist -->
+    <div class="planner-actions-bar">
+      <span style="font-size: 0.8rem; font-weight: 700; color: var(--rose-contrast);">
+        Daftar Belanja (<span id="unboughtItemCount">0</span>)
+      </span>
+      <div class="planner-actions-right">
+        <button class="btn-manage-blacklist touch-target" onclick="openBlacklistManagerModal()"
+          title="Kelola daftar pantangan (Anti-List)">
+          <span>🛑</span>
+          <span>Anti-List</span>
         </button>
-
-        <!-- Tab 2: Planner (Icon-Only, Active by default) -->
-        <button class="bottom-nav-item active touch-target" onclick="switchTab('planner')" title="Checklist Rencana Belanja" aria-label="Planner">
-          <span class="nav-icon-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 11l3 3L22 4"></path>
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-            </svg>
-          </span>
-          <span class="nav-active-dot"></span>
-        </button>
-
-        <!-- Tab 3: Pantry (Icon-Only) -->
-        <button class="bottom-nav-item touch-target" onclick="switchTab('pantry')" title="My Pantry &amp; Expiry Tracker" aria-label="Pantry">
-          <span class="nav-icon-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9H4v10z"></path>
-              <path d="M4 9l2-5h12l2 5"></path>
-              <line x1="10" y1="13" x2="14" y2="13"></line>
-            </svg>
-          </span>
-          <span class="nav-active-dot"></span>
+        <button class="btn-share-wa touch-target" onclick="shareToWhatsApp()"
+          title="Kirim daftar kebutuhan belanja ke WhatsApp">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+            </path>
+          </svg>
+          <span>Share ke WhatsApp</span>
         </button>
       </div>
-    </nav>
+    </div>
+
+    <!-- Checklist Items Container (Sorted by Aisle in In-Store mode) -->
+    <div id="groceryItemsContainer" class="grocery-items-list">
+      <!-- Rendered via JS -->
+    </div>
+  </main>
+
+  <!-- ========================================================================
+         TAB 3: MY PANTRY & EXPIRY TRACKER
+         ======================================================================== -->
+  <section id="tabPantry" class="content-tab">
+    <div class="smart-input-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">🧺 My Pantry Stock</h3>
+          <p style="font-size: 0.76rem; color: var(--text-subtle);">Pantau ketersediaan bahan di rumah dan estimasi masa
+            simpan</p>
+        </div>
+        <button class="btn-edit-budget touch-target" onclick="openAddPantryModal()">+ Tambah Manual</button>
+      </div>
+
+      <div class="pantry-summary-grid">
+        <div class="metric-box">
+          <span class="metric-label">📦 Total Bahan</span>
+          <span class="metric-val" id="pantryTotalCount">0</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-label">⚠️ Segera Habis</span>
+          <span class="metric-val warning" id="pantryExpiringSoonCount">0</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-label">🟢 Stok Aman</span>
+          <span class="metric-val balance" id="pantryFreshCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="pantryItemsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+      <!-- Rendered via JS -->
+    </div>
+  </section>
+
+  <!-- ========================================================================
+         FLOATING ACTION BUTTON (FAB): IN-STORE MODE TOGGLE
+         ======================================================================== -->
+  <button id="fabStoreMode" class="fab-store-mode touch-target" onclick="toggleShoppingMode()"
+    title="Beralih Mode Belanja Toko">
+    <span id="fabIcon" class="fab-icon">🛒</span>
+    <span id="fabText">Mulai Belanja</span>
+  </button>
+
+  <!-- ========================================================================
+         RUNNING CART BAR (IN-STORE MODE FLOATING BAR)
+         ======================================================================== -->
+  <div id="runningCartBar" class="running-cart-bar d-none">
+    <div class="running-cart-container">
+      <div class="running-cart-info">
+        <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.4px;">
+          Keranjang Toko
+        </div>
+        <div style="font-weight: 800; font-size: 1.05rem; color: var(--rose-contrast); display: flex; align-items: baseline; gap: 4px; line-height: 1.2;">
+          <span id="runningCartTotalVal">Rp 0</span>
+          <span style="font-size: 0.72rem; color: var(--text-subtle); font-weight: 600;">(<span
+              id="runningCartCheckedCount">0</span> item)</span>
+        </div>
+        <div id="runningCartRemainingBadge" style="font-size: 0.68rem; font-weight: 700; color: var(--status-safe-text); margin-top: 1px;">
+          Sisa Saldo: Rp 100.000
+        </div>
+      </div>
+
+      <div class="running-cart-actions">
+        <button type="button" class="btn-scan-instore touch-target" onclick="openProductScannerModal()" title="Scan Barcode Kemasan">
+          📷 Scan Barcode
+        </button>
+        <button type="button" class="btn-finish-shopping touch-target" onclick="confirmFinishShopping()" title="Selesai Belanja & Simpan Struk">
+          <span>Selesai 🛍️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+         BOTTOM NAVIGATION BAR (ICON-ONLY WITH CLEAR VISUAL INDICATOR)
+         ======================================================================== -->
+  <nav class="bottom-nav-bar">
+    <div class="bottom-nav-container">
+      <!-- Tab 1: Budget (Icon-Only) -->
+      <button class="bottom-nav-item touch-target" onclick="switchTab('budget')" title="Ringkasan Anggaran"
+        aria-label="Budget">
+        <span class="nav-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </span>
+        <span class="nav-active-dot"></span>
+      </button>
+
+      <!-- Tab 2: Planner (Icon-Only, Active by default) -->
+      <button class="bottom-nav-item active touch-target" onclick="switchTab('planner')"
+        title="Checklist Rencana Belanja" aria-label="Planner">
+        <span class="nav-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </span>
+        <span class="nav-active-dot"></span>
+      </button>
+
+      <!-- Tab 3: Pantry (Icon-Only) -->
+      <button class="bottom-nav-item touch-target" onclick="switchTab('pantry')" title="My Pantry &amp; Expiry Tracker"
+        aria-label="Pantry">
+        <span class="nav-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9H4v10z"></path>
+            <path d="M4 9l2-5h12l2 5"></path>
+            <line x1="10" y1="13" x2="14" y2="13"></line>
+          </svg>
+        </span>
+        <span class="nav-active-dot"></span>
+      </button>
+    </div>
+  </nav>
 
   </div>
 
@@ -460,8 +757,10 @@
     <div class="modal-card">
       <div class="modal-header">
         <div>
-          <h3 id="itemModalTitle" class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">Tambah / Ubah Item Belanja</h3>
-          <p style="font-size: 0.74rem; color: var(--text-subtle);">Lengkapi detail barang &amp; kalkulasi diskon kompound</p>
+          <h3 id="itemModalTitle" class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">Tambah /
+            Ubah Item Belanja</h3>
+          <p style="font-size: 0.74rem; color: var(--text-subtle);">Lengkapi detail barang &amp; kalkulasi diskon
+            kompound</p>
         </div>
         <button class="modal-close-btn touch-target" onclick="closeDetailedItemModal()">&times;</button>
       </div>
@@ -470,7 +769,8 @@
         <!-- Nama Barang (SRS F-01) -->
         <div class="form-group">
           <label class="form-label">Nama Barang *</label>
-          <input type="text" id="detailInputName" class="form-control" placeholder="Contoh: Minyak Goreng, Sabun Mandi" required list="detail-item-suggestions" oninput="handleDetailNameInput(this.value)">
+          <input type="text" id="detailInputName" class="form-control" placeholder="Contoh: Minyak Goreng, Sabun Mandi"
+            required list="detail-item-suggestions" oninput="handleDetailNameInput(this.value)">
           <datalist id="detail-item-suggestions">
             <option value="Minyak Goreng">
             <option value="Beras 5kg">
@@ -515,23 +815,31 @@
             <label class="form-label">Kuantitas (Qty) *</label>
             <div style="display: flex; align-items: center; gap: 4px;">
               <button type="button" class="stepper-btn" onclick="adjustDetailModalQty(-1)">&minus;</button>
-              <input type="number" inputmode="numeric" id="detailInputQty" class="form-control" min="1" value="1" required style="text-align: center; font-weight: 800;" oninput="updateDetailModalPreview()">
+              <input type="number" inputmode="numeric" id="detailInputQty" class="form-control" min="1" value="1"
+                required style="text-align: center; font-weight: 800;" oninput="updateDetailModalPreview()">
               <button type="button" class="stepper-btn" onclick="adjustDetailModalQty(1)">+</button>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Harga Satuan (Rp) *</label>
-            <input type="number" inputmode="numeric" id="detailInputPrice" class="form-control" min="1" step="100" placeholder="Contoh: 20000" required oninput="updateDetailModalPreview()">
+            <input type="number" inputmode="numeric" id="detailInputPrice" class="form-control" min="1" step="100"
+              placeholder="Contoh: 20000" required oninput="updateDetailModalPreview()">
           </div>
         </div>
 
-        <!-- Tipe Diskon (SRS F-03: Kompound Bertingkat & Tunggal) -->
+        <!-- Tipe Diskon (Kompound Bertingkat & Tunggal) -->
         <div class="form-group" style="margin-top: 6px;">
-          <label class="form-label">Tipe Diskon Promosi (SRS F-03)</label>
+          <label class="form-label">Tipe Diskon Promosi</label>
           <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
-            <button type="button" id="btnDiscountNone" class="frequent-chip" style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('none')">Tanpa Diskon</button>
-            <button type="button" id="btnDiscountSingle" class="frequent-chip" style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('single')">Tunggal (%)</button>
-            <button type="button" id="btnDiscountTiered" class="frequent-chip" style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('tiered')">Bertingkat (A+B)</button>
+            <button type="button" id="btnDiscountNone" class="frequent-chip"
+              style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('none')">Tanpa
+              Diskon</button>
+            <button type="button" id="btnDiscountSingle" class="frequent-chip"
+              style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('single')">Tunggal
+              (%)</button>
+            <button type="button" id="btnDiscountTiered" class="frequent-chip"
+              style="justify-content: center; font-weight: 700;" onclick="setDiscountTypeSelection('tiered')">Bertingkat
+              (A+B)</button>
           </div>
 
           <!-- Input Diskon Tunggal -->
@@ -542,7 +850,8 @@
               <button type="button" class="frequent-chip" onclick="setSinglePreset(25)">25%</button>
               <button type="button" class="frequent-chip" onclick="setSinglePreset(50)">50%</button>
             </div>
-            <input type="number" inputmode="numeric" id="inputDiscountSingle" class="form-control" min="0" max="100" placeholder="Besar diskon % (contoh: 25)" oninput="updateDetailModalPreview()">
+            <input type="number" inputmode="numeric" id="inputDiscountSingle" class="form-control" min="0" max="100"
+              placeholder="Besar diskon % (contoh: 25)" oninput="updateDetailModalPreview()">
           </div>
 
           <!-- Input Diskon Bertingkat Kompound -->
@@ -553,39 +862,47 @@
               <button type="button" class="frequent-chip" onclick="setTieredPreset('70+10')">70% + 10%</button>
               <button type="button" class="frequent-chip" onclick="setTieredPreset('30+20')">30% + 20%</button>
             </div>
-            <input type="text" id="inputDiscountTiered" class="form-control" placeholder="Contoh: 50+20 atau 50% + 20%" oninput="updateDetailModalPreview()">
+            <input type="text" id="inputDiscountTiered" class="form-control" placeholder="Contoh: 50+20 atau 50% + 20%"
+              oninput="updateDetailModalPreview()">
             <p style="font-size: 0.68rem; color: var(--text-faint); margin-top: 3px;">
               Formula Bertahap: <code>Harga &times; (1 - d1) &times; (1 - d2)</code> (Bukan 70%)
             </p>
           </div>
         </div>
 
-        <!-- Harga Acuan Bulan Lalu (SRS F-04) -->
+        <!-- Harga Acuan Bulan Lalu -->
         <div class="form-group">
           <label class="form-label">Harga Riwayat Toko Bulan Lalu (Rp)</label>
-          <input type="number" inputmode="numeric" id="detailInputHistoryPrice" class="form-control" placeholder="Acuan komparasi fluktuasi (SRS F-04)" oninput="updateDetailModalPreview()">
+          <input type="number" inputmode="numeric" id="detailInputHistoryPrice" class="form-control"
+            placeholder="Contoh: 18000 (Harga bulan lalu)" oninput="updateDetailModalPreview()">
         </div>
 
         <!-- Live Preview Perhitungan Realtime -->
-        <div style="background: var(--surface-soft); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 14px; border: 1px solid var(--pastel-light-1); font-size: 0.76rem;">
+        <div
+          style="background: var(--surface-soft); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 14px; border: 1px solid var(--pastel-light-1); font-size: 0.76rem;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span style="color: var(--text-subtle);">Harga Akhir Satuan:</span>
             <span id="previewFinalPriceText" style="font-weight: 800; color: var(--rose-contrast);">Rp 0</span>
           </div>
-          <div id="previewSavingsText" style="color: #059669; font-weight: 700; margin-bottom: 4px; display: none;"></div>
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--pastel-light-1); padding-top: 4px; margin-top: 4px;">
+          <div id="previewSavingsText" style="color: #059669; font-weight: 700; margin-bottom: 4px; display: none;">
+          </div>
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--pastel-light-1); padding-top: 4px; margin-top: 4px;">
             <span style="color: var(--text-subtle);">Komparasi vs Histori:</span>
             <span id="previewFluctBadge" class="fluctuation-badge fluctuation-stable">= Rp 0</span>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 6px; margin-top: 6px; font-weight: 800; font-size: 0.9rem;">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 6px; margin-top: 6px; font-weight: 800; font-size: 0.9rem;">
             <span>Subtotal Baris:</span>
             <span id="previewSubtotalText" style="color: var(--rose-contrast);">Rp 0</span>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
-          <button type="button" class="btn-demo-quick" style="margin-top: 0;" onclick="closeDetailedItemModal()">Batal</button>
-          <button type="submit" id="btnSubmitDetailedItem" class="btn-primary" style="margin-top: 0;">Tambahkan ke Daftar</button>
+          <button type="button" class="btn-demo-quick" style="margin-top: 0;"
+            onclick="closeDetailedItemModal()">Batal</button>
+          <button type="submit" id="btnSubmitDetailedItem" class="btn-primary" style="margin-top: 0;">Tambahkan ke
+            Daftar</button>
         </div>
       </form>
     </div>
@@ -597,14 +914,19 @@
   <div id="deleteConfirmModal" class="modal-backdrop">
     <div class="modal-card" style="text-align: center;">
       <div style="font-size: 36px; margin-bottom: 8px;">🗑️</div>
-      <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast); margin-bottom: 6px;">Hapus Item Belanja?</h3>
+      <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast); margin-bottom: 6px;">Hapus Item
+        Belanja?</h3>
       <p style="font-size: 0.8rem; color: var(--text-subtle); margin-bottom: 16px;">
-        Apakah Anda yakin ingin menghapus <strong id="deleteConfirmItemName" style="color: var(--rose-contrast);"></strong> dari daftar belanja? Tindakan ini otomatis memperbarui total bayar.
+        Apakah Anda yakin ingin menghapus <strong id="deleteConfirmItemName"
+          style="color: var(--rose-contrast);"></strong> dari daftar belanja? Tindakan ini otomatis memperbarui total
+        bayar.
       </p>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button type="button" class="btn-demo-quick" style="margin-top: 0;" onclick="closeDeleteConfirmModal()">Batal</button>
-        <button type="button" class="btn-primary" style="margin-top: 0; background: var(--status-danger);" onclick="executeDeleteItem()">Ya, Hapus</button>
+        <button type="button" class="btn-demo-quick" style="margin-top: 0;"
+          onclick="closeDeleteConfirmModal()">Batal</button>
+        <button type="button" class="btn-primary" style="margin-top: 0; background: var(--status-danger);"
+          onclick="executeDeleteItem()">Ya, Hapus</button>
       </div>
     </div>
   </div>
@@ -625,7 +947,8 @@
           Are you sure? You usually avoid this item.
         </p>
         <p style="font-size: 0.8rem; color: var(--text-subtle);">
-          Bahan <strong id="blacklistWarningItemName" style="color: var(--rose-contrast);">"Item"</strong> terdaftar di daftar pantangan atau bahan yang biasanya kamu hindari.
+          Bahan <strong id="blacklistWarningItemName" style="color: var(--rose-contrast);">"Item"</strong> terdaftar di
+          daftar pantangan atau bahan yang biasanya kamu hindari.
         </p>
       </div>
 
@@ -633,7 +956,8 @@
         <button type="button" class="btn-demo-quick" style="margin-top: 0;" onclick="cancelBlacklistAdd()">
           Batal Beli
         </button>
-        <button type="button" class="btn-primary" style="margin-top: 0; background: var(--rose-contrast);" onclick="proceedBlacklistAdd()">
+        <button type="button" class="btn-primary" style="margin-top: 0; background: var(--rose-contrast);"
+          onclick="proceedBlacklistAdd()">
           Tetap Tambahkan
         </button>
       </div>
@@ -655,11 +979,14 @@
       </p>
 
       <form onsubmit="handleAddNewBlacklistItem(event)" style="display: flex; gap: 8px; margin-bottom: 14px;">
-        <input type="text" id="newBlacklistItemInput" class="form-control" placeholder="Contoh: Pare, Jengkol, Labu Siam" style="flex: 1;" required>
-        <button type="submit" class="btn-primary touch-target" style="width: auto; margin-top: 0; padding: 0 16px;">+ Tambah</button>
+        <input type="text" id="newBlacklistItemInput" class="form-control"
+          placeholder="Contoh: Pare, Jengkol, Labu Siam" style="flex: 1;" required>
+        <button type="submit" class="btn-primary touch-target" style="width: auto; margin-top: 0; padding: 0 16px;">+
+          Tambah</button>
       </form>
 
-      <div id="blacklistItemsList" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 200px; overflow-y: auto;">
+      <div id="blacklistItemsList"
+        style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 200px; overflow-y: auto;">
         <!-- Rendered via JS -->
       </div>
     </div>
@@ -672,8 +999,10 @@
     <div class="modal-card">
       <div class="modal-header">
         <div>
-          <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">☁️ Sinkronisasi Cloud Firestore</h3>
-          <p style="font-size: 0.74rem; color: var(--text-subtle);">Listener onSnapshot() Realtime Multi-Device (&le; 2 detik)</p>
+          <h3 class="serif-font" style="font-size: 1.1rem; color: var(--rose-contrast);">☁️ Sinkronisasi Cloud Firestore
+          </h3>
+          <p style="font-size: 0.74rem; color: var(--text-subtle);">Listener onSnapshot() Realtime Multi-Device (&le; 2
+            detik)</p>
         </div>
         <button class="modal-close-btn touch-target" onclick="closeCloudSyncModal()">&times;</button>
       </div>
@@ -683,8 +1012,10 @@
           <label class="form-label">ID Sesi Belanja (Room Session)</label>
           <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
             <span style="font-size: 0.72rem; color: var(--text-subtle);">Preset:</span>
-            <button type="button" class="frequent-chip" onclick="document.getElementById('cloudSessionInput').value='lotte-mart-puri-01'">lotte-mart-puri-01</button>
-            <button type="button" class="frequent-chip" onclick="document.getElementById('cloudSessionInput').value='keluarga-belanja'">keluarga-belanja</button>
+            <button type="button" class="frequent-chip"
+              onclick="document.getElementById('cloudSessionInput').value='lotte-mart-puri-01'">lotte-mart-puri-01</button>
+            <button type="button" class="frequent-chip"
+              onclick="document.getElementById('cloudSessionInput').value='keluarga-belanja'">keluarga-belanja</button>
           </div>
           <input type="text" id="cloudSessionInput" class="form-control" value="lotte-mart-puri-01" required>
           <p style="font-size: 0.68rem; color: var(--text-faint); margin-top: 3px;">
@@ -692,16 +1023,21 @@
           </p>
         </div>
 
-        <details style="background: var(--surface-soft); padding: 8px 10px; border-radius: var(--radius-md); font-size: 0.74rem; margin-bottom: 12px; border: 1px solid var(--pastel-light-1);">
+        <details
+          style="background: var(--surface-soft); padding: 8px 10px; border-radius: var(--radius-md); font-size: 0.74rem; margin-bottom: 12px; border: 1px solid var(--pastel-light-1);">
           <summary style="font-weight: 700; cursor: pointer;">Pengaturan Custom Firebase JSON (Opsional)</summary>
           <div style="margin-top: 6px;">
-            <p style="font-size: 0.68rem; color: var(--text-subtle); margin-bottom: 4px;">Secara default, aplikasi menggunakan Firebase Demo &amp; BroadcastChannel multi-tab.</p>
-            <textarea id="customFirebaseJson" rows="3" class="form-control" placeholder='{"apiKey":"...","projectId":"..."}' style="font-family: monospace; font-size: 0.7rem;"></textarea>
+            <p style="font-size: 0.68rem; color: var(--text-subtle); margin-bottom: 4px;">Secara default, aplikasi
+              menggunakan Firebase Demo &amp; BroadcastChannel multi-tab.</p>
+            <textarea id="customFirebaseJson" rows="3" class="form-control"
+              placeholder='{"apiKey":"...","projectId":"..."}'
+              style="font-family: monospace; font-size: 0.7rem;"></textarea>
           </div>
         </details>
 
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
-          <button type="button" class="btn-demo-quick" style="margin-top: 0;" onclick="closeCloudSyncModal()">Batal</button>
+          <button type="button" class="btn-demo-quick" style="margin-top: 0;"
+            onclick="closeCloudSyncModal()">Batal</button>
           <button type="submit" class="btn-primary" style="margin-top: 0;">Terapkan &amp; Sinkronkan</button>
         </div>
       </form>
@@ -721,13 +1057,15 @@
       <form onsubmit="handleManualPantrySubmit(event)">
         <div class="form-group">
           <label class="form-label">Nama Bahan / Barang</label>
-          <input type="text" id="pantryInputName" class="form-control" placeholder="Contoh: Keju Cheddar, Tomat..." required>
+          <input type="text" id="pantryInputName" class="form-control" placeholder="Contoh: Keju Cheddar, Tomat..."
+            required>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label class="form-label">Jumlah (Qty)</label>
-            <input type="number" inputmode="numeric" id="pantryInputQty" class="form-control" value="1" min="1" required>
+            <input type="number" inputmode="numeric" id="pantryInputQty" class="form-control" value="1" min="1"
+              required>
           </div>
           <div class="form-group">
             <label class="form-label">Satuan</label>
@@ -753,7 +1091,7 @@
   <div id="budgetModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="serif-font" style="font-size: 1.05rem; color: var(--rose-contrast);">💰 Atur Batas Saldo Dompet (SRS F-05)</h3>
+        <h3 class="serif-font" style="font-size: 1.05rem; color: var(--rose-contrast);">💰 Atur Batas Saldo Dompet</h3>
         <button class="modal-close-btn touch-target" onclick="closeBudgetModal()">&times;</button>
       </div>
 
@@ -768,13 +1106,174 @@
 
         <div class="form-group" style="margin-bottom: 16px;">
           <label class="form-label">Nominal Batas Anggaran (Rp)</label>
-          <input type="number" inputmode="numeric" id="modalBudgetAmount" class="form-control" min="10000" step="5000" required>
+          <input type="number" inputmode="numeric" id="modalBudgetAmount" class="form-control" min="10000" step="5000"
+            required>
         </div>
 
         <button type="submit" class="btn-primary">
           <span>Terapkan Anggaran</span>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: PRODUCT BARCODE SCANNER (SCAN PRODUK SUPERMARKET)
+       ======================================================================== -->
+  <div id="productScannerModal" class="modal-backdrop">
+    <div class="modal-card scanner-modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 class="serif-font" style="font-size: 1.15rem; color: var(--rose-contrast); margin: 0; display: flex; align-items: center; gap: 6px;">
+            <span>📷</span>
+            <span>Scan Barcode Produk</span>
+          </h3>
+          <p style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0;">
+            Arahkan kamera ke barcode kemasan barang supermarket
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn touch-target" onclick="closeProductScannerModal()">&times;</button>
+      </div>
+
+      <!-- CAMERA VIEWFINDER -->
+      <div class="scanner-viewport-wrap">
+        <div id="scannerViewport" class="scanner-viewport">
+          <video id="scannerVideo" playsinline autoplay muted></video>
+          <canvas id="scannerCanvas" style="display: none;"></canvas>
+
+          <!-- Animated Laser Scan Beam -->
+          <div class="scanner-laser-beam"></div>
+
+          <!-- 4 Corner Target Reticles -->
+          <div class="scanner-reticle reticle-tl"></div>
+          <div class="scanner-reticle reticle-tr"></div>
+          <div class="scanner-reticle reticle-bl"></div>
+          <div class="scanner-reticle reticle-br"></div>
+
+          <!-- Viewfinder Camera Controls -->
+          <div class="scanner-controls-overlay">
+            <button type="button" id="btnScannerTorch" class="scanner-ctl-btn touch-target" onclick="toggleScannerTorch()" title="Lampu Flash" style="display: none;">
+              🔦
+            </button>
+            <button type="button" id="btnScannerFlip" class="scanner-ctl-btn touch-target" onclick="switchScannerCamera()" title="Balik Kamera">
+              🔄
+            </button>
+          </div>
+
+          <!-- Camera status placeholder / note -->
+          <div id="scannerCameraNotice" class="scanner-camera-notice" style="display: none;">
+            <span>📷</span>
+            <span id="scannerNoticeText">Memuat kamera...</span>
+          </div>
+        </div>
+
+        <div id="scannerStatusText" class="scanner-status-text">
+          🔍 Mencari barcode produk otomatis (EAN-13 / UPC)...
+        </div>
+      </div>
+
+      <!-- SCANNED PRODUCT RESULT CARD (Revealed when barcode recognized) -->
+      <div id="scannerResultCard" class="scanned-result-card" style="display: none;">
+        <div class="scanned-result-header">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px;">
+              <span id="scannedItemBarcodeBadge" class="scanned-barcode-pill">8992753210118</span>
+              <span id="scannedItemCategoryBadge" class="frequent-chip" style="font-size: 0.68rem; padding: 1px 6px;">Minyak</span>
+              <span id="scannedItemInCartBadge" class="scanned-incart-badge" style="display: none;">Sudah di Keranjang (Qty: 1)</span>
+            </div>
+            <h4 id="scannedItemName" class="scanned-item-title">Minyak Goreng Tropical 2L</h4>
+          </div>
+        </div>
+
+        <div class="scanned-result-body" style="margin-top: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+            <div>
+              <span style="font-size: 0.72rem; color: var(--text-faint);">Harga Satuan:</span>
+              <div id="scannedItemPriceText" style="font-size: 1.1rem; font-weight: 800; color: var(--rose-contrast);">Rp 37.500</div>
+            </div>
+            <div id="scannedItemFluctBadge" class="fluct-badge fluct-same">= Stabil</div>
+          </div>
+
+          <!-- Scanned Qty Adjuster -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--surface-soft); border-radius: 12px; margin-bottom: 10px;">
+            <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-main);">Jumlah yang diambil:</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button type="button" class="stepper-btn touch-target" onclick="adjustScannedQty(-1)">&minus;</button>
+              <input type="number" inputmode="numeric" id="scannedItemQtyInput" class="form-control" min="1" value="1" style="width: 50px; text-align: center; font-weight: 800; padding: 4px;" oninput="updateScannedPreview()">
+              <button type="button" class="stepper-btn touch-target" onclick="adjustScannedQty(1)">+</button>
+            </div>
+          </div>
+
+          <!-- Impact on Budget Calculation -->
+          <div class="scanned-budget-impact">
+            <div style="display: flex; justify-content: space-between; font-size: 0.76rem;">
+              <span style="color: var(--text-subtle);">Subtotal Tambahan:</span>
+              <strong id="scannedSubtotalPreview" style="color: var(--rose-contrast);">Rp 37.500</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.74rem; margin-top: 4px;">
+              <span style="color: var(--text-subtle);">Estimasi Sisa Saldo:</span>
+              <strong id="scannedRemainingPreview" style="color: var(--status-safe-text);">Rp 62.500</strong>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+            <button type="button" class="btn-demo-quick" style="margin: 0; min-height: 44px;" onclick="resetScannerForNext()">
+              🔄 Scan Lain
+            </button>
+            <button type="button" id="btnConfirmScannedAdd" class="btn-primary" style="margin: 0; min-height: 44px;" onclick="confirmAddScannedProduct()">
+              ✅ Masukkan Keranjang
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUPERMARKET BARCODE SIMULATOR TRAY (PENGUJIAN & FALLBACK) -->
+      <div class="scanner-presets-section">
+        <div class="scanner-presets-title">
+          <span>⚡</span>
+          <span>Tes Barcode Cepat (Simulasi Supermarket):</span>
+        </div>
+        <div class="scanner-presets-chips">
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8992753210118')">
+            🧴 Minyak Tropical (Rp 37.500)
+          </button>
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8998866200234')">
+            🥛 Ultra Milk 1L (Rp 20.500)
+          </button>
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8999999001235')">
+            🍜 Indomie Goreng (Rp 3.100)
+          </button>
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8991002101340')">
+            🧼 Sabun Lifebuoy (Rp 24.500)
+          </button>
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8993005120015')">
+            🌾 Beras Ramos 5kg (Rp 74.000)
+          </button>
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8992388102441')">
+            🥚 Telur Pack 10 (Rp 29.500)
+          </button>
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8996001301018')">
+            ☕ Nescafe Classic (Rp 42.000)
+          </button>
+          <button type="button" class="barcode-preset-chip touch-target" onclick="simulateBarcodeScan('8992745330112')">
+            🧂 Royco Sapi 230g (Rp 11.500)
+          </button>
+        </div>
+      </div>
+
+      <!-- MANUAL BARCODE / CODE SEARCH INPUT -->
+      <div class="scanner-manual-section">
+        <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 5px;">
+          Atau Masukkan Nomor Barcode / Nama Barang:
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="manualBarcodeInput" class="form-control" placeholder="Contoh: 8992753210118 atau Susu Segar" style="font-size: 0.82rem;" onkeydown="if(event.key==='Enter')handleManualBarcodeSearch()">
+          <button type="button" class="btn-primary touch-target" onclick="handleManualBarcodeSearch()" style="width: auto; padding: 6px 14px; font-size: 0.8rem; margin: 0; white-space: nowrap;">
+            Cari / Scan
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -795,4 +1294,5 @@
     }
   </script>
 </body>
+
 </html>

@@ -2,16 +2,17 @@
  * Service Worker for Smart Grocery Tracker & Budget Planner
  * Production-ready offline caching for supermarket in-store experience
  */
-const CACHE_NAME = 'sgt-cache-v4';
+const CACHE_NAME = 'sgt-cache-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './css/app.css',
   './js/app.js',
+  './js/firebase-config.js',
   './icons/icon.svg',
-  'https://cdn.tailwindcss.com',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
 ];
 

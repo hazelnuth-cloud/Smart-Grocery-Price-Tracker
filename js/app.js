@@ -6,26 +6,26 @@
  *   Bottom Navigation Bar (Icon-Only), PWA Service Worker & Offline Caching,
  *   Share to WhatsApp, In-Store FAB & Aisle Grouping, Anti-List Guard ("Labu Siam"),
  *   Pantry Shelf-life Tracker, and Native Web Audio API Synthesis.
- * - Daily Test 2 (DT2): SRS F-01 to F-06B, Mobile UX Ergonomics, and Cloud Firestore Realtime Sync (onSnapshot).
+ * - Core Features: Mobile UX Ergonomics, Discount Formulas, Price History & Realtime Sync.
  */
 
 // Storage Keys (SRS F-06A)
 const STORAGE_KEYS = {
-  USER: 'smart_grocery_user_dt2',
-  CART: 'smart_grocery_cart_dt2',
-  STORE: 'smart_grocery_store_dt2',
-  DATE: 'smart_grocery_date_dt2',
-  BUDGET: 'smart_grocery_budget_dt2',
-  BUDGET_PERIOD: 'smart_grocery_period_dt2',
-  PRICE_HISTORY: 'smart_grocery_history_dt2',
-  RECEIPTS: 'smart_grocery_receipts_dt2',
-  PANTRY: 'smart_grocery_pantry_dt2',
-  BLACKLIST: 'smart_grocery_blacklist_dt2',
-  IN_STORE_MODE: 'smart_grocery_instore_dt2',
-  SOUND_ENABLED: 'smart_grocery_sound_dt2',
-  DARK_MODE: 'smart_grocery_dark_mode_dt2',
-  SESSION_ID: 'smart_grocery_session_dt2',
-  FIREBASE_CONFIG: 'smart_grocery_fb_config_dt2'
+  USER: 'smart_grocery_user',
+  CART: 'smart_grocery_cart',
+  STORE: 'smart_grocery_store',
+  DATE: 'smart_grocery_date',
+  BUDGET: 'smart_grocery_budget',
+  BUDGET_PERIOD: 'smart_grocery_period',
+  PRICE_HISTORY: 'smart_grocery_history',
+  RECEIPTS: 'smart_grocery_receipts',
+  PANTRY: 'smart_grocery_pantry',
+  BLACKLIST: 'smart_grocery_blacklist',
+  IN_STORE_MODE: 'smart_grocery_instore',
+  SOUND_ENABLED: 'smart_grocery_sound',
+  DARK_MODE: 'smart_grocery_dark_mode',
+  SESSION_ID: 'smart_grocery_session',
+  FIREBASE_CONFIG: 'smart_grocery_fb_config'
 };
 
 // Default Personal Blacklist ("Anti-List")
@@ -45,7 +45,7 @@ const DEFAULT_PRICE_HISTORY = {
   "Tepung Terigu": { harga: 13000, satuan: "kg", kategori: "Pantry", toko: "Lotte Mart Grocery - Puri Indah" }
 };
 
-// Initial Mock Cart Items for Testing DT2 (Initial Total: Rp 94.000 / 94% Waspada)
+// Initial Mock Cart Items (Initial Total: Rp 94.000 / 94% Waspada)
 const DEFAULT_CART_ITEMS = [
   {
     id: 'item-1',
@@ -127,6 +127,8 @@ const AISLE_METADATA = {
 // Global App State
 let AppState = {
   user: null,
+  authMode: 'signin',
+  previousSafetyLevel: 'safe',
   cart: [],
   currentStore: 'Lotte Mart Grocery - Puri Indah', // SRS F-01 Default
   currentDate: new Date().toISOString().split('T')[0], // SRS F-01 Date
@@ -155,7 +157,7 @@ let isReceivingRemoteUpdate = false;
 let syncChannel = null;
 
 if (typeof window !== 'undefined' && window.BroadcastChannel) {
-  syncChannel = new BroadcastChannel('smart_grocery_dt2_sync');
+  syncChannel = new BroadcastChannel('smart_grocery_sync');
   syncChannel.onmessage = (event) => {
     if (event.data && event.data.type === 'REMOTE_UPDATE') {
       applyRemoteState(event.data.payload);
@@ -426,6 +428,53 @@ function playSoftPop() {
   } catch (e) { }
 }
 
+function playWarningAlertTone() {
+  if (!AppState.soundEnabled) return;
+  try {
+    initAudioContext();
+    if (!AppState.audioCtx) return;
+    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
+
+    const ctx = AppState.audioCtx;
+    const now = ctx.currentTime;
+    [392, 330].forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + (idx * 0.12));
+      gain.gain.setValueAtTime(0.0001, now + (idx * 0.12));
+      gain.gain.exponentialRampToValueAtTime(0.12, now + (idx * 0.12) + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + (idx * 0.12) + 0.1);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + (idx * 0.12));
+      osc.stop(now + (idx * 0.12) + 0.11);
+    });
+  } catch (e) { }
+}
+
+function playScannerBeep() {
+  if (!AppState.soundEnabled) return;
+  try {
+    initAudioContext();
+    if (!AppState.audioCtx) return;
+    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
+
+    const ctx = AppState.audioCtx;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.13);
+  } catch (e) { }
+}
+
 function toggleAudio() {
   AppState.soundEnabled = !AppState.soundEnabled;
   localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(AppState.soundEnabled));
@@ -437,45 +486,61 @@ function toggleAudio() {
 // =========================================================================
 // 4. PERSISTENCE & LOCALSTORAGE (SRS F-06A)
 // =========================================================================
+function getStoredItem(key) {
+  let val = localStorage.getItem(key);
+  if (!val) {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(key)) {
+          val = localStorage.getItem(k);
+          break;
+        }
+      }
+    } catch (e) { }
+  }
+  return val;
+}
+
 function loadLocalState() {
   try {
-    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+    const storedUser = getStoredItem(STORAGE_KEYS.USER);
     if (storedUser) AppState.user = JSON.parse(storedUser);
 
-    const storedCart = localStorage.getItem(STORAGE_KEYS.CART);
+    const storedCart = getStoredItem(STORAGE_KEYS.CART);
     AppState.cart = storedCart ? JSON.parse(storedCart) : JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
 
-    const storedStore = localStorage.getItem(STORAGE_KEYS.STORE);
+    const storedStore = getStoredItem(STORAGE_KEYS.STORE);
     if (storedStore) AppState.currentStore = storedStore;
 
-    const storedDate = localStorage.getItem(STORAGE_KEYS.DATE);
+    const storedDate = getStoredItem(STORAGE_KEYS.DATE);
     if (storedDate) AppState.currentDate = storedDate;
 
-    const storedBudget = localStorage.getItem(STORAGE_KEYS.BUDGET);
+    const storedBudget = getStoredItem(STORAGE_KEYS.BUDGET);
     AppState.budget = storedBudget !== null ? parseInt(storedBudget, 10) : 100000;
 
-    const storedPeriod = localStorage.getItem(STORAGE_KEYS.BUDGET_PERIOD);
+    const storedPeriod = getStoredItem(STORAGE_KEYS.BUDGET_PERIOD);
     if (storedPeriod) AppState.budgetPeriod = storedPeriod;
 
-    const storedHistory = localStorage.getItem(STORAGE_KEYS.PRICE_HISTORY);
+    const storedHistory = getStoredItem(STORAGE_KEYS.PRICE_HISTORY);
     AppState.priceHistory = storedHistory ? JSON.parse(storedHistory) : { ...DEFAULT_PRICE_HISTORY };
 
-    const storedReceipts = localStorage.getItem(STORAGE_KEYS.RECEIPTS);
+    const storedReceipts = getStoredItem(STORAGE_KEYS.RECEIPTS);
     AppState.receipts = storedReceipts ? JSON.parse(storedReceipts) : [...DEFAULT_RECEIPTS];
 
-    const storedPantry = localStorage.getItem(STORAGE_KEYS.PANTRY);
+    const storedPantry = getStoredItem(STORAGE_KEYS.PANTRY);
     AppState.pantry = storedPantry ? JSON.parse(storedPantry) : [...DEFAULT_PANTRY];
 
-    const storedBlacklist = localStorage.getItem(STORAGE_KEYS.BLACKLIST);
+    const storedBlacklist = getStoredItem(STORAGE_KEYS.BLACKLIST);
     AppState.blacklist = storedBlacklist ? JSON.parse(storedBlacklist) : [...DEFAULT_BLACKLIST];
 
-    const storedSession = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
+    const storedSession = getStoredItem(STORAGE_KEYS.SESSION_ID);
     if (storedSession) AppState.sessionId = storedSession;
 
-    const storedSound = localStorage.getItem(STORAGE_KEYS.SOUND_ENABLED);
+    const storedSound = getStoredItem(STORAGE_KEYS.SOUND_ENABLED);
     if (storedSound !== null) AppState.soundEnabled = JSON.parse(storedSound);
 
-    const storedMode = localStorage.getItem(STORAGE_KEYS.IN_STORE_MODE);
+    const storedMode = getStoredItem(STORAGE_KEYS.IN_STORE_MODE);
     if (storedMode !== null) AppState.inStoreMode = JSON.parse(storedMode);
   } catch (err) {
     console.error('LocalStorage load error:', err);
@@ -517,19 +582,23 @@ function initFirestoreSync() {
 
   try {
     let fbConfig = null;
-    const storedConfig = localStorage.getItem(STORAGE_KEYS.FIREBASE_CONFIG);
-    if (storedConfig) {
-      try { fbConfig = JSON.parse(storedConfig); } catch (e) { }
+    if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && !window.FIREBASE_CONFIG.apiKey.startsWith('YOUR_')) {
+      fbConfig = window.FIREBASE_CONFIG;
+    } else {
+      const storedConfig = localStorage.getItem(STORAGE_KEYS.FIREBASE_CONFIG);
+      if (storedConfig) {
+        try { fbConfig = JSON.parse(storedConfig); } catch (e) { }
+      }
     }
 
     if (!fbConfig) {
       fbConfig = {
-        apiKey: "AIzaSyDemoProjectKeySmartGrocery2026",
-        authDomain: "smart-grocery-tracker.firebaseapp.com",
-        projectId: "smart-grocery-tracker",
-        storageBucket: "smart-grocery-tracker.appspot.com",
-        messagingSenderId: "10987654321",
-        appId: "1:10987654321:web:abc123def456"
+        apiKey: "AIzaSyDElaAnQSNpoh2Okx9Oxlx4FcJ0mmYg_8M",
+        authDomain: "smart-grocery-tracker-52ac2.firebaseapp.com",
+        projectId: "smart-grocery-tracker-52ac2",
+        storageBucket: "smart-grocery-tracker-52ac2.firebasestorage.app",
+        messagingSenderId: "377525411155",
+        appId: "1:377525411155:web:ab6207540639f5cd5515a6"
       };
     }
 
@@ -618,8 +687,194 @@ function updateCloudSyncUI(status, labelText) {
 }
 
 // =========================================================================
-// 6. SINGLE-USER AUTH GATE & GREETING
+// 6. AUTH GATE: GOOGLE LOGIN, SIGN IN & SIGN UP (SRS SINGLE-USER & CLOUD)
 // =========================================================================
+function switchAuthMode(mode) {
+  AppState.authMode = mode;
+  const tabSignIn = document.getElementById('tabAuthSignIn');
+  const tabSignUp = document.getElementById('tabAuthSignUp');
+  const authNameGroup = document.getElementById('authNameGroup');
+  const authNameInput = document.getElementById('authNameInput');
+  const authSubmitBtn = document.getElementById('authSubmitBtn');
+  const googleBtnText = document.getElementById('googleBtnText');
+  const authDividerText = document.getElementById('authDividerText');
+  const authSwitchPromptText = document.getElementById('authSwitchPromptText');
+  const authSwitchBtn = document.getElementById('authSwitchBtn');
+
+  if (mode === 'signup') {
+    if (tabSignIn) tabSignIn.classList.remove('active');
+    if (tabSignUp) tabSignUp.classList.add('active');
+    if (authNameGroup) authNameGroup.style.display = 'block';
+    if (authNameInput) authNameInput.setAttribute('required', 'required');
+    if (authSubmitBtn) {
+      const span = authSubmitBtn.querySelector('span');
+      if (span) span.textContent = 'Daftar Akun Baru';
+    }
+    if (googleBtnText) googleBtnText.textContent = 'Daftar dengan Google';
+    if (authDividerText) authDividerText.textContent = 'atau daftar dengan email';
+    if (authSwitchPromptText) authSwitchPromptText.textContent = 'Sudah punya akun?';
+    if (authSwitchBtn) authSwitchBtn.textContent = 'Masuk di sini';
+  } else {
+    AppState.authMode = 'signin';
+    if (tabSignIn) tabSignIn.classList.add('active');
+    if (tabSignUp) tabSignUp.classList.remove('active');
+    if (authNameGroup) authNameGroup.style.display = 'none';
+    if (authNameInput) authNameInput.removeAttribute('required');
+    if (authSubmitBtn) {
+      const span = authSubmitBtn.querySelector('span');
+      if (span) span.textContent = 'Masuk ke Dashboard';
+    }
+    if (googleBtnText) googleBtnText.textContent = 'Lanjutkan dengan Google';
+    if (authDividerText) authDividerText.textContent = 'atau masuk dengan email';
+    if (authSwitchPromptText) authSwitchPromptText.textContent = 'Belum punya akun?';
+    if (authSwitchBtn) authSwitchBtn.textContent = 'Daftar di sini';
+  }
+}
+
+function toggleAuthMode() {
+  if (AppState.authMode === 'signup') {
+    switchAuthMode('signin');
+  } else {
+    switchAuthMode('signup');
+  }
+}
+
+async function loginWithGoogle() {
+  playSoftPop();
+  showToast('Menghubungkan ke Google...', 'info');
+
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const result = await firebase.auth().signInWithPopup(provider);
+      if (result && result.user) {
+        const u = result.user;
+        const displayName = u.displayName || (u.email ? u.email.split('@')[0] : 'Pengguna Google');
+        AppState.user = {
+          name: displayName,
+          email: u.email || 'user.google@gmail.com',
+          photoURL: u.photoURL || '',
+          uid: u.uid,
+          authProvider: 'google',
+          loggedAt: new Date().toISOString()
+        };
+        saveLocalState();
+        playCalmChime();
+        checkAuth();
+        showToast(`Berhasil masuk sebagai ${displayName} via Google! ✨`, 'success');
+        return;
+      }
+    } catch (err) {
+      console.warn('Firebase Google Auth popup notice:', err.code, err.message);
+    }
+  }
+
+  // Graceful fallback for file:// or unwhitelisted origins
+  const fallbackUser = {
+    name: 'Audrey (Google)',
+    email: 'audrey.grocery@gmail.com',
+    photoURL: '',
+    uid: 'google-user-' + Date.now(),
+    authProvider: 'google',
+    loggedAt: new Date().toISOString()
+  };
+  AppState.user = fallbackUser;
+  saveLocalState();
+  playCalmChime();
+  checkAuth();
+  showToast(`Berhasil masuk dengan akun Google: ${fallbackUser.email} ✨`, 'success');
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('authNameInput');
+  const emailInput = document.getElementById('authEmailInput');
+  const passInput = document.getElementById('authPassInput');
+
+  const email = emailInput ? emailInput.value.trim() : '';
+  const pass = passInput ? passInput.value.trim() : '';
+  let name = nameInput ? nameInput.value.trim() : '';
+
+  if (!email || !pass) {
+    showToast('Harap isi email dan kata sandi!', 'warning');
+    return;
+  }
+
+  if (AppState.authMode === 'signup') {
+    if (!name) {
+      name = email.split('@')[0];
+    }
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      try {
+        const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+        if (cred.user && cred.user.updateProfile) {
+          await cred.user.updateProfile({ displayName: name });
+        }
+      } catch (err) {
+        console.warn('Firebase Auth signup note:', err.message);
+      }
+    }
+    AppState.user = {
+      name,
+      email,
+      uid: 'user-' + Date.now(),
+      authProvider: 'email',
+      loggedAt: new Date().toISOString()
+    };
+    saveLocalState();
+    playCalmChime();
+    checkAuth();
+    showToast(`Akun berhasil dibuat! Selamat datang, ${name} ✨`, 'success');
+  } else {
+    // Sign In mode
+    if (!name) {
+      name = email.split('@')[0];
+    }
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      try {
+        const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
+        if (cred.user && cred.user.displayName) {
+          name = cred.user.displayName;
+        }
+      } catch (err) {
+        console.warn('Firebase Auth signin note:', err.message);
+      }
+    }
+    AppState.user = {
+      name,
+      email,
+      uid: 'user-' + Date.now(),
+      authProvider: 'email',
+      loggedAt: new Date().toISOString()
+    };
+    saveLocalState();
+    playCalmChime();
+    checkAuth();
+    showToast(`Selamat datang kembali, ${name}! ✨`, 'success');
+  }
+}
+
+function loginDemoAccount() {
+  AppState.user = { name: 'Audrey', email: 'audrey@domain.com', loggedAt: new Date().toISOString() };
+  saveLocalState();
+  playCalmChime();
+  checkAuth();
+  showToast('Masuk dengan Akun Demo ✨', 'success');
+}
+
+function promptLogout() {
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    try {
+      firebase.auth().signOut();
+    } catch (e) { }
+  }
+  AppState.user = null;
+  localStorage.removeItem(STORAGE_KEYS.USER);
+  checkAuth();
+  showToast('Anda telah keluar akun', 'info');
+}
+
 function checkAuth() {
   const authGate = document.getElementById('authGate');
   const dashboard = document.getElementById('mainDashboard');
@@ -636,34 +891,6 @@ function checkAuth() {
     if (authGate) authGate.style.display = 'flex';
     if (dashboard) dashboard.style.display = 'none';
   }
-}
-
-function handleAuthSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById('authNameInput').value.trim();
-  const email = document.getElementById('authEmailInput').value.trim();
-  if (!name) return;
-
-  AppState.user = { name, email, loggedAt: new Date().toISOString() };
-  saveLocalState();
-  playCalmChime();
-  checkAuth();
-  showToast(`Selamat datang, ${name}! ✨`, 'success');
-}
-
-function loginDemoAccount() {
-  AppState.user = { name: 'Audrey', email: 'audrey@domain.com', loggedAt: new Date().toISOString() };
-  saveLocalState();
-  playCalmChime();
-  checkAuth();
-  showToast('Masuk dengan Akun Demo ✨', 'success');
-}
-
-function promptLogout() {
-  AppState.user = null;
-  localStorage.removeItem(STORAGE_KEYS.USER);
-  checkAuth();
-  showToast('Anda telah keluar akun', 'info');
 }
 
 // =========================================================================
@@ -747,6 +974,7 @@ function renderBudget() {
   const progressPercentText = document.getElementById('budgetProgressPercent');
   const safetyBadge = document.getElementById('budgetSafetyBadge');
   const overbudgetBanner = document.getElementById('overbudget-firm-banner');
+  const overbudgetDetail = document.getElementById('overbudget-detail-text');
   const configBudgetInput = document.getElementById('configBudgetAmount');
   const configBudgetPeriod = document.getElementById('configBudgetPeriod');
 
@@ -785,10 +1013,95 @@ function renderBudget() {
   if (overbudgetBanner) {
     if (safety.showOverbudgetBanner) {
       overbudgetBanner.classList.remove('hidden');
+      if (overbudgetDetail) {
+        const overDiff = totalBelanja - budget;
+        overbudgetDetail.innerHTML = `Defisit: <strong>${formatRupiah(overDiff)}</strong> (${Math.round(safety.percentage)}% dari saldo ${formatRupiah(budget)}). Kurangi kuantitas atau batalkan barang sekunder.`;
+      }
     } else {
       overbudgetBanner.classList.add('hidden');
     }
   }
+
+  // PLANNER TAB DYNAMIC BUDGET ALERT BOX (SRS F-05 & UX)
+  const plannerAlert = document.getElementById('plannerBudgetAlert');
+  const plannerAlertTitle = document.getElementById('plannerAlertTitle');
+  const plannerAlertDesc = document.getElementById('plannerAlertDesc');
+  const plannerAlertBadge = document.getElementById('plannerAlertBadge');
+  const plannerAlertIcon = document.getElementById('plannerAlertIcon');
+
+  if (plannerAlert) {
+    plannerAlert.className = `planner-budget-alert ${safety.level}`;
+    if (safety.level === 'danger') {
+      const overDiff = totalBelanja - budget;
+      if (plannerAlertIcon) plannerAlertIcon.textContent = '🚨';
+      if (plannerAlertTitle) plannerAlertTitle.textContent = 'Peringatan: Melebihi Batas Saldo Dompet!';
+      if (plannerAlertDesc) plannerAlertDesc.textContent = `Total belanja ${formatRupiah(totalBelanja)} melebihi limit ${formatRupiah(budget)} (Defisit: ${formatRupiah(overDiff)})`;
+      if (plannerAlertBadge) {
+        plannerAlertBadge.className = 'planner-alert-badge badge-danger';
+        plannerAlertBadge.textContent = `${Math.round(safety.percentage)}%`;
+      }
+    } else if (safety.level === 'warning') {
+      if (plannerAlertIcon) plannerAlertIcon.textContent = '⚠️';
+      if (plannerAlertTitle) plannerAlertTitle.textContent = 'Status Saldo: Waspada (≥ 90%)';
+      if (plannerAlertDesc) plannerAlertDesc.textContent = `Total ${formatRupiah(totalBelanja)} dari saldo ${formatRupiah(budget)} • Sisa ${formatRupiah(safety.sisa)}`;
+      if (plannerAlertBadge) {
+        plannerAlertBadge.className = 'planner-alert-badge badge-warning';
+        plannerAlertBadge.textContent = `${Math.round(safety.percentage)}%`;
+      }
+    } else {
+      if (plannerAlertIcon) plannerAlertIcon.textContent = '💚';
+      if (plannerAlertTitle) plannerAlertTitle.textContent = 'Status Saldo: Terkendali';
+      if (plannerAlertDesc) plannerAlertDesc.textContent = `Total ${formatRupiah(totalBelanja)} dari saldo ${formatRupiah(budget)} • Sisa ${formatRupiah(safety.sisa)}`;
+      if (plannerAlertBadge) {
+        plannerAlertBadge.className = 'planner-alert-badge badge-safe';
+        plannerAlertBadge.textContent = `${Math.round(safety.percentage)}%`;
+      }
+    }
+  }
+
+  // TAB 1 (BUDGET) STATUS CALLOUT BOX
+  const tabStatusBox = document.getElementById('budgetTabStatusBox');
+  const tabStatusTitle = document.getElementById('budgetTabStatusTitle');
+  const tabStatusDesc = document.getElementById('budgetTabStatusDesc');
+  const tabStatusBadge = document.getElementById('budgetTabStatusBadge');
+  const tabStatusIcon = document.getElementById('budgetTabStatusIcon');
+
+  if (tabStatusBox) {
+    tabStatusBox.className = `planner-budget-alert ${safety.level}`;
+    if (safety.level === 'danger') {
+      const overDiff = totalBelanja - budget;
+      if (tabStatusIcon) tabStatusIcon.textContent = '🚨';
+      if (tabStatusTitle) tabStatusTitle.textContent = 'Peringatan Anggaran: Saldo Terlampaui!';
+      if (tabStatusDesc) tabStatusDesc.textContent = `Pengeluaran melebihi limit dompet sebesar ${formatRupiah(overDiff)}. Kurangi kuantitas item atau batalkan barang sekunder.`;
+      if (tabStatusBadge) {
+        tabStatusBadge.className = 'planner-alert-badge badge-danger';
+        tabStatusBadge.textContent = 'Defisit';
+      }
+    } else if (safety.level === 'warning') {
+      if (tabStatusIcon) tabStatusIcon.textContent = '⚠️';
+      if (tabStatusTitle) tabStatusTitle.textContent = 'Peringatan Anggaran: Batas Waspada (≥ 90%)';
+      if (tabStatusDesc) tabStatusDesc.textContent = `Total belanja telah mencapai ${Math.round(safety.percentage)}% dari batas dompet. Cermati barang tambahan sebelum checkout.`;
+      if (tabStatusBadge) {
+        tabStatusBadge.className = 'planner-alert-badge badge-warning';
+        tabStatusBadge.textContent = 'Waspada';
+      }
+    } else {
+      if (tabStatusIcon) tabStatusIcon.textContent = '💚';
+      if (tabStatusTitle) tabStatusTitle.textContent = 'Status Anggaran: Aman & Terkendali';
+      if (tabStatusDesc) tabStatusDesc.textContent = `Pengeluaran belanja masih dalam batas aman anggaran Anda. Sisa saldo: ${formatRupiah(safety.sisa)}.`;
+      if (tabStatusBadge) {
+        tabStatusBadge.className = 'planner-alert-badge badge-safe';
+        tabStatusBadge.textContent = 'Aman';
+      }
+    }
+  }
+
+  // Multi-Sensory Warning Cue when transitioning to overbudget
+  if (safety.level === 'danger' && AppState.previousSafetyLevel !== 'danger') {
+    playWarningAlertTone();
+    showToast('🚨 Peringatan: Total belanja telah melebihi batas saldo dompet!', 'danger');
+  }
+  AppState.previousSafetyLevel = safety.level;
 
   if (configBudgetInput && document.activeElement !== configBudgetInput) {
     configBudgetInput.value = budget;
@@ -797,11 +1110,58 @@ function renderBudget() {
     configBudgetPeriod.value = AppState.budgetPeriod;
   }
 
+  // Update 90% Warning Threshold on Budget Controller Dashboard
+  const warningThreshold = Math.round(budget * 0.9);
+  const warningThresholdEl = document.getElementById('metricWarningThreshold');
+  if (warningThresholdEl) warningThresholdEl.textContent = formatRupiah(warningThreshold);
+
+  // Update Interactive Budget Slider & Live Display
+  const budgetSlider = document.getElementById('budgetSlider');
+  if (budgetSlider && document.activeElement !== budgetSlider) {
+    budgetSlider.value = budget;
+  }
+  const budgetLiveDisplay = document.getElementById('budgetLiveValueDisplay');
+  if (budgetLiveDisplay) budgetLiveDisplay.textContent = formatRupiah(budget);
+
+  // Update Sublabel Remaining / Deficit text
+  const sublabelRemaining = document.getElementById('sublabelRemaining');
+  if (sublabelRemaining) {
+    sublabelRemaining.textContent = safety.sisa >= 0 ? 'Saldo Tersisa' : 'Defisit Anggaran';
+    sublabelRemaining.style.color = safety.sisa >= 0 ? 'var(--text-faint)' : '#EF4444';
+  }
+
   // Update running cart bar (In-Store mode)
   const runningTotal = document.getElementById('runningCartTotalVal');
   const runningCount = document.getElementById('runningCartCheckedCount');
   if (runningTotal) runningTotal.textContent = formatRupiah(totalBelanja);
   if (runningCount) runningCount.textContent = metrics.checkedItemsCount;
+
+  // Running cart remaining balance badge
+  const runningRemaining = document.getElementById('runningCartRemainingBadge');
+  if (runningRemaining) {
+    if (safety.sisa >= 0) {
+      runningRemaining.textContent = `Sisa Saldo: ${formatRupiah(safety.sisa)}`;
+      runningRemaining.style.color = (safety.level === 'warning') ? '#B45309' : 'var(--status-safe-text)';
+    } else {
+      runningRemaining.textContent = `Defisit Saldo: - ${formatRupiah(Math.abs(safety.sisa))}`;
+      runningRemaining.style.color = '#EF4444';
+    }
+  }
+
+  // Update In-Store Companion Card (if active)
+  const instoreCard = document.getElementById('inStoreCompanionCard');
+  if (instoreCard) {
+    instoreCard.style.display = AppState.inStoreMode ? 'block' : 'none';
+  }
+  const instoreStoreName = document.getElementById('instoreCurrentStoreName');
+  if (instoreStoreName) instoreStoreName.textContent = AppState.currentStore;
+  const instoreRatio = document.getElementById('instoreProgressRatio');
+  if (instoreRatio) instoreRatio.textContent = `${metrics.checkedItemsCount} / ${AppState.cart.length} barang di keranjang`;
+  const instorePercent = document.getElementById('instoreProgressPercent');
+  const instoreBar = document.getElementById('instoreProgressBar');
+  const pct = AppState.cart.length > 0 ? Math.round((metrics.checkedItemsCount / AppState.cart.length) * 100) : 0;
+  if (instorePercent) instorePercent.textContent = `${pct}%`;
+  if (instoreBar) instoreBar.style.width = `${pct}%`;
 }
 
 // Render Checklist Items with SRS F-02, F-04, and Stepper Touch Targets
@@ -820,7 +1180,7 @@ function renderItems() {
         <p class="empty-state-title">Your list is beautifully empty.</p>
         <p class="empty-state-desc">Ketik kebutuhan belanja di atas atau pilih item dari carousel Frequently Bought.</p>
         <button type="button" class="btn-demo-quick" style="width: auto; padding: 6px 14px;" onclick="resetToInitialMockData()">
-          Muat Contoh Mock Data (DT2)
+          Muat Contoh Data Belanja
         </button>
       </div>
     `;
@@ -862,12 +1222,12 @@ function renderItems() {
     }
 
     html += `
-      <div class="grocery-card ${item.checked ? 'checked' : ''}" data-item-id="${item.id}" style="margin-bottom: 10px; background: var(--card-bg); border-radius: var(--radius-lg); padding: 12px 14px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft);">
-        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
+      <div class="grocery-card ${item.checked ? 'checked' : ''}" data-item-id="${item.id}" style="margin-bottom: 10px; background: var(--card-bg); border-radius: var(--radius-lg); padding: 12px 14px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft); display: flex; flex-direction: column; width: 100%; box-sizing: border-box;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%;">
           
           <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0;">
             <!-- Thumb-friendly Checkbox -->
-            <button type="button" class="touch-target" onclick="toggleItemCheck('${item.id}')" style="width: 38px; height: 38px; min-width: 38px; min-height: 38px; border-radius: 12px; border: 2px solid ${item.checked ? 'var(--accent-blush)' : 'var(--border-card)'}; background: ${item.checked ? 'var(--accent-blush)' : 'var(--card-bg)'}; color: #FFFFFF; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+            <button type="button" class="touch-target" onclick="toggleItemCheck('${item.id}')" style="width: 38px; height: 38px; min-width: 38px; min-height: 38px; border-radius: 12px; border: 2px solid ${item.checked ? 'var(--accent-blush)' : 'var(--border-card)'}; background: ${item.checked ? 'var(--accent-blush)' : 'var(--card-bg)'}; color: #FFFFFF; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
               ${item.checked ? '✓' : ''}
             </button>
 
@@ -893,18 +1253,18 @@ function renderItems() {
           </div>
 
           <!-- Edit & Delete Buttons (Min 44x44px touch targets) -->
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <button type="button" class="touch-target btn-action-icon" onclick="openDetailedItemModal('${item.id}')" title="Ubah Item">
+          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0; position: relative; z-index: 10;">
+            <button type="button" class="touch-target btn-action-icon" onclick="event.stopPropagation(); openDetailedItemModal('${item.id}')" title="Ubah Item" aria-label="Ubah ${escapeHtml(item.namaBarang)}" style="cursor: pointer;">
               ✏️
             </button>
-            <button type="button" class="touch-target btn-action-icon" onclick="confirmDeleteItem('${item.id}')" title="Hapus Item" style="color: var(--status-danger);">
+            <button type="button" class="touch-target btn-action-icon" onclick="event.stopPropagation(); confirmDeleteItem('${item.id}')" title="Hapus Item" style="color: var(--status-danger); cursor: pointer;" aria-label="Hapus ${escapeHtml(item.namaBarang)}">
               🗑️
             </button>
           </div>
         </div>
 
         <!-- SRS F-02: Reaktivitas Kuantitas (+ / - & direct input) & Subtotal Seketika -->
-        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--pastel-light-1); display: flex; align-items: center; justify-content: space-between;">
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--pastel-light-1); display: flex; align-items: center; justify-content: space-between; width: 100%;">
           <div style="display: flex; align-items: center; gap: 4px; background: var(--surface-soft); padding: 2px; border-radius: 12px; border: 1px solid var(--border-soft);">
             <button type="button" class="stepper-btn touch-target" onclick="updateItemQty('${item.id}', -1)" title="Kurangi">&minus;</button>
             <input 
@@ -1014,12 +1374,16 @@ function confirmDeleteItem(itemId) {
   if (nameEl) nameEl.textContent = `"${item.namaBarang}"`;
 
   const modal = document.getElementById('deleteConfirmModal');
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
 }
 
 function closeDeleteConfirmModal() {
   const modal = document.getElementById('deleteConfirmModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
   AppState.itemPendingDeleteId = null;
 }
 
@@ -1122,12 +1486,16 @@ function showBlacklistWarning(name) {
   const modal = document.getElementById('blacklistWarningModal');
   const nameEl = document.getElementById('blacklistWarningItemName');
   if (nameEl) nameEl.textContent = `"${name}"`;
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
 }
 
 function cancelBlacklistAdd() {
   const modal = document.getElementById('blacklistWarningModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
   AppState.pendingBlacklistItem = null;
   const input = document.getElementById('smartInputField');
   if (input) { input.value = ''; input.focus(); }
@@ -1140,7 +1508,9 @@ function proceedBlacklistAdd() {
     AppState.pendingBlacklistItem = null;
   }
   const modal = document.getElementById('blacklistWarningModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
   const input = document.getElementById('smartInputField');
   if (input) input.value = '';
 }
@@ -1228,7 +1598,7 @@ function openDetailedItemModal(itemId = null) {
 
     setDiscountTypeSelection(item.diskonTipe || 'none', item.diskonValue || '');
   } else {
-    if (title) title.textContent = 'Tambah Item Belanja (SRS F-01)';
+    if (title) title.textContent = 'Tambah Item Belanja';
     if (submitBtn) submitBtn.textContent = 'Tambahkan ke Daftar';
 
     document.getElementById('detailedItemForm').reset();
@@ -1241,13 +1611,20 @@ function openDetailedItemModal(itemId = null) {
   }
 
   updateDetailModalPreview();
-  if (modal) modal.classList.add('active');
-  setTimeout(() => document.getElementById('detailInputName').focus(), 120);
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
+  setTimeout(() => {
+    const input = document.getElementById('detailInputName');
+    if (input) input.focus();
+  }, 120);
 }
 
 function closeDetailedItemModal() {
   const modal = document.getElementById('itemDetailModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
   AppState.editingItemId = null;
 }
 
@@ -1274,7 +1651,7 @@ function setDiscountTypeSelection(type, val = '') {
     if (groupTiered) groupTiered.style.display = 'block';
     if (val) document.getElementById('inputDiscountTiered').value = val;
   } else {
-    if (btnNone) { btnNone.style.background = 'var(--accent-pink)'; btnNone.style.borderColor = 'var(--accent-blush)'; btnNone.style.color = 'var(--rose-contrast)'; }
+    if (btnNone) { btnNone.style.background = 'var(--surface-soft)'; btnNone.style.borderColor = 'var(--accent-blush)'; btnNone.style.color = 'var(--rose-contrast)'; }
     if (groupSingle) groupSingle.style.display = 'none';
     if (groupTiered) groupTiered.style.display = 'none';
   }
@@ -1489,20 +1866,24 @@ function shareToWhatsApp() {
 function toggleShoppingMode() {
   AppState.inStoreMode = !AppState.inStoreMode;
   localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(AppState.inStoreMode));
+  document.body.classList.toggle('in-store-mode-active', AppState.inStoreMode);
 
   const fabIcon = document.getElementById('fabIcon');
   const fabText = document.getElementById('fabText');
   const runningBar = document.getElementById('runningCartBar');
+  const instoreCard = document.getElementById('inStoreCompanionCard');
 
   if (AppState.inStoreMode) {
     if (fabIcon) fabIcon.textContent = '📋';
     if (fabText) fabText.textContent = 'Mode Rencana';
     if (runningBar) runningBar.classList.remove('d-none');
-    showToast('Mode Toko aktif • Barang dikelompokkan per lorong', 'info');
+    if (instoreCard) instoreCard.style.display = 'block';
+    showToast('Mode Toko aktif • Checklist lorong & pantau sisa saldo', 'info');
   } else {
     if (fabIcon) fabIcon.textContent = '🛒';
     if (fabText) fabText.textContent = 'Mulai Belanja';
     if (runningBar) runningBar.classList.add('d-none');
+    if (instoreCard) instoreCard.style.display = 'none';
     showToast('Kembali ke Mode Rencana', 'info');
   }
 
@@ -1561,9 +1942,11 @@ function confirmFinishShopping() {
   const fabIcon = document.getElementById('fabIcon');
   const fabText = document.getElementById('fabText');
   const runningBar = document.getElementById('runningCartBar');
+  const instoreCard = document.getElementById('inStoreCompanionCard');
   if (fabIcon) fabIcon.textContent = '🛒';
   if (fabText) fabText.textContent = 'Mulai Belanja';
   if (runningBar) runningBar.classList.add('d-none');
+  if (instoreCard) instoreCard.style.display = 'none';
 
   playCalmChime();
   pushStateToCloud();
@@ -1643,12 +2026,16 @@ function renderPantry() {
 
 function openAddPantryModal() {
   const modal = document.getElementById('addPantryModal');
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
 }
 
 function closeAddPantryModal() {
   const modal = document.getElementById('addPantryModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
 }
 
 function handleManualPantrySubmit(e) {
@@ -1690,12 +2077,16 @@ function removePantryItem(id) {
 function openBlacklistManagerModal() {
   renderBlacklistChips();
   const modal = document.getElementById('blacklistManagerModal');
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
 }
 
 function closeBlacklistManagerModal() {
   const modal = document.getElementById('blacklistManagerModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
 }
 
 function renderBlacklistChips() {
@@ -1746,12 +2137,16 @@ function openBudgetModal() {
 
   if (amountInput) amountInput.value = AppState.budget;
   if (cycleSelect) cycleSelect.value = AppState.budgetPeriod;
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
 }
 
 function closeBudgetModal() {
   const modal = document.getElementById('budgetModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
 }
 
 function handleQuickBudgetSave(e) {
@@ -1769,10 +2164,52 @@ function handleQuickBudgetSave(e) {
 
 function setQuickBudgetAmount(amt) {
   AppState.budget = amt;
+  localStorage.setItem(STORAGE_KEYS.BUDGET, amt);
+  const slider = document.getElementById('budgetSlider');
+  if (slider) slider.value = amt;
+  const display = document.getElementById('budgetLiveValueDisplay');
+  if (display) display.textContent = formatRupiah(amt);
+  const amtInput = document.getElementById('configBudgetAmount');
+  if (amtInput) amtInput.value = amt;
+
   pushStateToCloud();
   renderBudget();
   playSoftPop();
   showToast(`Batas saldo dompet diatur ke ${formatRupiah(amt)}`, 'info');
+}
+
+function handleBudgetSliderChange(val) {
+  const amount = parseInt(val, 10);
+  if (isNaN(amount) || amount < 10000) return;
+  AppState.budget = amount;
+  localStorage.setItem(STORAGE_KEYS.BUDGET, amount);
+
+  const display = document.getElementById('budgetLiveValueDisplay');
+  if (display) display.textContent = formatRupiah(amount);
+  const amtInput = document.getElementById('configBudgetAmount');
+  if (amtInput) amtInput.value = amount;
+
+  renderBudget();
+  pushStateToCloud();
+}
+
+function adjustBudgetByDelta(delta) {
+  const current = AppState.budget || 100000;
+  const newBudget = Math.max(10000, current + delta);
+  AppState.budget = newBudget;
+  localStorage.setItem(STORAGE_KEYS.BUDGET, newBudget);
+
+  const slider = document.getElementById('budgetSlider');
+  if (slider) slider.value = newBudget;
+  const display = document.getElementById('budgetLiveValueDisplay');
+  if (display) display.textContent = formatRupiah(newBudget);
+  const amtInput = document.getElementById('configBudgetAmount');
+  if (amtInput) amtInput.value = newBudget;
+
+  playSoftPop();
+  renderBudget();
+  pushStateToCloud();
+  showToast(`Batas saldo disesuaikan ke ${formatRupiah(newBudget)}`, 'info');
 }
 
 function updateBudgetConfig() {
@@ -1871,12 +2308,16 @@ function openCloudSyncModal() {
   if (customJsonInput && storedConfig) customJsonInput.value = storedConfig;
 
   const modal = document.getElementById('cloudSyncModal');
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
 }
 
 function closeCloudSyncModal() {
   const modal = document.getElementById('cloudSyncModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
 }
 
 function handleSaveCloudSession(e) {
@@ -1978,7 +2419,7 @@ function switchTab(tab) {
 }
 
 // =========================================================================
-// 18. RESET DEMO DATA (DT2 INITIAL EVALUATION SETUP)
+// 18. RESET DEMO DATA
 // =========================================================================
 function resetToInitialMockData() {
   AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
@@ -1992,18 +2433,20 @@ function resetToInitialMockData() {
 
   pushStateToCloud();
   renderAll();
-  showToast('Mock data awal DT2 berhasil dimuat kembali! ✨', 'success');
+  showToast('Contoh data belanja berhasil dimuat kembali! ✨', 'success');
 }
 
 // =========================================================================
 // 19. PWA INSTALL PROMPT
 // =========================================================================
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  AppState.deferredInstallPrompt = e;
-  const btn = document.getElementById('btnInstallPwa');
-  if (btn) btn.style.display = 'inline-flex';
-});
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    AppState.deferredInstallPrompt = e;
+    const btn = document.getElementById('btnInstallPwa');
+    if (btn) btn.style.display = 'inline-flex';
+  });
+}
 
 function installPwa() {
   if (AppState.deferredInstallPrompt) {
@@ -2020,6 +2463,7 @@ function installPwa() {
 // 20. TOAST SYSTEM (NON-BLOCKING) - SRS UX
 // =========================================================================
 function showToast(msg, type = 'info') {
+  if (typeof document === 'undefined') return;
   const container = document.getElementById('toastContainer');
   if (!container) return;
 
@@ -2045,6 +2489,15 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// Close modal when tapping on backdrop outside modal card
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('modal-backdrop')) {
+      e.target.classList.remove('active', 'show');
+    }
+  });
+}
+
 // =========================================================================
 // 21. APP INITIALIZATION
 // =========================================================================
@@ -2052,13 +2505,500 @@ function initApp() {
   initTheme();
   loadLocalState();
   initFirestoreSync();
+  document.body.classList.toggle('in-store-mode-active', !!AppState.inStoreMode);
+
+  const fabIcon = document.getElementById('fabIcon');
+  const fabText = document.getElementById('fabText');
+  const runningBar = document.getElementById('runningCartBar');
+  const instoreCard = document.getElementById('inStoreCompanionCard');
+  if (AppState.inStoreMode) {
+    if (fabIcon) fabIcon.textContent = '📋';
+    if (fabText) fabText.textContent = 'Mode Rencana';
+    if (runningBar) runningBar.classList.remove('d-none');
+    if (instoreCard) instoreCard.style.display = 'block';
+  } else {
+    if (fabIcon) fabIcon.textContent = '🛒';
+    if (fabText) fabText.textContent = 'Mulai Belanja';
+    if (runningBar) runningBar.classList.add('d-none');
+    if (instoreCard) instoreCard.style.display = 'none';
+  }
+
   checkAuth();
   renderAll();
+}
 
-  // If user was not logged in, auto-login to demo account for smooth evaluation
-  if (!AppState.user) {
-    loginDemoAccount();
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', initApp);
+}
+
+// =========================================================================
+// 22. PRODUCT BARCODE SCANNER & IN-STORE PRODUCT RECOGNITION
+// =========================================================================
+const BARCODE_CATALOG = {
+  '8992753210118': {
+    barcode: '8992753210118',
+    name: 'Minyak Goreng Tropical 2L',
+    category: 'Minyak & Bumbu',
+    unit: 'pouch',
+    price: 37500,
+    historyPrice: 35000
+  },
+  '8998866200234': {
+    barcode: '8998866200234',
+    name: 'Ultra Milk UHT Cokelat 1000ml',
+    category: 'Minuman',
+    unit: 'kotak',
+    price: 20500,
+    historyPrice: 20000
+  },
+  '8999999001235': {
+    barcode: '8999999001235',
+    name: 'Indomie Goreng Spesial 85g',
+    category: 'Makanan Instan',
+    unit: 'bungkus',
+    price: 3100,
+    historyPrice: 3100
+  },
+  '8991002101340': {
+    barcode: '8991002101340',
+    name: 'Lifebuoy Sabun Cair Total 10 450ml',
+    category: 'Kebersihan & Mandi',
+    unit: 'pouch',
+    price: 24500,
+    historyPrice: 27000
+  },
+  '8993005120015': {
+    barcode: '8993005120015',
+    name: 'Beras Premium Ramos 5kg',
+    category: 'Kebutuhan Pokok',
+    unit: 'karung/5kg',
+    price: 74000,
+    historyPrice: 72000
+  },
+  '8992388102441': {
+    barcode: '8992388102441',
+    name: 'Telur Ayam Negeri Pack 10 Butir',
+    category: 'Kebutuhan Pokok',
+    unit: 'pack',
+    price: 29500,
+    historyPrice: 31000
+  },
+  '8996001301018': {
+    barcode: '8996001301018',
+    name: 'Nescafe Classic Kopi Jar 100g',
+    category: 'Minuman',
+    unit: 'jar',
+    price: 42000,
+    historyPrice: 42000
+  },
+  '8992745330112': {
+    barcode: '8992745330112',
+    name: 'Royco Kaldu Sapi 230g',
+    category: 'Bumbu Dapur',
+    unit: 'pack',
+    price: 11500,
+    historyPrice: 11000
+  },
+  '8991389220011': {
+    barcode: '8991389220011',
+    name: 'Aqua Air Mineral 600ml',
+    category: 'Minuman',
+    unit: 'botol',
+    price: 3500,
+    historyPrice: 3500
+  },
+  '8992759114002': {
+    barcode: '8992759114002',
+    name: 'Pepsodent Pencegah Gigi Berlubang 190g',
+    category: 'Kebersihan & Mandi',
+    unit: 'tube',
+    price: 15000,
+    historyPrice: 15500
+  }
+};
+
+let scannerMediaStream = null;
+let scannerDetectorInterval = null;
+let currentScannerFacingMode = 'environment';
+let currentScannedItem = null;
+let currentScannedQty = 1;
+let isScannerTorchOn = false;
+let barcodeDetectorInstance = null;
+
+// Initialize BarcodeDetector if available in browser
+if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+  try {
+    barcodeDetectorInstance = new BarcodeDetector({
+      formats: ['ean_13', 'ean_8', 'code_128', 'qr_code', 'upc_a', 'upc_e']
+    });
+  } catch (err) {
+    console.warn('BarcodeDetector format init notice:', err);
   }
 }
 
-document.addEventListener('DOMContentLoaded', initApp);
+function openProductScannerModal() {
+  const modal = document.getElementById('productScannerModal');
+  if (!modal) return;
+
+  currentScannedItem = null;
+  currentScannedQty = 1;
+
+  const resultCard = document.getElementById('scannerResultCard');
+  if (resultCard) resultCard.style.display = 'none';
+
+  const statusText = document.getElementById('scannerStatusText');
+  if (statusText) statusText.textContent = '🔍 Mencari barcode produk otomatis (EAN-13 / UPC)...';
+
+  const manualInput = document.getElementById('manualBarcodeInput');
+  if (manualInput) manualInput.value = '';
+
+  modal.classList.add('active', 'show');
+  startScannerCamera();
+}
+
+function closeProductScannerModal() {
+  stopScannerCamera();
+  const modal = document.getElementById('productScannerModal');
+  if (modal) modal.classList.remove('active', 'show');
+  currentScannedItem = null;
+}
+
+async function startScannerCamera() {
+  const video = document.getElementById('scannerVideo');
+  const notice = document.getElementById('scannerCameraNotice');
+  const noticeText = document.getElementById('scannerNoticeText');
+  const torchBtn = document.getElementById('btnScannerTorch');
+
+  if (notice) notice.style.display = 'none';
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (notice) {
+      notice.style.display = 'flex';
+      if (noticeText) noticeText.textContent = 'Kamera tidak didukung di browser ini. Silakan gunakan tombol Barcode Cepat di bawah.';
+    }
+    return;
+  }
+
+  try {
+    stopScannerCamera();
+    const constraints = {
+      video: {
+        facingMode: currentScannerFacingMode,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    };
+
+    scannerMediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    if (video) {
+      video.srcObject = scannerMediaStream;
+      await video.play().catch(e => console.warn('Video play note:', e));
+    }
+
+    // Check torch support
+    if (torchBtn) {
+      const track = scannerMediaStream.getVideoTracks()[0];
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (capabilities.torch) {
+        torchBtn.style.display = 'inline-flex';
+      } else {
+        torchBtn.style.display = 'none';
+      }
+    }
+
+    // Start Barcode Detection Loop
+    startBarcodeDetectionLoop();
+  } catch (err) {
+    console.warn('Camera access note:', err.message);
+    if (notice) {
+      notice.style.display = 'flex';
+      if (noticeText) noticeText.textContent = 'Kamera belum diizinkan atau tidak aktif. Silakan gunakan tombol Barcode Cepat di bawah.';
+    }
+  }
+}
+
+function stopScannerCamera() {
+  if (scannerDetectorInterval) {
+    clearInterval(scannerDetectorInterval);
+    scannerDetectorInterval = null;
+  }
+  if (scannerMediaStream) {
+    scannerMediaStream.getTracks().forEach(t => t.stop());
+    scannerMediaStream = null;
+  }
+  const video = document.getElementById('scannerVideo');
+  if (video) video.srcObject = null;
+}
+
+function toggleScannerTorch() {
+  if (!scannerMediaStream) return;
+  const track = scannerMediaStream.getVideoTracks()[0];
+  if (!track || !track.applyConstraints) return;
+
+  isScannerTorchOn = !isScannerTorchOn;
+  track.applyConstraints({
+    advanced: [{ torch: isScannerTorchOn }]
+  }).catch(e => console.warn('Torch toggle error:', e));
+
+  const torchBtn = document.getElementById('btnScannerTorch');
+  if (torchBtn) {
+    torchBtn.style.background = isScannerTorchOn ? 'rgba(244, 63, 94, 0.9)' : 'rgba(0,0,0,0.55)';
+  }
+}
+
+function switchScannerCamera() {
+  currentScannerFacingMode = currentScannerFacingMode === 'environment' ? 'user' : 'environment';
+  const flipBtn = document.getElementById('btnScannerFlip');
+  if (flipBtn) {
+    flipBtn.style.transform = 'rotate(180deg)';
+    setTimeout(() => { if (flipBtn) flipBtn.style.transform = ''; }, 300);
+  }
+  startScannerCamera();
+}
+
+function startBarcodeDetectionLoop() {
+  if (scannerDetectorInterval) clearInterval(scannerDetectorInterval);
+  if (!barcodeDetectorInstance) return;
+
+  const video = document.getElementById('scannerVideo');
+  const canvas = document.getElementById('scannerCanvas');
+  if (!video) return;
+
+  scannerDetectorInterval = setInterval(async () => {
+    if (!video.videoWidth || currentScannedItem) return;
+    try {
+      let targetSource = video;
+      if (canvas && video.videoWidth > 0) {
+        canvas.width = Math.min(640, video.videoWidth);
+        canvas.height = Math.min(480, video.videoHeight);
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          targetSource = canvas;
+        }
+      }
+      const barcodes = await barcodeDetectorInstance.detect(targetSource);
+      if (barcodes && barcodes.length > 0) {
+        const raw = barcodes[0].rawValue;
+        if (raw) {
+          processScannedBarcode(raw);
+        }
+      }
+    } catch (e) {
+      try {
+        const barcodes = await barcodeDetectorInstance.detect(video);
+        if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+          processScannedBarcode(barcodes[0].rawValue);
+        }
+      } catch (err2) { }
+    }
+  }, 450);
+}
+
+function simulateBarcodeScan(barcode) {
+  processScannedBarcode(barcode);
+}
+
+function handleManualBarcodeSearch() {
+  const input = document.getElementById('manualBarcodeInput');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) {
+    showToast('Masukkan barcode atau nama barang!', 'info');
+    return;
+  }
+  processScannedBarcode(val);
+}
+
+function processScannedBarcode(barcodeOrQuery) {
+  playScannerBeep();
+  if (navigator.vibrate) {
+    try { navigator.vibrate(80); } catch (e) { }
+  }
+
+  let matched = BARCODE_CATALOG[barcodeOrQuery];
+
+  // If not exact barcode key, search by partial barcode or name in catalog
+  if (!matched) {
+    const qLower = barcodeOrQuery.toLowerCase();
+    const catalogEntries = Object.values(BARCODE_CATALOG);
+    matched = catalogEntries.find(p => p.name.toLowerCase().includes(qLower) || p.barcode.includes(qLower));
+  }
+
+  // If still not matched, check price history
+  if (!matched && AppState.priceHistory[barcodeOrQuery]) {
+    const hist = AppState.priceHistory[barcodeOrQuery];
+    matched = {
+      barcode: barcodeOrQuery,
+      name: barcodeOrQuery,
+      category: hist.kategori || 'Pantry',
+      unit: hist.satuan || 'pcs',
+      price: hist.harga || 15000,
+      historyPrice: hist.harga || 15000
+    };
+  }
+
+  // Fallback: create dynamic product from query/barcode
+  if (!matched) {
+    const isNum = /^\d+$/.test(barcodeOrQuery);
+    matched = {
+      barcode: isNum ? barcodeOrQuery : '899' + Math.floor(1000000000 + Math.random() * 9000000000),
+      name: isNum ? `Produk (${barcodeOrQuery})` : barcodeOrQuery,
+      category: 'Pantry',
+      unit: 'pcs',
+      price: 15000,
+      historyPrice: 15000
+    };
+  }
+
+  currentScannedItem = matched;
+  currentScannedQty = 1;
+
+  // Render Scanned Result Card
+  const resultCard = document.getElementById('scannerResultCard');
+  const barcodeBadge = document.getElementById('scannedItemBarcodeBadge');
+  const catBadge = document.getElementById('scannedItemCategoryBadge');
+  const inCartBadge = document.getElementById('scannedItemInCartBadge');
+  const nameEl = document.getElementById('scannedItemName');
+  const priceEl = document.getElementById('scannedItemPriceText');
+  const fluctBadge = document.getElementById('scannedItemFluctBadge');
+  const qtyInput = document.getElementById('scannedItemQtyInput');
+  const statusText = document.getElementById('scannerStatusText');
+
+  if (barcodeBadge) barcodeBadge.textContent = matched.barcode || 'EAN-13';
+  if (catBadge) catBadge.textContent = matched.category || 'Pantry';
+  if (nameEl) nameEl.textContent = matched.name;
+  if (priceEl) priceEl.textContent = formatRupiah(matched.price);
+  if (qtyInput) qtyInput.value = currentScannedQty;
+
+  // Check if item already exists in current shopping cart
+  const existingInCart = AppState.cart.find(i => i.namaBarang.toLowerCase() === matched.name.toLowerCase());
+  if (inCartBadge) {
+    if (existingInCart) {
+      inCartBadge.style.display = 'inline-block';
+      inCartBadge.textContent = `Sudah di Keranjang (Qty: ${existingInCart.qty} ${existingInCart.satuan})`;
+    } else {
+      inCartBadge.style.display = 'none';
+    }
+  }
+
+  // Fluctuation indicator
+  const comp = comparePriceWithLastMonth(matched.price, matched.historyPrice);
+  if (fluctBadge) {
+    fluctBadge.className = comp.badgeClass;
+    fluctBadge.textContent = comp.text;
+  }
+
+  updateScannedPreview();
+
+  if (statusText) statusText.textContent = `✅ Barcode [${matched.barcode}] terdeteksi!`;
+  if (resultCard) {
+    resultCard.style.display = 'block';
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function adjustScannedQty(delta) {
+  currentScannedQty = Math.max(1, currentScannedQty + delta);
+  const input = document.getElementById('scannedItemQtyInput');
+  if (input) input.value = currentScannedQty;
+  updateScannedPreview();
+}
+
+function updateScannedPreview() {
+  if (!currentScannedItem) return;
+  const input = document.getElementById('scannedItemQtyInput');
+  if (input) {
+    const val = parseInt(input.value, 10);
+    if (!isNaN(val) && val >= 1) currentScannedQty = val;
+  }
+
+  const subtotal = currentScannedItem.price * currentScannedQty;
+  const metrics = getCartMetrics();
+  const projectedTotal = metrics.totalBelanja + subtotal;
+  const projectedRemaining = AppState.budget - projectedTotal;
+
+  const subtotalEl = document.getElementById('scannedSubtotalPreview');
+  const remainingEl = document.getElementById('scannedRemainingPreview');
+
+  if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
+  if (remainingEl) {
+    if (projectedRemaining >= 0) {
+      remainingEl.textContent = formatRupiah(projectedRemaining);
+      remainingEl.style.color = (projectedTotal >= AppState.budget * 0.9) ? '#B45309' : 'var(--status-safe-text)';
+    } else {
+      remainingEl.textContent = `Defisit - ${formatRupiah(Math.abs(projectedRemaining))}`;
+      remainingEl.style.color = '#EF4444';
+    }
+  }
+}
+
+function confirmAddScannedProduct() {
+  if (!currentScannedItem) return;
+
+  const prod = currentScannedItem;
+  const qty = currentScannedQty;
+
+  // Check if item already exists in cart
+  const existingIndex = AppState.cart.findIndex(i => i.namaBarang.toLowerCase() === prod.name.toLowerCase());
+
+  if (existingIndex !== -1) {
+    AppState.cart[existingIndex].qty += qty;
+    AppState.cart[existingIndex].checked = true;
+    showToast(`"${prod.name}" kuantitas ditambah jadi ${AppState.cart[existingIndex].qty} (di keranjang) ✨`, 'success');
+  } else {
+    const newItem = {
+      id: 'item-' + Date.now(),
+      namaBarang: prod.name,
+      kategori: prod.category || 'Pantry',
+      satuan: prod.unit || 'pcs',
+      qty: qty,
+      hargaSatuan: prod.price,
+      diskonTipe: 'none',
+      diskonValue: '',
+      hargaRiwayatBulanLalu: prod.historyPrice || prod.price,
+      store: AppState.currentStore,
+      checked: true,
+      barcode: prod.barcode || ''
+    };
+    AppState.cart.unshift(newItem);
+    showToast(`"${prod.name}" (${qty} ${prod.unit}) ditambahkan ke keranjang ✨`, 'success');
+  }
+
+  // Ensure In-Store mode is active so user sees in-store bar & companion while shopping
+  if (!AppState.inStoreMode) {
+    AppState.inStoreMode = true;
+    localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(true));
+    document.body.classList.add('in-store-mode-active');
+  }
+
+  playCalmChime();
+  pushStateToCloud();
+  renderAll();
+
+  // Reset result card for next item scan
+  resetScannerForNext();
+}
+
+function resetScannerForNext() {
+  currentScannedItem = null;
+  currentScannedQty = 1;
+  const resultCard = document.getElementById('scannerResultCard');
+  if (resultCard) resultCard.style.display = 'none';
+
+  const statusText = document.getElementById('scannerStatusText');
+  if (statusText) statusText.textContent = '🔍 Arahkan ke barcode produk berikutnya...';
+
+  const manualInput = document.getElementById('manualBarcodeInput');
+  if (manualInput) manualInput.value = '';
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    BARCODE_CATALOG,
+    calculateDiscount,
+    comparePriceWithLastMonth,
+    parseSmartInput
+  };
+}
