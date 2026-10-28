@@ -134,19 +134,19 @@
        ======================================================================== -->
   <div id="mainDashboard" class="app-viewport" style="display: none;">
 
-    <!-- OVERBUDGET FIRM RED BANNER (> 100% Limit) - STICKY TOP APP BANNER (SRS F-05) -->
-    <div id="overbudget-firm-banner" class="hidden overbudget-firm-banner">
-      <span style="font-size: 18px;">🚨</span>
-      <div style="flex: 1;">
-        <div style="font-weight: 900; line-height: 1.2;">Total belanja melebihi batas saldo dompet!</div>
-        <div id="overbudget-detail-text" style="font-size: 0.72rem; opacity: 0.95; font-weight: 600; margin-top: 2px;">
-          Kurangi kuantitas atau batalkan barang sekunder.
-        </div>
-      </div>
-    </div>
-
     <!-- HEADER BAR: BRAND LOGO, PWA INSTALL, DARK MODE, SOUND & GREETING -->
     <header class="app-header">
+      <!-- OVERBUDGET FIRM RED BANNER (> 100% Limit) - STICKY TOP APP BANNER (SRS F-05) -->
+      <div id="overbudget-firm-banner" class="hidden overbudget-firm-banner">
+        <span style="font-size: 18px;">🚨</span>
+        <div style="flex: 1;">
+          <div style="font-weight: 900; line-height: 1.2;">Total belanja melebihi batas saldo dompet!</div>
+          <div id="overbudget-detail-text" style="font-size: 0.72rem; opacity: 0.95; font-weight: 600; margin-top: 2px;">
+            Kurangi kuantitas atau batalkan barang sekunder.
+          </div>
+        </div>
+      </div>
+
       <div class="header-content">
         <div class="brand-wrap">
           <div class="brand-logo-badge">
@@ -201,42 +201,6 @@
         </div>
       </div>
     </header>
-    <!-- PWA Install Button -->
-    <button id="btnInstallPwa" class="btn-install-pwa" onclick="installPwa()" title="Pasang ke Layar Utama (PWA)">
-      <span>📲</span>
-      <span>Install</span>
-    </button>
-
-    <!-- Dark Mode Toggle Switch -->
-    <button id="btnThemeToggle" class="btn-action-icon touch-target" onclick="toggleTheme()"
-      title="Mode Gelap / Terang">
-      🌙
-    </button>
-
-    <!-- Audio Toggle -->
-    <button id="btnSoundToggle" class="btn-action-icon touch-target" onclick="toggleAudio()" title="Suara Feedback">
-      🔊
-    </button>
-
-    <!-- User Greeting & Logout -->
-    <div class="user-pill">
-      <div class="user-pill-info">
-        <div class="user-greeting">
-          <span>Halo, </span>
-          <span id="headerUserName">Pengguna</span>
-          <span>✨</span>
-        </div>
-        <div class="user-email-badge" id="headerUserEmail">user@email.com</div>
-      </div>
-      <button class="btn-logout touch-target" onclick="promptLogout()" title="Keluar Akun">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-        </svg>
-      </button>
-    </div>
-  </div>
-  </div>
-  </header>
 
   <!-- ========================================================================
          TAB 1: BUDGET & RINGKASAN ANGGARAN (SRS F-05)
@@ -470,9 +434,46 @@
       </div>
     </div>
 
+    <!-- IN-STORE ACTIVE COMPANION CARD (PANDUAN BELANJA DI SUPERMARKET) -->
+    <div id="inStoreCompanionCard" class="instore-companion-card" style="display: none;">
+      <div class="instore-companion-header">
+        <div class="instore-store-info">
+          <span class="instore-pulse-dot"></span>
+          <div>
+            <div style="font-size: 0.68rem; font-weight: 700; color: var(--rose-contrast); text-transform: uppercase; letter-spacing: 0.5px;">Mode Toko Aktif</div>
+            <div id="instoreCurrentStoreName" style="font-size: 0.86rem; font-weight: 800; color: var(--text-headline);">Lotte Mart Grocery - Puri Indah</div>
+          </div>
+        </div>
+        <button type="button" class="btn-edit-budget" onclick="toggleShoppingMode()" style="font-size: 0.68rem; padding: 3px 8px;">
+          Batal Toko
+        </button>
+      </div>
+
+      <div class="instore-progress-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.72rem; font-weight: 700; color: var(--text-subtle);">
+          <span id="instoreProgressRatio">0 / 0 barang di keranjang</span>
+          <span id="instoreProgressPercent">0%</span>
+        </div>
+        <div class="instore-progress-bar-bg">
+          <div id="instoreProgressBar" class="instore-progress-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="instore-quick-actions">
+        <button type="button" class="instore-action-btn primary touch-target" onclick="openProductScannerModal()">
+          <span>📷</span>
+          <span>Scan Barcode Produk</span>
+        </button>
+        <button type="button" class="instore-action-btn secondary touch-target" onclick="confirmFinishShopping()">
+          <span>🛍️</span>
+          <span>Selesai Belanja</span>
+        </button>
+      </div>
+    </div>
+
     <!-- SESI TOKO & TANGGAL (SRS F-01 & F-06B) -->
     <div class="session-info-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
         <div
           style="font-size: 0.8rem; font-weight: 700; color: var(--rose-contrast); display: flex; align-items: center; gap: 6px;">
           <span>🏬</span>
@@ -514,7 +515,7 @@
           <span>✨</span>
           <span>Tambah Cepat Kebutuhan</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
+        <div class="smart-input-header-actions" style="display: flex; align-items: center; gap: 6px;">
           <button type="button" class="btn-scan-header touch-target" onclick="openProductScannerModal()"
             title="Scan Barcode Produk Supermarket">
             📷 Scan Barcode
@@ -556,43 +557,6 @@
           <span class="frequent-chip" onclick="quickAddFavorite('Susu UHT 1L', 1, 'liter', 'Minuman', 19500)">🥛 Susu
             UHT</span>
         </div>
-      </div>
-    </div>
-
-    <!-- IN-STORE ACTIVE COMPANION CARD (PANDUAN BELANJA DI SUPERMARKET) -->
-    <div id="inStoreCompanionCard" class="instore-companion-card" style="display: none;">
-      <div class="instore-companion-header">
-        <div class="instore-store-info">
-          <span class="instore-pulse-dot"></span>
-          <div>
-            <div style="font-size: 0.68rem; font-weight: 700; color: var(--rose-contrast); text-transform: uppercase; letter-spacing: 0.5px;">Mode Toko Aktif</div>
-            <div id="instoreCurrentStoreName" style="font-size: 0.86rem; font-weight: 800; color: var(--text-headline);">Lotte Mart Grocery - Puri Indah</div>
-          </div>
-        </div>
-        <button type="button" class="btn-edit-budget" onclick="toggleShoppingMode()" style="font-size: 0.68rem; padding: 3px 8px;">
-          Batal Toko
-        </button>
-      </div>
-
-      <div class="instore-progress-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.72rem; font-weight: 700; color: var(--text-subtle);">
-          <span id="instoreProgressRatio">0 / 0 barang di keranjang</span>
-          <span id="instoreProgressPercent">0%</span>
-        </div>
-        <div class="instore-progress-bar-bg">
-          <div id="instoreProgressBar" class="instore-progress-bar-fill" style="width: 0%;"></div>
-        </div>
-      </div>
-
-      <div class="instore-quick-actions">
-        <button type="button" class="instore-action-btn primary touch-target" onclick="openProductScannerModal()">
-          <span>📷</span>
-          <span>Scan Barcode Produk</span>
-        </button>
-        <button type="button" class="instore-action-btn secondary touch-target" onclick="confirmFinishShopping()">
-          <span>🛍️</span>
-          <span>Selesai Belanja</span>
-        </button>
       </div>
     </div>
 

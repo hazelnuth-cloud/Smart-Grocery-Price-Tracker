@@ -2395,6 +2395,7 @@ function switchTab(tab) {
   const plannerSection = document.getElementById('tabPlanner');
   const pantrySection = document.getElementById('tabPantry');
   const fab = document.getElementById('fabStoreMode');
+  const runningBar = document.getElementById('runningCartBar');
 
   if (budgetSection) budgetSection.classList.remove('active');
   if (plannerSection) plannerSection.classList.remove('active');
@@ -2403,15 +2404,24 @@ function switchTab(tab) {
   if (tab === 'budget') {
     if (budgetSection) budgetSection.classList.add('active');
     if (fab) fab.style.display = 'none';
+    if (runningBar) runningBar.classList.add('d-none');
     renderBudget();
     renderCategoryBreakdown();
   } else if (tab === 'planner') {
     if (plannerSection) plannerSection.classList.add('active');
-    if (fab) fab.style.display = 'inline-flex';
+    if (AppState.inStoreMode) {
+      if (fab) fab.style.display = 'none';
+      if (runningBar) runningBar.classList.remove('d-none');
+    } else {
+      if (fab) fab.style.display = 'inline-flex';
+      if (runningBar) runningBar.classList.add('d-none');
+    }
     renderItems();
+    renderBudget();
   } else if (tab === 'pantry') {
     if (pantrySection) pantrySection.classList.add('active');
     if (fab) fab.style.display = 'none';
+    if (runningBar) runningBar.classList.add('d-none');
     renderPantry();
   }
 
@@ -2524,6 +2534,7 @@ function initApp() {
   }
 
   checkAuth();
+  switchTab(AppState.currentTab || 'planner');
   renderAll();
 }
 
