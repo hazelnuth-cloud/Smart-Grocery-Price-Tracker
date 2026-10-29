@@ -967,7 +967,7 @@ function pushStateToCloud(immediate = false) {
 
 function updateCloudSyncUI(status, labelText) {
   const statusPill = document.getElementById('cloud-sync-status-pill');
-  const statusText = document.getElementById('cloud-sync-text');
+  const statusText = document.getElementById('cloud-sync-text') || document.querySelector('.cloud-sync-text');
   const dot = document.getElementById('cloud-sync-dot');
 
   if (statusText) statusText.textContent = labelText;
@@ -1490,7 +1490,7 @@ function renderBudget() {
   const budgetSlimBar = document.getElementById('budgetSlimProgressBar');
   const cartSlimBar = document.getElementById('cartSlimProgressBar');
   const overbudgetSlimBadge = document.getElementById('overbudget-slim-badge');
-  const overbudgetSlimDiff = document.getElementById('overbudget-slim-diff');
+  const overbudgetSlimDiff = document.getElementById('overbudget-slim-diff') || document.getElementById('slimOverbudgetDiff');
 
   const clampedPercent = Math.min(100, Math.max(0, safety.percentage));
   if (budgetSlimBar) {
@@ -1744,10 +1744,12 @@ function renderItems() {
                 <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
                   ${escapeHtml(item.namaBarang)}
                 </span>
-                <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-                <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
-                  🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
-                </button>
+                <div class="shopee-compact-meta-left">
+                  <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
+                  </button>
+                </div>
               </div>
               <div class="shopee-compact-actions">
                 <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
@@ -2023,7 +2025,7 @@ function parseSmartInput(rawText) {
   }
 
   // Match trailing number: "susu uht 2"
-  const numberSuffix = text.match(/^(.*?)s+(d+)$/);
+  const numberSuffix = text.match(/^(.*?)\s+(\d+)$/);
   if (numberSuffix) {
     text = numberSuffix[1].trim();
     qty = parseInt(numberSuffix[2], 10);
@@ -3639,6 +3641,12 @@ function openCloudSyncModal() {
   const storedConfig = localStorage.getItem(STORAGE_KEYS.FIREBASE_CONFIG);
   if (customJsonInput && storedConfig) customJsonInput.value = storedConfig;
 
+  // Dynamic logged-in user profile update in sync modal
+  const nameEl = document.getElementById('syncUserAccountName');
+  const emailEl = document.getElementById('syncUserAccountEmail');
+  if (nameEl) nameEl.textContent = AppState.user ? AppState.user.name : 'Pengguna Tamu';
+  if (emailEl) emailEl.textContent = AppState.user ? AppState.user.email : 'Belum masuk akun';
+
   const modal = document.getElementById('cloudSyncModal');
   if (modal) {
     modal.classList.add('active', 'show');
@@ -3650,6 +3658,151 @@ function closeCloudSyncModal() {
   if (modal) {
     modal.classList.remove('active', 'show');
   }
+}
+
+function forcePushSingleUserCloud() {
+  try {
+    pushStateToCloud(true);
+    showToast('Data berhasil dicadangkan ke Cloud Firestore! ☁️', 'success');
+  } catch (err) {
+    console.error('Push cloud error:', err);
+    showToast('Gagal mencadangkan data ke Cloud', 'danger');
+  }
+}
+
+async function forcePullSingleUserCloud() {
+  try {
+    if (!firestoreDb) {
+      showToast('Firebase belum terhubung. Berjalan dalam mode offline.', 'warning');
+      return;
+    }
+    const userDocRef = getUserDocRef();
+    if (!userDocRef) {
+      showToast('Sesi pengguna belum aktif.', 'warning');
+      return;
+    }
+    showToast('Mengambil data cadangan dari Cloud... 📥', 'info');
+    const docSnapshot = await userDocRef.get();
+    if (docSnapshot && docSnapshot.exists) {
+      const data = docSnapshot.data();
+      applyRemoteState(data);
+      showToast('Data berhasil dipulihkan dari Cloud! ☁️✨', 'success');
+    } else {
+      showToast('Belum ada cadangan data di Cloud untuk akun ini.', 'info');
+    }
+  } catch (err) {
+    console.error('Pull cloud error:', err);
+    showToast('Gagal memulihkan dari Cloud: ' + (err.message || err), 'danger');
+  }
+}
+
+function exportLocalJsonBackup() {
+  try {
+    const backupData = {
+      app: 'Smart Grocery Price Tracker',
+      version: '2.0',
+      exportedAt: new Date().toISOString(),
+      user: AppState.user ? { name: AppState.user.name, email: AppState.user.email, uid: AppState.user.uid } : null,
+      currentStore: AppState.currentStore,
+      currentDate: AppState.currentDate,
+      budget: AppState.budget,
+      cart: AppState.cart,
+      pantry: AppState.pantry,
+      history: AppState.history,
+      receipts: AppState.receipts || []
+    };
+    const jsonStr = JSON.stringify(backupData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sgt-backup-${AppState.currentDate || new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Cadangan data berhasil diunduh (JSON)! 💾', 'success');
+  } catch (err) {
+    console.error('Export error:', err);
+    showToast('Gagal mengunduh cadangan JSON', 'danger');
+  }
+}
+
+function saveCustomFirebaseConfig() {
+  const customJsonInput = document.getElementById('customFirebaseJson');
+  if (!customJsonInput || !customJsonInput.value.trim()) {
+    showToast('Masukkan konfigurasi JSON Firebase!', 'warning');
+    return;
+  }
+  try {
+    const parsedConfig = JSON.parse(customJsonInput.value.trim());
+    localStorage.setItem(STORAGE_KEYS.FIREBASE_CONFIG, JSON.stringify(parsedConfig));
+    initFirestoreSync();
+    showToast('Konfigurasi Firebase berhasil disimpan! ⚙️', 'success');
+  } catch (err) {
+    showToast('Format JSON Firebase tidak valid: ' + (err.message || ''), 'danger');
+  }
+}
+
+let pendingModalBubbleResolver = null;
+
+function handleModalBubbleAction(confirmed) {
+  const modal = document.getElementById('appModalBubble');
+  const inputEl = document.getElementById('modalBubbleInput');
+  const inputValue = inputEl ? inputEl.value : '';
+
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active', 'show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (pendingModalBubbleResolver) {
+    pendingModalBubbleResolver(confirmed ? (inputValue || true) : false);
+    pendingModalBubbleResolver = null;
+  }
+}
+
+function showAppModalBubble({ title = 'Konfirmasi', message = '', icon = '✨', showInput = false, inputPlaceholder = '', defaultValue = '' } = {}) {
+  return new Promise((resolve) => {
+    pendingModalBubbleResolver = resolve;
+    const modal = document.getElementById('appModalBubble');
+    const titleEl = document.getElementById('modalBubbleTitle');
+    const msgEl = document.getElementById('modalBubbleMessage');
+    const iconEl = document.getElementById('modalBubbleIcon');
+    const inputWrap = document.getElementById('modalBubbleInputWrap');
+    const inputEl = document.getElementById('modalBubbleInput');
+
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.textContent = message;
+    if (iconEl) iconEl.textContent = icon;
+
+    if (inputWrap && inputEl) {
+      if (showInput) {
+        inputWrap.style.display = 'block';
+        inputEl.placeholder = inputPlaceholder;
+        inputEl.value = defaultValue;
+        setTimeout(() => inputEl.focus(), 100);
+      } else {
+        inputWrap.style.display = 'none';
+      }
+    }
+
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('active', 'show');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  });
+}
+
+if (typeof window !== 'undefined') {
+  window.forcePushSingleUserCloud = forcePushSingleUserCloud;
+  window.forcePullSingleUserCloud = forcePullSingleUserCloud;
+  window.exportLocalJsonBackup = exportLocalJsonBackup;
+  window.saveCustomFirebaseConfig = saveCustomFirebaseConfig;
+  window.handleModalBubbleAction = handleModalBubbleAction;
+  window.showAppModalBubble = showAppModalBubble;
 }
 
 function handleSaveCloudSession(e) {
@@ -3922,7 +4075,7 @@ if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     AppState.deferredInstallPrompt = e;
-    const btn = document.getElementById('btnInstallPwa');
+    const btn = document.getElementById('btnInstallPwa') || document.getElementById('modalBtnInstallPwa');
     if (btn) btn.style.display = 'inline-flex';
   });
 }
@@ -4602,10 +4755,12 @@ function renderCartSection() {
                 <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
                   ${escapeHtml(item.namaBarang)}
                 </span>
-                <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-                <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
-                  🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
-                </button>
+                <div class="shopee-compact-meta-left">
+                  <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
+                  </button>
+                </div>
               </div>
               <div class="shopee-compact-actions">
                 <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
@@ -4736,11 +4891,13 @@ function updateCartBadges() {
     if (el) el.textContent = unbought.length;
   });
 
-  const cartPills = ['cartCountPill', 'cartCountPill2', 'cartSelectedCountBadge'];
+  const cartPills = ['cartCountPill', 'cartCountPill2'];
   cartPills.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = checked.length;
   });
+  const selectedCountEl = document.getElementById('cartSelectedCountBadge');
+  if (selectedCountEl) selectedCountEl.textContent = `${checked.length} item`;
 
   const checkoutBtnCount = document.getElementById('checkoutBtnCount');
   if (checkoutBtnCount) checkoutBtnCount.textContent = `(${checked.length})`;

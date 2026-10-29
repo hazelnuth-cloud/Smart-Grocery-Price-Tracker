@@ -2,7 +2,7 @@
  * Service Worker for Smart Grocery Tracker & Budget Planner
  * Production-ready offline caching for supermarket in-store experience
  */
-const CACHE_NAME = 'sgt-cache-v51';
+const CACHE_NAME = 'sgt-cache-v56';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -11,6 +11,8 @@ const ASSETS_TO_CACHE = [
   './js/app.js',
   './js/firebase-config.js',
   './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'

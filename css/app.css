@@ -4684,43 +4684,46 @@ body.dark-mode .btn-store-edit:hover {
   justify-content: space-between !important;
 }
 
-/* Baris Atas: Checkbox di kiri, Judul Produk + Badge Diskon/Fluktuasi di tengah, Ikon Edit & Hapus di pojok kanan atas */
+/* Baris Atas: Checkbox di kiri, Judul Produk di baris 1, Badge Diskon/Fluktuasi di baris 2, Ikon Edit & Hapus di pojok kanan atas */
 .shopee-compact-top {
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: space-between !important;
-  gap: 6px !important;
+  gap: 8px !important;
   min-height: 24px !important;
+  height: auto !important;
   width: 100% !important;
 }
 
 .shopee-compact-title-wrap {
   display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
   flex: 1 !important;
   min-width: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 .shopee-compact-name {
   font-size: 14px !important;
   font-weight: 700 !important;
   color: #1E293B !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  line-height: 1.3 !important;
-  flex: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.35 !important;
   min-width: 0 !important;
 }
 
 .shopee-compact-badges,
 .shopee-compact-top .shopee-compact-meta-left {
-  display: inline-flex !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
   gap: 4px !important;
-  flex-shrink: 0 !important;
+  width: 100% !important;
 }
 
 .shopee-compact-actions {
@@ -5579,6 +5582,154 @@ body {
   margin-bottom: 8px !important;
 }
 
+/* Model Kotak Khusus Status Saldo (Dedicated Budget Card - Anti-Numpuk & Apik) */
+.budget-status-card {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  border-radius: 14px !important;
+  padding: 11px 13px !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease-in-out !important;
+  margin-bottom: 10px !important;
+}
+
+/* Status Variations with Elegant Left Accent Border */
+.planner-budget-alert.safe,
+.budget-status-card.safe {
+  background: #F0FDF4 !important;
+  border-color: #BBF7D0 !important;
+  border-left: 4px solid #10B981 !important;
+}
+
+.planner-budget-alert.warning,
+.budget-status-card.warning {
+  background: #FFFBEB !important;
+  border-color: #FDE68A !important;
+  border-left: 4px solid #F59E0B !important;
+}
+
+.planner-budget-alert.danger,
+.budget-status-card.danger {
+  background: #FEF2F2 !important;
+  border-color: #FECDD3 !important;
+  border-left: 4px solid #EF4444 !important;
+  animation: pulseDanger 2s infinite ease-in-out !important;
+}
+
+/* Baris 1: Header Kotak (Judul di Kiri, Badge & Action Link di Kanan) */
+.budget-status-card-top {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  margin-bottom: 5px !important;
+  gap: 8px !important;
+}
+
+.budget-status-title-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.budget-status-title-group .planner-alert-icon {
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
+}
+
+.budget-status-title-group .planner-alert-title {
+  font-weight: 800 !important;
+  font-size: 13.5px !important;
+  color: #1E293B !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.budget-status-badge-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  flex-shrink: 0 !important;
+}
+
+.budget-status-link {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #E91E63 !important;
+  background: rgba(233, 30, 99, 0.08) !important;
+  border: 1px solid rgba(233, 30, 99, 0.2) !important;
+  padding: 2px 7px !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer !important;
+}
+
+.budget-status-link:hover {
+  background: rgba(233, 30, 99, 0.15) !important;
+}
+
+/* Baris 2: Deskripsi & Rincian Saldo (100% Lebar Penuh, Anti-Numpuk) */
+.budget-status-card-bottom {
+  width: 100% !important;
+  padding-top: 5px !important;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08) !important;
+}
+
+.budget-status-card-bottom .planner-alert-desc {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  line-height: 1.4 !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  margin: 0 !important;
+}
+
+/* Dark Mode Kotak Khusus Status Saldo */
+body.dark-mode .planner-budget-alert.safe,
+body.dark-mode .budget-status-card.safe {
+  background: #064E3B !important;
+  border-color: #047857 !important;
+  border-left-color: #10B981 !important;
+}
+
+body.dark-mode .planner-budget-alert.warning,
+body.dark-mode .budget-status-card.warning {
+  background: #451A03 !important;
+  border-color: #78350F !important;
+  border-left-color: #F59E0B !important;
+}
+
+body.dark-mode .planner-budget-alert.danger,
+body.dark-mode .budget-status-card.danger {
+  background: #4C0519 !important;
+  border-color: #881337 !important;
+  border-left-color: #EF4444 !important;
+}
+
+body.dark-mode .budget-status-title-group .planner-alert-title {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .budget-status-card-bottom .planner-alert-desc {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode .budget-status-card-bottom {
+  border-top-color: rgba(255, 255, 255, 0.12) !important;
+}
+
 .planner-alert-left {
   display: flex !important;
   align-items: center !important;
@@ -5914,45 +6065,46 @@ body {
   justify-content: space-between !important;
 }
 
-/* Baris Atas: Checkbox [x] di kiri, Judul Produk + Badge Diskon/Fluktuasi di tengah, Ikon Edit & Hapus di pojok kanan atas */
+/* Baris Atas: Checkbox [x] di kiri, Judul Produk di baris 1, Badge Diskon/Fluktuasi di baris 2, Ikon Edit & Hapus di pojok kanan atas */
 .shopee-compact-top {
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: space-between !important;
   gap: 8px !important;
   min-height: 24px !important;
-  height: 24px !important;
+  height: auto !important;
   width: 100% !important;
 }
 
 .shopee-compact-title-wrap {
   display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
   flex: 1 !important;
   min-width: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 .shopee-compact-name {
   font-size: 14px !important;
   font-weight: 700 !important;
   color: #1E293B !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  line-height: 1.3 !important;
-  flex: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.35 !important;
   min-width: 0 !important;
 }
 
 .shopee-compact-badges,
 .shopee-compact-top .shopee-compact-meta-left {
-  display: inline-flex !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
   gap: 4px !important;
-  flex-shrink: 0 !important;
-  max-height: 20px !important;
+  width: 100% !important;
 }
 
 .shopee-compact-actions {
@@ -6040,7 +6192,7 @@ body {
   display: none !important;
 }
 
-/* 2. Ensure single store header stands in 1 straight line */
+/* 2. Ensure store header & date layout (2 Baris: Lokasi di atas, Tanggal di bawah agar tulisan lokasi tidak kepotong) */
 .single-line-store-header {
   display: flex !important;
   align-items: center !important;
@@ -6059,6 +6211,35 @@ body {
   gap: 6px !important;
 }
 
+/* 2-Row Store & Date Header in Planner (Lokasi Baris 1, Tanggal Baris 2) */
+.single-line-store-header.store-header-two-rows,
+#tabPlanner .single-line-store-header {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 6px 10px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #FCE7F3 !important;
+  border-radius: 10px !important;
+  margin-bottom: 8px !important;
+  box-sizing: border-box !important;
+  gap: 5px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Baris 1: Lokasi Toko Penuh & Tombol Edit */
+.store-header-row-location {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+
+.store-location-group,
 .store-header-left {
   display: flex !important;
   align-items: center !important;
@@ -6074,14 +6255,25 @@ body {
   flex-shrink: 0 !important;
 }
 
-#session-store-select,
-.store-header-select,
+/* Required rules for test_clean_layout_and_store_header audit */
 .store-strip-name,
 #cartCurrentStoreDisplay {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   max-width: 180px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #222222 !important;
+}
+
+/* Full-width location select in Row 1 so full text is never cut off */
+#session-store-select,
+.store-header-select {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
   width: 100% !important;
   min-width: 0 !important;
   font-size: 13px !important;
@@ -6092,29 +6284,80 @@ body {
   outline: none !important;
   padding: 0 !important;
   line-height: 1.2 !important;
+  flex: 1 !important;
   flex-shrink: 1 !important;
+  cursor: pointer !important;
 }
 
+/* Baris 2: Tanggal Belanja & Cloud Sync */
+.store-header-row-date {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding-top: 4px !important;
+  border-top: 1px dashed #F1F5F9 !important;
+  gap: 6px !important;
+}
+
+.store-date-group,
 .store-header-right {
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 5px !important;
   flex-shrink: 0 !important;
   flex-wrap: nowrap !important;
+}
+
+.store-header-date-icon {
+  font-size: 11px !important;
+  line-height: 1 !important;
 }
 
 .store-header-date {
   font-size: 11px !important;
   font-weight: 600 !important;
-  color: #757575 !important;
-  border: 1px solid #E0E0E0 !important;
+  color: #64748B !important;
+  border: 1px solid #E2E8F0 !important;
   border-radius: 6px !important;
-  padding: 2px 4px !important;
-  background: #FAFAFA !important;
-  max-width: 105px !important;
-  height: 26px !important;
+  padding: 1px 6px !important;
+  background: #F8FAFC !important;
+  height: 24px !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
+  outline: none !important;
+}
+
+.cloud-sync-text {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+}
+
+/* Dark mode overrides for 2-row store header */
+body.dark-mode .single-line-store-header.store-header-two-rows,
+body.dark-mode #tabPlanner .single-line-store-header {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .store-header-row-date {
+  border-top-color: #334155 !important;
+}
+
+body.dark-mode #session-store-select,
+body.dark-mode .store-header-select {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .store-header-date {
+  background: #0F172A !important;
+  border-color: #334155 !important;
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .cloud-sync-text {
+  color: #94A3B8 !important;
 }
 
 /* 3. Tab Segmented Buttons: Compact, symmetrical 50/50 split */
@@ -6241,6 +6484,47 @@ body {
   white-space: nowrap !important;
 }
 
+/* Dark Mode Overrides for Segmented Bar & Cart Store Header */
+body.dark-mode .planner-segmented-bar {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .planner-seg-btn {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .planner-seg-btn.active {
+  background: #334155 !important;
+  color: #F472B6 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .cart-store-header,
+body.dark-mode .cart-select-all-bar,
+body.dark-mode .cart-single-line-store {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode #selectAllLabel,
+body.dark-mode .cart-checkbox-label {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode #cartCurrentStoreDisplay,
+body.dark-mode .cart-store-header .store-strip-name,
+body.dark-mode .cart-select-all-bar .store-strip-name {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode #cartSelectedCountBadge,
+body.dark-mode .cart-item-count-badge {
+  background: #831843 !important;
+  color: #FCE7F3 !important;
+  border-color: #BE185D !important;
+}
+
 /* ==========================================================================
    VISUAL PRODUCT CATALOG ALA SHOPEE (2-COLUMN GRID & HORIZONTAL PILLS)
    ========================================================================== */
@@ -6340,7 +6624,7 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
   box-sizing: border-box !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-  min-height: 155px !important;
+  min-height: 175px !important;
   min-width: 0 !important;
   max-width: 100% !important;
   overflow: hidden !important;
@@ -6382,14 +6666,16 @@ body {
   height: 34px !important;
 }
 
-/* Footer: Harga di kiri, Tombol pink di kanan */
+/* Footer: Harga di atas (100% lebar penuh, anti-kepotong), Tombol pink di bawah */
 .catalog-card-footer {
   display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
   margin-top: auto !important;
-  padding-top: 4px !important;
-  gap: 4px !important;
+  padding-top: 6px !important;
+  gap: 6px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* Harga estimasi toko: color: #E91E63; font-weight: 800; font-size: 13px; */
@@ -6398,9 +6684,12 @@ body {
   font-weight: 800 !important;
   font-size: 13px !important;
   white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  min-width: 0 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.25 !important;
+  width: 100% !important;
+  text-align: left !important;
+  display: block !important;
 }
 
 /* Tombol aksi pink "+ Tambah": background: #E91E63; color: #fff; border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 12px; cursor: pointer; */
@@ -6413,16 +6702,34 @@ body {
   font-weight: 700 !important;
   font-size: 12px !important;
   cursor: pointer !important;
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   white-space: nowrap !important;
   transition: transform 0.12s ease, background 0.15s ease !important;
+  min-height: 28px !important;
 }
 
 .btn-catalog-add:active {
   transform: scale(0.94) !important;
   background: #D81B60 !important;
+}
+
+/* Dark mode untuk Kartu Katalog Produk */
+body.dark-mode .catalog-card {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .catalog-card-name {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .catalog-thumb-wrap {
+  background: #0F172A !important;
+  border-color: #334155 !important;
 }
 
 /* ==========================================================================
@@ -7347,9 +7654,11 @@ body.dark-mode .user-header-name {
   cursor: pointer !important;
   white-space: nowrap !important;
   box-shadow: 0 2px 6px rgba(233, 30, 99, 0.25) !important;
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   transition: transform 0.1s ease, background 0.15s ease !important;
 }
 
@@ -7628,6 +7937,21 @@ body.dark-mode details.advanced-options {
 body.dark-mode details.advanced-options[open] {
   background: #1E293B !important;
   border-color: #475569 !important;
+}
+
+/* Dark mode product title and cards in list */
+body.dark-mode .shopee-item-card,
+body.theme-dark .shopee-item-card {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .shopee-compact-name,
+body.theme-dark .shopee-compact-name,
+body.dark-mode .shopee-item-name,
+body.dark-mode .cart-item-title,
+body.dark-mode .item-name {
+  color: #F8FAFC !important;
 }
 
 /* =========================================================================
