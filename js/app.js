@@ -141,6 +141,15 @@ const AISLE_METADATA = {
   'Kebersihan & Rumah': { title: 'Lorong: Kebersihan Rumah', icon: '🧹' }
 };
 
+// Initial Routine Items Presets (Daily Auto-Refresh)
+const DEFAULT_ROUTINE_ITEMS = [
+  { namaBarang: 'Telur Ayam 1kg', kategori: 'Bahan Pokok', satuan: 'kg', qty: 1, hargaSatuan: 28000, isRoutine: true },
+  { namaBarang: 'Minyak Goreng 2L', kategori: 'Minyak & Bumbu', satuan: 'pouch/2L', qty: 1, hargaSatuan: 38000, isRoutine: true },
+  { namaBarang: 'Susu UHT Ultra Milk 1L', kategori: 'Dairy & Minuman', satuan: 'karton', qty: 1, hargaSatuan: 19500, isRoutine: true },
+  { namaBarang: 'Bayam Hijau Segar', kategori: 'Sayur & Buah', satuan: 'ikat', qty: 1, hargaSatuan: 4000, isRoutine: true },
+  { namaBarang: 'Roti Tawar Gandum', kategori: 'Bahan Pokok', satuan: 'pack', qty: 1, hargaSatuan: 16000, isRoutine: true }
+];
+
 // Global App State
 let AppState = {
   user: null,
@@ -155,6 +164,7 @@ let AppState = {
   receipts: [],
   pantry: [],
   blacklist: [],
+  routineItems: [],
   sessionId: 'lotte-mart-puri-01',
   lastLocalUpdate: Date.now(),
   currentTab: 'planner',
@@ -560,7 +570,9 @@ function toggleAudio() {
   AppState.soundEnabled = !AppState.soundEnabled;
   localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(AppState.soundEnabled));
   const btn = document.getElementById('btnSoundToggle');
+  const settingsToggle = document.getElementById('settingsSoundToggle');
   if (btn) btn.textContent = AppState.soundEnabled ? '🔊' : '🔇';
+  if (settingsToggle) settingsToggle.checked = AppState.soundEnabled;
   showToast(AppState.soundEnabled ? 'Suara Feedback Aktif 🔊' : 'Suara Dibisukan 🔇', 'info');
 }
 
@@ -609,7 +621,15 @@ function loadUserIsolatedState(uid) {
     const userBlacklist = localStorage.getItem('grocery_blacklist_' + uid);
     if (userBlacklist) AppState.blacklist = JSON.parse(userBlacklist);
 
+    const userRoutine = localStorage.getItem('grocery_routine_items_' + uid);
+    if (userRoutine) {
+      try { AppState.routineItems = JSON.parse(userRoutine); } catch (e) { AppState.routineItems = [...DEFAULT_ROUTINE_ITEMS]; }
+    } else {
+      AppState.routineItems = JSON.parse(JSON.stringify(DEFAULT_ROUTINE_ITEMS));
+    }
+
     renderAll();
+    checkDailyPlannerReset(uid);
   } catch (e) {
     console.warn('loadUserIsolatedState error:', e);
   }
@@ -681,6 +701,13 @@ function loadLocalState() {
       AppState.blacklist = storedBlacklist ? JSON.parse(storedBlacklist) : [...DEFAULT_BLACKLIST];
     }
 
+    const userRoutine = localStorage.getItem('grocery_routine_items_' + uid);
+    if (userRoutine) {
+      try { AppState.routineItems = JSON.parse(userRoutine); } catch (e) { AppState.routineItems = [...DEFAULT_ROUTINE_ITEMS]; }
+    } else {
+      AppState.routineItems = JSON.parse(JSON.stringify(DEFAULT_ROUTINE_ITEMS));
+    }
+
     const storedSession = getStoredItem(STORAGE_KEYS.SESSION_ID);
     if (storedSession) AppState.sessionId = storedSession;
 
@@ -714,6 +741,7 @@ function saveLocalState() {
     localStorage.setItem('grocery_receipts_' + uid, JSON.stringify(AppState.receipts));
     localStorage.setItem('grocery_pantry_' + uid, JSON.stringify(AppState.pantry));
     localStorage.setItem('grocery_blacklist_' + uid, JSON.stringify(AppState.blacklist));
+    localStorage.setItem('grocery_routine_items_' + uid, JSON.stringify(AppState.routineItems || []));
 
     // Global / fallback keys for cross-compatibility
     localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(AppState.cart));
@@ -725,6 +753,7 @@ function saveLocalState() {
     localStorage.setItem(STORAGE_KEYS.RECEIPTS, JSON.stringify(AppState.receipts));
     localStorage.setItem(STORAGE_KEYS.PANTRY, JSON.stringify(AppState.pantry));
     localStorage.setItem(STORAGE_KEYS.BLACKLIST, JSON.stringify(AppState.blacklist));
+    localStorage.setItem('grocery_routine_items', JSON.stringify(AppState.routineItems || []));
     localStorage.setItem(STORAGE_KEYS.SESSION_ID, AppState.sessionId);
     localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(AppState.soundEnabled));
     localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(AppState.inStoreMode));
@@ -1071,6 +1100,8 @@ async function handleAuthSubmit(e) {
     return;
   }
 
+  let uid = 'user-' + Date.now();
+
   if (AppState.authMode === 'signup') {
     if (!name) {
       name = email.split('@')[0];
@@ -1078,8 +1109,11 @@ async function handleAuthSubmit(e) {
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
-        if (cred.user && cred.user.updateProfile) {
-          await cred.user.updateProfile({ displayName: name });
+        if (cred.user) {
+          uid = cred.user.uid;
+          if (cred.user.updateProfile) {
+            await cred.user.updateProfile({ displayName: name });
+          }
         }
       } catch (err) {
         console.warn('Firebase Auth signup note:', err.message);
@@ -1088,13 +1122,15 @@ async function handleAuthSubmit(e) {
     AppState.user = {
       name,
       email,
-      uid: 'user-' + Date.now(),
+      uid,
       authProvider: 'email',
       loggedAt: new Date().toISOString()
     };
+    loadUserIsolatedState(uid);
     saveLocalState();
     playCalmChime();
     checkAuth();
+    setupFirestoreListener();
     showToast(`Akun berhasil dibuat! Selamat datang, ${name} ✨`, 'success');
   } else {
     // Sign In mode
@@ -1104,8 +1140,11 @@ async function handleAuthSubmit(e) {
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
-        if (cred.user && cred.user.displayName) {
-          name = cred.user.displayName;
+        if (cred.user) {
+          uid = cred.user.uid;
+          if (cred.user.displayName) {
+            name = cred.user.displayName;
+          }
         }
       } catch (err) {
         console.warn('Firebase Auth signin note:', err.message);
@@ -1114,13 +1153,15 @@ async function handleAuthSubmit(e) {
     AppState.user = {
       name,
       email,
-      uid: 'user-' + Date.now(),
+      uid,
       authProvider: 'email',
       loggedAt: new Date().toISOString()
     };
+    loadUserIsolatedState(uid);
     saveLocalState();
     playCalmChime();
     checkAuth();
+    setupFirestoreListener();
     showToast(`Selamat datang kembali, ${name}! ✨`, 'success');
   }
 }
@@ -1176,7 +1217,8 @@ function checkAuth() {
 
   if (AppState.user && AppState.user.name) {
     document.body.classList.add('authenticated');
-    document.body.classList.remove('unauthenticated', 'auth-locked');
+    document.body.classList.remove('unauthenticated');
+    document.body.classList.remove('auth-locked');
     document.body.style.overflow = '';
 
     if (authGate) {
@@ -1188,9 +1230,13 @@ function checkAuth() {
       dashboard.classList.remove('hidden');
     }
 
+    // Daily Auto-Refresh Rencana Belanja check
+    checkDailyPlannerReset(AppState.user.uid);
+
     const headerName = document.getElementById('headerUserName');
     const headerEmail = document.getElementById('headerUserEmail');
     const headerAvatar = document.getElementById('headerUserAvatar');
+    const headerAvatarFallback = document.getElementById('headerUserAvatarFallback');
 
     if (headerName) headerName.textContent = AppState.user.name;
     if (headerEmail) headerEmail.textContent = AppState.user.email || 'user@email.com';
@@ -1198,8 +1244,27 @@ function checkAuth() {
       if (AppState.user.photoURL) {
         headerAvatar.src = AppState.user.photoURL;
         headerAvatar.style.display = 'inline-block';
+        if (headerAvatarFallback) headerAvatarFallback.style.display = 'none';
       } else {
         headerAvatar.style.display = 'none';
+        if (headerAvatarFallback) headerAvatarFallback.style.display = 'inline-flex';
+      }
+    }
+
+    const modalName = document.getElementById('modalUserName');
+    const modalEmail = document.getElementById('modalUserEmail');
+    const modalAvatar = document.getElementById('modalUserAvatar');
+    const modalAvatarFallback = document.getElementById('modalUserAvatarFallback');
+    if (modalName) modalName.textContent = AppState.user.name;
+    if (modalEmail) modalEmail.textContent = AppState.user.email || 'user@email.com';
+    if (modalAvatar) {
+      if (AppState.user.photoURL) {
+        modalAvatar.src = AppState.user.photoURL;
+        modalAvatar.style.display = 'block';
+        if (modalAvatarFallback) modalAvatarFallback.style.display = 'none';
+      } else {
+        modalAvatar.style.display = 'none';
+        if (modalAvatarFallback) modalAvatarFallback.style.display = 'flex';
       }
     }
 
@@ -1207,6 +1272,14 @@ function checkAuth() {
     const syncEmail = document.getElementById('syncUserAccountEmail');
     if (syncName) syncName.textContent = AppState.user.name;
     if (syncEmail) syncEmail.textContent = AppState.user.email || 'user@email.com';
+
+    // Refresh active tab and components so all buttons are 100% interactive
+    if (typeof switchTab === 'function') {
+      switchTab(AppState.currentTab || 'planner', true);
+    }
+    if (typeof renderAll === 'function') {
+      renderAll();
+    }
   } else {
     document.body.classList.remove('authenticated');
     document.body.classList.add('unauthenticated', 'auth-locked');
@@ -1239,7 +1312,9 @@ function renderAll() {
   renderBudget();
   renderItems();
   renderCartSection();
+  renderProductCatalog();
   renderPantry();
+  renderPantryCatalog();
   renderHistory();
   renderCategoryBreakdown();
   updateCartBadges();
@@ -1283,6 +1358,61 @@ function handleStoreChange(val) {
   pushStateToCloud();
   renderItems();
   showToast(`Toko belanja diatur ke ${AppState.currentStore}`, 'info');
+}
+
+function toggleCustomStoreInput() {
+  const wrap = document.getElementById('custom-store-wrap');
+  const input = document.getElementById('custom-store-input');
+  if (!wrap) return;
+  const isHidden = wrap.style.display === 'none' || (typeof getComputedStyle !== 'undefined' && getComputedStyle(wrap).display === 'none');
+  if (isHidden) {
+    wrap.style.display = 'block';
+    if (input) {
+      input.value = (AppState.currentStore && AppState.currentStore !== 'custom') ? AppState.currentStore : '';
+      input.focus();
+    }
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function saveCustomStoreInput() {
+  const wrap = document.getElementById('custom-store-wrap');
+  const input = document.getElementById('custom-store-input');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) {
+    showToast('Nama toko tidak boleh kosong!', 'warning');
+    input.focus();
+    return;
+  }
+
+  AppState.currentStore = val;
+  const select = document.getElementById('session-store-select');
+  if (select) {
+    let customOpt = Array.from(select.options).find(o => o.value === val);
+    if (!customOpt) {
+      customOpt = document.createElement('option');
+      customOpt.value = val;
+      customOpt.textContent = val;
+      select.insertBefore(customOpt, select.firstChild);
+    }
+    select.value = val;
+  }
+
+  const disp = document.getElementById('cartCurrentStoreDisplay');
+  if (disp) disp.textContent = val;
+
+  AppState.cart.forEach(item => { item.store = val; });
+  if (wrap) wrap.style.display = 'none';
+  pushStateToCloud();
+  renderItems();
+  showToast(`Toko belanja diubah ke "${val}"`, 'success');
+}
+
+function cancelCustomStoreInput() {
+  const wrap = document.getElementById('custom-store-wrap');
+  if (wrap) wrap.style.display = 'none';
 }
 
 function handleDateChange(val) {
@@ -1523,10 +1653,10 @@ function renderBudget() {
     }
   }
 
-  // Update In-Store Companion Card (if active)
+  // Update In-Store Companion Card (hidden to prevent module duplication)
   const instoreCard = document.getElementById('inStoreCompanionCard');
   if (instoreCard) {
-    instoreCard.style.display = AppState.inStoreMode ? 'block' : 'none';
+    instoreCard.style.display = 'none';
   }
   const instoreStoreName = document.getElementById('instoreCurrentStoreName');
   if (instoreStoreName) instoreStoreName.textContent = AppState.currentStore;
@@ -1554,8 +1684,8 @@ function renderItems() {
     container.innerHTML = `
       <div class="empty-state" style="padding: 36px 16px; text-align: center;">
         <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang belanja masih kosong, silakan tambah atau scan barang pertamamu!</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Ketik kebutuhan belanja di atas atau pilih item dari carousel Frequently Bought.</p>
+        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang masih kosong</p>
+        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Keranjang belanja masih kosong, silakan tambah atau scan barang pertamamu!</p>
         <button type="button" class="btn-demo-quick" style="width: auto; padding: 6px 16px; margin: 0 auto;" onclick="resetToInitialMockData()">
           Muat Contoh Data Belanja
         </button>
@@ -1608,6 +1738,9 @@ function renderItems() {
                   ${escapeHtml(item.namaBarang)}
                 </span>
                 <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                  🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
+                </button>
               </div>
               <div class="shopee-compact-actions">
                 <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
@@ -1669,6 +1802,9 @@ function renderItems() {
                 </span>
                 <div class="shopee-compact-meta-left">
                   <span class="${comparator.badgeClass}">${comparator.text}</span>
+                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
+                  </button>
                   ${promoBadge ? `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">${promoBadge}</button>` : `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">🏷️ +Diskon</button>`}
                 </div>
               </div>
@@ -1988,6 +2124,124 @@ function insertParsedItem(parsed) {
   showToast(`"${parsed.name}" (${newItem.qty} ${newItem.satuan}) dicatat di rencana belanja ✨`, 'success');
 }
 
+// =========================================================================
+// 8B. VISUAL PRODUCT CATALOG ALA SHOPEE (PRESET DATA & 1-TAP ADD)
+// =========================================================================
+const PRODUCT_CATALOG = [
+  { id: 'cat-1', name: 'Beras Rojolele 5kg', category: 'staple', icon: '🌾', price: 74000, unit: 'karung/5kg', aisle: 'Bahan Pokok', isRoutine: true },
+  { id: 'cat-2', name: 'Minyak Goreng 2L', category: 'oil-seasoning', icon: '🍳', price: 38000, unit: 'pouch/2L', aisle: 'Minyak & Bumbu', isRoutine: true },
+  { id: 'cat-3', name: 'Telur Ayam 1kg', category: 'staple', icon: '🥚', price: 28000, unit: 'kg', aisle: 'Bahan Pokok', isRoutine: true },
+  { id: 'cat-4', name: 'Indomie Goreng (5 pcs)', category: 'staple', icon: '🍜', price: 15500, unit: 'pack/5pcs', aisle: 'Bahan Pokok' },
+  { id: 'cat-5', name: 'Tepung Terigu Segitiga 1kg', category: 'staple', icon: '🍞', price: 13000, unit: 'kg', aisle: 'Bahan Pokok' },
+  { id: 'cat-6', name: 'Gula Pasir Gulaku 1kg', category: 'oil-seasoning', icon: '🧂', price: 17500, unit: 'kg', aisle: 'Minyak & Bumbu', isRoutine: true },
+  { id: 'cat-7', name: 'Garam Dapur 500g', category: 'oil-seasoning', icon: '🧂', price: 5000, unit: 'bungkus', aisle: 'Minyak & Bumbu', isRoutine: true },
+  { id: 'cat-8', name: 'Kecap Manis Bango 520ml', category: 'oil-seasoning', icon: '🍾', price: 24000, unit: 'pouch', aisle: 'Minyak & Bumbu' },
+  { id: 'cat-9', name: 'Saus Sambal ABC 335ml', category: 'oil-seasoning', icon: '🌶️', price: 16000, unit: 'botol', aisle: 'Minyak & Bumbu' },
+  { id: 'cat-10', name: 'Sabun Mandi Lifebuoy', category: 'hygiene', icon: '🧼', price: 16000, unit: 'multipack', aisle: 'Kebersihan' },
+  { id: 'cat-11', name: 'Deterjen Rinso 770g', category: 'hygiene', icon: '🧺', price: 22500, unit: 'bag', aisle: 'Kebersihan' },
+  { id: 'cat-12', name: 'Pasta Gigi Pepsodent 190g', category: 'hygiene', icon: '🪥', price: 14500, unit: 'tube', aisle: 'Kebersihan' },
+  { id: 'cat-13', name: 'Sunlight Cuci Piring 700ml', category: 'hygiene', icon: '🍋', price: 15000, unit: 'pouch', aisle: 'Kebersihan' },
+  { id: 'cat-14', name: 'Bayam Hijau Segar', category: 'produce', icon: '🥬', price: 4000, unit: 'ikat', aisle: 'Sayur & Buah', isRoutine: true },
+  { id: 'cat-15', name: 'Wortel Berastagi 500g', category: 'produce', icon: '🥕', price: 9000, unit: 'pack', aisle: 'Sayur & Buah' },
+  { id: 'cat-16', name: 'Apel Fuji Segar (1kg)', category: 'produce', icon: '🍎', price: 35000, unit: 'kg', aisle: 'Sayur & Buah' },
+  { id: 'cat-17', name: 'Pisang Cavendish 1 Sisir', category: 'produce', icon: '🍌', price: 23000, unit: 'sisir', aisle: 'Sayur & Buah' },
+  { id: 'cat-18', name: 'Tomat Segar 500g', category: 'produce', icon: '🍅', price: 7000, unit: 'pack', aisle: 'Sayur & Buah' },
+  { id: 'cat-19', name: 'Susu UHT Ultra Milk 1L', category: 'dairy-drink', icon: '🥛', price: 19500, unit: 'karton', aisle: 'Dairy & Minuman', isRoutine: true },
+  { id: 'cat-20', name: 'Kopi Kapal Api Special Mix', category: 'dairy-drink', icon: '☕', price: 14000, unit: 'renteng', aisle: 'Dairy & Minuman' },
+  { id: 'cat-21', name: 'Keju Cheddar Kraft 165g', category: 'dairy-drink', icon: '🧀', price: 22000, unit: 'kotak', aisle: 'Dairy & Minuman' },
+  { id: 'cat-22', name: 'Yogurt Biokul 120ml', category: 'dairy-drink', icon: '🥣', price: 8500, unit: 'cup', aisle: 'Dairy & Minuman' }
+];
+
+let catalogActiveCategory = 'all';
+let catalogSearchQuery = '';
+
+function renderProductCatalog() {
+  const container = document.getElementById('productCatalogGrid');
+  if (!container) return;
+
+  const query = (catalogSearchQuery || '').toLowerCase().trim();
+  const filtered = PRODUCT_CATALOG.filter(item => {
+    const matchesCat = (catalogActiveCategory === 'all' || item.category === catalogActiveCategory);
+    const matchesQuery = !query || item.name.toLowerCase().includes(query) || (item.aisle || '').toLowerCase().includes(query);
+    return matchesCat && matchesQuery;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 24px 12px; color: var(--text-subtle); font-size: 13px;">
+        🔍 Produk "<strong>${escapeHtml(query)}</strong>" tidak ada di katalog.<br>Tekan tombol <strong>➔</strong> di atas untuk menambahkannya sebagai barang baru!
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(item => `
+    <div class="catalog-card" data-catalog-id="${item.id}">
+      <div class="catalog-thumb-wrap">
+        <span>${item.icon}</span>
+      </div>
+      <div class="catalog-card-name" title="${escapeHtml(item.name)}">
+        ${escapeHtml(item.name)}
+        ${item.isRoutine ? '<span class="catalog-routine-tag" title="Barang Rutin Harian">🔁 Rutin</span>' : ''}
+      </div>
+      <div class="catalog-card-footer">
+        <span class="catalog-card-price">${formatRupiah(item.price)}</span>
+        <button type="button" class="btn-catalog-add touch-target"
+          onclick="addCatalogItemToPlan('${item.id}')"
+          title="Tambah ke Rencana Belanja">
+          + Tambah
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCatalogCategory(category, buttonEl) {
+  catalogActiveCategory = category;
+  const pills = document.querySelectorAll('#catalogCategoryPills .catalog-pill');
+  pills.forEach(p => p.classList.remove('active'));
+  if (buttonEl) buttonEl.classList.add('active');
+  renderProductCatalog();
+}
+
+function handleCatalogSearch(query) {
+  catalogSearchQuery = query;
+  renderProductCatalog();
+}
+
+function addCatalogItemToPlan(catalogId) {
+  const product = PRODUCT_CATALOG.find(p => p.id === catalogId);
+  if (!product) return;
+
+  if (checkBlacklist(product.name)) {
+    AppState.pendingBlacklistItem = { name: product.name, qty: 1, unit: product.unit };
+    showBlacklistWarning(product.name);
+    return;
+  }
+
+  // Tambahkan barang ke rencana dengan status belum dibeli (checked: false)
+  const newItem = {
+    id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+    namaBarang: product.name,
+    kategori: product.aisle || 'Kebutuhan Pokok',
+    satuan: product.unit || 'pcs',
+    qty: 1,
+    hargaSatuan: product.price || 0,
+    diskonTipe: 'none',
+    diskonValue: '',
+    hargaRiwayatBulanLalu: product.price || null,
+    store: AppState.currentStore,
+    checked: false,
+    isRoutine: !!product.isRoutine
+  };
+
+  AppState.cart.unshift(newItem);
+  playSoftPop();
+  pushStateToCloud();
+  renderAll();
+  showToast('Ditambahkan ke Rencana! 🛒', 'success');
+}
+
 function quickAddFavorite(name, qty, unit, category, price, promoType = 'none', promoVal = '') {
   if (checkBlacklist(name)) {
     AppState.pendingBlacklistItem = { name, qty, unit };
@@ -2020,32 +2274,209 @@ function quickAddFavorite(name, qty, unit, category, price, promoType = 'none', 
 }
 
 // =========================================================================
+// 8C. DAILY AUTO-REFRESH RENCANA BELANJA & ROUTINE ITEMS MANAGER
+// =========================================================================
+
+/**
+ * Toggle status "Rutin Harian" pada item belanja
+ */
+function toggleItemRoutine(itemId) {
+  const item = AppState.cart.find(i => i.id === itemId);
+  if (!item) return;
+
+  item.isRoutine = !item.isRoutine;
+
+  if (!AppState.routineItems) AppState.routineItems = [];
+  const existingIdx = AppState.routineItems.findIndex(r => (r.namaBarang || r.name || '').toLowerCase() === item.namaBarang.toLowerCase());
+
+  if (item.isRoutine) {
+    if (existingIdx === -1) {
+      AppState.routineItems.push({
+        namaBarang: item.namaBarang,
+        kategori: item.kategori || 'Bahan Pokok',
+        satuan: item.satuan || 'pcs',
+        qty: item.qty || 1,
+        hargaSatuan: item.hargaSatuan || 0,
+        isRoutine: true
+      });
+    } else {
+      AppState.routineItems[existingIdx].isRoutine = true;
+    }
+    showToast(`"${item.namaBarang}" ditandai sebagai Rutin Harian 🔁`, 'success');
+  } else {
+    if (existingIdx !== -1) {
+      AppState.routineItems.splice(existingIdx, 1);
+    }
+    showToast(`"${item.namaBarang}" bukan lagi barang rutin`, 'info');
+  }
+
+  saveLocalState();
+  pushStateToCloud();
+  renderItems();
+  renderCartSection();
+}
+
+/**
+ * Acak & perbarui urutan rekomendasi Katalog Produk Shopee Harian
+ */
+function shuffleDailyCatalog(dateStr) {
+  if (!Array.isArray(PRODUCT_CATALOG) || PRODUCT_CATALOG.length === 0) return;
+  const seedStr = dateStr || new Date().toISOString().split('T')[0];
+  let seed = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    seed = (seed * 31 + seedStr.charCodeAt(i)) % 100000;
+  }
+
+  for (let i = PRODUCT_CATALOG.length - 1; i > 0; i--) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const rnd = seed / 233280;
+    const j = Math.floor(rnd * (i + 1));
+    const temp = PRODUCT_CATALOG[i];
+    PRODUCT_CATALOG[i] = PRODUCT_CATALOG[j];
+    PRODUCT_CATALOG[j] = temp;
+  }
+}
+
+/**
+ * Logika Deteksi Pergantian Hari untuk Auto-Refresh Rencana Belanja
+ */
+function checkDailyPlannerReset(uid) {
+  if (!uid) {
+    uid = (AppState.user && AppState.user.uid) ? AppState.user.uid : 'guest';
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const storageKey = 'last_planner_reset_date_' + uid;
+  const lastResetDate = localStorage.getItem(storageKey) || localStorage.getItem('last_planner_reset_date');
+
+  // Jika belum ada lastResetDate atau tanggal berbeda (hari baru)
+  if (!lastResetDate || lastResetDate !== todayStr) {
+    executeDailyPlannerReset(todayStr, uid);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Eksekusi Auto-Refresh & Reset Otomatis
+ */
+function executeDailyPlannerReset(todayStr, uid) {
+  if (!todayStr) todayStr = new Date().toISOString().split('T')[0];
+  if (!uid) uid = (AppState.user && AppState.user.uid) ? AppState.user.uid : 'guest';
+
+  // 1. Ambil daftar barang rutin harian
+  if (!AppState.routineItems || AppState.routineItems.length === 0) {
+    AppState.routineItems = JSON.parse(JSON.stringify(DEFAULT_ROUTINE_ITEMS));
+  }
+
+  // 2. Munculkan kembali barang rutin ke Rencana Belanja dengan checklist [ ] kosong
+  AppState.routineItems.forEach(routine => {
+    const rName = (routine.namaBarang || routine.name || '').trim().toLowerCase();
+    const existing = AppState.cart.find(i => (i.namaBarang || '').trim().toLowerCase() === rName);
+    if (!existing) {
+      AppState.cart.unshift({
+        id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+        namaBarang: routine.namaBarang || routine.name,
+        kategori: routine.kategori || routine.aisle || 'Bahan Pokok',
+        satuan: routine.satuan || routine.unit || 'pcs',
+        qty: routine.qty || 1,
+        hargaSatuan: routine.hargaSatuan || routine.price || 0,
+        diskonTipe: 'none',
+        diskonValue: '',
+        hargaRiwayatBulanLalu: routine.hargaSatuan || routine.price || null,
+        store: AppState.currentStore,
+        checked: false, // Checklist kosong
+        isRoutine: true
+      });
+    } else {
+      existing.checked = false; // Reset checklist ke kosong
+      existing.isRoutine = true;
+    }
+  });
+
+  // 3. Acak/perbarui urutan rekomendasi Katalog Produk Shopee Harian
+  shuffleDailyCatalog(todayStr);
+
+  // 4. Simpan tanggal hari ini ke storage
+  localStorage.setItem('last_planner_reset_date_' + uid, todayStr);
+  localStorage.setItem('last_planner_reset_date', todayStr);
+
+  if (typeof firebase !== 'undefined' && firebase.firestore && uid && uid !== 'guest') {
+    try {
+      const uRef = userDocRef(uid);
+      if (uRef) {
+        uRef.set({ last_planner_reset_date: todayStr }, { merge: true }).catch(err => {
+          console.warn('Firestore last_planner_reset_date sync note:', err.message);
+        });
+      }
+    } catch (e) { }
+  }
+
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+
+  // 5. Tampilkan Toast Notification ramah
+  showToast('🌅 Rencana belanja hari ini sudah disiapin! Selamat berbelanja.', 'info');
+}
+
+// =========================================================================
 // 9. MODAL DETAIL ITEM
 // =========================================================================
 function openDetailedItemModal(itemId = null) {
   AppState.editingItemId = itemId;
-  const modal = document.getElementById('itemDetailModal');
+  const modal = document.getElementById('addItemModal') || document.getElementById('itemDetailModal');
   const title = document.getElementById('itemModalTitle');
   const submitBtn = document.getElementById('btnSubmitDetailedItem');
+  const advDetails = document.getElementById('detailsAdvancedOptions');
+
+  // Pastikan listener chip diskon single-select terpasang
+  initDiscountChips();
 
   if (itemId) {
     const item = AppState.cart.find(i => i.id === itemId);
     if (!item) return;
 
     if (title) title.textContent = 'Ubah Item Belanja';
-    if (submitBtn) submitBtn.textContent = 'Simpan Perubahan';
+    if (submitBtn) submitBtn.textContent = '💾 Simpan Perubahan';
 
     document.getElementById('detailInputName').value = item.namaBarang;
     document.getElementById('detailInputCategory').value = item.kategori || 'Kebutuhan Pokok';
     document.getElementById('detailInputUnit').value = item.satuan || 'pcs';
     document.getElementById('detailInputQty').value = item.qty;
-    document.getElementById('detailInputPrice').value = item.hargaSatuan;
+    document.getElementById('detailInputPrice').value = item.hargaSatuan ? item.hargaSatuan : '';
     document.getElementById('detailInputHistoryPrice').value = item.hargaRiwayatBulanLalu || '';
+    const isRoutineCb = document.getElementById('detailInputIsRoutine');
+    if (isRoutineCb) isRoutineCb.checked = !!item.isRoutine;
 
-    setDiscountTypeSelection(item.diskonTipe || 'none', item.diskonValue || '');
+    const discVal = item.diskonValue || '';
+    const discTipe = item.diskonTipe || 'none';
+    const chips = document.querySelectorAll('.discount-chip');
+
+    if (!discVal || discTipe === 'none') {
+      setDetailDiscountPreset('none', '');
+    } else {
+      const matchingChip = Array.from(chips).find(c => c.getAttribute('data-val') === String(discVal) && c.getAttribute('data-type') === discTipe) ||
+                           Array.from(chips).find(c => c.getAttribute('data-val') === String(discVal));
+      if (matchingChip) {
+        setDetailDiscountPreset(discTipe, discVal, matchingChip);
+      } else {
+        // Custom manual discount
+        chips.forEach(c => c.classList.remove('active'));
+        const discInput = document.getElementById('detailInputDiscountValue');
+        if (discInput) discInput.value = discVal;
+        AppState.activeDiscountType = discTipe;
+        AppState.activeDiscountValue = discVal;
+        setDiscountTypeSelection(discTipe, discVal);
+      }
+    }
+
+    if (advDetails) {
+      advDetails.open = !!(item.diskonValue || item.hargaRiwayatBulanLalu || item.isRoutine || (item.kategori && item.kategori !== 'Kebutuhan Pokok'));
+    }
   } else {
     if (title) title.textContent = 'Tambah Item Belanja';
-    if (submitBtn) submitBtn.textContent = 'Tambahkan ke Daftar';
+    if (submitBtn) submitBtn.textContent = '➕ Tambahkan Barang';
 
     document.getElementById('detailedItemForm').reset();
     document.getElementById('detailInputQty').value = '1';
@@ -2053,7 +2484,16 @@ function openDetailedItemModal(itemId = null) {
     document.getElementById('detailInputCategory').value = 'Kebutuhan Pokok';
     document.getElementById('detailInputPrice').value = '';
     document.getElementById('detailInputHistoryPrice').value = '';
-    setDiscountTypeSelection('none');
+    const discInput = document.getElementById('detailInputDiscountValue');
+    if (discInput) discInput.value = '';
+    const isRoutineCb = document.getElementById('detailInputIsRoutine');
+    if (isRoutineCb) isRoutineCb.checked = false;
+
+    // Secara default, set pilihan awal pada "Tanpa Diskon" (0%)
+    setDetailDiscountPreset('none', '');
+
+    // Default terlipat (closed) untuk item baru
+    if (advDetails) advDetails.open = false;
   }
 
   updateDetailModalPreview();
@@ -2067,11 +2507,83 @@ function openDetailedItemModal(itemId = null) {
 }
 
 function closeDetailedItemModal() {
-  const modal = document.getElementById('itemDetailModal');
+  const modal = document.getElementById('addItemModal') || document.getElementById('itemDetailModal');
   if (modal) {
     modal.classList.remove('active', 'show');
   }
   AppState.editingItemId = null;
+}
+
+if (typeof window !== 'undefined') {
+  window.openAddItemModal = openDetailedItemModal;
+  window.closeAddItemModal = closeDetailedItemModal;
+}
+
+function initDiscountChips() {
+  if (typeof document === 'undefined') return;
+  const chips = document.querySelectorAll('.discount-chip');
+  chips.forEach(chip => {
+    chip.onclick = function(e) {
+      if (e) e.preventDefault();
+      const type = this.getAttribute('data-type') || 'none';
+      const val = this.getAttribute('data-val') || '';
+      setDetailDiscountPreset(type, val, this);
+    };
+  });
+}
+
+function setDetailDiscountPreset(type, val = '', clickedChip = null) {
+  AppState.activeDiscountType = type || 'none';
+  AppState.activeDiscountValue = val || '';
+
+  // Kosongkan input manual diskon jika chip preset diklik
+  const input = document.getElementById('detailInputDiscountValue');
+  if (input) input.value = '';
+
+  // Hapus kelas .active dari seluruh chip diskon lainnya
+  const chips = document.querySelectorAll('.discount-chip');
+  chips.forEach(c => c.classList.remove('active'));
+
+  // Tambahkan kelas .active HANYA pada chip yang baru diklik
+  let targetChip = clickedChip;
+  if (!targetChip && typeof document !== 'undefined') {
+    if (type === 'none' || !val) {
+      targetChip = document.querySelector('.discount-chip[data-type="none"]') || chips[0];
+    } else {
+      targetChip = Array.from(chips).find(c => c.getAttribute('data-val') === String(val) && c.getAttribute('data-type') === type) ||
+                   Array.from(chips).find(c => c.getAttribute('data-val') === String(val));
+    }
+  }
+  if (targetChip) {
+    targetChip.classList.add('active');
+  }
+
+  setDiscountTypeSelection(type, val);
+  updateDetailModalPreview();
+}
+
+function handleDetailDiscountInput(val) {
+  val = (val || '').trim();
+
+  // Jika pengguna mengetik persentase di input manual diskon, otomatis hilangkan kelas .active dari semua chip preset
+  const chips = document.querySelectorAll('.discount-chip');
+  chips.forEach(c => c.classList.remove('active'));
+
+  let type = 'none';
+  if (!val) {
+    // Secara default, set pilihan awal pada "Tanpa Diskon" (0%)
+    AppState.activeDiscountType = 'none';
+    AppState.activeDiscountValue = '';
+    const noDiscChip = document.querySelector('.discount-chip[data-type="none"]') || chips[0];
+    if (noDiscChip) noDiscChip.classList.add('active');
+  } else {
+    type = val.includes('+') ? 'tiered' : 'single';
+    AppState.activeDiscountType = type;
+    AppState.activeDiscountValue = val;
+  }
+
+  setDiscountTypeSelection(type, val);
+  updateDetailModalPreview();
 }
 
 function setDiscountTypeSelection(type, val = '') {
@@ -2090,12 +2602,18 @@ function setDiscountTypeSelection(type, val = '') {
     if (btnSingle) { btnSingle.style.background = '#FEF3C7'; btnSingle.style.borderColor = '#F59E0B'; btnSingle.style.color = '#92400E'; }
     if (groupSingle) groupSingle.style.display = 'block';
     if (groupTiered) groupTiered.style.display = 'none';
-    if (val) document.getElementById('inputDiscountSingle').value = val;
+    if (val) {
+      const el = document.getElementById('inputDiscountSingle');
+      if (el) el.value = val;
+    }
   } else if (type === 'tiered') {
     if (btnTiered) { btnTiered.style.background = '#F3E8FF'; btnTiered.style.borderColor = '#A855F7'; btnTiered.style.color = '#6B21A8'; }
     if (groupSingle) groupSingle.style.display = 'none';
     if (groupTiered) groupTiered.style.display = 'block';
-    if (val) document.getElementById('inputDiscountTiered').value = val;
+    if (val) {
+      const el = document.getElementById('inputDiscountTiered');
+      if (el) el.value = val;
+    }
   } else {
     if (btnNone) { btnNone.style.background = 'var(--surface-soft)'; btnNone.style.borderColor = 'var(--accent-blush)'; btnNone.style.color = 'var(--rose-contrast)'; }
     if (groupSingle) groupSingle.style.display = 'none';
@@ -2107,23 +2625,48 @@ function setDiscountTypeSelection(type, val = '') {
 }
 
 function getSelectedDiscountType() {
+  const directInput = document.getElementById('detailInputDiscountValue');
+  if (directInput && directInput.value.trim()) {
+    return directInput.value.includes('+') ? 'tiered' : 'single';
+  }
   return AppState.activeDiscountType || 'none';
 }
 
 function getSelectedDiscountValue() {
+  const directInput = document.getElementById('detailInputDiscountValue');
+  if (directInput && directInput.value.trim()) {
+    return directInput.value.trim();
+  }
+  if (AppState.activeDiscountValue) {
+    return AppState.activeDiscountValue;
+  }
   const type = getSelectedDiscountType();
-  if (type === 'single') return document.getElementById('inputDiscountSingle').value.trim();
-  if (type === 'tiered') return document.getElementById('inputDiscountTiered').value.trim();
+  if (type === 'single') {
+    const el = document.getElementById('inputDiscountSingle');
+    return el ? el.value.trim() : '';
+  }
+  if (type === 'tiered') {
+    const el = document.getElementById('inputDiscountTiered');
+    return el ? el.value.trim() : '';
+  }
   return '';
 }
 
 function setSinglePreset(p) {
-  document.getElementById('inputDiscountSingle').value = p;
+  const el = document.getElementById('inputDiscountSingle');
+  if (el) el.value = p;
+  const direct = document.getElementById('detailInputDiscountValue');
+  if (direct) direct.value = p;
+  AppState.activeDiscountType = 'single';
   updateDetailModalPreview();
 }
 
 function setTieredPreset(fmt) {
-  document.getElementById('inputDiscountTiered').value = fmt;
+  const el = document.getElementById('inputDiscountTiered');
+  if (el) el.value = fmt;
+  const direct = document.getElementById('detailInputDiscountValue');
+  if (direct) direct.value = fmt;
+  AppState.activeDiscountType = 'tiered';
   updateDetailModalPreview();
 }
 
@@ -2166,6 +2709,16 @@ function updateDetailModalPreview() {
 
   if (previewFinal) previewFinal.textContent = formatRupiah(disc.finalPrice);
   if (previewSubtotal) previewSubtotal.textContent = formatRupiah(subtotal);
+
+  const discBadge = document.getElementById('detailEffectivePercentBadge');
+  if (discBadge) {
+    if (disc.effectivePercent > 0) {
+      discBadge.style.display = 'inline-block';
+      discBadge.textContent = `Hemat ${disc.effectivePercent}%`;
+    } else {
+      discBadge.style.display = 'none';
+    }
+  }
 
   if (previewSavings) {
     if (disc.savingsPerUnit > 0) {
@@ -2237,6 +2790,8 @@ function handleDetailedItemFormSubmit(e) {
     return;
   }
 
+  const isRoutine = document.getElementById('detailInputIsRoutine') ? document.getElementById('detailInputIsRoutine').checked : false;
+
   if (AppState.editingItemId) {
     const item = AppState.cart.find(i => i.id === AppState.editingItemId);
     if (item) {
@@ -2249,7 +2804,17 @@ function handleDetailedItemFormSubmit(e) {
       item.diskonValue = diskonValue;
       item.hargaRiwayatBulanLalu = hargaRiwayatBulanLalu;
       item.store = toko;
+      item.isRoutine = isRoutine;
       if (hargaSatuan > 0) item.checked = true;
+    }
+    // Sync to AppState.routineItems
+    if (!AppState.routineItems) AppState.routineItems = [];
+    const rIdx = AppState.routineItems.findIndex(r => (r.namaBarang || r.name || '').toLowerCase() === nama.toLowerCase());
+    if (isRoutine) {
+      if (rIdx === -1) AppState.routineItems.push({ namaBarang: nama, kategori, satuan, qty, hargaSatuan, isRoutine: true });
+      else AppState.routineItems[rIdx].isRoutine = true;
+    } else if (rIdx !== -1) {
+      AppState.routineItems.splice(rIdx, 1);
     }
     showToast(`"${nama}" berhasil diperbarui ✨`, 'success');
   } else {
@@ -2264,8 +2829,13 @@ function handleDetailedItemFormSubmit(e) {
       diskonValue,
       hargaRiwayatBulanLalu,
       store: toko,
-      checked: (hargaSatuan > 0)
+      checked: (hargaSatuan > 0),
+      isRoutine
     };
+    if (isRoutine) {
+      if (!AppState.routineItems) AppState.routineItems = [];
+      AppState.routineItems.push({ namaBarang: nama, kategori, satuan, qty, hargaSatuan, isRoutine: true });
+    }
     AppState.cart.unshift(newItem);
     showToast(`"${nama}" berhasil ditambahkan ke daftar ✨`, 'success');
   }
@@ -2326,7 +2896,7 @@ function toggleShoppingMode() {
     if (fabIcon) fabIcon.textContent = '📋';
     if (fabText) fabText.textContent = 'Mode Rencana';
     if (runningBar) runningBar.classList.remove('d-none');
-    if (instoreCard) instoreCard.style.display = 'block';
+    if (instoreCard) instoreCard.style.display = 'none';
     showToast('Mode Toko aktif • Checklist lorong & pantau sisa saldo', 'info');
   } else {
     if (fabIcon) fabIcon.textContent = '🛒';
@@ -2346,45 +2916,53 @@ function confirmFinishShopping() {
     return;
   }
 
-  const metrics = getCartMetrics();
-  const receipt = {
-    id: 'rec-' + Date.now(),
-    tanggal: AppState.currentDate,
-    toko: AppState.currentStore,
-    judul: `Belanja ${AppState.currentStore}`,
-    totalBelanja: metrics.totalBelanja,
-    totalHemat: metrics.totalHemat,
-    budgetSaatItu: AppState.budget,
-    statusBudget: metrics.safety.level,
-    items: AppState.cart.map(i => {
-      const disc = calculateDiscount(i.hargaSatuan, i.diskonTipe, i.diskonValue);
-      return {
-        namaBarang: i.namaBarang,
-        qty: i.qty,
-        satuan: i.satuan,
-        hargaAkhirSatuan: disc.finalPrice,
-        totalHarga: disc.finalPrice * i.qty
-      };
-    })
-  };
+  // 1. Generate Thermal Supermarket Receipt Data Realtime
+  const generatedReceipt = generateReceiptData();
 
-  // Move checked items to Pantry
-  AppState.cart.forEach(item => {
-    if (item.checked) {
-      AppState.pantry.unshift({
-        id: 'pan-' + Date.now() + Math.random().toString(36).substr(2, 4),
-        name: item.namaBarang,
-        qty: item.qty,
-        unit: item.satuan,
-        category: item.kategori,
-        addedDate: new Date().toISOString(),
-        expiryDate: getOffsetDateString(7)
-      });
+  const checkedItems = AppState.cart.filter(item => item.checked);
+  const itemsToPantry = checkedItems.length > 0 ? checkedItems : [...AppState.cart];
+
+  // 2. Move checked items to Pantry
+  itemsToPantry.forEach(item => {
+    AppState.pantry.unshift({
+      id: 'pan-' + Date.now() + Math.random().toString(36).substr(2, 4),
+      name: item.namaBarang,
+      qty: item.qty,
+      unit: item.satuan,
+      category: item.kategori,
+      addedDate: new Date().toISOString(),
+      expiryDate: getOffsetDateString(7)
+    });
+
+    // Jika ditandai "Rutin", simpan ke AppState.routineItems agar otomatis kembali besok
+    if (item.isRoutine) {
+      if (!AppState.routineItems) AppState.routineItems = [];
+      const idx = AppState.routineItems.findIndex(r => (r.namaBarang || r.name || '').toLowerCase() === item.namaBarang.toLowerCase());
+      if (idx === -1) {
+        AppState.routineItems.push({
+          namaBarang: item.namaBarang,
+          kategori: item.kategori || 'Bahan Pokok',
+          satuan: item.satuan || 'pcs',
+          qty: item.qty || 1,
+          hargaSatuan: item.hargaSatuan || 0,
+          isRoutine: true
+        });
+      }
     }
   });
 
-  AppState.receipts.unshift(receipt);
-  AppState.cart = [];
+  // 3. Save receipt to history
+  if (generatedReceipt) {
+    AppState.receipts.unshift(generatedReceipt);
+  }
+
+  // 4. Update cart: clear purchased items
+  if (checkedItems.length > 0 && checkedItems.length < AppState.cart.length) {
+    AppState.cart = AppState.cart.filter(item => !item.checked);
+  } else {
+    AppState.cart = [];
+  }
+
   AppState.inStoreMode = false;
   localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(false));
 
@@ -2401,7 +2979,237 @@ function confirmFinishShopping() {
   pushStateToCloud();
   renderAll();
   switchTab('budget');
-  showToast('Belanja selesai! Struk tersimpan & barang dipindahkan ke Pantry 🧺', 'success');
+
+  // 5. Otomatis tampilkan modal Struk Belanja Supermarket Asli
+  openReceiptModal();
+  showToast('Belanja selesai! Struk resmi kasir siap dicetak 🧾✨', 'success');
+}
+
+// =========================================================================
+// STRUK BELANJA SUPERMARKET ASLI (Thermal Digital Receipt) LOGIC
+// =========================================================================
+
+function generateReceiptData(customReceipt = null) {
+  let receipt = customReceipt;
+
+  if (!receipt) {
+    if (!AppState.cart || AppState.cart.length === 0) return null;
+
+    const checkedItems = AppState.cart.filter(item => item.checked);
+    const itemsToProcess = checkedItems.length > 0 ? checkedItems : AppState.cart;
+
+    let subtotalRaw = 0;
+    let totalDiscount = 0;
+
+    const processedItems = itemsToProcess.map(item => {
+      const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+      const rawPrice = item.hargaSatuan || 0;
+      const finalPrice = disc.finalPrice;
+      const savingsUnit = disc.savingsPerUnit;
+
+      const rowRawSubtotal = rawPrice * item.qty;
+      const rowFinalSubtotal = finalPrice * item.qty;
+      const rowSavings = savingsUnit * item.qty;
+
+      subtotalRaw += (rawPrice > 0 ? rowRawSubtotal : rowFinalSubtotal);
+      totalDiscount += rowSavings;
+
+      return {
+        namaBarang: item.namaBarang,
+        qty: item.qty,
+        satuan: item.satuan,
+        hargaSatuan: rawPrice,
+        hargaAkhirSatuan: finalPrice,
+        subtotal: rowFinalSubtotal,
+        diskonNominal: rowSavings,
+        diskonTipe: item.diskonTipe,
+        diskonValue: item.diskonValue
+      };
+    });
+
+    const grandTotal = Math.max(0, subtotalRaw - totalDiscount);
+    const taxPpn = Math.round(grandTotal * 0.11); // PPN 11%
+
+    receipt = {
+      id: 'rec-' + Date.now(),
+      tanggal: AppState.currentDate || new Date().toISOString().slice(0, 10),
+      toko: AppState.currentStore || 'Supermarket',
+      judul: `Belanja ${AppState.currentStore || 'Supermarket'}`,
+      trxNo: 'TRX-' + (AppState.currentDate || new Date().toISOString().slice(0, 10)).replace(/-/g, '') + '-' + Math.floor(1000 + Math.random() * 9000),
+      posNo: 'POS-0' + (Math.floor(Math.random() * 4) + 1),
+      waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      kasir: (AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna',
+      subtotal: subtotalRaw,
+      totalHemat: totalDiscount,
+      totalBelanja: grandTotal,
+      grandTotal: grandTotal,
+      taxPpn: taxPpn,
+      budgetSaatItu: AppState.budget,
+      statusBudget: evaluateBudgetSafety(grandTotal, AppState.budget).level,
+      items: processedItems
+    };
+  }
+
+  // Populate Header Toko
+  const storeRaw = receipt.toko || 'Supermarket';
+  let storeTitle = storeRaw.toUpperCase();
+  let branchText = 'Cabang Resmi Supermarket';
+  let addressText = 'Jl. Boulevard Raya No. 88 • Telp: (021) 500-888';
+
+  if (storeRaw.includes('Lotte Mart')) {
+    storeTitle = 'LOTTE MART GROCERY';
+    branchText = 'Cabang Mall Puri Indah, Lt. GF';
+    addressText = 'Jl. Puri Agung No. 1, Jakarta Barat • Telp: (021) 5835-8899';
+  } else if (storeRaw.includes('Superindo')) {
+    storeTitle = 'SUPERINDO SUPERMARKET';
+    branchText = 'Cabang Kebon Jeruk, Jl. Pejuangan';
+    addressText = 'Jl. Raya Pejuangan No. 88, Jakarta Barat • Telp: (021) 536-1234';
+  } else if (storeRaw.includes('Grand Lucky')) {
+    storeTitle = 'GRAND LUCKY SUPERSTORE';
+    branchText = 'Cabang SCBD Lot 12';
+    addressText = 'Kawasan Niaga Terpadu Sudirman, Jaksel • Telp: (021) 515-3888';
+  } else if (storeRaw.includes('Hypermart')) {
+    storeTitle = 'HYPERMART SUPERSTORE';
+    branchText = 'Cabang Puri Indah Mall';
+    addressText = 'Sentra Bisnis Puri Indah Blok U1 • Telp: (021) 582-2777';
+  } else if (storeRaw.includes('Alfamart') || storeRaw.includes('Indomaret')) {
+    storeTitle = 'MINIMARKET RETAIL';
+    branchText = 'Outlet Komersial No. 104B';
+    addressText = 'Kawasan Residensial Puri • Telp: 1500-959';
+  } else if (storeRaw.includes(' - ')) {
+    const parts = storeRaw.split(' - ');
+    storeTitle = parts[0].toUpperCase();
+    branchText = 'Cabang ' + parts[1];
+  }
+
+  const elStoreName = document.getElementById('receiptStoreName');
+  const elStoreBranch = document.getElementById('receiptStoreBranch');
+  const elStoreAddress = document.getElementById('receiptStoreAddress');
+  const elTrxNo = document.getElementById('receiptTrxNo');
+  const elPosNo = document.getElementById('receiptPosNo');
+  const elDateTime = document.getElementById('receiptDateTime');
+  const elCashier = document.getElementById('receiptCashierName');
+
+  if (elStoreName) elStoreName.textContent = storeTitle;
+  if (elStoreBranch) elStoreBranch.textContent = branchText;
+  if (elStoreAddress) elStoreAddress.textContent = addressText;
+
+  const trxVal = receipt.trxNo || ('TRX-' + (receipt.tanggal || '').replace(/-/g, '') + '-' + (receipt.id ? receipt.id.slice(-4) : '8821'));
+  if (elTrxNo) elTrxNo.textContent = trxVal;
+  if (elPosNo) elPosNo.textContent = receipt.posNo || 'POS-02';
+
+  const dateFormatted = receipt.tanggal || new Date().toISOString().slice(0, 10);
+  const timeFormatted = receipt.waktu || '20:15:00';
+  if (elDateTime) elDateTime.textContent = `${dateFormatted} ${timeFormatted}`;
+  if (elCashier) elCashier.textContent = receipt.kasir || ((AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna');
+
+  // Populate Items List
+  const itemsContainer = document.getElementById('receiptItemsContainer');
+  if (itemsContainer) {
+    if (!receipt.items || receipt.items.length === 0) {
+      itemsContainer.innerHTML = '<div style="text-align:center; padding: 10px; font-size:10px; color:#64748B;">(Tidak ada rincian barang)</div>';
+    } else {
+      itemsContainer.innerHTML = receipt.items.map(item => {
+        const discNominal = item.diskonNominal || 0;
+        const hasDisc = discNominal > 0;
+        const unitPrice = item.hargaSatuan || item.hargaAkhirSatuan || 0;
+        const rowSubtotal = item.subtotal || item.totalHarga || (item.hargaAkhirSatuan * item.qty);
+
+        return `
+          <div class="receipt-item-row">
+            <div class="receipt-item-name">${escapeHtml(item.namaBarang)}</div>
+            <div class="receipt-item-calc">
+              <span>${item.qty} ${escapeHtml(item.satuan || 'pcs')} x ${formatRupiah(unitPrice)}</span>
+              <span class="receipt-item-subtotal">${formatRupiah(rowSubtotal)}</span>
+            </div>
+            ${hasDisc ? `
+              <div class="receipt-item-discount">
+                <span>  (HEMAT/DISKON)</span>
+                <span>-${formatRupiah(discNominal)}</span>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Populate Ringkasan Total
+  const subtotalVal = receipt.subtotal || receipt.totalBelanja || 0;
+  const discountVal = receipt.totalHemat || 0;
+  const grandTotalVal = receipt.grandTotal || receipt.totalBelanja || 0;
+  const taxVal = receipt.taxPpn || Math.round(grandTotalVal * 0.11);
+  const budgetVal = receipt.budgetSaatItu || AppState.budget || 0;
+  const remainingVal = Math.max(0, budgetVal - grandTotalVal);
+
+  const elSubtotal = document.getElementById('receiptSubtotal');
+  const elDiscount = document.getElementById('receiptDiscount');
+  const elDiscountRow = document.getElementById('receiptDiscountRow');
+  const elTax = document.getElementById('receiptTax');
+  const elGrandTotal = document.getElementById('receiptGrandTotal');
+  const elPaymentUsed = document.getElementById('receiptPaymentUsed');
+  const elRemainingBudget = document.getElementById('receiptRemainingBudget');
+  const elSavingsBanner = document.getElementById('receiptSavingsBanner');
+  const elSavingsHighlight = document.getElementById('receiptSavingsHighlight');
+  const elBarcodeNum = document.getElementById('receiptBarcodeNumber');
+
+  if (elSubtotal) elSubtotal.textContent = formatRupiah(subtotalVal);
+  if (elDiscount) elDiscount.textContent = '-' + formatRupiah(discountVal);
+  if (elDiscountRow) elDiscountRow.style.display = discountVal > 0 ? 'flex' : 'none';
+  if (elTax) elTax.textContent = formatRupiah(taxVal);
+  if (elGrandTotal) elGrandTotal.textContent = formatRupiah(grandTotalVal);
+  if (elPaymentUsed) elPaymentUsed.textContent = formatRupiah(grandTotalVal);
+  if (elRemainingBudget) elRemainingBudget.textContent = formatRupiah(remainingVal);
+
+  // Highlight Kehematan Banner
+  if (elSavingsBanner && elSavingsHighlight) {
+    if (discountVal > 0) {
+      elSavingsHighlight.textContent = formatRupiah(discountVal);
+      elSavingsBanner.style.display = 'block';
+    } else {
+      elSavingsBanner.style.display = 'none';
+    }
+  }
+
+  // Barcode number
+  if (elBarcodeNum) {
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    elBarcodeNum.textContent = `9823 8812 0019 ${randomSuffix}`;
+  }
+
+  return receipt;
+}
+
+function openReceiptModal() {
+  const modal = document.getElementById('receiptModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeReceiptModal() {
+  const modal = document.getElementById('receiptModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function printReceipt() {
+  window.print();
+}
+
+function viewHistoricalReceipt(receiptId) {
+  const rec = (AppState.receipts || []).find(r => r.id === receiptId);
+  if (!rec) {
+    showToast('Struk belanja tidak ditemukan', 'warning');
+    return;
+  }
+  generateReceiptData(rec);
+  openReceiptModal();
 }
 
 // =========================================================================
@@ -2437,6 +3245,7 @@ function renderPantry() {
         <p class="empty-state-desc">Barang yang dibeli saat selesai belanja akan otomatis masuk ke sini.</p>
       </div>
     `;
+    renderPantryCatalog();
     return;
   }
 
@@ -2471,6 +3280,69 @@ function renderPantry() {
   });
 
   container.innerHTML = html;
+  renderPantryCatalog();
+}
+
+// =========================================================================
+// 12B. VISUAL PANTRY PRODUCT CATALOG ALA SHOPEE (PRESET DATA & 1-TAP ADD)
+// =========================================================================
+const PANTRY_CATALOG = [
+  { id: 'pan-cat-1', name: 'Beras 5kg', icon: '🌾', unit: 'karung/5kg', category: 'Kebutuhan Pokok', days: 90, desc: 'Bahan Pokok' },
+  { id: 'pan-cat-2', name: 'Minyak Goreng', icon: '🍳', unit: 'pouch/2L', category: 'Minyak & Bumbu', days: 60, desc: 'Minyak Masak' },
+  { id: 'pan-cat-3', name: 'Garam Dapur', icon: '🧂', unit: 'bungkus', category: 'Minyak & Bumbu', days: 180, desc: 'Bumbu Dapur' },
+  { id: 'pan-cat-4', name: 'Gula Pasir', icon: '🍬', unit: 'kg', category: 'Minyak & Bumbu', days: 90, desc: 'Pemanis Dapur' },
+  { id: 'pan-cat-5', name: 'Kecap Manis', icon: '🍾', unit: 'pouch', category: 'Minyak & Bumbu', days: 90, desc: 'Bumbu Masak' },
+  { id: 'pan-cat-6', name: 'Sabun Cuci', icon: '🍋', unit: 'pouch', category: 'Kebersihan', days: 60, desc: 'Kebersihan' },
+  { id: 'pan-cat-7', name: 'Pasta Gigi', icon: '🪥', unit: 'tube', category: 'Kebersihan', days: 90, desc: 'Kebersihan Diri' },
+  { id: 'pan-cat-8', name: 'Deterjen Bubuk', icon: '🧺', unit: 'bag', category: 'Kebersihan', days: 90, desc: 'Cuci Pakaian' }
+];
+
+function renderPantryCatalog() {
+  const container = document.getElementById('pantryCatalogGrid');
+  if (!container) return;
+
+  container.innerHTML = PANTRY_CATALOG.map(item => `
+    <div class="catalog-card pantry-catalog-card" data-pantry-cat-id="${item.id}">
+      <div class="catalog-thumb-wrap">
+        <span>${item.icon}</span>
+      </div>
+      <div class="catalog-card-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+      <div class="catalog-card-footer">
+        <span class="catalog-card-price" style="font-size: 11px; color: var(--text-subtle); font-weight: 600;">${escapeHtml(item.desc || item.unit)}</span>
+        <button type="button" class="btn-catalog-add btn-pantry-add touch-target"
+          onclick="addPantryCatalogItem('${item.id}')"
+          title="Tambah ke Inventaris Pantry">
+          + Tambah Stok
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addPantryCatalogItem(catalogId) {
+  const item = PANTRY_CATALOG.find(p => p.id === catalogId);
+  if (!item) return;
+
+  const existing = AppState.pantry.find(p => p.name.toLowerCase() === item.name.toLowerCase());
+  if (existing) {
+    existing.qty = (existing.qty || 1) + 1;
+    existing.expiryDate = getOffsetDateString(item.days || 60);
+  } else {
+    AppState.pantry.unshift({
+      id: 'pan-' + Date.now() + Math.random().toString(36).substr(2, 4),
+      name: item.name,
+      qty: 1,
+      unit: item.unit || 'pcs',
+      category: item.category || 'Pantry',
+      addedDate: new Date().toISOString(),
+      expiryDate: getOffsetDateString(item.days || 60)
+    });
+  }
+
+  saveLocalState();
+  renderPantry();
+  playCalmChime();
+  showToast(`"${item.name}" berhasil ditambahkan ke Pantry! 🧺`, 'success');
 }
 
 function openAddPantryModal() {
@@ -2732,7 +3604,11 @@ function renderHistory() {
         <span style="font-weight: 900; font-size: 0.88rem; color: var(--rose-contrast);">${formatRupiah(r.totalBelanja)}</span>
       </div>
       <div style="font-size: 0.7rem; color: var(--text-subtle);">
-        ${r.items.map(i => `${escapeHtml(i.namaBarang)} (${i.qty} ${i.satuan})`).join(', ')}
+        ${(r.items || []).map(i => `${escapeHtml(i.namaBarang)} (${i.qty} ${i.satuan})`).join(', ')}
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--pastel-light-1);">
+        <span style="font-size: 0.68rem; color: var(--text-faint); font-weight: 600;">${(r.items || []).length} jenis barang</span>
+        <button type="button" class="btn-demo-quick" style="margin: 0; padding: 3px 8px; font-size: 0.68rem; font-weight: 700; color: #E91E63;" onclick="viewHistoricalReceipt('${r.id}')">🧾 Lihat Struk Asli</button>
       </div>
     </div>
   `).join('');
@@ -2814,23 +3690,140 @@ function toggleTheme() {
 function applyTheme(isDark) {
   const metaTheme = document.getElementById('themeColorMeta');
   const toggleBtn = document.getElementById('btnThemeToggle');
+  const settingsToggle = document.getElementById('settingsThemeToggle');
 
   if (isDark) {
     document.body.classList.add('dark-mode');
     if (metaTheme) metaTheme.setAttribute('content', '#1A0B14');
     if (toggleBtn) toggleBtn.textContent = '☀️';
+    if (settingsToggle) settingsToggle.checked = true;
   } else {
     document.body.classList.remove('dark-mode');
     if (metaTheme) metaTheme.setAttribute('content', '#FCE7F3');
     if (toggleBtn) toggleBtn.textContent = '🌙';
+    if (settingsToggle) settingsToggle.checked = false;
   }
+}
+
+// =========================================================================
+// 16B. PROFILE & SETTINGS MODAL (Shopee Soft Pink Clean Style)
+// =========================================================================
+
+function openProfileSettingsModal() {
+  const modal = document.getElementById('profileSettingsModal');
+  if (!modal) return;
+
+  // 1. Populate profile details from active user
+  const user = AppState.user || (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser);
+  const userName = (user && (user.name || user.displayName)) || 'Pengguna';
+  const userEmail = (user && user.email) || 'user@email.com';
+  const userPhoto = user && (user.photoURL || user.photo);
+
+  const modalName = document.getElementById('modalUserName');
+  const modalEmail = document.getElementById('modalUserEmail');
+  const modalAvatar = document.getElementById('modalUserAvatar');
+  const modalAvatarFallback = document.getElementById('modalUserAvatarFallback');
+
+  if (modalName) modalName.textContent = userName;
+  if (modalEmail) modalEmail.textContent = userEmail;
+  if (modalAvatar && modalAvatarFallback) {
+    if (userPhoto) {
+      modalAvatar.src = userPhoto;
+      modalAvatar.style.display = 'block';
+      modalAvatarFallback.style.display = 'none';
+    } else {
+      modalAvatar.style.display = 'none';
+      modalAvatarFallback.style.display = 'flex';
+    }
+  }
+
+  // 2. Populate Dark Mode toggle switch
+  const themeToggle = document.getElementById('settingsThemeToggle');
+  if (themeToggle) {
+    themeToggle.checked = document.body.classList.contains('dark-mode');
+  }
+
+  // 3. Populate Sound FX toggle switch
+  const soundToggle = document.getElementById('settingsSoundToggle');
+  if (soundToggle) {
+    soundToggle.checked = AppState.soundEnabled !== false;
+  }
+
+  // 4. Populate PWA status
+  const pwaBtn = document.getElementById('modalBtnInstallPwa');
+  const pwaBadge = document.getElementById('modalPwaInstalledBadge');
+  const isStandalone = (typeof window !== 'undefined') &&
+    ((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (window.navigator && window.navigator.standalone === true));
+  if (isStandalone) {
+    if (pwaBtn) pwaBtn.style.display = 'none';
+    if (pwaBadge) pwaBadge.style.display = 'inline-block';
+  } else {
+    if (pwaBtn) pwaBtn.style.display = 'inline-block';
+    if (pwaBadge) pwaBadge.style.display = 'none';
+  }
+
+  // 5. Populate Cloud Sync status
+  const cloudStatus = document.getElementById('modalCloudSyncStatus');
+  if (cloudStatus) {
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      cloudStatus.className = 'settings-status-pill online';
+      cloudStatus.textContent = '🟢 Tersambung ke Google Cloud';
+    } else {
+      cloudStatus.className = 'settings-status-pill offline';
+      cloudStatus.textContent = '🟠 Mode Offline (LocalStorage)';
+    }
+  }
+
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeProfileSettingsModal() {
+  const modal = document.getElementById('profileSettingsModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function toggleThemeFromSettings(checked) {
+  applyTheme(checked);
+  localStorage.setItem(STORAGE_KEYS.DARK_MODE, checked.toString());
+  showToast(checked ? 'Mode Gelap diaktifkan 🌙' : 'Mode Terang diaktifkan ☀️', 'info');
+}
+
+function toggleSoundFromSettings(checked) {
+  AppState.soundEnabled = checked;
+  localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(checked));
+  const btn = document.getElementById('btnSoundToggle');
+  if (btn) btn.textContent = checked ? '🔊' : '🔇';
+  showToast(checked ? 'Suara Feedback Aktif 🔊' : 'Suara Dibisukan 🔇', 'info');
+}
+
+function handleClearCacheAndReset() {
+  if (typeof caches !== 'undefined') {
+    caches.keys().then(keys => {
+      keys.forEach(k => caches.delete(k));
+    });
+  }
+  showToast('Cache lokal dibersihkan! Memuat ulang aset...', 'success');
+  setTimeout(() => {
+    if (typeof window !== 'undefined' && window.location) {
+      window.location.reload();
+    }
+  }, 600);
+}
+
+function handleProfileLogout() {
+  closeProfileSettingsModal();
+  promptLogout(true);
 }
 
 // =========================================================================
 // 17. TAB SWITCHING (ICON-ONLY BOTTOM DOCK)
 // =========================================================================
-function switchTab(tab) {
-  if (AppState.currentTab === tab) return;
+function switchTab(tab, force = false) {
+  if (AppState.currentTab === tab && !force) return;
   AppState.currentTab = tab;
 
   const tabIndex = { planner: 0, cart: 1, budget: 2, pantry: 3 };
@@ -2930,28 +3923,62 @@ function installPwa() {
 }
 
 // =========================================================================
-// 20. TOAST SYSTEM (NON-BLOCKING)
+// 20. SINGLETON TOAST MANAGER (NON-BLOCKING & DEBOUNCED)
 // =========================================================================
-function showToast(msg, type = 'info') {
+let lastToastMessage = '';
+let lastToastTimestamp = 0;
+let activeToastTimeout = null;
+
+function showToast(message, type = 'info') {
   if (typeof document === 'undefined') return;
-  const container = document.getElementById('toastContainer');
-  if (!container) return;
 
-  const t = document.createElement('div');
-  t.className = `toast-message ${type}`;
+  const now = Date.now();
+  // Cegah pemanggilan ganda jika pesan yang sama dipanggil berulang kali dalam jeda singkat (debounce 1.5s)
+  if (message === lastToastMessage && (now - lastToastTimestamp < 1500)) {
+    return;
+  }
+  lastToastMessage = message;
+  lastToastTimestamp = now;
+
+  // Hapus/bersihkan toast yang sedang tampil sebelumnya
+  if (activeToastTimeout) {
+    clearTimeout(activeToastTimeout);
+    activeToastTimeout = null;
+  }
+  document.querySelectorAll('.app-toast, .toast-message').forEach(t => t.remove());
+
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  // Buat SATU elemen toast baru
+  const toast = document.createElement('div');
+  toast.className = `app-toast toast-message ${type}`;
+
   let icon = 'ℹ️';
-  if (type === 'danger') icon = '⚠️';
-  if (type === 'success') icon = '✅';
+  if (type === 'danger' || type === 'error') icon = '⚠️';
+  else if (type === 'success') icon = '✅';
+  else if (type === 'warning') icon = '⚠️';
 
-  t.innerHTML = `<span>${icon}</span><span>${escapeHtml(msg)}</span>`;
-  container.appendChild(t);
+  toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-text">${escapeHtml(message)}</span>`;
+  container.appendChild(toast);
 
-  setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateY(-10px)';
-    t.style.transition = 'all 0.25s ease';
-    setTimeout(() => t.remove(), 250);
-  }, 2800);
+  // Pasang timer otomatis hilang setelah 2 detik
+  activeToastTimeout = setTimeout(() => {
+    toast.classList.add('fade-out');
+    toast.style.opacity = '0';
+    toast.style.transform = 'translate(-50%, -10px)';
+    toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.remove();
+      }
+    }, 250);
+  }, 2000);
 }
 
 function escapeHtml(str) {
@@ -2995,6 +4022,7 @@ function initApp() {
 
   checkAuth();
   switchTab(AppState.currentTab || 'planner');
+  initDiscountChips();
   renderAll();
 }
 
@@ -3468,6 +4496,15 @@ function resetScannerForNext() {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     BARCODE_CATALOG,
+    PRODUCT_CATALOG,
+    PANTRY_CATALOG,
+    DEFAULT_ROUTINE_ITEMS,
+    checkDailyPlannerReset,
+    executeDailyPlannerReset,
+    shuffleDailyCatalog,
+    toggleItemRoutine,
+    renderPantryCatalog,
+    addPantryCatalogItem,
     calculateDiscount,
     comparePriceWithLastMonth,
     parseSmartInput
@@ -3482,7 +4519,7 @@ if (typeof module !== 'undefined' && module.exports) {
  * Render Dedicated Keranjang Belanja Khusus (Shopee Style Cart -  & UX)
  */
 function renderCartSection() {
-  const container = document.getElementById('dedicatedCartItemsContainer');
+  const container = document.getElementById('cartItemsContainer') || document.getElementById('dedicatedCartItemsContainer');
   const storeDisplay = document.getElementById('cartCurrentStoreDisplay');
   const selectAllCb = document.getElementById('cartSelectAllCheckbox');
   const grandTotalEl = document.getElementById('checkoutGrandTotal');
@@ -3514,8 +4551,8 @@ function renderCartSection() {
     container.innerHTML = `
       <div class="empty-state" style="padding: 36px 16px; text-align: center;">
         <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang belanja masih kosong, silakan tambah atau scan barang pertamamu!</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Tambahkan barang dari rencana belanja atau scan barcode langsung di toko.</p>
+        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang masih kosong</p>
+        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Keranjang belanja masih kosong, silakan tambah atau scan barang pertamamu!</p>
         <button type="button" class="btn-demo-quick" style="width: auto; padding: 6px 16px; margin: 0 auto;" onclick="switchTab('planner')">
           📋 Buka Rencana Belanja
         </button>
@@ -3550,6 +4587,9 @@ function renderCartSection() {
                   ${escapeHtml(item.namaBarang)}
                 </span>
                 <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                  🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
+                </button>
               </div>
               <div class="shopee-compact-actions">
                 <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
@@ -3610,6 +4650,9 @@ function renderCartSection() {
                 </span>
                 <div class="shopee-compact-meta-left">
                   <span class="${comparator.badgeClass}">${comparator.text}</span>
+                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
+                  </button>
                   ${promoBadge ? `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">${promoBadge}</button>` : `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">🏷️ +Diskon</button>`}
                 </div>
               </div>
