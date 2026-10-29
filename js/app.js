@@ -1293,6 +1293,13 @@ function checkAuth() {
       dashboard.style.setProperty('display', 'none', 'important');
       dashboard.classList.add('hidden');
     }
+
+    const profileModal = document.getElementById('profileSettingsModal');
+    if (profileModal) {
+      profileModal.style.display = 'none';
+      profileModal.classList.remove('open', 'active', 'show');
+      profileModal.setAttribute('aria-hidden', 'true');
+    }
   }
 }
 
@@ -3713,6 +3720,13 @@ function openProfileSettingsModal() {
   const modal = document.getElementById('profileSettingsModal');
   if (!modal) return;
 
+  // Guard: Never open profile settings if user is unauthenticated or on login screen
+  if (typeof document !== 'undefined' && document.body && 
+      (document.body.classList.contains('auth-locked') || document.body.classList.contains('unauthenticated')) && 
+      (!AppState.user || !AppState.user.name)) {
+    return;
+  }
+
   // 1. Populate profile details from active user
   const user = AppState.user || (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser);
   const userName = (user && (user.name || user.displayName)) || 'Pengguna';
@@ -3775,6 +3789,7 @@ function openProfileSettingsModal() {
   }
 
   modal.style.display = 'flex';
+  modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
 }
 
@@ -3782,6 +3797,7 @@ function closeProfileSettingsModal() {
   const modal = document.getElementById('profileSettingsModal');
   if (modal) {
     modal.style.display = 'none';
+    modal.classList.remove('open', 'active', 'show');
     modal.setAttribute('aria-hidden', 'true');
   }
 }

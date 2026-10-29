@@ -6872,11 +6872,25 @@ body {
   backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
   z-index: 9999 !important;
-  display: flex !important;
+  display: none;
   align-items: flex-end !important;
   justify-content: center !important;
   box-sizing: border-box !important;
   animation: backdropFadeIn 0.2s ease !important;
+}
+
+.profile-settings-backdrop.open,
+.profile-settings-backdrop.active,
+.profile-settings-backdrop.show {
+  display: flex !important;
+}
+
+/* Guard: Profile Settings must NEVER show on Auth Gate or when hidden */
+body.auth-locked #profileSettingsModal,
+body.unauthenticated #profileSettingsModal,
+#profileSettingsModal[style*="display: none"],
+.profile-settings-backdrop[style*="display: none"] {
+  display: none !important;
 }
 
 @keyframes backdropFadeIn {
