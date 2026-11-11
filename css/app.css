@@ -2893,9 +2893,13 @@ body.in-store-mode-active .app-viewport {
 html,
 body,
 #mainDashboard,
-.content-tab,
 .app-viewport {
-  overflow-x: hidden !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.content-tab {
+  overflow: visible !important;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -7770,16 +7774,22 @@ body.dark-mode .user-header-name {
    ========================================================================= */
 
 /* 1. Total System Scrolling & Padding Bottom */
-#mainDashboard,
+#mainDashboard {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - 70px);
+  padding-bottom: 120px !important;
+}
+
 .content-body,
 .tab-pane,
 #tabBudget,
 #tabPlanner,
 #tabCart,
 #tabPantry {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  max-height: calc(100vh - 70px);
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
   padding-bottom: 120px !important;
 }
 
@@ -8251,8 +8261,9 @@ body.dark-mode #appContainer {
 #tabPlanner,
 #tabCart,
 #tabPantry {
+  overflow: visible !important;
+  overflow-x: visible !important;
   overflow-y: visible !important;
-  overflow-x: hidden !important;
   height: auto !important;
   min-height: auto !important;
   max-height: none !important;
@@ -8448,7 +8459,7 @@ body.dark-mode .quick-price-repurchase-detail {
   position: -webkit-sticky !important;
   position: sticky !important;
   top: calc(52px + env(safe-area-inset-top, 0px)) !important;
-  z-index: 35 !important;
+  z-index: 45 !important;
   background: rgba(255, 255, 255, 0.96) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
@@ -9157,7 +9168,10 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
    ========================================================================== */
 @media (max-width: 640px) {
   .sticky-dashboard-tracker {
+    position: -webkit-sticky !important;
+    position: sticky !important;
     top: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    z-index: 45 !important;
     padding: 6px 10px 5px 10px !important;
     margin-top: 2px !important;
     margin-bottom: 6px !important;
