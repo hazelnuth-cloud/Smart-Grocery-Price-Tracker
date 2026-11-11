@@ -2387,7 +2387,7 @@ function renderItems() {
             <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="handleItemCheckOrPricePrompt('${item.id}', this)">
           </label>
 
-          <!-- Compact Body (Flexbox Horizontal, Shopee Cart Item Layout) -->
+          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
           <div class="shopee-compact-body">
             <!-- Top Row: Judul Produk + Kuantitas Satuan + Badge Riwayat Beli Ulang -->
             <div class="shopee-compact-top">
@@ -2454,7 +2454,7 @@ function renderItems() {
             <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItemCheck('${item.id}')">
           </label>
 
-          <!-- Compact Body (Flexbox Horizontal, Shopee Cart Item Layout) -->
+          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
           <div class="shopee-compact-body">
             <!-- Top Row: Judul Produk + Badge Akurat Kenaikan/Penurunan Beli Ulang -->
             <div class="shopee-compact-top">
@@ -2919,7 +2919,7 @@ function insertParsedItem(parsed) {
 }
 
 // =========================================================================
-// 8B. VISUAL PRODUCT CATALOG ALA SHOPEE (PRESET DATA & 1-TAP ADD)
+// 8B. VISUAL PRODUCT CATALOG (PRESET DATA & 1-TAP ADD)
 // =========================================================================
 const PRODUCT_CATALOG = [
   { id: 'cat-1', name: 'Beras Rojolele 5kg', category: 'staple', icon: '🌾', price: 74000, unit: 'karung/5kg', aisle: 'Bahan Pokok', isRoutine: true },
@@ -3168,7 +3168,7 @@ function toggleItemRoutine(itemId) {
 }
 
 /**
- * Acak & perbarui urutan rekomendasi Katalog Produk Shopee Harian
+ * Acak & perbarui urutan rekomendasi Katalog Produk Harian
  */
 function shuffleDailyCatalog(dateStr) {
   if (!Array.isArray(PRODUCT_CATALOG) || PRODUCT_CATALOG.length === 0) return;
@@ -3255,7 +3255,7 @@ function executeDailyPlannerReset(todayStr, uid) {
     }
   });
 
-  // 3. Acak/perbarui urutan rekomendasi Katalog Produk Shopee Harian
+  // 3. Acak/perbarui urutan rekomendasi Katalog Produk Harian
   shuffleDailyCatalog(todayStr);
 
   // 4. Simpan tanggal hari ini ke storage
@@ -3288,6 +3288,7 @@ function openDetailedItemModal(itemId = null) {
   AppState.editingItemId = itemId;
   const modal = document.getElementById('addItemModal') || document.getElementById('itemDetailModal');
   const title = document.getElementById('itemModalTitle');
+  const subtitle = document.getElementById('itemModalSubtitle');
   const submitBtn = document.getElementById('btnSubmitDetailedItem');
   const advDetails = document.getElementById('detailsAdvancedOptions');
 
@@ -3298,7 +3299,8 @@ function openDetailedItemModal(itemId = null) {
     const item = AppState.cart.find(i => i.id === itemId);
     if (!item) return;
 
-    if (title) title.textContent = 'Ubah Item Belanja';
+    if (title) title.textContent = 'Edit Detail Produk';
+    if (subtitle) subtitle.textContent = 'Ubah nama, jumlah, harga, atau diskon';
     if (submitBtn) submitBtn.textContent = '💾 Simpan Perubahan';
 
     document.getElementById('detailInputName').value = item.namaBarang;
@@ -3336,7 +3338,8 @@ function openDetailedItemModal(itemId = null) {
       advDetails.open = !!(item.diskonValue || item.hargaRiwayatBulanLalu || item.isRoutine || (item.kategori && item.kategori !== 'Kebutuhan Pokok'));
     }
   } else {
-    if (title) title.textContent = 'Tambah Item Belanja';
+    if (title) title.textContent = 'Tambah Produk';
+    if (subtitle) subtitle.textContent = 'Atur detail & estimasi belanja';
     if (submitBtn) submitBtn.textContent = '➕ Tambahkan Barang';
 
     document.getElementById('detailedItemForm').reset();
@@ -4312,7 +4315,7 @@ function renderPantry() {
 }
 
 // =========================================================================
-// 12B. VISUAL PANTRY PRODUCT CATALOG ALA SHOPEE (PRESET DATA & 1-TAP ADD)
+// 12B. VISUAL PANTRY PRODUCT CATALOG (PRESET DATA & 1-TAP ADD)
 // =========================================================================
 const PANTRY_CATALOG = [
   { id: 'pan-cat-1', name: 'Beras 5kg', icon: '🌾', unit: 'karung/5kg', category: 'Kebutuhan Pokok', days: 90, desc: 'Bahan Pokok' },
@@ -4920,7 +4923,7 @@ function applyTheme(isDark) {
 }
 
 // =========================================================================
-// 16B. PROFILE & SETTINGS MODAL (Shopee Soft Pink Clean Style)
+// 16B. PROFILE & SETTINGS MODAL (Soft Pink Clean Style)
 // =========================================================================
 
 function openProfileSettingsModal() {
@@ -5799,11 +5802,11 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // =========================================================================
-// DEDICATED SHOPEE-STYLE COMPACT CART & QUICK DISCOUNT POPOVER
+// DEDICATED COMPACT CART & QUICK DISCOUNT POPOVER
 // =========================================================================
 
 /**
- * Render Dedicated Keranjang Belanja Khusus (Shopee Style Cart -  & UX)
+ * Render Dedicated Keranjang Belanja Khusus (Compact Cart -  & UX)
  */
 function renderCartSection() {
   const container = document.getElementById('cartItemsContainer') || document.getElementById('dedicatedCartItemsContainer');
@@ -5879,7 +5882,7 @@ function renderCartSection() {
             <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="handleItemCheckOrPricePrompt('${item.id}', this)">
           </label>
 
-          <!-- Compact Body (Flexbox Horizontal, Shopee Cart Item Layout) -->
+          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
           <div class="shopee-compact-body">
             <!-- Top Row: Judul Produk + Kuantitas Satuan + Badge Riwayat Beli Ulang -->
             <div class="shopee-compact-top">
@@ -5957,7 +5960,7 @@ function renderCartSection() {
             <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItemCheck('${item.id}')">
           </label>
 
-          <!-- Compact Body (Flexbox Horizontal, Shopee Cart Item Layout) -->
+          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
           <div class="shopee-compact-body">
             <!-- Top Row: Judul Produk + Badge Diskon/Fluktuasi in Center, Edit & Trash on Right Top -->
             <div class="shopee-compact-top">

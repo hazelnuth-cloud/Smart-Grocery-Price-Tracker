@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=65">
+  <link rel="stylesheet" href="./css/app.css?v=66">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -592,7 +592,7 @@
           </div>
         </form>
 
-        <!-- VISUAL PRODUCT CATALOG SECTION (SHOPEE STYLE) -->
+        <!-- VISUAL PRODUCT CATALOG SECTION -->
         <div id="productCatalogSection" class="product-catalog-section">
           <!-- Catalog Section Header -->
           <div class="catalog-section-header">
@@ -651,7 +651,7 @@
     </main>
 
     <!-- ========================================================================
-       TAB 2B: KERANJANG BELANJA KHUSUS & COMPACT (DEDICATED TROLLEY - SHOPEE STYLE)
+       TAB 2B: KERANJANG BELANJA KHUSUS & COMPACT (DEDICATED TROLLEY)
        ======================================================================== -->
     <section id="tabCart" class="content-tab tab-pane content-body">
       <!-- SHOPPING VIEW SEGMENTED CONTROLLER -->
@@ -664,7 +664,7 @@
         </button>
       </div>
 
-      <!-- SINGLE-LINE STORE HEADER & SLIM BUDGET BAR IN CART (SHOPEE STYLE) -->
+      <!-- SINGLE-LINE STORE HEADER & SLIM BUDGET BAR IN CART -->
       <div class="cart-store-header cart-select-all-bar single-line-store-header cart-single-line-store">
         <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
           <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
@@ -689,7 +689,7 @@
         <!-- Rendered via JS -->
       </div>
 
-      <!-- STICKY SHOPEE BOTTOM ACTION BAR (FIXED BOTTOM ALA SHOPEE) -->
+      <!-- STICKY BOTTOM ACTION BAR -->
       <div class="shopee-sticky-bottom-bar">
         <div class="shopee-bottom-left">
           <div class="shopee-bottom-total-row">
@@ -735,7 +735,7 @@
           </div>
         </div>
 
-        <!-- VISUAL PANTRY PRODUCT CATALOG SECTION (SHOPEE STYLE) -->
+        <!-- VISUAL PANTRY PRODUCT CATALOG SECTION -->
         <div id="pantryCatalogSection" class="product-catalog-section pantry-catalog-section" style="margin-top: 14px;">
           <div class="catalog-section-header">
             <div class="catalog-section-title">
@@ -875,7 +875,7 @@
        MODAL: ITEM DETAIL FORM & ATUR PROMO / DISKON
        ======================================================================== -->
   <!-- ========================================================================
-       MODAL: SHOPEE COMPACT BOTTOM SHEET (TAMBAH / UBAH ITEM BELANJA)
+       MODAL: COMPACT FLOATING DETAIL ITEM (TAMBAH / UBAH ITEM BELANJA)
        ======================================================================== -->
   <script>
     // Dual ID alias support for addItemModal and itemDetailModal
@@ -890,13 +890,10 @@
   </script>
   <div id="addItemModal" class="modal-backdrop shopee-bottom-sheet-backdrop" data-modal="itemDetailModal">
     <div class="modal-card shopee-bottom-sheet-card">
-      <!-- Drag handle kecil ala Shopee -->
-      <div class="bottom-sheet-drag-handle"></div>
-
       <div class="modal-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center;">
         <div>
           <h3 id="itemModalTitle" class="serif-font" style="font-size: 1.05rem; color: #222222; margin: 0;">Tambah Item Belanja</h3>
-          <p style="font-size: 0.72rem; color: var(--text-subtle); margin: 2px 0 0;">Cepat &amp; praktis ala Shopee</p>
+          <p id="itemModalSubtitle" style="font-size: 0.72rem; color: var(--text-subtle); margin: 2px 0 0;">Atur kuantitas, harga, dan diskon</p>
         </div>
         <button type="button" class="modal-close-btn touch-target" onclick="closeDetailedItemModal()">&times;</button>
       </div>
@@ -1044,7 +1041,7 @@
           </div>
         </details>
 
-        <!-- Tombol Simpan Shopee Style (Pink, Height 44px, 100% Width) -->
+        <!-- Tombol Simpan (Pink, Height 44px, 100% Width) -->
         <button type="submit" id="btnSubmitDetailedItem" class="btn-shopee-submit touch-target">
           ➕ Tambahkan Barang
         </button>
@@ -1940,7 +1937,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=65"></script>
+  <script src="./js/app.js?v=66"></script>
 
   <!-- Service Worker Registration -->
   <script>
