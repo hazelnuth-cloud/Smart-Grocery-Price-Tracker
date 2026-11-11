@@ -631,6 +631,83 @@ function getCartMetrics() {
   };
 }
 
+/**
+ * Beri efek animasi berdenyut (pulse) dan sorotan visual pada banner / kotak peringatan overbudget
+ */
+function highlightOverbudgetBanner() {
+  if (typeof document === 'undefined') return;
+  const firmBanner = document.getElementById('overbudget-firm-banner');
+  const slimBadge = document.getElementById('overbudget-slim-badge');
+  const plannerAlert = document.getElementById('plannerBudgetAlert');
+  const targets = [firmBanner, slimBadge, plannerAlert].filter(Boolean);
+
+  targets.forEach(el => {
+    el.classList.remove('hidden');
+    el.classList.remove('pulse-highlight');
+    void el.offsetWidth; // Trigger reflow
+    el.classList.add('pulse-highlight');
+  });
+
+  if (firmBanner && !firmBanner.classList.contains('hidden')) {
+    try {
+      firmBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {}
+  }
+
+  setTimeout(() => {
+    targets.forEach(el => {
+      if (el) el.classList.remove('pulse-highlight');
+    });
+  }, 1800);
+}
+
+/**
+ * Memeriksa apakah pengguna saat ini telah melebihi batas anggaran (overbudget)
+ * atau apakah penambahan biaya tertentu akan membuatnya overbudget.
+ * @param {number} additionalCost - Biaya tambahan yang akan ditambahkan ke belanjaan
+ * @returns {boolean}
+ */
+function isUserOverbudget(additionalCost = 0) {
+  const budget = AppState.budget || 0;
+  if (budget <= 0) return false;
+  const metrics = getCartMetrics();
+  const currentTotal = metrics.totalBelanja || 0;
+  const cost = Math.max(0, additionalCost || 0);
+  return (currentTotal > budget) || ((currentTotal + cost) > budget);
+}
+
+/**
+ * Validasi ketat pencegahan overbudget:
+ * Jika overbudget atau penambahan akan melampaui limit anggaran,
+ * blokir aksi, bunyikan alarm peringatan, berikan toast penjelasan detail,
+ * dan buat banner overbudget berkedip (pulse).
+ * @param {string} actionName - Deskripsi tindakan (misal: "menambah barang baru")
+ * @param {number} additionalCost - Estimasi biaya tambahan dari aksi tersebut
+ * @returns {boolean} true jika DIBLOKIR, false jika AMAN/DIIZINKAN
+ */
+function checkOverbudgetBlock(actionName = 'menambah belanjaan', additionalCost = 0) {
+  const budget = AppState.budget || 0;
+  if (budget <= 0) return false; // Anggaran tidak aktif / 0
+
+  const metrics = getCartMetrics();
+  const currentTotal = metrics.totalBelanja || 0;
+  const cost = Math.max(0, additionalCost || 0);
+  const projectedTotal = currentTotal + cost;
+
+  if (currentTotal > budget || projectedTotal > budget) {
+    const deficit = (projectedTotal > budget) ? (projectedTotal - budget) : (currentTotal - budget);
+    playWarningAlertTone();
+    showToast(
+      `🚨 Tidak bisa ${actionName}! Total belanja melebihi batas saldo anggaran dompet (Defisit: ${formatRupiah(deficit)} dari limit ${formatRupiah(budget)}). Kurangi kuantitas atau batalkan barang lain terlebih dahulu!`,
+      'danger'
+    );
+    highlightOverbudgetBanner();
+    return true; // DIBLOKIR
+  }
+
+  return false; // AMAN
+}
+
 // =========================================================================
 // 3. AUDIO SYNTHESIS & MICRO-INTERACTIONS (WEB AUDIO API)
 // =========================================================================
@@ -2225,6 +2302,20 @@ function renderBudget() {
   const pct = AppState.cart.length > 0 ? Math.round((metrics.checkedItemsCount / AppState.cart.length) * 100) : 0;
   if (instorePercent) instorePercent.textContent = `${pct}%`;
   if (instoreBar) instoreBar.style.width = `${pct}%`;
+
+  // Update Finish Shopping buttons visual state when overbudget
+  if (typeof document !== 'undefined') {
+    const finishButtons = document.querySelectorAll('.btn-shopee-finish-action, .btn-finish-shopping, .instore-action-btn.secondary');
+    finishButtons.forEach(btn => {
+      if (safety.level === 'danger') {
+        btn.classList.add('overbudget-blocked');
+        btn.title = `Belanja melebihi anggaran dompet! Defisit ${formatRupiah(totalBelanja - budget)}. Kurangi barang sebelum selesai.`;
+      } else {
+        btn.classList.remove('overbudget-blocked');
+        btn.title = 'Selesai Belanja & Simpan Struk';
+      }
+    });
+  }
 }
 
 // Render Checklist Items with Stepper Touch Targets
@@ -2429,6 +2520,13 @@ function updateItemQty(itemId, delta) {
     return;
   }
 
+  // Jika menambah kuantitas (delta > 0), periksa proteksi overbudget
+  if (delta > 0) {
+    const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+    const addedCost = (disc.finalPrice || item.hargaSatuan || 0) * delta;
+    if (checkOverbudgetBlock('menambah jumlah barang', addedCost)) return;
+  }
+
   item.qty = newQty;
   playSoftPop();
 
@@ -2456,6 +2554,20 @@ function handleQtyDirectInput(itemId, rawVal) {
   const val = parseInt(rawVal, 10);
   if (isNaN(val) || val <= 0) return;
 
+  const prevQty = parseInt(item.qty, 10) || 1;
+  if (val > prevQty) {
+    const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+    const addedCost = (disc.finalPrice || item.hargaSatuan || 0) * (val - prevQty);
+    if (isUserOverbudget(addedCost)) {
+      checkOverbudgetBlock('menambah jumlah barang', addedCost);
+      const inputEl = document.getElementById(`qty-input-${item.id}`);
+      if (inputEl) inputEl.value = prevQty;
+      const cartInputEl = document.getElementById(`cart-qty-${item.id}`);
+      if (cartInputEl) cartInputEl.value = prevQty;
+      return;
+    }
+  }
+
   item.qty = Math.min(val, 9999);
   const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
   const subtotal = disc.finalPrice * item.qty;
@@ -2472,12 +2584,28 @@ function handleQtyBlur(itemId, rawVal) {
   const item = AppState.cart.find(i => i.id === itemId);
   if (!item) return;
 
+  const prevQty = parseInt(item.qty, 10) || 1;
   const val = parseInt(rawVal, 10);
+  let targetQty = 1;
   if (isNaN(val) || val <= 0) {
-    item.qty = 1;
+    targetQty = 1;
   } else {
-    item.qty = Math.min(val, 9999);
+    targetQty = Math.min(val, 9999);
   }
+
+  if (targetQty > prevQty) {
+    const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+    const addedCost = (disc.finalPrice || item.hargaSatuan || 0) * (targetQty - prevQty);
+    if (checkOverbudgetBlock('menambah jumlah barang', addedCost)) {
+      const inputEl = document.getElementById(`qty-input-${item.id}`);
+      if (inputEl) inputEl.value = prevQty;
+      const cartInputEl = document.getElementById(`cart-qty-${item.id}`);
+      if (cartInputEl) cartInputEl.value = prevQty;
+      return;
+    }
+  }
+
+  item.qty = targetQty;
 
   // Koreksi visual input agar user melihat angka yang aman dan valid
   const inputEl = document.getElementById(`qty-input-${item.id}`);
@@ -2686,6 +2814,11 @@ function handleSmartInputSubmit(e) {
     return;
   }
 
+  if (isUserOverbudget()) {
+    checkOverbudgetBlock('menambah barang baru');
+    return;
+  }
+
   isSubmittingSmartInput = true;
   setTimeout(() => isSubmittingSmartInput = false, 350);
 
@@ -2745,6 +2878,8 @@ function proceedBlacklistAdd() {
 }
 
 function insertParsedItem(parsed) {
+  if (checkOverbudgetBlock('menambah barang baru')) return;
+
   const category = detectCategory(parsed.name);
   const history = AppState.priceHistory[parsed.name] || {};
   const historyPrice = history.harga || null;
@@ -2752,6 +2887,8 @@ function insertParsedItem(parsed) {
   // Proteksi duplikasi tidak sengaja: jika nama barang persis sudah ada di rencana (belum dibeli), tambahkan kuantitasnya saja
   const existing = AppState.cart.find(i => (i.namaBarang || '').toLowerCase() === parsed.name.toLowerCase() && !i.checked);
   if (existing) {
+    const addedCost = (existing.hargaSatuan || 0) * (parsed.qty || 1);
+    if (addedCost > 0 && checkOverbudgetBlock('menambah kuantitas barang', addedCost)) return;
     existing.qty = Math.min(9999, (existing.qty || 1) + (parsed.qty || 1));
     playSoftPop();
     pushStateToCloud();
@@ -2840,6 +2977,7 @@ function renderProductCatalog() {
 
   // Tampilkan 4 item saja secara default agar grid ringkas dan tidak scroll terlalu jauh
   const itemsToDisplay = (catalogExpanded || query) ? filtered : filtered.slice(0, 4);
+  const isOver = isUserOverbudget();
 
   let html = itemsToDisplay.map(item => `
     <div class="catalog-card" data-catalog-id="${item.id}">
@@ -2852,9 +2990,9 @@ function renderProductCatalog() {
       </div>
       <div class="catalog-card-footer">
         <span class="catalog-card-price">${formatRupiah(item.price)}</span>
-        <button type="button" class="btn-catalog-add touch-target"
+        <button type="button" class="btn-catalog-add touch-target ${isOver ? 'overbudget-blocked' : ''}"
           onclick="addCatalogItemToPlan('${item.id}')"
-          title="Tambah ke Rencana Belanja">
+          title="${isOver ? 'Anggaran belanja sudah melebihi batas!' : 'Tambah ke Rencana Belanja'}">
           + Tambah
         </button>
       </div>
@@ -2896,6 +3034,9 @@ function addCatalogItemToPlan(catalogId) {
 
   const product = PRODUCT_CATALOG.find(p => p.id === catalogId);
   if (!product) return;
+
+  const addedCost = product.price || 0;
+  if (checkOverbudgetBlock('menambah barang dari katalog', addedCost)) return;
 
   if (checkBlacklist(product.name)) {
     AppState.pendingBlacklistItem = { name: product.name, qty: 1, unit: product.unit };
@@ -2939,6 +3080,12 @@ function addCatalogItemToPlan(catalogId) {
 }
 
 function quickAddFavorite(name, qty, unit, category, price, promoType = 'none', promoVal = '') {
+  const history = AppState.priceHistory[name] || {};
+  const finalPrice = (price !== undefined && price !== null) ? price : (history.harga || 0);
+  const estimatedCost = Math.max(0, finalPrice) * (parseInt(qty, 10) || 1);
+
+  if (checkOverbudgetBlock('menambah barang favorit', estimatedCost)) return;
+
   if (checkBlacklist(name)) {
     AppState.pendingBlacklistItem = { name, qty, unit };
     showBlacklistWarning(name);
@@ -2955,9 +3102,6 @@ function quickAddFavorite(name, qty, unit, category, price, promoType = 'none', 
     showToast(`"${name}" kuantitas ditambah jadi ${existing.qty} ✨`, 'success');
     return;
   }
-
-  const history = AppState.priceHistory[name] || {};
-  const finalPrice = (price !== undefined && price !== null) ? price : (history.harga || 0);
 
   const newItem = {
     id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
@@ -3512,6 +3656,16 @@ function handleDetailedItemFormSubmit(e) {
   if (AppState.editingItemId) {
     const item = AppState.cart.find(i => i.id === AppState.editingItemId);
     if (item) {
+      const oldDisc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+      const oldSubtotal = oldDisc.finalPrice * item.qty;
+      const newDisc = calculateDiscount(hargaSatuan, diskonTipe, diskonValue);
+      const newSubtotal = newDisc.finalPrice * qty;
+      const diffCost = newSubtotal - oldSubtotal;
+
+      if (diffCost > 0 && checkOverbudgetBlock('memperbarui item dengan harga atau jumlah lebih tinggi', diffCost)) {
+        return;
+      }
+
       item.namaBarang = nama;
       item.kategori = kategori;
       item.satuan = satuan;
@@ -3535,6 +3689,10 @@ function handleDetailedItemFormSubmit(e) {
     }
     showToast(`"${nama}" berhasil diperbarui ✨`, 'success');
   } else {
+    const newDisc = calculateDiscount(hargaSatuan, diskonTipe, diskonValue);
+    const addedCost = newDisc.finalPrice * qty;
+    if (checkOverbudgetBlock('menambah barang baru', addedCost)) return;
+
     const newItem = {
       id: 'item-' + Date.now(),
       namaBarang: nama,
@@ -3709,6 +3867,15 @@ function confirmFinishShopping() {
 
   if (!AppState.cart || AppState.cart.length === 0) {
     showToast('Keranjang masih kosong!', 'info');
+    return;
+  }
+
+  const metrics = getCartMetrics();
+  if (metrics.totalBelanja > AppState.budget) {
+    const deficit = metrics.totalBelanja - AppState.budget;
+    playWarningAlertTone();
+    showToast(`🚨 Tidak bisa menyelesaikan belanja! Total belanja melebihi batas saldo anggaran dompet sebesar ${formatRupiah(deficit)}. Kurangi barang atau kuantitas terlebih dahulu!`, 'danger');
+    highlightOverbudgetBanner();
     return;
   }
 
@@ -5537,6 +5704,17 @@ function updateScannedPreview() {
       remainingEl.style.color = '#EF4444';
     }
   }
+
+  const confirmBtn = document.getElementById('btnConfirmScannedAdd');
+  if (confirmBtn) {
+    if (projectedRemaining < 0 || isUserOverbudget(subtotal)) {
+      confirmBtn.classList.add('overbudget-blocked');
+      confirmBtn.title = 'Tidak bisa menambah: melebihi batas saldo anggaran dompet!';
+    } else {
+      confirmBtn.classList.remove('overbudget-blocked');
+      confirmBtn.title = '';
+    }
+  }
 }
 
 function confirmAddScannedProduct() {
@@ -5544,6 +5722,9 @@ function confirmAddScannedProduct() {
 
   const prod = currentScannedItem;
   const qty = currentScannedQty;
+  const addedCost = (prod.price || 0) * (qty || 1);
+
+  if (checkOverbudgetBlock('menambah barang hasil scan barcode', addedCost)) return;
 
   // Check if item already exists in cart
   const existingIndex = AppState.cart.findIndex(i => i.namaBarang.toLowerCase() === prod.name.toLowerCase());
@@ -6172,6 +6353,19 @@ function updateQuickPricePreview() {
       remainEl.style.color = '#DC2626';
     }
   }
+
+  if (typeof document !== 'undefined') {
+    const saveBtn = document.querySelector('#quickPriceModal .btn-primary');
+    if (saveBtn) {
+      if (safety.level === 'danger') {
+        saveBtn.classList.add('overbudget-blocked');
+        saveBtn.title = 'Tidak bisa membeli barang ini: total belanja akan melebihi saldo anggaran!';
+      } else {
+        saveBtn.classList.remove('overbudget-blocked');
+        saveBtn.title = '';
+      }
+    }
+  }
 }
 
 let isSavingQuickPrice = false;
@@ -6195,16 +6389,24 @@ function saveQuickPrice() {
     return;
   }
 
+  const rawQty = parseInt(document.getElementById('quickPriceQtyInput')?.value, 10);
+  const targetQty = (!isNaN(rawQty) && rawQty >= 1) ? Math.min(rawQty, 9999) : 1;
+
+  // Evaluasi dampak perubahan harga/kuantitas terhadap anggaran belanja
+  const oldDisc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+  const oldSubtotal = oldDisc.finalPrice * (item.qty || 1);
+  const newDisc = calculateDiscount(price, item.diskonTipe, item.diskonValue);
+  const newSubtotal = newDisc.finalPrice * targetQty;
+  const diffCost = newSubtotal - oldSubtotal;
+
+  if (diffCost > 0 && checkOverbudgetBlock('membeli barang ini dengan harga tersebut', diffCost)) {
+    return;
+  }
+
   isSavingQuickPrice = true;
   setTimeout(() => isSavingQuickPrice = false, 600);
 
-  const rawQty = parseInt(document.getElementById('quickPriceQtyInput')?.value, 10);
-  if (!isNaN(rawQty) && rawQty >= 1) {
-    item.qty = Math.min(rawQty, 9999);
-  } else {
-    item.qty = 1;
-  }
-
+  item.qty = targetQty;
   item.hargaSatuan = price;
   item.checked = true; // Otomatis aktif & masuk hitungan keranjang
   item.store = AppState.currentStore;
