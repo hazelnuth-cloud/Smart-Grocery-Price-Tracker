@@ -2013,6 +2013,59 @@ async function loginWithGoogle() {
   }
 }
 
+/**
+ * Sinkronisasi Akun Lokal ke Cloud Firestore & Firebase Auth
+ * Menjamin akun yang dibuat di HP langsung terbaca di laptop atau perangkat lain
+ */
+async function syncLocalAccountsToCloud() {
+  if (typeof firebase === 'undefined') return;
+  try {
+    const users = getRegisteredUsers();
+    if (AppState.user && AppState.user.email && AppState.user.authProvider === 'email') {
+      const exists = users.find(u => u.email.toLowerCase() === AppState.user.email.toLowerCase());
+      if (!exists && AppState.user.password) {
+        users.push(AppState.user);
+      }
+    }
+
+    if (!users || users.length === 0) return;
+
+    for (const u of users) {
+      if (!u || !u.email) continue;
+      const cleanEmail = u.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+
+      // 1. Cadangkan ke Cloud Firestore collection 'registered_accounts'
+      if (firestoreDb) {
+        try {
+          await firestoreDb.collection('registered_accounts').doc(cleanEmail).set({
+            name: u.name || cleanEmail,
+            email: u.email.toLowerCase().trim(),
+            password: u.password || '',
+            uid: u.uid || getDeterministicUid(u.email, 'usr_'),
+            photoURL: u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'User')}&background=E91E63&color=fff&bold=true`,
+            authProvider: u.authProvider || 'email',
+            lastSynced: new Date().toISOString()
+          }, { merge: true });
+        } catch (fsErr) {
+          console.info('Firestore account backup notice:', fsErr);
+        }
+      }
+
+      // 2. Daftarkan ke Firebase Auth jika belum terdaftar
+      if (firebase.auth && u.password && u.password.length >= 6) {
+        try {
+          await firebase.auth().createUserWithEmailAndPassword(u.email, u.password);
+          console.log('Akun berhasil dicadangkan ke Firebase Auth:', u.email);
+        } catch (authErr) {
+          // auth/email-already-in-use berarti sudah ada di Firebase Auth
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('syncLocalAccountsToCloud notice:', err);
+  }
+}
+
 async function handleAuthSubmit(e) {
   e.preventDefault();
   clearAuthAlert();
@@ -2038,19 +2091,21 @@ async function handleAuthSubmit(e) {
     return;
   }
 
+  const cleanEmail = email.replace(/[^a-z0-9]/g, '_');
+
   if (AppState.authMode === 'signup') {
     // ---------------------------------------------------------------------
-    // SIGN UP FLOW
+    // SIGN UP FLOW (CROSS-DEVICE CLOUD SYNC)
     // ---------------------------------------------------------------------
     if (!name) {
       name = email.split('@')[0];
       name = name.charAt(0).toUpperCase() + name.slice(1);
     }
 
-    // Check if email already registered locally
+    // 1. Cek duplikasi lokal
     const users = getRegisteredUsers();
-    const existing = users.find(u => u.email.toLowerCase() === email);
-    if (existing) {
+    const existingLocal = users.find(u => u.email.toLowerCase() === email);
+    if (existingLocal) {
       setAuthAlert(`Email "${email}" sudah terdaftar! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
       showToast('Email sudah terdaftar, silakan Masuk', 'warning');
       switchAuthMode('signin');
@@ -2062,7 +2117,27 @@ async function handleAuthSubmit(e) {
       return;
     }
 
-    // Try live Firebase Auth signup if available
+    // 2. Cek duplikasi di Cloud Firestore jika online
+    if (firestoreDb) {
+      try {
+        const docSnap = await firestoreDb.collection('registered_accounts').doc(cleanEmail).get();
+        if (docSnap.exists) {
+          setAuthAlert(`Email "${email}" sudah terdaftar di Cloud! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
+          showToast('Email sudah terdaftar, silakan Masuk', 'warning');
+          switchAuthMode('signin');
+          if (emailInput) emailInput.value = email;
+          if (passInput) {
+            passInput.value = '';
+            passInput.focus();
+          }
+          return;
+        }
+      } catch (fsErr) {
+        console.warn('Firestore duplicate check notice:', fsErr);
+      }
+    }
+
+    // 3. Daftarkan ke live Firebase Authentication
     let isLive = false;
     let fbUid = null;
     if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -2100,9 +2175,19 @@ async function handleAuthSubmit(e) {
       createdAt: new Date().toISOString()
     };
 
-    // Save to registered users database
+    // 4. Simpan ke database pengguna lokal
     users.push(newUser);
     saveRegisteredUsers(users);
+
+    // 5. Simpan ke Cloud Firestore agar langsung tersinkronisasi ke laptop/perangkat lain
+    if (firestoreDb) {
+      try {
+        await firestoreDb.collection('registered_accounts').doc(cleanEmail).set(newUser, { merge: true });
+        console.log('Profil akun tersimpan di Cloud Firestore:', cleanEmail);
+      } catch (fsErr) {
+        console.warn('Gagal menyimpan profil akun ke Firestore:', fsErr);
+      }
+    }
 
     AppState.user = {
       name,
@@ -2123,11 +2208,12 @@ async function handleAuthSubmit(e) {
     showToast(`Akun berhasil dibuat! Selamat datang, ${name} ✨`, 'success');
   } else {
     // ---------------------------------------------------------------------
-    // SIGN IN FLOW
+    // SIGN IN FLOW (CROSS-DEVICE CLOUD SUPPORT)
     // ---------------------------------------------------------------------
     let isLive = false;
     let fbUser = null;
 
+    // 1. Coba login via Firebase Authentication (Server Resmi)
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
@@ -2137,14 +2223,43 @@ async function handleAuthSubmit(e) {
         }
       } catch (fbErr) {
         console.info('Firebase Auth signin note:', fbErr.code || fbErr.message);
+        if (fbErr.code === 'auth/wrong-password' || fbErr.code === 'auth/invalid-credential') {
+          setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan coba lagi!', 'danger');
+          showToast('Kata sandi salah!', 'danger');
+          if (passInput) {
+            passInput.value = '';
+            passInput.focus();
+          }
+          return;
+        }
       }
     }
 
+    // 2. Cek di registri lokal (localStorage)
     const users = getRegisteredUsers();
-    const foundUser = users.find(u => u.email.toLowerCase() === email);
+    let foundUser = users.find(u => u.email.toLowerCase() === email);
+
+    // 3. Jika belum ada di lokal (misal baru buka di laptop), ambil dari Cloud Firestore!
+    if (!foundUser && firestoreDb) {
+      try {
+        const docSnap = await firestoreDb.collection('registered_accounts').doc(cleanEmail).get();
+        if (docSnap.exists) {
+          const remoteUser = docSnap.data();
+          if (remoteUser && remoteUser.email) {
+            foundUser = remoteUser;
+            // Cache ke lokal browser agar berikutnya instan
+            users.push(remoteUser);
+            saveRegisteredUsers(users);
+            console.log('Akun berhasil diunduh dari Cloud Firestore ke perangkat ini:', cleanEmail);
+          }
+        }
+      } catch (fsErr) {
+        console.warn('Gagal mengambil profil akun dari Firestore:', fsErr);
+      }
+    }
 
     if (foundUser) {
-      // Validate password
+      // Validasi kata sandi
       if (foundUser.password && foundUser.password !== pass) {
         setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan coba lagi!', 'danger');
         showToast('Kata sandi salah!', 'danger');
@@ -2155,17 +2270,32 @@ async function handleAuthSubmit(e) {
         return;
       }
 
+      // Jika belum aktif di Firebase Auth, daftarkan secara seamless
+      if (!isLive && typeof firebase !== 'undefined' && firebase.auth && pass && pass.length >= 6) {
+        try {
+          const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+          if (cred && cred.user) isLive = true;
+        } catch (e) {
+          if (e.code === 'auth/email-already-in-use') {
+            try {
+              const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
+              if (cred && cred.user) isLive = true;
+            } catch (e2) {}
+          }
+        }
+      }
+
       AppState.user = {
         name: foundUser.name,
         email: foundUser.email,
-        uid: foundUser.uid,
+        uid: foundUser.uid || getDeterministicUid(foundUser.email, 'usr_'),
         photoURL: foundUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(foundUser.name)}&background=E91E63&color=fff&bold=true`,
         authProvider: 'email',
         isLiveFirebaseSession: isLive,
         loggedAt: new Date().toISOString()
       };
 
-      loadUserIsolatedState(foundUser.uid);
+      loadUserIsolatedState(AppState.user.uid);
       saveLocalState();
       playCelebrationFanfare();
       triggerCuteLoginConfetti();
@@ -2181,7 +2311,7 @@ async function handleAuthSubmit(e) {
       return;
     }
 
-    // User not found in local registry nor in live Firebase
+    // Pengguna tidak ditemukan di manapun
     setAuthAlert(`Email "${email}" belum terdaftar! Silakan pilih tab "Daftar" untuk membuat akun baru.`, 'warning');
     showToast('Email belum terdaftar. Silakan buat akun baru!', 'warning');
     if (emailInput) emailInput.focus();
@@ -2570,8 +2700,8 @@ function renderBudget() {
   const trackerSpentVal = document.getElementById('trackerSpentVal');
   const trackerPercentVal = document.getElementById('trackerPercentVal');
 
+  // Reuse activeSpend computed earlier
   const isPlanner = (AppState.currentTab === 'planner');
-  const activeSpend = isPlanner ? (totalBelanja > 0 ? totalBelanja : (metrics.totalAll || totalBelanja)) : totalBelanja;
 
   if (trackerSaldoLabel && trackerSaldoValue) {
     if (safety.sisa >= 0) {
@@ -5331,6 +5461,7 @@ function saveCustomFirebaseConfig() {
     const parsedConfig = JSON.parse(customJsonInput.value.trim());
     localStorage.setItem(STORAGE_KEYS.FIREBASE_CONFIG, JSON.stringify(parsedConfig));
     initFirestoreSync();
+  setTimeout(syncLocalAccountsToCloud, 600);
     showToast('Konfigurasi Firebase berhasil disimpan! ⚙️', 'success');
   } catch (err) {
     showToast('Format JSON Firebase tidak valid: ' + (err.message || ''), 'danger');
@@ -5413,6 +5544,7 @@ function handleSaveCloudSession(e) {
       const parsedConfig = JSON.parse(customJsonInput.value.trim());
       localStorage.setItem(STORAGE_KEYS.FIREBASE_CONFIG, JSON.stringify(parsedConfig));
       initFirestoreSync();
+  setTimeout(syncLocalAccountsToCloud, 600);
     } catch (err) {
       showToast('Format JSON Firebase tidak valid!', 'danger');
       return;
@@ -5866,6 +5998,7 @@ function initApp() {
   initTheme();
   loadLocalState();
   initFirestoreSync();
+  setTimeout(syncLocalAccountsToCloud, 600);
   document.body.classList.toggle('in-store-mode-active', !!AppState.inStoreMode);
 
   const fabIcon = document.getElementById('fabIcon');
@@ -6969,6 +7102,7 @@ if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
     showToast('Koneksi internet terhubung kembali 🌐 Sinkronisasi Cloud aktif', 'success');
     initFirestoreSync();
+  setTimeout(syncLocalAccountsToCloud, 600);
     pushStateToCloud();
   });
   window.addEventListener('offline', () => {
@@ -6989,6 +7123,7 @@ if (typeof window !== 'undefined') {
   window.toggleAuthMode = toggleAuthMode;
   window.loginWithGoogle = loginWithGoogle;
   window.handleAuthSubmit = handleAuthSubmit;
+  window.syncLocalAccountsToCloud = syncLocalAccountsToCloud;
   window.loginDemoAccount = loginDemoAccount;
   window.handleProfileLogout = handleProfileLogout;
   window.promptLogout = promptLogout;

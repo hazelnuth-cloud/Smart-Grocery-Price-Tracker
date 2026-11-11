@@ -1,6 +1,7 @@
 {
   "auth": {
     "providers": {
+      "emailPassword": true,
       "googleSignIn": {
         "oAuthBrandDisplayName": "Smart Grocery Price Tracker",
         "supportEmail": "evelinametta@mutiarabangsa.sch.id",
@@ -12,4 +13,3 @@
     }
   }
 }
-
