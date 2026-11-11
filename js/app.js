@@ -1505,6 +1505,19 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
     saveSavedGoogleAccounts(accounts);
   }
 
+  // Backup profile to Cloud Firestore registered_accounts
+  if (firestoreDb && u.email) {
+    const cleanEmail = u.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    firestoreDb.collection('registered_accounts').doc(cleanEmail).set({
+      name: displayName,
+      email: u.email.toLowerCase().trim(),
+      uid: uid,
+      photoURL: photoURL,
+      authProvider: providerType || 'google',
+      lastLogin: new Date().toISOString()
+    }, { merge: true }).catch(err => console.info('Firestore profile sync notice:', err));
+  }
+
   // Load isolated local storage for this specific user UID
   loadUserIsolatedState(uid);
   saveLocalState();
@@ -1961,56 +1974,75 @@ function handleGooglePopupSuccess(u) {
   setTimeout(() => { isInitialAppLoad = false; }, 600);
 }
 
+function getAuthErrorMessage(err) {
+  if (!err) return 'Terjadi kesalahan saat masuk.';
+  switch (err.code) {
+    case 'auth/unauthorized-domain':
+      return 'Domain aplikasi belum terdaftar di Firebase Authorized Domains.';
+    case 'auth/popup-blocked':
+      return 'Pop-up diblokir peramban. Mengalihkan ke login resmi Google...';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return 'Masuk dengan Google dibatalkan.';
+    case 'auth/network-request-failed':
+      return 'Koneksi jaringan terputus. Silakan coba lagi.';
+    case 'auth/user-disabled':
+      return 'Akun Google ini telah dinonaktifkan.';
+    case 'auth/operation-not-allowed':
+      return 'Layanan masuk Google belum diaktifkan di Firebase Console.';
+    default:
+      return err.message || 'Gagal masuk dengan Google.';
+  }
+}
+
 async function loginWithGoogle() {
   playSoftPop();
   clearAuthAlert();
   purgeLegacyAudreyData();
 
-  // 1. Official Firebase Google Auth Popup (Active & Configured on smart-grocery-tracker-52ac2)
+  // 1. Official Firebase Google Auth (Popup for Desktop, Seamless Redirect for Mobile/Blocked popups)
   if (typeof firebase !== 'undefined' && firebase.auth && typeof window.initGoogleAuthProvider === 'function') {
-    try {
-      const provider = window.initGoogleAuthProvider();
-      if (provider) {
-        showToast('Membuka jendela masuk Google...', 'info');
+    const provider = window.initGoogleAuthProvider();
+    if (provider) {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      showToast('Menghubungkan ke Google...', 'info');
+
+      try {
         const result = await firebase.auth().signInWithPopup(provider);
         if (result && result.user) {
           result.user.isLiveFirebaseSession = true;
           handleSuccessfulAuth(result.user, 'google', true);
           return;
         }
-      }
-    } catch (popupError) {
-      console.warn('Firebase signInWithPopup notice:', popupError);
-      if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
-        showToast('Login Google dibatalkan.', 'info');
+      } catch (popupError) {
+        console.warn('Firebase signInWithPopup notice:', popupError);
+
+        // Jika user menutup jendela pop-up secara manual
+        if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
+          showToast('Masuk dengan Google dibatalkan.', 'info');
+          return;
+        }
+
+        // Jika pop-up diblokir peramban atau di perangkat mobile: alihkan langsung ke Google resmi via redirect
+        if (popupError.code === 'auth/popup-blocked' || isMobile) {
+          showToast('Mengalihkan ke pemilih akun Google resmi di perangkat Anda...', 'info');
+          try {
+            await firebase.auth().signInWithRedirect(provider);
+            return;
+          } catch (redirErr) {
+            console.error('signInWithRedirect error:', redirErr);
+            showToast(getAuthErrorMessage(redirErr), 'error');
+            return;
+          }
+        }
+
+        showToast(getAuthErrorMessage(popupError), 'error');
         return;
       }
-      showToast('Mengalihkan ke pemilih akun Google...', 'info');
     }
   }
 
-  // 2. Safe Fallback: Google Account Chooser popup window (500x620 centered)
-  const width = 500;
-  const height = 620;
-  const left = Math.max(0, Math.round((window.screen.width - width) / 2));
-  const top = Math.max(0, Math.round((window.screen.height - height) / 2));
-  const popupFeatures = `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,scrollbars=yes`;
-
-  let authPopup = null;
-  try {
-    authPopup = window.open('google-auth.html', 'GoogleSignIn', popupFeatures);
-  } catch (e) {
-    console.warn('Popup window open notice:', e);
-  }
-
-  if (!authPopup || authPopup.closed || typeof authPopup.closed === 'undefined') {
-    showToast('Jendela pop-up diblokir peramban. Menampilkan pemilih akun...', 'info');
-    openGoogleAuthModal();
-  } else {
-    try {
-      authPopup.focus();
-    } catch (e) {}
-  }
+  showToast('Layanan Firebase tidak dapat dijangkau. Periksa koneksi internet Anda.', 'error');
 }
 
 /**
