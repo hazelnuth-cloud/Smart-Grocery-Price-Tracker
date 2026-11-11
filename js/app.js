@@ -869,12 +869,12 @@ let activeConfettiAnimId = null;
 function triggerCuteLoginConfetti() {
   if (typeof document === 'undefined' || typeof window === 'undefined') return;
 
-  // Respect reduced motion preference
+  // Respect user preference for reduced motion
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return;
   }
 
-  // Cancel any currently running confetti animation cleanly
+  // Cancel any running confetti cleanly to prevent duplicate stacking
   if (activeConfettiAnimId) {
     cancelAnimationFrame(activeConfettiAnimId);
     activeConfettiAnimId = null;
@@ -895,7 +895,7 @@ function triggerCuteLoginConfetti() {
   canvas.style.pointerEvents = 'none';
   canvas.style.zIndex = '999999';
   canvas.style.opacity = '1';
-  canvas.style.transition = 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+  canvas.style.transition = 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
   document.body.appendChild(canvas);
 
   if (typeof canvas.getContext !== 'function') return;
@@ -906,46 +906,48 @@ function triggerCuteLoginConfetti() {
   const w = (canvas.width = Math.round(window.innerWidth * dpr));
   const h = (canvas.height = Math.round(window.innerHeight * dpr));
 
-  // Cute, cheerful palette: soft pinks, candy roses, warm gold, lilac & mint
+  // Vibrant, cheerful pastel-candy palette
   const CUTE_PALETTE = [
-    '#FF6584', '#E91E63', '#F472B6', '#FDA4AF', '#FB7185',
-    '#C084FC', '#A855F7', '#FBBF24', '#FCD34D', '#34D399', '#38BDF8'
+    '#FF4B72', '#E91E63', '#F472B6', '#FDA4AF', '#FB7185',
+    '#C084FC', '#A855F7', '#FBBF24', '#FDE047', '#34D399', '#38BDF8'
   ];
-  // Adorable celebratory love, stars & sweets emojis
   const CUTE_EMOJIS = ['💖', '💕', '❤️', '🌸', '✨', '⭐', '🎀', '🍓', '🎉', '🥰'];
 
-  const count = Math.min(95, Math.max(50, Math.floor(window.innerWidth / 4.8)));
+  const count = Math.min(100, Math.max(55, Math.floor(window.innerWidth / 4.5)));
   const particles = [];
 
   for (let i = 0; i < count; i++) {
-    const isBurst = (i < count * 0.45); // 45% burst upward from bottom/center
     const typeRoll = Math.random();
     let type = 'heart';
-    if (typeRoll < 0.42) type = 'heart';
-    else if (typeRoll < 0.68) type = 'emoji';
-    else if (typeRoll < 0.88) type = 'ribbon';
+    if (typeRoll < 0.40) type = 'heart';
+    else if (typeRoll < 0.65) type = 'emoji';
+    else if (typeRoll < 0.85) type = 'ribbon';
     else type = 'sparkle';
 
     const emoji = CUTE_EMOJIS[Math.floor(Math.random() * CUTE_EMOJIS.length)];
     const color = CUTE_PALETTE[Math.floor(Math.random() * CUTE_PALETTE.length)];
     const size = (type === 'emoji') ? (18 + Math.random() * 12) * dpr :
-                 (type === 'heart') ? (13 + Math.random() * 13) * dpr :
+                 (type === 'heart') ? (12 + Math.random() * 12) * dpr :
                  (type === 'ribbon') ? (8 + Math.random() * 8) * dpr :
-                 (5 + Math.random() * 6) * dpr;
+                 (6 + Math.random() * 6) * dpr;
 
     let x, y, vx, vy;
+    const isBurst = (i < count * 0.6); // 60% twin bottom-corner cannons
     if (isBurst) {
-      x = w * (0.35 + Math.random() * 0.3);
-      y = h * (0.45 + Math.random() * 0.2);
-      const angle = (Math.PI * 1.1) + (Math.random() * Math.PI * 0.8);
-      const speed = (6.5 + Math.random() * 11) * dpr;
+      const fromLeft = (i % 2 === 0);
+      x = fromLeft ? w * (0.05 + Math.random() * 0.12) : w * (0.83 + Math.random() * 0.12);
+      y = h * (0.75 + Math.random() * 0.18);
+      const angle = fromLeft
+        ? (-Math.PI * 0.48 + (Math.random() - 0.5) * 0.45)
+        : (-Math.PI * 0.52 - (Math.random() - 0.5) * 0.45);
+      const speed = (9 + Math.random() * 12) * dpr;
       vx = Math.cos(angle) * speed;
       vy = Math.sin(angle) * speed;
     } else {
       x = Math.random() * w;
-      y = -20 * dpr - Math.random() * 120 * dpr;
-      vx = (Math.random() - 0.5) * 3.5 * dpr;
-      vy = (2.2 + Math.random() * 4.2) * dpr;
+      y = -15 * dpr - Math.random() * 80 * dpr;
+      vx = (Math.random() - 0.5) * 3 * dpr;
+      vy = (2.0 + Math.random() * 3.8) * dpr;
     }
 
     particles.push({
@@ -957,43 +959,62 @@ function triggerCuteLoginConfetti() {
       y,
       vx,
       vy,
-      gravity: (0.2 + Math.random() * 0.12) * dpr,
+      gravity: (0.18 + Math.random() * 0.10) * dpr,
       drag: 0.985,
       wobble: Math.random() * Math.PI * 2,
-      wobbleSpeed: 0.04 + Math.random() * 0.05,
+      wobbleSpeed: 0.04 + Math.random() * 0.04,
       rotation: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.12,
+      rotSpeed: (Math.random() - 0.5) * 0.10,
       tilt: Math.random() * Math.PI * 2,
-      tiltSpeed: 0.05 + Math.random() * 0.08,
+      tiltSpeed: 0.05 + Math.random() * 0.07,
       opacity: 1,
-      fadeSpeed: 0.0035 + Math.random() * 0.004
+      fadeSpeed: 0.0035 + Math.random() * 0.003
     });
   }
 
-  const startTime = Date.now();
-  const maxDuration = 3800; // 3.8s total duration
+  const startTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  const maxDuration = 3600;
 
-  function drawHeart(ctx, x, y, size, color, rotation, tilt, opacity) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(rotation);
-    ctx.scale(Math.cos(tilt), 1);
-    ctx.globalAlpha = Math.max(0, opacity);
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    const topCurve = size * 0.35;
-    ctx.moveTo(0, topCurve);
-    ctx.bezierCurveTo(0, 0, -size / 2, 0, -size / 2, topCurve);
-    ctx.bezierCurveTo(-size / 2, (size + topCurve) / 2, 0, size * 1.1, 0, size * 1.35);
-    ctx.bezierCurveTo(0, size * 1.1, size / 2, (size + topCurve) / 2, size / 2, topCurve);
-    ctx.bezierCurveTo(size / 2, 0, 0, 0, 0, topCurve);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+  function drawCuteHeart(c, x, y, s, col, rot, tilt, op) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(rot);
+    c.scale(Math.cos(tilt), 1);
+    c.globalAlpha = Math.max(0, Math.min(1, op));
+    c.fillStyle = col;
+    c.beginPath();
+    const half = s * 0.5;
+    c.moveTo(0, -half * 0.3);
+    c.bezierCurveTo(-half * 0.5, -half * 1.1, -half * 1.4, -half * 0.4, -half * 1.4, half * 0.2);
+    c.bezierCurveTo(-half * 1.4, half * 0.8, -half * 0.5, half * 1.3, 0, half * 1.7);
+    c.bezierCurveTo(half * 0.5, half * 1.3, half * 1.4, half * 0.8, half * 1.4, half * 0.2);
+    c.bezierCurveTo(half * 1.4, -half * 0.4, half * 0.5, -half * 1.1, 0, -half * 0.3);
+    c.closePath();
+    c.fill();
+    c.restore();
   }
 
-  function renderFrame() {
-    const elapsed = Date.now() - startTime;
+  function drawCuteSparkle(c, x, y, s, col, rot, op) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(rot);
+    c.globalAlpha = Math.max(0, Math.min(1, op));
+    c.fillStyle = col;
+    const rad = s * 0.6;
+    c.beginPath();
+    c.moveTo(0, -rad * 1.5);
+    c.quadraticCurveTo(0, 0, rad * 1.5, 0);
+    c.quadraticCurveTo(0, 0, 0, rad * 1.5);
+    c.quadraticCurveTo(0, 0, -rad * 1.5, 0);
+    c.quadraticCurveTo(0, 0, 0, -rad * 1.5);
+    c.closePath();
+    c.fill();
+    c.restore();
+  }
+
+  function renderFrame(now) {
+    const currentTime = now || ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+    const elapsed = currentTime - startTime;
     ctx.clearRect(0, 0, w, h);
 
     let activeCount = 0;
@@ -1002,7 +1023,7 @@ function triggerCuteLoginConfetti() {
       if (p.opacity <= 0 || p.y > h + 50 * dpr) continue;
       activeCount++;
 
-      p.x += p.vx + Math.sin(p.wobble) * (1.6 * dpr);
+      p.x += p.vx + Math.sin(p.wobble) * (1.4 * dpr);
       p.y += p.vy;
       p.vx *= p.drag;
       p.vy += p.gravity;
@@ -1010,7 +1031,6 @@ function triggerCuteLoginConfetti() {
       p.rotation += p.rotSpeed;
       p.tilt += p.tiltSpeed;
 
-      // Start gentle fade-out after 1.8s
       if (elapsed > 1800) {
         p.opacity -= p.fadeSpeed * 1.8;
       }
@@ -1020,9 +1040,9 @@ function triggerCuteLoginConfetti() {
       } else if (p.type === 'emoji') {
         ctx.save();
         ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation * 0.5);
-        ctx.globalAlpha = Math.max(0, p.opacity);
-        ctx.font = `${Math.round(p.size)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+        ctx.rotate(p.rotation * 0.4);
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.opacity));
+        ctx.font = `${Math.round(p.size)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(p.emoji, 0, 0);
@@ -1032,20 +1052,12 @@ function triggerCuteLoginConfetti() {
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
         ctx.scale(Math.cos(p.tilt), 1);
-        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.opacity));
         ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        ctx.fillRect(-p.size * 0.5, -p.size * 0.25, p.size, p.size * 0.5);
         ctx.restore();
       } else {
-        // Sparkle
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.globalAlpha = Math.max(0, p.opacity);
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(0, 0, p.size / 3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        drawCuteSparkle(ctx, p.x, p.y, p.size, p.color, p.rotation, p.opacity);
       }
     }
 
@@ -1059,7 +1071,7 @@ function triggerCuteLoginConfetti() {
           else canvas.parentNode.removeChild(canvas);
         }
         activeConfettiAnimId = null;
-      }, 600);
+      }, 650);
     }
   }
 
