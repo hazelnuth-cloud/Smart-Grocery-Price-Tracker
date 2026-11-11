@@ -12,6 +12,8 @@
 // Storage Keys
 const STORAGE_KEYS = {
   USER: 'smart_grocery_user',
+  REGISTERED_USERS: 'smart_grocery_registered_users',
+  GOOGLE_ACCOUNTS: 'smart_grocery_google_accounts',
   CART: 'smart_grocery_cart',
   STORE: 'smart_grocery_store',
   DATE: 'smart_grocery_date',
@@ -596,36 +598,123 @@ function getStoredItem(key) {
 }
 
 function loadUserIsolatedState(uid) {
-  if (!uid) return;
+  if (!uid) uid = 'guest';
   try {
+    // 1. User-isolated cart with robust fallback
     const userCart = localStorage.getItem('grocery_cart_' + uid);
     if (userCart) {
-      AppState.cart = JSON.parse(userCart);
+      try {
+        AppState.cart = JSON.parse(userCart);
+      } catch (e) {
+        AppState.cart = [];
+      }
+    } else {
+      // Fallback: check global STORAGE_KEYS.CART
+      const fallbackCart = getStoredItem(STORAGE_KEYS.CART);
+      if (fallbackCart) {
+        try {
+          AppState.cart = JSON.parse(fallbackCart);
+        } catch (e) {
+          AppState.cart = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS)) : [];
+        }
+      } else {
+        AppState.cart = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS)) : [];
+      }
     }
 
-    const userStore = localStorage.getItem('grocery_store_' + uid);
-    if (userStore) AppState.currentStore = userStore;
+    // 2. User-isolated store
+    const userStore = localStorage.getItem('grocery_store_' + uid) || getStoredItem(STORAGE_KEYS.STORE);
+    AppState.currentStore = userStore || 'Lotte Mart Grocery - Puri Indah';
 
-    const userDate = localStorage.getItem('grocery_date_' + uid);
-    if (userDate) AppState.currentDate = userDate;
+    // 3. User-isolated date
+    const userDate = localStorage.getItem('grocery_date_' + uid) || getStoredItem(STORAGE_KEYS.DATE);
+    AppState.currentDate = userDate || new Date().toISOString().split('T')[0];
 
-    const userBudget = localStorage.getItem('grocery_budget_' + uid);
-    if (userBudget !== null) AppState.budget = parseInt(userBudget, 10);
-
-    const userReceipts = localStorage.getItem('grocery_receipts_' + uid);
-    if (userReceipts) AppState.receipts = JSON.parse(userReceipts);
-
-    const userPantry = localStorage.getItem('grocery_pantry_' + uid);
-    if (userPantry) AppState.pantry = JSON.parse(userPantry);
-
-    const userBlacklist = localStorage.getItem('grocery_blacklist_' + uid);
-    if (userBlacklist) AppState.blacklist = JSON.parse(userBlacklist);
-
-    const userRoutine = localStorage.getItem('grocery_routine_items_' + uid);
-    if (userRoutine) {
-      try { AppState.routineItems = JSON.parse(userRoutine); } catch (e) { AppState.routineItems = [...DEFAULT_ROUTINE_ITEMS]; }
+    // 4. User-isolated budget
+    const userBudget = localStorage.getItem('grocery_budget_' + uid) || getStoredItem(STORAGE_KEYS.BUDGET);
+    if (userBudget !== null && !isNaN(parseInt(userBudget, 10))) {
+      AppState.budget = parseInt(userBudget, 10);
     } else {
-      AppState.routineItems = JSON.parse(JSON.stringify(DEFAULT_ROUTINE_ITEMS));
+      AppState.budget = 100000;
+    }
+
+    // 5. User-isolated budget period
+    const userPeriod = localStorage.getItem('grocery_period_' + uid) || getStoredItem(STORAGE_KEYS.BUDGET_PERIOD);
+    AppState.budgetPeriod = userPeriod || 'weekly';
+
+    // 6. User-isolated receipts history
+    const userReceipts = localStorage.getItem('grocery_receipts_' + uid) || getStoredItem(STORAGE_KEYS.RECEIPTS);
+    if (userReceipts) {
+      try {
+        AppState.receipts = JSON.parse(userReceipts);
+      } catch (e) {
+        AppState.receipts = [];
+      }
+    } else {
+      AppState.receipts = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_RECEIPTS)) : [];
+    }
+
+    // 7. User-isolated pantry inventory
+    const userPantry = localStorage.getItem('grocery_pantry_' + uid) || getStoredItem(STORAGE_KEYS.PANTRY);
+    if (userPantry) {
+      try {
+        AppState.pantry = JSON.parse(userPantry);
+      } catch (e) {
+        AppState.pantry = [];
+      }
+    } else {
+      AppState.pantry = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_PANTRY)) : [];
+    }
+
+    // 8. User-isolated anti-list / blacklist
+    const userBlacklist = localStorage.getItem('grocery_blacklist_' + uid) || getStoredItem(STORAGE_KEYS.BLACKLIST);
+    if (userBlacklist) {
+      try {
+        AppState.blacklist = JSON.parse(userBlacklist);
+      } catch (e) {
+        AppState.blacklist = [...DEFAULT_BLACKLIST];
+      }
+    } else {
+      AppState.blacklist = [...DEFAULT_BLACKLIST];
+    }
+
+    // 9. User-isolated routine items (Auto-refresh)
+    const userRoutine = localStorage.getItem('grocery_routine_items_' + uid) || getStoredItem('grocery_routine_items');
+    if (userRoutine) {
+      try {
+        AppState.routineItems = JSON.parse(userRoutine);
+      } catch (e) {
+        AppState.routineItems = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_ROUTINE_ITEMS)) : [];
+      }
+    } else {
+      AppState.routineItems = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_ROUTINE_ITEMS)) : [];
+    }
+
+    // 10. User-isolated price history
+    const userHistory = localStorage.getItem('grocery_history_' + uid) || getStoredItem(STORAGE_KEYS.PRICE_HISTORY);
+    if (userHistory) {
+      try {
+        AppState.priceHistory = JSON.parse(userHistory);
+      } catch (e) {
+        AppState.priceHistory = JSON.parse(JSON.stringify(DEFAULT_PRICE_HISTORY));
+      }
+    } else {
+      AppState.priceHistory = JSON.parse(JSON.stringify(DEFAULT_PRICE_HISTORY));
+    }
+
+    // 11. User-isolated in-store mode
+    const userInStore = localStorage.getItem('grocery_instore_' + uid);
+    if (userInStore !== null) {
+      AppState.inStoreMode = (userInStore === 'true');
+    } else {
+      const fallbackInStore = getStoredItem(STORAGE_KEYS.IN_STORE_MODE);
+      AppState.inStoreMode = (fallbackInStore === 'true');
+    }
+
+    // 12. User-isolated active tab
+    const userTab = localStorage.getItem('grocery_tab_' + uid) || localStorage.getItem('smart_grocery_current_tab');
+    if (userTab && ['planner', 'cart', 'budget', 'pantry'].includes(userTab)) {
+      AppState.currentTab = userTab;
     }
 
     renderAll();
@@ -638,87 +727,25 @@ function loadUserIsolatedState(uid) {
 function loadLocalState() {
   try {
     const storedUser = getStoredItem(STORAGE_KEYS.USER);
-    if (storedUser) AppState.user = JSON.parse(storedUser);
+    if (storedUser) {
+      try {
+        AppState.user = JSON.parse(storedUser);
+      } catch (e) {
+        AppState.user = null;
+      }
+    }
 
     const uid = (AppState.user && AppState.user.uid) ? AppState.user.uid : 'guest';
-
-    // 1. User-isolated cart with fallback (Requirement 4)
-    const userCart = localStorage.getItem('grocery_cart_' + uid);
-    if (userCart) {
-      AppState.cart = JSON.parse(userCart);
-    } else {
-      const storedCart = getStoredItem(STORAGE_KEYS.CART);
-      AppState.cart = storedCart ? JSON.parse(storedCart) : JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
-    }
-
-    // 2. User-isolated store
-    const userStore = localStorage.getItem('grocery_store_' + uid);
-    AppState.currentStore = userStore || getStoredItem(STORAGE_KEYS.STORE) || AppState.currentStore;
-
-    // 3. User-isolated date
-    const userDate = localStorage.getItem('grocery_date_' + uid);
-    AppState.currentDate = userDate || getStoredItem(STORAGE_KEYS.DATE) || AppState.currentDate;
-
-    // 4. User-isolated budget
-    const userBudget = localStorage.getItem('grocery_budget_' + uid);
-    if (userBudget !== null) {
-      AppState.budget = parseInt(userBudget, 10);
-    } else {
-      const storedBudget = getStoredItem(STORAGE_KEYS.BUDGET);
-      AppState.budget = storedBudget !== null ? parseInt(storedBudget, 10) : 100000;
-    }
-
-    const storedPeriod = getStoredItem(STORAGE_KEYS.BUDGET_PERIOD);
-    if (storedPeriod) AppState.budgetPeriod = storedPeriod;
-
-    const storedHistory = getStoredItem(STORAGE_KEYS.PRICE_HISTORY);
-    AppState.priceHistory = storedHistory ? JSON.parse(storedHistory) : { ...DEFAULT_PRICE_HISTORY };
-
-    // 5. User-isolated receipts
-    const userReceipts = localStorage.getItem('grocery_receipts_' + uid);
-    if (userReceipts) {
-      AppState.receipts = JSON.parse(userReceipts);
-    } else {
-      const storedReceipts = getStoredItem(STORAGE_KEYS.RECEIPTS);
-      AppState.receipts = storedReceipts ? JSON.parse(storedReceipts) : [...DEFAULT_RECEIPTS];
-    }
-
-    // 6. User-isolated pantry
-    const userPantry = localStorage.getItem('grocery_pantry_' + uid);
-    if (userPantry) {
-      AppState.pantry = JSON.parse(userPantry);
-    } else {
-      const storedPantry = getStoredItem(STORAGE_KEYS.PANTRY);
-      AppState.pantry = storedPantry ? JSON.parse(storedPantry) : [...DEFAULT_PANTRY];
-    }
-
-    // 7. User-isolated blacklist
-    const userBlacklist = localStorage.getItem('grocery_blacklist_' + uid);
-    if (userBlacklist) {
-      AppState.blacklist = JSON.parse(userBlacklist);
-    } else {
-      const storedBlacklist = getStoredItem(STORAGE_KEYS.BLACKLIST);
-      AppState.blacklist = storedBlacklist ? JSON.parse(storedBlacklist) : [...DEFAULT_BLACKLIST];
-    }
-
-    const userRoutine = localStorage.getItem('grocery_routine_items_' + uid);
-    if (userRoutine) {
-      try { AppState.routineItems = JSON.parse(userRoutine); } catch (e) { AppState.routineItems = [...DEFAULT_ROUTINE_ITEMS]; }
-    } else {
-      AppState.routineItems = JSON.parse(JSON.stringify(DEFAULT_ROUTINE_ITEMS));
-    }
-
-    const storedSession = getStoredItem(STORAGE_KEYS.SESSION_ID);
-    if (storedSession) AppState.sessionId = storedSession;
+    loadUserIsolatedState(uid);
 
     const storedSound = getStoredItem(STORAGE_KEYS.SOUND_ENABLED);
     if (storedSound !== null) AppState.soundEnabled = JSON.parse(storedSound);
 
-    const storedMode = getStoredItem(STORAGE_KEYS.IN_STORE_MODE);
-    if (storedMode !== null) AppState.inStoreMode = JSON.parse(storedMode);
+    const storedSession = getStoredItem(STORAGE_KEYS.SESSION_ID);
+    if (storedSession) AppState.sessionId = storedSession;
   } catch (err) {
     console.error('LocalStorage load error:', err);
-    AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
+    AppState.cart = [];
     AppState.priceHistory = { ...DEFAULT_PRICE_HISTORY };
     AppState.pantry = [...DEFAULT_PANTRY];
     AppState.blacklist = [...DEFAULT_BLACKLIST];
@@ -733,22 +760,32 @@ function saveLocalState() {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(AppState.user));
     }
 
-    // Isolated keys per user UID (Requirement 4)
+    // Isolated keys per user UID (Guarantees every account's progress is saved independently)
     localStorage.setItem('grocery_cart_' + uid, JSON.stringify(AppState.cart));
     localStorage.setItem('grocery_store_' + uid, AppState.currentStore);
     localStorage.setItem('grocery_date_' + uid, AppState.currentDate);
     localStorage.setItem('grocery_budget_' + uid, AppState.budget.toString());
+    localStorage.setItem('grocery_period_' + uid, AppState.budgetPeriod || 'weekly');
     localStorage.setItem('grocery_receipts_' + uid, JSON.stringify(AppState.receipts));
     localStorage.setItem('grocery_pantry_' + uid, JSON.stringify(AppState.pantry));
     localStorage.setItem('grocery_blacklist_' + uid, JSON.stringify(AppState.blacklist));
     localStorage.setItem('grocery_routine_items_' + uid, JSON.stringify(AppState.routineItems || []));
+    localStorage.setItem('grocery_history_' + uid, JSON.stringify(AppState.priceHistory));
+    localStorage.setItem('grocery_instore_' + uid, JSON.stringify(AppState.inStoreMode));
+    if (AppState.currentTab) {
+      localStorage.setItem('grocery_tab_' + uid, AppState.currentTab);
+      localStorage.setItem('smart_grocery_current_tab', AppState.currentTab);
+    }
+    const todayStr = AppState.currentDate || new Date().toISOString().split('T')[0];
+    localStorage.setItem('last_planner_reset_date_' + uid, todayStr);
+    localStorage.setItem('last_planner_reset_date', todayStr);
 
     // Global / fallback keys for cross-compatibility
     localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(AppState.cart));
     localStorage.setItem(STORAGE_KEYS.STORE, AppState.currentStore);
     localStorage.setItem(STORAGE_KEYS.DATE, AppState.currentDate);
     localStorage.setItem(STORAGE_KEYS.BUDGET, AppState.budget.toString());
-    localStorage.setItem(STORAGE_KEYS.BUDGET_PERIOD, AppState.budgetPeriod);
+    localStorage.setItem(STORAGE_KEYS.BUDGET_PERIOD, AppState.budgetPeriod || 'weekly');
     localStorage.setItem(STORAGE_KEYS.PRICE_HISTORY, JSON.stringify(AppState.priceHistory));
     localStorage.setItem(STORAGE_KEYS.RECEIPTS, JSON.stringify(AppState.receipts));
     localStorage.setItem(STORAGE_KEYS.PANTRY, JSON.stringify(AppState.pantry));
@@ -848,13 +885,11 @@ function setupAuthListener() {
   try {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // Requirement 1: Dynamic profile without static text
+        user.isLiveFirebaseSession = true;
         handleSuccessfulAuth(user, user.providerData && user.providerData[0] ? user.providerData[0].providerId : 'google', false);
       } else {
-        // If logged in via firebase (not demo), reset state upon sign-out
-        if (AppState.user && AppState.user.authProvider !== 'demo') {
-          promptLogout(false);
-        }
+        // DO NOT log out on initial null or pending Firebase state during page refresh!
+        // Logout should only occur via explicit user action (e.g. clicking 'Keluar Akun').
       }
     });
   } catch (err) {
@@ -867,36 +902,52 @@ async function handleRedirectResult() {
     try {
       const result = await firebase.auth().getRedirectResult();
       if (result && result.user) {
+        result.user.isLiveFirebaseSession = true;
         handleSuccessfulAuth(result.user, 'google', true);
       }
     } catch (err) {
       if (err.code && err.code !== 'auth/null-user') {
         console.warn('Redirect sign-in notice:', err.code, err.message);
-        showToast(`Kendala masuk Google: ${err.message || err.code}`, 'warning');
       }
     }
   }
 }
 
 function handleSuccessfulAuth(u, providerType, notify = true) {
-  // Requirement 1: Dynamic profile & Hapus Hardcoded "Audrey"
   const displayName = u.displayName || (u.email ? u.email.split('@')[0] : 'Pengguna');
+  const uid = u.uid || getDeterministicUid(u.email, providerType === 'google' ? 'google_' : 'usr_');
+  const photoURL = u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4285F4&color=fff&bold=true`;
+
   AppState.user = {
     name: displayName,
     email: u.email || 'user@email.com',
-    photoURL: u.photoURL || '',
-    uid: u.uid,
+    photoURL: photoURL,
+    uid: uid,
     authProvider: providerType || 'google',
+    isLiveFirebaseSession: !!u.isLiveFirebaseSession,
     loggedAt: new Date().toISOString()
   };
 
-  // Requirement 4: Load isolated local storage for this specific user UID
-  loadUserIsolatedState(u.uid);
+  // If Google provider, record in Google accounts list for fast switching
+  if (providerType === 'google' && u.email) {
+    let accounts = getSavedGoogleAccounts();
+    const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === u.email.toLowerCase());
+    const accObj = { name: displayName, email: u.email, photoURL, lastLogin: new Date().toISOString() };
+    if (existingIdx >= 0) {
+      accounts[existingIdx] = accObj;
+    } else {
+      accounts.push(accObj);
+    }
+    saveSavedGoogleAccounts(accounts);
+  }
+
+  // Load isolated local storage for this specific user UID
+  loadUserIsolatedState(uid);
   saveLocalState();
   playCalmChime();
   checkAuth();
 
-  // Requirement 3: Connect realtime onSnapshot listener for this user's UID
+  // Connect realtime onSnapshot listener for this user's UID
   setupFirestoreListener();
 
   if (notify) {
@@ -910,6 +961,9 @@ function applyRemoteState(data) {
   if (data.store) AppState.currentStore = data.store;
   if (data.date) AppState.currentDate = data.date;
   if (data.budget) AppState.budget = parseFloat(data.budget) || AppState.budget;
+  if (data.budgetPeriod) AppState.budgetPeriod = data.budgetPeriod;
+  if (Array.isArray(data.receipts)) AppState.receipts = data.receipts;
+  if (Array.isArray(data.pantry)) AppState.pantry = data.pantry;
   if (data.lastUpdated) AppState.lastLocalUpdate = data.lastUpdated;
 
   saveLocalState();
@@ -928,6 +982,9 @@ function pushStateToCloud(immediate = false) {
     store: AppState.currentStore,
     date: AppState.currentDate,
     budget: AppState.budget,
+    budgetPeriod: AppState.budgetPeriod || 'weekly',
+    receipts: AppState.receipts || [],
+    pantry: AppState.pantry || [],
     lastUpdated: AppState.lastLocalUpdate
   };
 
@@ -977,10 +1034,73 @@ function updateCloudSyncUI(status, labelText) {
 }
 
 // =========================================================================
-// 6. AUTH GATE: GOOGLE LOGIN, SIGN IN & SIGN UP
+// 6. AUTH GATE: USER REGISTRY, GOOGLE AUTH & EMAIL SIGN IN / SIGN UP
 // =========================================================================
+
+function getDeterministicUid(email, prefix = 'usr_') {
+  if (!email) return prefix + 'guest';
+  const clean = email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+  return prefix + clean;
+}
+
+function getRegisteredUsers() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveRegisteredUsers(users) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(users || []));
+  } catch (e) {
+    console.warn('Error saving registered users:', e);
+  }
+}
+
+function getSavedGoogleAccounts() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.GOOGLE_ACCOUNTS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveSavedGoogleAccounts(accounts) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.GOOGLE_ACCOUNTS, JSON.stringify(accounts || []));
+  } catch (e) {
+    console.warn('Error saving google accounts:', e);
+  }
+}
+
+function setAuthAlert(message, type = 'warning') {
+  const alertBox = document.getElementById('authAlertBox');
+  if (!alertBox) return;
+  alertBox.className = `auth-alert-box alert-${type}`;
+  const icon = (type === 'danger') ? '❌' : (type === 'success') ? '✅' : '⚠️';
+  alertBox.innerHTML = `<span>${icon}</span> <span>${escapeHtml(message)}</span>`;
+  alertBox.style.display = 'flex';
+}
+
+function clearAuthAlert() {
+  const alertBox = document.getElementById('authAlertBox');
+  if (alertBox) {
+    alertBox.style.display = 'none';
+    alertBox.innerHTML = '';
+  }
+}
+
 function switchAuthMode(mode) {
   AppState.authMode = mode;
+  clearAuthAlert();
   const tabSignIn = document.getElementById('tabAuthSignIn');
   const tabSignUp = document.getElementById('tabAuthSignUp');
   const authNameGroup = document.getElementById('authNameGroup');
@@ -1029,13 +1149,180 @@ function toggleAuthMode() {
   }
 }
 
+// -------------------------------------------------------------------------
+// GOOGLE ACCOUNT CHOOSER MODAL HANDLERS
+// -------------------------------------------------------------------------
+
+function openGoogleAuthModal() {
+  const modal = document.getElementById('googleAuthModal');
+  if (!modal) return;
+  renderGoogleAccountsList();
+  modal.style.display = 'flex';
+  modal.classList.add('active');
+}
+
+function closeGoogleAuthModal() {
+  const modal = document.getElementById('googleAuthModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active');
+  }
+  toggleGoogleNewAccount(false);
+}
+
+function toggleGoogleNewAccount(show) {
+  const box = document.getElementById('googleNewAccountSection');
+  const addBtnWrap = document.getElementById('googleAddAccountBtnWrap');
+  if (box) box.style.display = show ? 'block' : 'none';
+  if (addBtnWrap) addBtnWrap.style.display = show ? 'none' : 'block';
+  if (show) {
+    const nameInput = document.getElementById('googleNewNameInput');
+    if (nameInput) nameInput.focus();
+  }
+}
+
+function renderGoogleAccountsList() {
+  const listEl = document.getElementById('googleAccountsList');
+  if (!listEl) return;
+  const accounts = getSavedGoogleAccounts();
+
+  if (accounts.length === 0) {
+    listEl.innerHTML = '';
+    listEl.style.display = 'none';
+    toggleGoogleNewAccount(true);
+    return;
+  }
+
+  listEl.style.display = 'flex';
+  listEl.innerHTML = accounts.map(acc => {
+    const initial = (acc.name || acc.email || 'G').charAt(0).toUpperCase();
+    return `
+      <div class="google-account-item" onclick="selectGoogleAccount('${escapeHtml(acc.email)}')">
+        ${acc.photoURL ? 
+          `<img src="${escapeHtml(acc.photoURL)}" alt="Avatar" class="google-account-avatar">` : 
+          `<div class="google-account-avatar">${initial}</div>`
+        }
+        <div class="google-account-info">
+          <div class="google-account-name">${escapeHtml(acc.name || acc.email)}</div>
+          <div class="google-account-email">${escapeHtml(acc.email)}</div>
+        </div>
+        <button type="button" class="google-account-delete" title="Hapus dari daftar ini" onclick="removeSavedGoogleAccount('${escapeHtml(acc.email)}', event)">✕</button>
+      </div>
+    `;
+  }).join('');
+
+  toggleGoogleNewAccount(false);
+}
+
+function selectGoogleAccount(email) {
+  const accounts = getSavedGoogleAccounts();
+  const acc = accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
+  if (!acc) return;
+
+  const uid = getDeterministicUid(acc.email, 'google_');
+  AppState.user = {
+    name: acc.name,
+    email: acc.email,
+    photoURL: acc.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(acc.name)}&background=4285F4&color=fff&bold=true`,
+    uid: uid,
+    authProvider: 'google',
+    isLiveFirebaseSession: false,
+    loggedAt: new Date().toISOString()
+  };
+
+  closeGoogleAuthModal();
+  loadUserIsolatedState(uid);
+  saveLocalState();
+  playCalmChime();
+  checkAuth();
+  setupFirestoreListener();
+  showToast(`Selamat datang kembali, ${acc.name}! ✨ (Akun Google)`, 'success');
+}
+
+function removeSavedGoogleAccount(email, evt) {
+  if (evt) evt.stopPropagation();
+  let accounts = getSavedGoogleAccounts();
+  accounts = accounts.filter(a => a.email.toLowerCase() !== email.toLowerCase());
+  saveSavedGoogleAccounts(accounts);
+  renderGoogleAccountsList();
+  showToast('Akun Google dihapus dari daftar cepat', 'info');
+}
+
+function submitNewGoogleAccount() {
+  const nameInput = document.getElementById('googleNewNameInput');
+  const emailInput = document.getElementById('googleNewEmailInput');
+
+  let name = nameInput ? nameInput.value.trim() : '';
+  let email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+
+  if (!email) {
+    showToast('Masukkan alamat email Google Anda!', 'warning');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (!email.includes('@')) {
+    email += '@gmail.com';
+  }
+
+  if (!name) {
+    name = email.split('@')[0];
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  const uid = getDeterministicUid(email, 'google_');
+  const photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&bold=true`;
+
+  // Save to Google Accounts list
+  let accounts = getSavedGoogleAccounts();
+  const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === email);
+  const accObj = { name, email, photoURL, lastLogin: new Date().toISOString() };
+  if (existingIdx >= 0) {
+    accounts[existingIdx] = accObj;
+  } else {
+    accounts.push(accObj);
+  }
+  saveSavedGoogleAccounts(accounts);
+
+  // Also register in registered users list
+  let regUsers = getRegisteredUsers();
+  const regIdx = regUsers.findIndex(u => u.email.toLowerCase() === email);
+  const regObj = { name, email, uid, photoURL, authProvider: 'google', createdAt: new Date().toISOString() };
+  if (regIdx >= 0) {
+    regUsers[regIdx] = { ...regUsers[regIdx], ...regObj };
+  } else {
+    regUsers.push(regObj);
+  }
+  saveRegisteredUsers(regUsers);
+
+  AppState.user = {
+    name,
+    email,
+    photoURL,
+    uid,
+    authProvider: 'google',
+    isLiveFirebaseSession: false,
+    loggedAt: new Date().toISOString()
+  };
+
+  closeGoogleAuthModal();
+  if (nameInput) nameInput.value = '';
+  if (emailInput) emailInput.value = '';
+
+  loadUserIsolatedState(uid);
+  saveLocalState();
+  playCalmChime();
+  checkAuth();
+  setupFirestoreListener();
+  showToast(`Selamat datang, ${name}! ✨ (Akun Google)`, 'success');
+}
+
 async function loginWithGoogle() {
   playSoftPop();
-  showToast('Membuka pilihan akun Google...', 'info');
+  clearAuthAlert();
 
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
-      // 1. Inisialisasi Google Auth Provider dengan email dan profile scope
       let googleProvider = null;
       if (typeof window !== 'undefined' && typeof window.initGoogleAuthProvider === 'function') {
         googleProvider = window.initGoogleAuthProvider();
@@ -1049,83 +1336,142 @@ async function loginWithGoogle() {
 
       if (googleProvider) {
         try {
-          // 2. Tampilkan pop-up pilihan akun Gmail
           const result = await firebase.auth().signInWithPopup(googleProvider);
           if (result && result.user) {
-            handleSuccessfulAuth(result.user, 'google');
+            result.user.isLiveFirebaseSession = true;
+            handleSuccessfulAuth(result.user, 'google', true);
             return;
           }
         } catch (popupErr) {
           console.warn('Firebase Google Auth popup notice:', popupErr.code, popupErr.message);
 
-          // Fallback redirect jika pop-up diblokir oleh browser
-          if (popupErr.code === 'auth/popup-blocked') {
-            showToast('Pop-up diblokir browser, mengalihkan ke halaman masuk Google...', 'warning');
-            await firebase.auth().signInWithRedirect(googleProvider);
-            return;
-          } else if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
+          if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
             showToast('Proses masuk Google dibatalkan', 'info');
             return;
-          } else if (popupErr.code === 'auth/unauthorized-domain') {
-            showToast('Domain belum terdaftar di Firebase Console. Menggunakan akun demo.', 'warning');
-          } else {
-            showToast(`Kendala masuk Google: ${popupErr.message || popupErr.code}`, 'warning');
           }
+          if (popupErr.code === 'auth/popup-blocked') {
+            try {
+              await firebase.auth().signInWithRedirect(googleProvider);
+              return;
+            } catch (redirErr) {
+              console.warn('Redirect error:', redirErr);
+            }
+          }
+          // For configuration-not-found, unauthorized-domain, network-request-failed, etc.
+          // Fall through to show the Google Account Chooser Modal
         }
       }
     } catch (err) {
       console.warn('Google Provider setup notice:', err);
-      showToast('Kendala inisialisasi Google Auth', 'warning');
     }
-  } else {
-    showToast('Firebase SDK belum siap. Menggunakan mode demo.', 'warning');
   }
 
-  // Graceful fallback for offline, file:// protocol, or unwhitelisted test environments
-  loginDemoAccount();
+  // Open interactive Google Account Selector Modal
+  // NEVER falls back to demo account!
+  openGoogleAuthModal();
 }
 
 async function handleAuthSubmit(e) {
   e.preventDefault();
+  clearAuthAlert();
+
   const nameInput = document.getElementById('authNameInput');
   const emailInput = document.getElementById('authEmailInput');
   const passInput = document.getElementById('authPassInput');
 
-  const email = emailInput ? emailInput.value.trim() : '';
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
   const pass = passInput ? passInput.value.trim() : '';
   let name = nameInput ? nameInput.value.trim() : '';
 
   if (!email || !pass) {
+    setAuthAlert('Harap isi alamat email dan kata sandi!', 'warning');
     showToast('Harap isi email dan kata sandi!', 'warning');
     return;
   }
 
-  let uid = 'user-' + Date.now();
+  if (pass.length < 6) {
+    setAuthAlert('Kata sandi minimal harus 6 karakter!', 'warning');
+    showToast('Kata sandi minimal 6 karakter!', 'warning');
+    if (passInput) passInput.focus();
+    return;
+  }
 
   if (AppState.authMode === 'signup') {
+    // ---------------------------------------------------------------------
+    // SIGN UP FLOW
+    // ---------------------------------------------------------------------
     if (!name) {
       name = email.split('@')[0];
+      name = name.charAt(0).toUpperCase() + name.slice(1);
     }
+
+    // Check if email already registered locally
+    const users = getRegisteredUsers();
+    const existing = users.find(u => u.email.toLowerCase() === email);
+    if (existing) {
+      setAuthAlert(`Email "${email}" sudah terdaftar! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
+      showToast('Email sudah terdaftar, silakan Masuk', 'warning');
+      switchAuthMode('signin');
+      if (emailInput) emailInput.value = email;
+      if (passInput) {
+        passInput.value = '';
+        passInput.focus();
+      }
+      return;
+    }
+
+    // Try live Firebase Auth signup if available
+    let isLive = false;
+    let fbUid = null;
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
-        if (cred.user) {
-          uid = cred.user.uid;
+        if (cred && cred.user) {
+          isLive = true;
+          fbUid = cred.user.uid;
           if (cred.user.updateProfile) {
             await cred.user.updateProfile({ displayName: name });
           }
         }
-      } catch (err) {
-        console.warn('Firebase Auth signup note:', err.message);
+      } catch (fbErr) {
+        console.info('Firebase Auth signup note:', fbErr.code || fbErr.message);
+        if (fbErr.code === 'auth/email-already-in-use') {
+          setAuthAlert(`Email "${email}" sudah terdaftar di server. Silakan beralih ke tab Masuk.`, 'warning');
+          showToast('Email sudah terdaftar di server, silakan Masuk', 'warning');
+          switchAuthMode('signin');
+          return;
+        }
       }
     }
+
+    const uid = fbUid || getDeterministicUid(email, 'usr_');
+    const photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E91E63&color=fff&bold=true`;
+
+    const newUser = {
+      name,
+      email,
+      password: pass,
+      uid,
+      photoURL,
+      authProvider: 'email',
+      isLiveFirebaseSession: isLive,
+      createdAt: new Date().toISOString()
+    };
+
+    // Save to registered users database
+    users.push(newUser);
+    saveRegisteredUsers(users);
+
     AppState.user = {
       name,
       email,
       uid,
+      photoURL,
       authProvider: 'email',
+      isLiveFirebaseSession: isLive,
       loggedAt: new Date().toISOString()
     };
+
     loadUserIsolatedState(uid);
     saveLocalState();
     playCalmChime();
@@ -1133,40 +1479,73 @@ async function handleAuthSubmit(e) {
     setupFirestoreListener();
     showToast(`Akun berhasil dibuat! Selamat datang, ${name} ✨`, 'success');
   } else {
-    // Sign In mode
-    if (!name) {
-      name = email.split('@')[0];
-    }
+    // ---------------------------------------------------------------------
+    // SIGN IN FLOW
+    // ---------------------------------------------------------------------
+    let isLive = false;
+    let fbUser = null;
+
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
-        if (cred.user) {
-          uid = cred.user.uid;
-          if (cred.user.displayName) {
-            name = cred.user.displayName;
-          }
+        if (cred && cred.user) {
+          isLive = true;
+          fbUser = cred.user;
         }
-      } catch (err) {
-        console.warn('Firebase Auth signin note:', err.message);
+      } catch (fbErr) {
+        console.info('Firebase Auth signin note:', fbErr.code || fbErr.message);
       }
     }
-    AppState.user = {
-      name,
-      email,
-      uid,
-      authProvider: 'email',
-      loggedAt: new Date().toISOString()
-    };
-    loadUserIsolatedState(uid);
-    saveLocalState();
-    playCalmChime();
-    checkAuth();
-    setupFirestoreListener();
-    showToast(`Selamat datang kembali, ${name}! ✨`, 'success');
+
+    const users = getRegisteredUsers();
+    const foundUser = users.find(u => u.email.toLowerCase() === email);
+
+    if (foundUser) {
+      // Validate password
+      if (foundUser.password && foundUser.password !== pass) {
+        setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan coba lagi!', 'danger');
+        showToast('Kata sandi salah!', 'danger');
+        if (passInput) {
+          passInput.value = '';
+          passInput.focus();
+        }
+        return;
+      }
+
+      AppState.user = {
+        name: foundUser.name,
+        email: foundUser.email,
+        uid: foundUser.uid,
+        photoURL: foundUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(foundUser.name)}&background=E91E63&color=fff&bold=true`,
+        authProvider: 'email',
+        isLiveFirebaseSession: isLive,
+        loggedAt: new Date().toISOString()
+      };
+
+      loadUserIsolatedState(foundUser.uid);
+      saveLocalState();
+      playCalmChime();
+      checkAuth();
+      setupFirestoreListener();
+      showToast(`Selamat datang kembali, ${foundUser.name}! ✨`, 'success');
+      return;
+    }
+
+    if (fbUser) {
+      fbUser.isLiveFirebaseSession = true;
+      handleSuccessfulAuth(fbUser, 'email', true);
+      return;
+    }
+
+    // User not found in local registry nor in live Firebase
+    setAuthAlert(`Email "${email}" belum terdaftar! Silakan pilih tab "Daftar" untuk membuat akun baru.`, 'warning');
+    showToast('Email belum terdaftar. Silakan buat akun baru!', 'warning');
+    if (emailInput) emailInput.focus();
   }
 }
 
 function loginDemoAccount() {
+  clearAuthAlert();
   const demoUid = 'demo_user_101';
   AppState.user = {
     name: 'Akun Demo',
@@ -1174,6 +1553,7 @@ function loginDemoAccount() {
     photoURL: '',
     uid: demoUid,
     authProvider: 'demo',
+    isLiveFirebaseSession: false,
     loggedAt: new Date().toISOString()
   };
   loadUserIsolatedState(demoUid);
@@ -1187,7 +1567,7 @@ function loginDemoAccount() {
 function promptLogout(notify = true) {
   // Requirement 3: Stop onSnapshot listener upon logout
   if (unsubscribeFirestore) {
-    unsubscribeFirestore();
+    try { unsubscribeFirestore(); } catch (e) { }
     unsubscribeFirestore = null;
   }
   if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -1200,8 +1580,11 @@ function promptLogout(notify = true) {
 
   // Reset active UI state cleanly
   AppState.cart = [];
+  AppState.receipts = [];
+  AppState.pantry = [];
   AppState.budget = 100000;
-  saveLocalState();
+  AppState.inStoreMode = false;
+
   renderAll();
   checkAuth();
   updateCloudSyncUI('offline', 'Mode Offline (Belum Masuk)');
@@ -1334,7 +1717,7 @@ function renderSessionControls() {
 
   if (datePicker) datePicker.value = AppState.currentDate;
   if (storeSelect) {
-    const knownValues = Array.from(storeSelect.options).map(o => o.value);
+    const knownValues = storeSelect.options ? Array.from(storeSelect.options).map(o => o.value) : [];
     if (knownValues.includes(AppState.currentStore)) {
       storeSelect.value = AppState.currentStore;
       if (customStoreInput) customStoreInput.style.display = 'none';
@@ -1542,7 +1925,7 @@ function renderBudget() {
   const plannerAlertIcon = document.getElementById('plannerAlertIcon');
 
   if (plannerAlert) {
-    plannerAlert.className = `planner-budget-alert ${safety.level}`;
+    plannerAlert.className = `planner-budget-alert budget-status-card ${safety.level}`;
     if (safety.level === 'danger') {
       const overDiff = totalBelanja - budget;
       if (plannerAlertIcon) plannerAlertIcon.textContent = '🚨';
@@ -1579,7 +1962,7 @@ function renderBudget() {
   const tabStatusIcon = document.getElementById('budgetTabStatusIcon');
 
   if (tabStatusBox) {
-    tabStatusBox.className = `planner-budget-alert ${safety.level}`;
+    tabStatusBox.className = `planner-budget-alert budget-status-card ${safety.level}`;
     if (safety.level === 'danger') {
       const overDiff = totalBelanja - budget;
       if (tabStatusIcon) tabStatusIcon.textContent = '🚨';
@@ -1691,11 +2074,16 @@ function renderItems() {
     container.innerHTML = `
       <div class="empty-state" style="padding: 36px 16px; text-align: center;">
         <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang masih kosong</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Keranjang belanja masih kosong, silakan tambah atau scan barang pertamamu!</p>
-        <button type="button" class="btn-demo-quick" style="width: auto; padding: 6px 16px; margin: 0 auto;" onclick="resetToInitialMockData()">
-          Muat Contoh Data Belanja
-        </button>
+        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang belanja masih kosong</p>
+        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Belanjaan sebelumnya sudah selesai dan tercatat di Pantri! Siap belanja lagi?</p>
+        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 16px; font-size: 0.82rem; font-weight: 800;" onclick="startNewShoppingSession()">
+            🛍️ Belanja Lagi (Muat Barang Rutin)
+          </button>
+          <button type="button" class="btn-demo-quick" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="resetToInitialMockData()">
+            Muat Contoh Data
+          </button>
+        </div>
       </div>
     `;
     updateCartBadges();
@@ -1875,6 +2263,7 @@ function updateItemQty(itemId, delta) {
   const subtotalEl = document.getElementById(`subtotal-${item.id}`);
   if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
 
+  saveLocalState();
   renderBudget();
   renderCategoryBreakdown();
   pushStateToCloud();
@@ -1893,6 +2282,7 @@ function handleQtyDirectInput(itemId, rawVal) {
   const subtotalEl = document.getElementById(`subtotal-${item.id}`);
   if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
 
+  saveLocalState();
   renderBudget();
   renderCategoryBreakdown();
   pushStateToCloud();
@@ -1909,6 +2299,7 @@ function handleQtyBlur(itemId, rawVal) {
   } else {
     item.qty = val;
   }
+  saveLocalState();
   renderBudget();
   pushStateToCloud();
 }
@@ -1919,6 +2310,7 @@ function toggleItemCheck(itemId) {
   item.checked = !item.checked;
   if (item.checked) playCalmChime();
   else playSoftPop();
+  saveLocalState();
   pushStateToCloud();
   renderItems();
   renderCartSection();
@@ -1986,6 +2378,7 @@ function executeDeleteItem() {
   AppState.cart = AppState.cart.filter(i => i.id !== AppState.itemPendingDeleteId);
   closeDeleteConfirmModal();
   playSoftPop();
+  saveLocalState();
   pushStateToCloud();
   renderAll();
   showToast(`"${name}" berhasil dihapus dari keranjang`, 'info');
@@ -2163,6 +2556,12 @@ const PRODUCT_CATALOG = [
 
 let catalogActiveCategory = 'all';
 let catalogSearchQuery = '';
+let catalogExpanded = false;
+
+function toggleCatalogExpand() {
+  catalogExpanded = !catalogExpanded;
+  renderProductCatalog();
+}
 
 function renderProductCatalog() {
   const container = document.getElementById('productCatalogGrid');
@@ -2184,7 +2583,10 @@ function renderProductCatalog() {
     return;
   }
 
-  container.innerHTML = filtered.map(item => `
+  // Tampilkan 4 item saja secara default agar grid ringkas dan tidak scroll terlalu jauh
+  const itemsToDisplay = (catalogExpanded || query) ? filtered : filtered.slice(0, 4);
+
+  let html = itemsToDisplay.map(item => `
     <div class="catalog-card" data-catalog-id="${item.id}">
       <div class="catalog-thumb-wrap">
         <span>${item.icon}</span>
@@ -2203,6 +2605,19 @@ function renderProductCatalog() {
       </div>
     </div>
   `).join('');
+
+  // Tombol toggle Lihat Lebih Banyak / Sedikit jika lebih dari 4 item dan tidak sedang mencari
+  if (!query && filtered.length > 4) {
+    html += `
+      <div style="grid-column: 1 / -1; text-align: center; margin-top: 6px; padding: 4px 0;">
+        <button type="button" class="btn-catalog-toggle touch-target" onclick="toggleCatalogExpand()">
+          ${catalogExpanded ? '▴ Tampilkan 4 Produk Saja (Ringkas)' : `▾ Lihat ${filtered.length - 4} Produk Lainnya`}
+        </button>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
 }
 
 function filterCatalogCategory(category, buttonEl) {
@@ -2358,12 +2773,22 @@ function checkDailyPlannerReset(uid) {
   const storageKey = 'last_planner_reset_date_' + uid;
   const lastResetDate = localStorage.getItem(storageKey) || localStorage.getItem('last_planner_reset_date');
 
-  // Jika belum ada lastResetDate atau tanggal berbeda (hari baru)
-  if (!lastResetDate || lastResetDate !== todayStr) {
-    executeDailyPlannerReset(todayStr, uid);
-    return true;
+  // Jika sudah tercatat hari ini, tidak perlu reset ulang
+  if (lastResetDate === todayStr) {
+    return false;
   }
-  return false;
+
+  // Jika user sudah memiliki keranjang belanja aktif (sedang dipakai/dicentang),
+  // jangan suntikkan barang baru atau ubah status barang yang sedang dikerjakan user!
+  if (AppState.cart && AppState.cart.length > 0) {
+    localStorage.setItem(storageKey, todayStr);
+    localStorage.setItem('last_planner_reset_date', todayStr);
+    return false;
+  }
+
+  // Jika keranjang benar-benar kosong di hari baru, siapkan barang rutin belanja
+  executeDailyPlannerReset(todayStr, uid);
+  return true;
 }
 
 /**
@@ -2398,7 +2823,7 @@ function executeDailyPlannerReset(todayStr, uid) {
         isRoutine: true
       });
     } else {
-      existing.checked = false; // Reset checklist ke kosong
+      // PRESERVE user progress across refreshes and daily sync!
       existing.isRoutine = true;
     }
   });
@@ -2412,7 +2837,7 @@ function executeDailyPlannerReset(todayStr, uid) {
 
   if (typeof firebase !== 'undefined' && firebase.firestore && uid && uid !== 'guest') {
     try {
-      const uRef = userDocRef(uid);
+      const uRef = getUserDocRef();
       if (uRef) {
         uRef.set({ last_planner_reset_date: todayStr }, { merge: true }).catch(err => {
           console.warn('Firestore last_planner_reset_date sync note:', err.message);
@@ -2891,11 +3316,77 @@ function shareToWhatsApp() {
 // =========================================================================
 // 11. IN-STORE SHOPPING MODE & RUNNING CART
 // =========================================================================
+function prepareRoutineItemsForNewShopping() {
+  const routineList = (AppState.routineItems && AppState.routineItems.length > 0)
+    ? AppState.routineItems
+    : DEFAULT_ROUTINE_ITEMS;
+
+  AppState.cart = routineList.map(r => ({
+    id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+    namaBarang: r.namaBarang || r.name,
+    kategori: r.kategori || r.aisle || 'Bahan Pokok',
+    satuan: r.satuan || r.unit || 'pcs',
+    qty: r.qty || 1,
+    hargaSatuan: r.hargaSatuan || r.price || 0,
+    diskonTipe: 'none',
+    diskonValue: '',
+    hargaRiwayatBulanLalu: r.hargaSatuan || r.price || null,
+    store: AppState.currentStore,
+    checked: false,
+    isRoutine: true
+  }));
+}
+
+function startNewShoppingSession() {
+  closeReceiptModal();
+  AppState.inStoreMode = false;
+  document.body.classList.remove('in-store-mode-active');
+  localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(false));
+
+  const fabStoreMode = document.getElementById('fabStoreMode');
+  const fabIcon = document.getElementById('fabIcon');
+  const fabText = document.getElementById('fabText');
+  const runningBar = document.getElementById('runningCartBar');
+  const instoreCard = document.getElementById('inStoreCompanionCard');
+
+  if (fabStoreMode) {
+    fabStoreMode.style.display = '';
+    fabStoreMode.classList.remove('d-none');
+  }
+  if (fabIcon) fabIcon.textContent = '🛒';
+  if (fabText) fabText.textContent = 'Mulai Belanja';
+  if (runningBar) runningBar.classList.add('d-none');
+  if (instoreCard) instoreCard.style.display = 'none';
+
+  switchTab('planner', true);
+
+  if (!AppState.cart || AppState.cart.length === 0) {
+    prepareRoutineItemsForNewShopping();
+  }
+
+  playCalmChime();
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  showToast('Siap belanja lagi! Daftar belanja baru sudah disiapkan 🛒✨', 'success');
+}
+
 function toggleShoppingMode() {
+  // Jika pengguna ingin memulai belanja tapi keranjang masih kosong (misal baru selesai belanja)
+  if (!AppState.inStoreMode && (!AppState.cart || AppState.cart.length === 0)) {
+    prepareRoutineItemsForNewShopping();
+    saveLocalState();
+    pushStateToCloud();
+    renderAll();
+    showToast('Daftar barang rutin disiapkan untuk belanja! 🛒', 'info');
+  }
+
   AppState.inStoreMode = !AppState.inStoreMode;
-  localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(AppState.inStoreMode));
+  saveLocalState();
+  pushStateToCloud();
   document.body.classList.toggle('in-store-mode-active', AppState.inStoreMode);
 
+  const fabStoreMode = document.getElementById('fabStoreMode');
   const fabIcon = document.getElementById('fabIcon');
   const fabText = document.getElementById('fabText');
   const runningBar = document.getElementById('runningCartBar');
@@ -2908,6 +3399,10 @@ function toggleShoppingMode() {
     if (instoreCard) instoreCard.style.display = 'none';
     showToast('Mode Toko aktif • Checklist lorong & pantau sisa saldo', 'info');
   } else {
+    if (fabStoreMode) {
+      fabStoreMode.style.display = '';
+      fabStoreMode.classList.remove('d-none');
+    }
     if (fabIcon) fabIcon.textContent = '🛒';
     if (fabText) fabText.textContent = 'Mulai Belanja';
     if (runningBar) runningBar.classList.add('d-none');
@@ -2973,18 +3468,25 @@ function confirmFinishShopping() {
   }
 
   AppState.inStoreMode = false;
+  document.body.classList.remove('in-store-mode-active');
   localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(false));
 
+  const fabStoreMode = document.getElementById('fabStoreMode');
   const fabIcon = document.getElementById('fabIcon');
   const fabText = document.getElementById('fabText');
   const runningBar = document.getElementById('runningCartBar');
   const instoreCard = document.getElementById('inStoreCompanionCard');
+  if (fabStoreMode) {
+    fabStoreMode.style.display = '';
+    fabStoreMode.classList.remove('d-none');
+  }
   if (fabIcon) fabIcon.textContent = '🛒';
   if (fabText) fabText.textContent = 'Mulai Belanja';
   if (runningBar) runningBar.classList.add('d-none');
   if (instoreCard) instoreCard.style.display = 'none';
 
   playCalmChime();
+  saveLocalState();
   pushStateToCloud();
   renderAll();
   switchTab('budget');
@@ -3047,7 +3549,7 @@ function generateReceiptData(customReceipt = null) {
       trxNo: 'TRX-' + (AppState.currentDate || new Date().toISOString().slice(0, 10)).replace(/-/g, '') + '-' + Math.floor(1000 + Math.random() * 9000),
       posNo: 'POS-0' + (Math.floor(Math.random() * 4) + 1),
       waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      kasir: (AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna',
+      kasir: (AppState.user && AppState.user.name) || (AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna',
       subtotal: subtotalRaw,
       totalHemat: totalDiscount,
       totalBelanja: grandTotal,
@@ -3110,7 +3612,7 @@ function generateReceiptData(customReceipt = null) {
   const dateFormatted = receipt.tanggal || new Date().toISOString().slice(0, 10);
   const timeFormatted = receipt.waktu || '20:15:00';
   if (elDateTime) elDateTime.textContent = `${dateFormatted} ${timeFormatted}`;
-  if (elCashier) elCashier.textContent = receipt.kasir || ((AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna');
+  if (elCashier) elCashier.textContent = receipt.kasir || ((AppState.user && AppState.user.name) || (AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna');
 
   // Populate Items List
   const itemsContainer = document.getElementById('receiptItemsContainer');
@@ -3306,11 +3808,21 @@ const PANTRY_CATALOG = [
   { id: 'pan-cat-8', name: 'Deterjen Bubuk', icon: '🧺', unit: 'bag', category: 'Kebersihan', days: 90, desc: 'Cuci Pakaian' }
 ];
 
+let pantryCatalogExpanded = false;
+
+function togglePantryCatalogExpand() {
+  pantryCatalogExpanded = !pantryCatalogExpanded;
+  renderPantryCatalog();
+}
+
 function renderPantryCatalog() {
   const container = document.getElementById('pantryCatalogGrid');
   if (!container) return;
 
-  container.innerHTML = PANTRY_CATALOG.map(item => `
+  // Tampilkan 4 item saja secara default agar grid ringkas dan tidak scroll terlalu jauh
+  const itemsToDisplay = pantryCatalogExpanded ? PANTRY_CATALOG : PANTRY_CATALOG.slice(0, 4);
+
+  let html = itemsToDisplay.map(item => `
     <div class="catalog-card pantry-catalog-card" data-pantry-cat-id="${item.id}">
       <div class="catalog-thumb-wrap">
         <span>${item.icon}</span>
@@ -3326,6 +3838,18 @@ function renderPantryCatalog() {
       </div>
     </div>
   `).join('');
+
+  if (PANTRY_CATALOG.length > 4) {
+    html += `
+      <div style="grid-column: 1 / -1; text-align: center; margin-top: 6px; padding: 4px 0;">
+        <button type="button" class="btn-catalog-toggle touch-target" onclick="togglePantryCatalogExpand()">
+          ${pantryCatalogExpanded ? '▴ Tampilkan 4 Bahan Saja (Ringkas)' : `▾ Lihat ${PANTRY_CATALOG.length - 4} Bahan Lainnya`}
+        </button>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
 }
 
 function addPantryCatalogItem(catalogId) {
@@ -3994,6 +4518,11 @@ function handleProfileLogout() {
 function switchTab(tab, force = false) {
   if (AppState.currentTab === tab && !force) return;
   AppState.currentTab = tab;
+  try {
+    localStorage.setItem('smart_grocery_current_tab', tab);
+    const uid = (AppState.user && AppState.user.uid) ? AppState.user.uid : 'guest';
+    localStorage.setItem('grocery_tab_' + uid, tab);
+  } catch (e) { }
 
   const tabIndex = { planner: 0, cart: 1, budget: 2, pantry: 3 };
   const navBtns = document.querySelectorAll('.bottom-nav-bar .bottom-nav-item');
@@ -4190,7 +4719,7 @@ function initApp() {
   }
 
   checkAuth();
-  switchTab(AppState.currentTab || 'planner');
+  switchTab(AppState.currentTab || 'planner', true);
   initDiscountChips();
   renderAll();
 }
@@ -4720,11 +5249,16 @@ function renderCartSection() {
     container.innerHTML = `
       <div class="empty-state" style="padding: 36px 16px; text-align: center;">
         <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang masih kosong</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Keranjang belanja masih kosong, silakan tambah atau scan barang pertamamu!</p>
-        <button type="button" class="btn-demo-quick" style="width: auto; padding: 6px 16px; margin: 0 auto;" onclick="switchTab('planner')">
-          📋 Buka Rencana Belanja
-        </button>
+        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Troli belanja masih kosong</p>
+        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Belanjaan sebelumnya sudah selesai. Mulai belanja baru sekarang!</p>
+        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 18px; font-size: 0.82rem; font-weight: 800;" onclick="startNewShoppingSession()">
+            🛍️ Mulai Belanja Lagi
+          </button>
+          <button type="button" class="btn-demo-quick" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="switchTab('planner')">
+            📋 Buka Rencana Belanja
+          </button>
+        </div>
       </div>
     `;
     if (selectAllCb) selectAllCb.checked = false;
@@ -5229,4 +5763,31 @@ if (typeof window !== 'undefined') {
     updateCloudSyncUI('offline', 'Mode Offline (LocalStorage)');
     showToast('Koneksi internet terputus. Bekerja dalam mode offline.', 'warning');
   });
+
+  // Global window bindings for HTML event handlers
+  window.openGoogleAuthModal = openGoogleAuthModal;
+  window.closeGoogleAuthModal = closeGoogleAuthModal;
+  window.toggleGoogleNewAccount = toggleGoogleNewAccount;
+  window.selectGoogleAccount = selectGoogleAccount;
+  window.removeSavedGoogleAccount = removeSavedGoogleAccount;
+  window.submitNewGoogleAccount = submitNewGoogleAccount;
+  window.switchAuthMode = switchAuthMode;
+  window.toggleAuthMode = toggleAuthMode;
+  window.loginWithGoogle = loginWithGoogle;
+  window.handleAuthSubmit = handleAuthSubmit;
+  window.loginDemoAccount = loginDemoAccount;
+  window.handleProfileLogout = handleProfileLogout;
+  window.promptLogout = promptLogout;
+  window.AppState = AppState;
+  window.saveLocalState = saveLocalState;
+  window.loadLocalState = loadLocalState;
+  window.loadUserIsolatedState = loadUserIsolatedState;
+  window.executeDailyPlannerReset = executeDailyPlannerReset;
+  window.startNewShoppingSession = startNewShoppingSession;
+  window.prepareRoutineItemsForNewShopping = prepareRoutineItemsForNewShopping;
+  window.confirmFinishShopping = confirmFinishShopping;
+  window.toggleShoppingMode = toggleShoppingMode;
+  window.toggleItemCheck = toggleItemCheck;
+  window.toggleCatalogExpand = toggleCatalogExpand;
+  window.togglePantryCatalogExpand = togglePantryCatalogExpand;
 }
