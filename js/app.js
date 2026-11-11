@@ -1,3 +1,30 @@
+
+// =========================================================================
+// ZERO NATIVE BROWSER DIALOGS (NO "THIS PAGE SAYS" EVER)
+// 100% In-App Aesthetic Modals & Non-Blocking Toast Notifications
+// =========================================================================
+if (typeof window !== 'undefined') {
+  window.alert = function(msg) {
+    if (typeof showToast === 'function') {
+      showToast(String(msg || ''), 'info');
+    }
+  };
+  window.confirm = function(msg) {
+    console.warn('Native window.confirm is disabled. Please use showAppModalBubble for asynchronous in-app confirmation.');
+    if (typeof showToast === 'function') {
+      showToast(String(msg || ''), 'warning');
+    }
+    return true;
+  };
+  window.prompt = function(msg, defaultVal) {
+    console.warn('Native window.prompt is disabled.');
+    if (typeof showToast === 'function') {
+      showToast(String(msg || ''), 'info');
+    }
+    return defaultVal || null;
+  };
+}
+
 /**
  * Smart Grocery Tracker & Budget Safety Planner - Core Application Logic
  * Integrates:
@@ -4575,7 +4602,7 @@ function toggleShoppingMode() {
 }
 
 let isFinishingShopping = false;
-function confirmFinishShopping() {
+async function confirmFinishShopping() {
   if (isFinishingShopping) return;
 
   if (!AppState.cart || AppState.cart.length === 0) {
@@ -4598,6 +4625,15 @@ function confirmFinishShopping() {
     showToast('Pilih / centang barang yang sudah masuk troli terlebih dahulu! 🛒', 'warning');
     return;
   }
+
+  const confirmed = await showAppModalBubble({
+    title: 'Selesai Belanja',
+    message: `Selesaikan belanja untuk ${checkedItems.length} barang? Struk digital akan otomatis dicetak & disimpan ke Pantry.`,
+    icon: '🛍️',
+    confirmText: 'Ya, Selesaikan',
+    cancelText: 'Lanjut Belanja'
+  });
+  if (!confirmed) return;
 
   isFinishingShopping = true;
   setTimeout(() => isFinishingShopping = false, 1500);
@@ -5148,9 +5184,17 @@ function handleManualPantrySubmit(e) {
   showToast(`"${name}" disimpan ke Pantry 🧺`, 'success');
 }
 
-function removePantryItem(id) {
+async function removePantryItem(id) {
   const item = (AppState.pantry || []).find(p => p.id === id);
   const name = item ? item.name : 'Item pantry';
+  const confirmed = await showAppModalBubble({
+    title: 'Hapus dari Pantry',
+    message: `Hapus "${name}" dari stok pantry Anda?`,
+    icon: '🧺',
+    confirmText: 'Ya, Hapus',
+    cancelText: 'Batal'
+  });
+  if (!confirmed) return;
   AppState.pantry = AppState.pantry.filter(p => p.id !== id);
   saveLocalState();
   pushStateToCloud();
@@ -5381,20 +5425,25 @@ function renderHistory() {
   `).join('');
 }
 
-function clearHistory() {
+async function clearHistory() {
   if (!AppState.receipts || AppState.receipts.length === 0) {
     showToast('Riwayat struk belanja masih kosong!', 'info');
     return;
   }
-  // Proteksi Jari Ceroboh: Konfirmasi sebelum menghapus permanen riwayat struk
-  if (!confirm('Apakah Anda yakin ingin menghapus seluruh riwayat struk belanja? Tindakan ini tidak dapat dibatalkan.')) {
-    return;
-  }
+  const confirmed = await showAppModalBubble({
+    title: 'Hapus Riwayat Struk',
+    message: 'Apakah Anda yakin ingin menghapus seluruh riwayat struk belanja? Tindakan ini tidak dapat dibatalkan.',
+    icon: '🗑️',
+    confirmText: 'Ya, Hapus Semua',
+    cancelText: 'Batal'
+  });
+  if (!confirmed) return;
+
   AppState.receipts = [];
   saveLocalState();
   pushStateToCloud();
   renderHistory();
-  showToast('Riwayat struk telah dibersihkan', 'info');
+  showToast('Riwayat struk telah dibersihkan ✨', 'info');
 }
 
 // =========================================================================
@@ -5531,7 +5580,16 @@ function handleModalBubbleAction(confirmed) {
   }
 }
 
-function showAppModalBubble({ title = 'Konfirmasi', message = '', icon = '✨', showInput = false, inputPlaceholder = '', defaultValue = '' } = {}) {
+function showAppModalBubble({
+  title = 'Konfirmasi',
+  message = '',
+  icon = '✨',
+  showInput = false,
+  inputPlaceholder = '',
+  defaultValue = '',
+  confirmText = 'Ya, Lanjutkan',
+  cancelText = 'Batal'
+} = {}) {
   return new Promise((resolve) => {
     pendingModalBubbleResolver = resolve;
     const modal = document.getElementById('appModalBubble');
@@ -5544,6 +5602,10 @@ function showAppModalBubble({ title = 'Konfirmasi', message = '', icon = '✨', 
     if (titleEl) titleEl.textContent = title;
     if (msgEl) msgEl.textContent = message;
     if (iconEl) iconEl.textContent = icon;
+    const btnCancel = document.getElementById('modalBubbleBtnCancel');
+    const btnConfirm = document.getElementById('modalBubbleBtnConfirm');
+    if (btnCancel) btnCancel.textContent = cancelText;
+    if (btnConfirm) btnConfirm.textContent = confirmText;
 
     if (inputWrap && inputEl) {
       if (showInput) {
@@ -5754,7 +5816,16 @@ function handleClearCacheAndReset() {
   }, 600);
 }
 
-function handleProfileLogout() {
+async function handleProfileLogout() {
+  const confirmed = await showAppModalBubble({
+    title: 'Keluar dari Akun',
+    message: 'Apakah Anda yakin ingin keluar dari akun Anda saat ini?',
+    icon: '🚪',
+    confirmText: 'Ya, Keluar Akun',
+    cancelText: 'Tetap Masuk'
+  });
+  if (!confirmed) return;
+
   closeProfileSettingsModal();
   promptLogout(true);
 }
@@ -5841,11 +5912,16 @@ function switchTab(tab, force = false) {
 // =========================================================================
 // 18. RESET DEMO DATA
 // =========================================================================
-function resetToInitialMockData() {
+async function resetToInitialMockData() {
   if (AppState.cart && AppState.cart.length > 0) {
-    if (!confirm('Perhatian: Memuat contoh data akan menggantikan daftar belanjaan Anda saat ini. Lanjutkan?')) {
-      return;
-    }
+    const confirmed = await showAppModalBubble({
+      title: 'Muat Contoh Data',
+      message: 'Perhatian: Memuat contoh data akan menggantikan daftar belanjaan Anda saat ini. Lanjutkan?',
+      icon: '📦',
+      confirmText: 'Ya, Gantikan',
+      cancelText: 'Batal'
+    });
+    if (!confirmed) return;
   }
   AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
   AppState.currentStore = 'Lotte Mart Grocery - Puri Indah';
