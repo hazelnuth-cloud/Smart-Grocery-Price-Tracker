@@ -9318,6 +9318,150 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
   color: #FECDD3 !important;
 }
 
+/* ==========================================================================
+   ULTRA-COMPACT MOBILE STICKY DASHBOARD TRACKER (PREVENTS TAKING HALF SCREEN)
+   Strictly scoped to mobile screens (<=640px) - Desktop layout remains 100% intact
+   ========================================================================== */
+@media (max-width: 640px) {
+  .sticky-dashboard-tracker {
+    top: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    padding: 6px 10px 5px 10px !important;
+    margin-top: 2px !important;
+    margin-bottom: 6px !important;
+    border-radius: 12px !important;
+    gap: 3px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  /* Compact Tier 1: Micro Header Row */
+  .tracker-header-row {
+    margin-bottom: 0 !important;
+    gap: 6px !important;
+  }
+
+  #cloud-sync-status-pill {
+    padding: 1.5px 6px !important;
+    font-size: 9.5px !important;
+    gap: 3.5px !important;
+    height: 18px !important;
+  }
+
+  .cloud-sync-dot {
+    width: 5px !important;
+    height: 5px !important;
+  }
+
+  .planner-alert-badge {
+    padding: 1.5px 6px !important;
+    font-size: 9.5px !important;
+    border-radius: 6px !important;
+    height: 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  .tracker-budget-btn {
+    padding: 1.5px 7px !important;
+    font-size: 9.5px !important;
+    border-radius: 6px !important;
+    height: 18px !important;
+    line-height: 1 !important;
+  }
+
+  /* Compact Tier 2: Main Metrics Row */
+  .tracker-main-row {
+    padding: 0 !important;
+    align-items: center !important;
+  }
+
+  .tracker-saldo-group {
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 5px !important;
+  }
+
+  .tracker-saldo-label {
+    font-size: 9px !important;
+    line-height: 1 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .tracker-saldo-value {
+    font-size: 1.05rem !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .tracker-spent-wrap {
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+  }
+
+  .tracker-spent-label {
+    font-size: 9px !important;
+    display: none !important;
+  }
+
+  .tracker-spent-figures {
+    gap: 3px !important;
+  }
+
+  .tracker-spent-val {
+    font-size: 11px !important;
+  }
+
+  .tracker-percent-val {
+    font-size: 10px !important;
+  }
+
+  /* Tier 3: Slim Progress Bar */
+  .tracker-progress-track {
+    height: 3px !important;
+    margin-top: 1px !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Tier 4: Alert Notice on Mobile */
+  /* When Safe: hide the redundant multi-line paragraph on mobile! */
+  .tracker-alert-notice.safe {
+    display: none !important;
+  }
+
+  /* When Warning or Danger: show as an ultra-compact single-line micro-chip! */
+  .tracker-alert-notice.warning,
+  .tracker-alert-notice.danger {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 3px 8px !important;
+    margin-top: 2px !important;
+    gap: 5px !important;
+    border-radius: 6px !important;
+  }
+
+  .tracker-alert-notice.warning .tracker-alert-desc,
+  .tracker-alert-notice.danger .tracker-alert-desc {
+    display: none !important;
+  }
+
+  .tracker-alert-notice.warning .tracker-alert-title,
+  .tracker-alert-notice.danger .tracker-alert-title {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .tracker-alert-notice.warning .tracker-alert-icon,
+  .tracker-alert-notice.danger .tracker-alert-icon {
+    font-size: 11px !important;
+  }
+}
+
+
 
 /* ==========================================================================
    COMPREHENSIVE FULL-APPLICATION DARK MODE OVERRIDES (NIGHT ROSE PALETTE)
