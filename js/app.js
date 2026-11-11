@@ -2776,11 +2776,11 @@ function renderBudget() {
 
   if (trackerSaldoLabel && trackerSaldoValue) {
     if (safety.sisa >= 0) {
-      trackerSaldoLabel.textContent = isPlanner ? 'Sisa Saldo (Rencana)' : 'Sisa Saldo (Keranjang)';
+      trackerSaldoLabel.textContent = 'Sisa Saldo';
       trackerSaldoValue.textContent = formatRupiah(safety.sisa);
       trackerSaldoValue.className = `tracker-saldo-value ${safety.level}`;
     } else {
-      trackerSaldoLabel.textContent = isPlanner ? 'Defisit (Rencana)' : 'Defisit (Keranjang)';
+      trackerSaldoLabel.textContent = 'Defisit Saldo';
       trackerSaldoValue.textContent = `- ${formatRupiah(Math.abs(safety.sisa))}`;
       trackerSaldoValue.className = 'tracker-saldo-value danger';
     }

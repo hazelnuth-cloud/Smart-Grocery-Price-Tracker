@@ -9374,33 +9374,64 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
     align-items: center !important;
   }
 
+  #overbudget-firm-banner {
+    display: none !important;
+  }
+
+  .tracker-main-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    padding: 2px 0 !important;
+    gap: 8px !important;
+  }
+
   .tracker-saldo-group {
-    flex-direction: row !important;
-    align-items: baseline !important;
-    gap: 5px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
   }
 
   .tracker-saldo-label {
     font-size: 9px !important;
-    line-height: 1 !important;
-    margin-bottom: 0 !important;
+    font-weight: 700 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
+    line-height: 1.1 !important;
+    margin-bottom: 1px !important;
+    white-space: nowrap !important;
   }
 
   .tracker-saldo-value {
-    font-size: 1.05rem !important;
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
     line-height: 1.1 !important;
+    white-space: nowrap !important;
     letter-spacing: -0.3px !important;
   }
 
   .tracker-spent-wrap {
-    flex-direction: row !important;
-    align-items: baseline !important;
-    gap: 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    text-align: right !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
   }
 
   .tracker-spent-label {
     font-size: 9px !important;
-    display: none !important;
+    font-weight: 700 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
+    line-height: 1.1 !important;
+    margin-bottom: 1px !important;
+    display: block !important;
   }
 
   .tracker-spent-figures {
@@ -9459,6 +9490,30 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
   .tracker-alert-notice.danger .tracker-alert-icon {
     font-size: 11px !important;
   }
+  /* Circular Mobile FAB to avoid blocking search input */
+  .fab-store-mode {
+    width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 14px !important;
+    box-shadow: 0 6px 20px rgba(233, 30, 99, 0.45) !important;
+  }
+
+  .fab-store-mode #fabText {
+    display: none !important;
+  }
+
+  .fab-store-mode #fabIcon {
+    font-size: 1.4rem !important;
+    margin: 0 !important;
+  }
+
 }
 
 
