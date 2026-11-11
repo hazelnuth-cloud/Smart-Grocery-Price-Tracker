@@ -1,0 +1,15 @@
+{
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Smart Grocery Price Tracker",
+        "supportEmail": "evelinametta@mutiarabangsa.sch.id",
+        "authorizedRedirectUris": [
+          "https://smart-grocery-tracker-52ac2.firebaseapp.com/__/auth/handler",
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}
+

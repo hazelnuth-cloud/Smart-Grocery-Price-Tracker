@@ -165,11 +165,13 @@ const DEFAULT_ROUTINE_ITEMS = [
   { namaBarang: 'Roti Tawar Gandum', kategori: 'Bahan Pokok', satuan: 'pack', qty: 1, hargaSatuan: 16000, isRoutine: true }
 ];
 
+let isInitialAppLoad = true;
+
 // Global App State
 let AppState = {
   user: null,
   authMode: 'signin',
-  previousSafetyLevel: 'safe',
+  previousSafetyLevel: null,
   cart: [],
   currentStore: 'Lotte Mart Grocery - Puri Indah', // Toko Default
   currentDate: new Date().toISOString().split('T')[0], // Tanggal Belanja
@@ -604,29 +606,44 @@ function evaluateBudgetSafety(totalBelanja, budget) {
 }
 
 function getCartMetrics() {
-  let totalBelanja = 0;
+  let totalBelanja = 0;       // Keranjang aktif (checked === true)
+  let totalRencana = 0;       // Rencana belanja (checked === false)
+  let totalAll = 0;           // Total gabungan
   let totalHemat = 0;
   let totalItemsCount = 0;
   let checkedItemsCount = 0;
+  let unboughtItemsCount = 0;
 
   AppState.cart.forEach(item => {
     const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
     const itemSubtotal = disc.finalPrice * item.qty;
     const itemSavings = disc.savingsPerUnit * item.qty;
 
-    totalBelanja += itemSubtotal;
-    totalHemat += itemSavings;
+    totalAll += itemSubtotal;
     totalItemsCount += item.qty;
-    if (item.checked) checkedItemsCount++;
+
+    if (item.checked) {
+      totalBelanja += itemSubtotal;
+      totalHemat += itemSavings;
+      checkedItemsCount++;
+    } else {
+      totalRencana += itemSubtotal;
+      unboughtItemsCount++;
+    }
   });
 
-  const safety = evaluateBudgetSafety(totalBelanja, AppState.budget);
+  const isPlanner = (AppState.currentTab === 'planner');
+  const evaluatedTotal = isPlanner ? (totalBelanja > 0 ? totalBelanja : totalAll) : totalBelanja;
+  const safety = evaluateBudgetSafety(evaluatedTotal, AppState.budget);
 
   return {
     totalBelanja,
+    totalRencana,
+    totalAll,
     totalHemat,
     totalItemsCount,
     checkedItemsCount,
+    unboughtItemsCount,
     safety
   };
 }
@@ -811,6 +828,244 @@ function playScannerBeep() {
   } catch (e) { }
 }
 
+function playCelebrationFanfare() {
+  if (!AppState.soundEnabled) return;
+  try {
+    initAudioContext();
+    if (!AppState.audioCtx) return;
+    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
+
+    const ctx = AppState.audioCtx;
+    const now = ctx.currentTime;
+    // Cheerful arpeggio melody: C5, E5, G5, C6 (Do-Mi-Sol-Do)
+    const notes = [
+      { freq: 523.25, time: 0.00, dur: 0.12 },
+      { freq: 659.25, time: 0.07, dur: 0.12 },
+      { freq: 783.99, time: 0.14, dur: 0.14 },
+      { freq: 1046.50, time: 0.22, dur: 0.35 }
+    ];
+
+    notes.forEach(n => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(n.freq, now + n.time);
+      gain.gain.setValueAtTime(0.001, now + n.time);
+      gain.gain.exponentialRampToValueAtTime(0.12, now + n.time + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + n.time);
+      osc.stop(now + n.time + n.dur + 0.02);
+    });
+  } catch (e) { }
+}
+
+// =========================================================================
+// 3B. CUTE CELEBRATION CONFETTI SHOWER (LOVE HEARTS, STARS & RIBBONS)
+// =========================================================================
+let activeConfettiAnimId = null;
+
+function triggerCuteLoginConfetti() {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+
+  // Respect reduced motion preference
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  // Cancel any currently running confetti animation cleanly
+  if (activeConfettiAnimId) {
+    cancelAnimationFrame(activeConfettiAnimId);
+    activeConfettiAnimId = null;
+  }
+  const oldCanvas = document.getElementById('celebrationConfettiCanvas');
+  if (oldCanvas) {
+    if (typeof oldCanvas.remove === 'function') oldCanvas.remove();
+    else if (oldCanvas.parentNode) oldCanvas.parentNode.removeChild(oldCanvas);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.id = 'celebrationConfettiCanvas';
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100vw';
+  canvas.style.height = '100vh';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '999999';
+  canvas.style.opacity = '1';
+  canvas.style.transition = 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+  document.body.appendChild(canvas);
+
+  if (typeof canvas.getContext !== 'function') return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const w = (canvas.width = Math.round(window.innerWidth * dpr));
+  const h = (canvas.height = Math.round(window.innerHeight * dpr));
+
+  // Cute, cheerful palette: soft pinks, candy roses, warm gold, lilac & mint
+  const CUTE_PALETTE = [
+    '#FF6584', '#E91E63', '#F472B6', '#FDA4AF', '#FB7185',
+    '#C084FC', '#A855F7', '#FBBF24', '#FCD34D', '#34D399', '#38BDF8'
+  ];
+  // Adorable celebratory love, stars & sweets emojis
+  const CUTE_EMOJIS = ['💖', '💕', '❤️', '🌸', '✨', '⭐', '🎀', '🍓', '🎉', '🥰'];
+
+  const count = Math.min(95, Math.max(50, Math.floor(window.innerWidth / 4.8)));
+  const particles = [];
+
+  for (let i = 0; i < count; i++) {
+    const isBurst = (i < count * 0.45); // 45% burst upward from bottom/center
+    const typeRoll = Math.random();
+    let type = 'heart';
+    if (typeRoll < 0.42) type = 'heart';
+    else if (typeRoll < 0.68) type = 'emoji';
+    else if (typeRoll < 0.88) type = 'ribbon';
+    else type = 'sparkle';
+
+    const emoji = CUTE_EMOJIS[Math.floor(Math.random() * CUTE_EMOJIS.length)];
+    const color = CUTE_PALETTE[Math.floor(Math.random() * CUTE_PALETTE.length)];
+    const size = (type === 'emoji') ? (18 + Math.random() * 12) * dpr :
+                 (type === 'heart') ? (13 + Math.random() * 13) * dpr :
+                 (type === 'ribbon') ? (8 + Math.random() * 8) * dpr :
+                 (5 + Math.random() * 6) * dpr;
+
+    let x, y, vx, vy;
+    if (isBurst) {
+      x = w * (0.35 + Math.random() * 0.3);
+      y = h * (0.45 + Math.random() * 0.2);
+      const angle = (Math.PI * 1.1) + (Math.random() * Math.PI * 0.8);
+      const speed = (6.5 + Math.random() * 11) * dpr;
+      vx = Math.cos(angle) * speed;
+      vy = Math.sin(angle) * speed;
+    } else {
+      x = Math.random() * w;
+      y = -20 * dpr - Math.random() * 120 * dpr;
+      vx = (Math.random() - 0.5) * 3.5 * dpr;
+      vy = (2.2 + Math.random() * 4.2) * dpr;
+    }
+
+    particles.push({
+      type,
+      emoji,
+      color,
+      size,
+      x,
+      y,
+      vx,
+      vy,
+      gravity: (0.2 + Math.random() * 0.12) * dpr,
+      drag: 0.985,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.04 + Math.random() * 0.05,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.12,
+      tilt: Math.random() * Math.PI * 2,
+      tiltSpeed: 0.05 + Math.random() * 0.08,
+      opacity: 1,
+      fadeSpeed: 0.0035 + Math.random() * 0.004
+    });
+  }
+
+  const startTime = Date.now();
+  const maxDuration = 3800; // 3.8s total duration
+
+  function drawHeart(ctx, x, y, size, color, rotation, tilt, opacity) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.scale(Math.cos(tilt), 1);
+    ctx.globalAlpha = Math.max(0, opacity);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    const topCurve = size * 0.35;
+    ctx.moveTo(0, topCurve);
+    ctx.bezierCurveTo(0, 0, -size / 2, 0, -size / 2, topCurve);
+    ctx.bezierCurveTo(-size / 2, (size + topCurve) / 2, 0, size * 1.1, 0, size * 1.35);
+    ctx.bezierCurveTo(0, size * 1.1, size / 2, (size + topCurve) / 2, size / 2, topCurve);
+    ctx.bezierCurveTo(size / 2, 0, 0, 0, 0, topCurve);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function renderFrame() {
+    const elapsed = Date.now() - startTime;
+    ctx.clearRect(0, 0, w, h);
+
+    let activeCount = 0;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      if (p.opacity <= 0 || p.y > h + 50 * dpr) continue;
+      activeCount++;
+
+      p.x += p.vx + Math.sin(p.wobble) * (1.6 * dpr);
+      p.y += p.vy;
+      p.vx *= p.drag;
+      p.vy += p.gravity;
+      p.wobble += p.wobbleSpeed;
+      p.rotation += p.rotSpeed;
+      p.tilt += p.tiltSpeed;
+
+      // Start gentle fade-out after 1.8s
+      if (elapsed > 1800) {
+        p.opacity -= p.fadeSpeed * 1.8;
+      }
+
+      if (p.type === 'heart') {
+        drawCuteHeart(ctx, p.x, p.y, p.size, p.color, p.rotation, p.tilt, p.opacity);
+      } else if (p.type === 'emoji') {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation * 0.5);
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.font = `${Math.round(p.size)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.emoji, 0, 0);
+        ctx.restore();
+      } else if (p.type === 'ribbon') {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.scale(Math.cos(p.tilt), 1);
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        ctx.restore();
+      } else {
+        // Sparkle
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size / 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    if (activeCount > 0 && elapsed < maxDuration) {
+      activeConfettiAnimId = requestAnimationFrame(renderFrame);
+    } else {
+      canvas.style.opacity = '0';
+      setTimeout(() => {
+        if (canvas.parentNode) {
+          if (typeof canvas.remove === 'function') canvas.remove();
+          else canvas.parentNode.removeChild(canvas);
+        }
+        activeConfettiAnimId = null;
+      }, 600);
+    }
+  }
+
+  activeConfettiAnimId = requestAnimationFrame(renderFrame);
+}
+
 function toggleAudio() {
   AppState.soundEnabled = !AppState.soundEnabled;
   localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(AppState.soundEnabled));
@@ -825,19 +1080,74 @@ function toggleAudio() {
 // 4. PERSISTENCE & LOCALSTORAGE
 // =========================================================================
 function getStoredItem(key) {
-  let val = localStorage.getItem(key);
-  if (!val) {
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith(key)) {
-          val = localStorage.getItem(k);
-          break;
-        }
-      }
-    } catch (e) { }
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    return null;
   }
-  return val;
+}
+
+// Requirement: Purge legacy Audrey/demo data completely
+function purgeLegacyAudreyData() {
+  try {
+    const rawUser = localStorage.getItem(STORAGE_KEYS.USER);
+    if (rawUser) {
+      try {
+        const u = JSON.parse(rawUser);
+        if (u && (
+          u.uid === 'demo_user_101' || 
+          (u.name && u.name.toLowerCase().includes('audrey')) || 
+          (u.email && u.email.toLowerCase().includes('audrey'))
+        )) {
+          localStorage.removeItem(STORAGE_KEYS.USER);
+          if (AppState.user && (
+            AppState.user.uid === 'demo_user_101' || 
+            (AppState.user.name && AppState.user.name.toLowerCase().includes('audrey')) ||
+            (AppState.user.email && AppState.user.email.toLowerCase().includes('audrey'))
+          )) {
+            AppState.user = null;
+          }
+        }
+      } catch (e) {
+        localStorage.removeItem(STORAGE_KEYS.USER);
+      }
+    }
+
+    // Clean saved Google accounts list
+    let googleAccs = getSavedGoogleAccounts();
+    if (Array.isArray(googleAccs)) {
+      const filtered = googleAccs.filter(a => 
+        a && a.email && !a.email.toLowerCase().includes('audrey') && 
+        (!a.name || !a.name.toLowerCase().includes('audrey'))
+      );
+      if (filtered.length !== googleAccs.length) {
+        saveSavedGoogleAccounts(filtered);
+      }
+    }
+
+    // Clean registered users list
+    let regUsers = getRegisteredUsers();
+    if (Array.isArray(regUsers)) {
+      const filteredReg = regUsers.filter(u => 
+        u && u.email && !u.email.toLowerCase().includes('audrey') && 
+        (!u.name || !u.name.toLowerCase().includes('audrey')) && 
+        u.uid !== 'demo_user_101'
+      );
+      if (filteredReg.length !== regUsers.length) {
+        saveRegisteredUsers(filteredReg);
+      }
+    }
+
+    // Purge any key in localStorage containing audrey or demo_user_101
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && (k.toLowerCase().includes('audrey') || k.includes('demo_user_101'))) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch (err) {
+    console.warn('Purge legacy demo users notice:', err);
+  }
 }
 
 function loadUserIsolatedState(uid) {
@@ -969,10 +1279,21 @@ function loadUserIsolatedState(uid) {
 
 function loadLocalState() {
   try {
+    purgeLegacyAudreyData();
     const storedUser = getStoredItem(STORAGE_KEYS.USER);
     if (storedUser) {
       try {
-        AppState.user = JSON.parse(storedUser);
+        const parsed = JSON.parse(storedUser);
+        if (parsed && (
+          parsed.uid === 'demo_user_101' ||
+          (parsed.name && parsed.name.toLowerCase().includes('audrey')) ||
+          (parsed.email && parsed.email.toLowerCase().includes('audrey'))
+        )) {
+          AppState.user = null;
+          localStorage.removeItem(STORAGE_KEYS.USER);
+        } else {
+          AppState.user = parsed;
+        }
       } catch (e) {
         AppState.user = null;
       }
@@ -1194,6 +1515,8 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
   setupFirestoreListener();
 
   if (notify) {
+    playCelebrationFanfare();
+    triggerCuteLoginConfetti();
     showToast(`Selamat datang, ${displayName}! ✨`, 'success');
   }
 }
@@ -1266,13 +1589,29 @@ function pushStateToCloud(immediate = false) {
 }
 
 function updateCloudSyncUI(status, labelText) {
+  const isOnline = (status === 'connected') || (status !== 'offline' && typeof navigator !== 'undefined' && navigator.onLine);
   const statusPill = document.getElementById('cloud-sync-status-pill');
   const statusText = document.getElementById('cloud-sync-text') || document.querySelector('.cloud-sync-text');
   const dot = document.getElementById('cloud-sync-dot');
 
-  if (statusText) statusText.textContent = labelText;
+  if (statusPill) {
+    statusPill.classList.toggle('status-online', isOnline);
+    statusPill.classList.toggle('status-offline', !isOnline);
+    statusPill.title = labelText || (isOnline ? 'Koneksi Online & Cloud Sync Siap' : 'Mode Offline (Penyimpanan Lokal)');
+  }
+  if (statusText) {
+    // Keep it short, clean, and elegant - no overflowing or overlapping text!
+    statusText.textContent = isOnline ? 'Aktif' : 'Offline';
+  }
   if (dot) {
-    dot.style.background = (status === 'connected') ? '#10B981' : '#94A3B8';
+    dot.className = `cloud-sync-dot ${isOnline ? 'online pulsing' : 'offline'}`;
+    dot.style.background = isOnline ? '#10B981' : '#94A3B8';
+  }
+
+  const modalCloudStatus = document.getElementById('modalCloudSyncStatus');
+  if (modalCloudStatus) {
+    modalCloudStatus.className = `settings-status-pill ${isOnline ? 'online' : 'offline'}`;
+    modalCloudStatus.textContent = isOnline ? '🟢 Online (Cloud Ready)' : '🟠 Mode Offline (LocalStorage)';
   }
 }
 
@@ -1291,7 +1630,8 @@ function getRegisteredUsers() {
     const raw = localStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(u => u && u.email && !u.email.toLowerCase().includes('audrey') && (!u.name || !u.name.toLowerCase().includes('audrey')) && u.uid !== 'demo_user_101');
   } catch (e) {
     return [];
   }
@@ -1310,7 +1650,8 @@ function getSavedGoogleAccounts() {
     const raw = localStorage.getItem(STORAGE_KEYS.GOOGLE_ACCOUNTS);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(a => a && a.email && !a.email.toLowerCase().includes('audrey') && (!a.name || !a.name.toLowerCase().includes('audrey')));
   } catch (e) {
     return [];
   }
@@ -1476,7 +1817,8 @@ function selectGoogleAccount(email) {
   closeGoogleAuthModal();
   loadUserIsolatedState(uid);
   saveLocalState();
-  playCalmChime();
+  playCelebrationFanfare();
+  triggerCuteLoginConfetti();
   checkAuth();
   setupFirestoreListener();
   showToast(`Selamat datang kembali, ${acc.name}! ✨ (Akun Google)`, 'success');
@@ -1554,64 +1896,121 @@ function submitNewGoogleAccount() {
 
   loadUserIsolatedState(uid);
   saveLocalState();
-  playCalmChime();
+  playCelebrationFanfare();
+  triggerCuteLoginConfetti();
   checkAuth();
   setupFirestoreListener();
   showToast(`Selamat datang, ${name}! ✨ (Akun Google)`, 'success');
 }
 
+// Global Google Auth Popup Message Handler
+if (typeof window !== 'undefined') {
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.user) {
+      handleGooglePopupSuccess(event.data.user);
+    }
+  });
+}
+
+function handleGooglePopupSuccess(u) {
+  if (!u || !u.email) return;
+
+  // Never allow legacy demo/audrey account
+  if ((u.name && u.name.toLowerCase().includes('audrey')) || (u.email && u.email.toLowerCase().includes('audrey'))) {
+    return;
+  }
+
+  const displayName = u.name || (u.email ? u.email.split('@')[0] : 'Pengguna Google');
+  const uid = u.uid || getDeterministicUid(u.email, 'google_');
+  const photoURL = u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4285F4&color=fff&bold=true`;
+
+  AppState.user = {
+    name: displayName,
+    email: u.email,
+    photoURL: photoURL,
+    uid: uid,
+    authProvider: 'google',
+    isLiveFirebaseSession: false,
+    loggedAt: new Date().toISOString()
+  };
+
+  // Record in saved Google accounts
+  let accounts = getSavedGoogleAccounts();
+  const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === u.email.toLowerCase());
+  const accObj = { name: displayName, email: u.email, photoURL, lastLogin: new Date().toISOString() };
+  if (existingIdx >= 0) {
+    accounts[existingIdx] = accObj;
+  } else {
+    accounts.push(accObj);
+  }
+  saveSavedGoogleAccounts(accounts);
+
+  // Close in-page modal if open
+  closeGoogleAuthModal();
+
+  // Load user isolated state
+  isInitialAppLoad = true;
+  AppState.previousSafetyLevel = null;
+  loadUserIsolatedState(uid);
+  saveLocalState();
+  playCelebrationFanfare();
+  triggerCuteLoginConfetti();
+  checkAuth();
+  setupFirestoreListener();
+  showToast(`Selamat datang, ${displayName}! ✨ (Akun Google)`, 'success');
+  setTimeout(() => { isInitialAppLoad = false; }, 600);
+}
+
 async function loginWithGoogle() {
   playSoftPop();
   clearAuthAlert();
+  purgeLegacyAudreyData();
 
-  if (typeof firebase !== 'undefined' && firebase.auth) {
+  // 1. Official Firebase Google Auth Popup (Active & Configured on smart-grocery-tracker-52ac2)
+  if (typeof firebase !== 'undefined' && firebase.auth && typeof window.initGoogleAuthProvider === 'function') {
     try {
-      let googleProvider = null;
-      if (typeof window !== 'undefined' && typeof window.initGoogleAuthProvider === 'function') {
-        googleProvider = window.initGoogleAuthProvider();
-      }
-      if (!googleProvider && firebase.auth.GoogleAuthProvider) {
-        googleProvider = new firebase.auth.GoogleAuthProvider();
-        googleProvider.addScope('email');
-        googleProvider.addScope('profile');
-        googleProvider.setCustomParameters({ prompt: 'select_account' });
-      }
-
-      if (googleProvider) {
-        try {
-          const result = await firebase.auth().signInWithPopup(googleProvider);
-          if (result && result.user) {
-            result.user.isLiveFirebaseSession = true;
-            handleSuccessfulAuth(result.user, 'google', true);
-            return;
-          }
-        } catch (popupErr) {
-          console.warn('Firebase Google Auth popup notice:', popupErr.code, popupErr.message);
-
-          if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
-            showToast('Proses masuk Google dibatalkan', 'info');
-            return;
-          }
-          if (popupErr.code === 'auth/popup-blocked') {
-            try {
-              await firebase.auth().signInWithRedirect(googleProvider);
-              return;
-            } catch (redirErr) {
-              console.warn('Redirect error:', redirErr);
-            }
-          }
-          // For configuration-not-found, unauthorized-domain, network-request-failed, etc.
-          // Fall through to show the Google Account Chooser Modal
+      const provider = window.initGoogleAuthProvider();
+      if (provider) {
+        showToast('Membuka jendela masuk Google...', 'info');
+        const result = await firebase.auth().signInWithPopup(provider);
+        if (result && result.user) {
+          result.user.isLiveFirebaseSession = true;
+          handleSuccessfulAuth(result.user, 'google', true);
+          return;
         }
       }
-    } catch (err) {
-      console.warn('Google Provider setup notice:', err);
+    } catch (popupError) {
+      console.warn('Firebase signInWithPopup notice:', popupError);
+      if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
+        showToast('Login Google dibatalkan.', 'info');
+        return;
+      }
+      showToast('Mengalihkan ke pemilih akun Google...', 'info');
     }
   }
 
-  // Open interactive Google Account Selector Modal
-  // NEVER falls back to demo account!
-  openGoogleAuthModal();
+  // 2. Safe Fallback: Google Account Chooser popup window (500x620 centered)
+  const width = 500;
+  const height = 620;
+  const left = Math.max(0, Math.round((window.screen.width - width) / 2));
+  const top = Math.max(0, Math.round((window.screen.height - height) / 2));
+  const popupFeatures = `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,scrollbars=yes`;
+
+  let authPopup = null;
+  try {
+    authPopup = window.open('google-auth.html', 'GoogleSignIn', popupFeatures);
+  } catch (e) {
+    console.warn('Popup window open notice:', e);
+  }
+
+  if (!authPopup || authPopup.closed || typeof authPopup.closed === 'undefined') {
+    showToast('Jendela pop-up diblokir peramban. Menampilkan pemilih akun...', 'info');
+    openGoogleAuthModal();
+  } else {
+    try {
+      authPopup.focus();
+    } catch (e) {}
+  }
 }
 
 async function handleAuthSubmit(e) {
@@ -1717,7 +2116,8 @@ async function handleAuthSubmit(e) {
 
     loadUserIsolatedState(uid);
     saveLocalState();
-    playCalmChime();
+    playCelebrationFanfare();
+    triggerCuteLoginConfetti();
     checkAuth();
     setupFirestoreListener();
     showToast(`Akun berhasil dibuat! Selamat datang, ${name} ✨`, 'success');
@@ -1767,7 +2167,8 @@ async function handleAuthSubmit(e) {
 
       loadUserIsolatedState(foundUser.uid);
       saveLocalState();
-      playCalmChime();
+      playCelebrationFanfare();
+      triggerCuteLoginConfetti();
       checkAuth();
       setupFirestoreListener();
       showToast(`Selamat datang kembali, ${foundUser.name}! ✨`, 'success');
@@ -1801,7 +2202,8 @@ function loginDemoAccount() {
   };
   loadUserIsolatedState(demoUid);
   saveLocalState();
-  playCalmChime();
+  playCelebrationFanfare();
+  triggerCuteLoginConfetti();
   checkAuth();
   setupFirestoreListener();
   showToast('Masuk dengan Akun Demo ✨', 'success');
@@ -1820,6 +2222,14 @@ function promptLogout(notify = true) {
   }
   AppState.user = null;
   localStorage.removeItem(STORAGE_KEYS.USER);
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('smart_grocery_user')) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch (e) { }
 
   // Reset active UI state cleanly
   AppState.cart = [];
@@ -2162,39 +2572,78 @@ function renderBudget() {
     }
   }
 
-  // PLANNER TAB DYNAMIC BUDGET ALERT BOX ( & UX)
+    // PLANNER TAB STICKY DASHBOARD TRACKER BOX
+  const trackerSaldoLabel = document.getElementById('trackerSaldoLabel');
+  const trackerSaldoValue = document.getElementById('trackerSaldoValue');
+  const trackerSpentVal = document.getElementById('trackerSpentVal');
+  const trackerPercentVal = document.getElementById('trackerPercentVal');
+
+  const isPlanner = (AppState.currentTab === 'planner');
+  const activeSpend = isPlanner ? (totalBelanja > 0 ? totalBelanja : (metrics.totalAll || totalBelanja)) : totalBelanja;
+
+  if (trackerSaldoLabel && trackerSaldoValue) {
+    if (safety.sisa >= 0) {
+      trackerSaldoLabel.textContent = isPlanner ? 'Sisa Saldo (Rencana)' : 'Sisa Saldo (Keranjang)';
+      trackerSaldoValue.textContent = formatRupiah(safety.sisa);
+      trackerSaldoValue.className = `tracker-saldo-value ${safety.level}`;
+    } else {
+      trackerSaldoLabel.textContent = isPlanner ? 'Defisit (Rencana)' : 'Defisit (Keranjang)';
+      trackerSaldoValue.textContent = `- ${formatRupiah(Math.abs(safety.sisa))}`;
+      trackerSaldoValue.className = 'tracker-saldo-value danger';
+    }
+  }
+
+  if (trackerSpentVal) {
+    trackerSpentVal.textContent = `${formatRupiah(activeSpend)} / ${formatRupiah(budget)}`;
+  }
+  if (trackerPercentVal) {
+    trackerPercentVal.textContent = `(${Math.round(safety.percentage)}%)`;
+  }
+
   const plannerAlert = document.getElementById('plannerBudgetAlert');
   const plannerAlertTitle = document.getElementById('plannerAlertTitle');
   const plannerAlertDesc = document.getElementById('plannerAlertDesc');
   const plannerAlertBadge = document.getElementById('plannerAlertBadge');
   const plannerAlertIcon = document.getElementById('plannerAlertIcon');
 
+  const trackerAlertNotice = document.getElementById('trackerAlertNotice');
+
   if (plannerAlert) {
-    plannerAlert.className = `planner-budget-alert budget-status-card ${safety.level}`;
+    plannerAlert.className = `sticky-dashboard-tracker planner-budget-alert budget-status-card ${safety.level}`;
+    if (plannerAlertBadge) {
+      plannerAlertBadge.textContent = (safety.level === 'danger') 
+        ? `Overbudget (${Math.round(safety.percentage)}%)` 
+        : (safety.level === 'warning' ? `Rem Dulu (${Math.round(safety.percentage)}%)` : 'Aman');
+      plannerAlertBadge.className = `planner-alert-badge badge-${safety.level}`;
+    }
+    if (trackerAlertNotice) {
+      trackerAlertNotice.className = `tracker-alert-notice ${safety.level}`;
+    }
+
     if (safety.level === 'danger') {
-      const overDiff = totalBelanja - budget;
+      const overDiff = (activeSpend > budget) ? (activeSpend - budget) : (totalBelanja - budget);
       if (plannerAlertIcon) plannerAlertIcon.textContent = '🚨';
       if (plannerAlertTitle) plannerAlertTitle.textContent = 'Peringatan: Melebihi Batas Saldo Dompet!';
-      if (plannerAlertDesc) plannerAlertDesc.textContent = `Total belanja ${formatRupiah(totalBelanja)} melebihi limit ${formatRupiah(budget)} (Defisit: ${formatRupiah(overDiff)})`;
+      if (plannerAlertDesc) plannerAlertDesc.textContent = `Total belanja ${formatRupiah(activeSpend)} melebihi limit ${formatRupiah(budget)} (Defisit: ${formatRupiah(overDiff)}). Kurangi kuantitas item atau batalkan barang sekunder agar pengeluaran tetap aman.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-danger';
-        plannerAlertBadge.textContent = `${Math.round(safety.percentage)}%`;
+        plannerAlertBadge.textContent = `Overbudget (${Math.round(safety.percentage)}%)`;
       }
     } else if (safety.level === 'warning') {
       if (plannerAlertIcon) plannerAlertIcon.textContent = '⚠️';
       if (plannerAlertTitle) plannerAlertTitle.textContent = 'Eits, Dikit Lagi Tembus Limit! 💸';
-      if (plannerAlertDesc) plannerAlertDesc.textContent = 'Pengeluaranmu udah 90% nih. Mending sortir lagi isi keranjang biar nggak bablas.';
+      if (plannerAlertDesc) plannerAlertDesc.textContent = `Pengeluaranmu sudah mencapai ${Math.round(safety.percentage)}% (${formatRupiah(activeSpend)} dari saldo ${formatRupiah(budget)}). Sortir lagi isi keranjang belanja agar tidak melebihi batas saldo.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-warning';
-        plannerAlertBadge.textContent = 'Rem Dulu Kak';
+        plannerAlertBadge.textContent = `Rem Dulu (${Math.round(safety.percentage)}%)`;
       }
     } else {
       if (plannerAlertIcon) plannerAlertIcon.textContent = '💚';
       if (plannerAlertTitle) plannerAlertTitle.textContent = 'Status Saldo: Terkendali';
-      if (plannerAlertDesc) plannerAlertDesc.textContent = `Total ${formatRupiah(totalBelanja)} dari saldo ${formatRupiah(budget)} • Sisa ${formatRupiah(safety.sisa)}`;
+      if (plannerAlertDesc) plannerAlertDesc.textContent = `Total belanja ${formatRupiah(activeSpend)} dari batas saldo ${formatRupiah(budget)} • Sisa saldo aman: ${formatRupiah(safety.sisa)}.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-safe';
-        plannerAlertBadge.textContent = `${Math.round(safety.percentage)}%`;
+        plannerAlertBadge.textContent = `Aman (${Math.round(safety.percentage)}%)`;
       }
     }
   }
@@ -2236,10 +2685,13 @@ function renderBudget() {
     }
   }
 
-  // Multi-Sensory Warning Cue when transitioning to overbudget
-  if (safety.level === 'danger' && AppState.previousSafetyLevel !== 'danger') {
-    playWarningAlertTone();
-    showToast('🚨 Peringatan: Total belanja telah melebihi batas saldo dompet!', 'danger');
+  // Multi-Sensory Warning Cue: ONLY trigger on dynamic user actions when authenticated, NEVER on initial page load / refresh / unauthenticated gate!
+  const isAuth = !!(AppState.user && AppState.user.name);
+  if (!isInitialAppLoad && isAuth && AppState.previousSafetyLevel !== null) {
+    if (safety.level === 'danger' && AppState.previousSafetyLevel !== 'danger') {
+      playWarningAlertTone();
+      showToast('🚨 Peringatan: Total belanja telah melebihi batas saldo dompet!', 'danger');
+    }
   }
   AppState.previousSafetyLevel = safety.level;
 
@@ -2320,24 +2772,155 @@ function renderBudget() {
 
 // Render Checklist Items with Stepper Touch Targets
 // Render Checklist Items with Compact Horizontal Rows
+
+function showToastWithUndo(message, onUndoAction) {
+  if (typeof document === 'undefined') return;
+
+  if (activeToastTimeout) {
+    clearTimeout(activeToastTimeout);
+    activeToastTimeout = null;
+  }
+  document.querySelectorAll('.app-toast, .toast-message').forEach(t => t.remove());
+
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'app-toast toast-message info toast-with-undo';
+
+  // Format bertingkat 2 baris sengaja untuk aksi undo (anti teks terpotong)
+  let titleText = 'Operasi Selesai';
+  let descText = message;
+  const quoteMatch = message.match(/^"([^"]+)"\s*(.*)$/);
+  if (quoteMatch) {
+    titleText = `"${quoteMatch[1]}"`;
+    descText = quoteMatch[2] || 'Berhasil dipindahkan';
+  }
+
+  toast.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+      <span class="toast-icon">✨</span>
+      <div class="toast-stacked-wrap" style="flex: 1; min-width: 0;">
+        <div class="toast-title" style="white-space: normal; word-break: break-word;">${escapeHtml(titleText)}</div>
+        <div class="toast-desc" style="white-space: normal; word-break: break-word; line-height: 1.3;">${escapeHtml(descText)}</div>
+      </div>
+    </div>
+    <button type="button" class="btn-toast-undo touch-target">Urungkan ↩️</button>
+  `;
+
+  const undoBtn = toast.querySelector('.btn-toast-undo');
+  if (undoBtn && typeof onUndoAction === 'function') {
+    undoBtn.onclick = (e) => {
+      e.stopPropagation();
+      onUndoAction();
+      toast.remove();
+      playSoftPop();
+    };
+  }
+
+  container.appendChild(toast);
+
+  activeToastTimeout = setTimeout(() => {
+    toast.classList.add('fade-out');
+    toast.style.opacity = '0';
+    toast.style.transform = 'translate(-50%, -10px)';
+    toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 250);
+  }, 4500);
+}
+
+function moveItemToCart(itemId) {
+  const item = AppState.cart.find(i => i.id === itemId);
+  if (!item) return;
+
+  item.checked = true;
+  playCalmChime();
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+
+  showToastWithUndo(`"${item.namaBarang}" dipindahkan ke Keranjang 🛒`, () => {
+    moveItemToPlan(itemId, true);
+  });
+}
+
+function moveItemToPlan(itemId, isSilent = false) {
+  const item = AppState.cart.find(i => i.id === itemId);
+  if (!item) return;
+
+  item.checked = false;
+  playSoftPop();
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+
+  if (!isSilent) {
+    showToastWithUndo(`"${item.namaBarang}" dikembalikan ke Rencana 📋`, () => {
+      moveItemToCart(itemId);
+    });
+  }
+}
+
+function startShoppingFromPlan() {
+  const unbought = AppState.cart.filter(i => !i.checked);
+  if (unbought.length === 0) {
+    if (AppState.cart.length === 0) {
+      showToast('Tambahkan barang ke Rencana Belanja terlebih dahulu! ✨', 'info');
+      const input = document.getElementById('smartInputField');
+      if (input) input.focus();
+      return;
+    }
+    switchTab('cart');
+    showToast('Semua barang sudah berada di Keranjang Belanja 🛒', 'info');
+    return;
+  }
+
+  const movedIds = unbought.map(i => i.id);
+  unbought.forEach(i => { i.checked = true; });
+
+  playCalmChime();
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  switchTab('cart');
+
+  showToastWithUndo(`${movedIds.length} barang dipindahkan ke Keranjang Belanja 🛒`, () => {
+    movedIds.forEach(id => {
+      const it = AppState.cart.find(item => item.id === id);
+      if (it) it.checked = false;
+    });
+    saveLocalState();
+    pushStateToCloud();
+    renderAll();
+    switchTab('planner');
+    showToast('Pengalihan ke Keranjang dibatalkan ↩️', 'info');
+  });
+}
+
 function renderItems() {
   const container = document.getElementById('groceryItemsContainer');
   const unboughtCountEl = document.getElementById('unboughtItemCount');
   if (!container) return;
 
   const unbought = AppState.cart.filter(i => !i.checked);
+  const inCart = AppState.cart.filter(i => i.checked);
   if (unboughtCountEl) unboughtCountEl.textContent = unbought.length;
 
-  // Requirement 1: Empty State Visual (UX)
+  // Empty state handling
   if (AppState.cart.length === 0) {
     container.innerHTML = `
       <div class="empty-state" style="padding: 36px 16px; text-align: center;">
         <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang belanja masih kosong</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Belanjaan sebelumnya sudah selesai dan tercatat di Pantri! Siap belanja lagi?</p>
+        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Daftar rencana belanja masih kosong</p>
+        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Ketik kebutuhan belanja di atas atau pilih dari katalog populer di bawah!</p>
         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
           <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 16px; font-size: 0.82rem; font-weight: 800;" onclick="startNewShoppingSession()">
-            🛍️ Belanja Lagi (Muat Barang Rutin)
+            🛍️ Muat Barang Rutin
           </button>
           <button type="button" class="btn-demo-quick" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="resetToInitialMockData()">
             Muat Contoh Data
@@ -2349,9 +2932,24 @@ function renderItems() {
     return;
   }
 
-  let itemsToRender = [...AppState.cart];
+  // If all items in plan are already moved to cart
+  if (unbought.length === 0 && inCart.length > 0) {
+    container.innerHTML = `
+      <div class="empty-plan-all-in-cart">
+        <div style="font-size: 38px; margin-bottom: 8px;">🎉</div>
+        <h4 style="font-size: 1rem; font-weight: 800; color: #166534; margin: 0 0 6px 0;">Semua Rencana Sudah Masuk Keranjang!</h4>
+        <p style="font-size: 0.8rem; color: #15803D; margin: 0 0 16px 0;">${inCart.length} barang rencana sudah siap di Keranjang Belanja untuk dibayar.</p>
+        <button type="button" class="btn-primary touch-target" onclick="switchTab('cart')" style="width: auto; padding: 10px 22px; font-size: 0.86rem; font-weight: 800; margin: 0 auto; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.25);">
+          🛒 Buka Keranjang Belanja (${inCart.length})
+        </button>
+      </div>
+    `;
+    updateCartBadges();
+    return;
+  }
 
-  // In-Store Mode Aisle Sorting
+  let itemsToRender = [...unbought];
+
   if (AppState.inStoreMode) {
     itemsToRender.sort((a, b) => (a.kategori || a.category || '').localeCompare(b.kategori || b.category || ''));
   }
@@ -2360,7 +2958,6 @@ function renderItems() {
   let currentCategory = null;
 
   itemsToRender.forEach(item => {
-    // Aisle Header in in-store mode
     if (AppState.inStoreMode && (item.kategori || item.category) !== currentCategory) {
       currentCategory = item.kategori || item.category;
       const aisle = AISLE_METADATA[currentCategory] || { title: currentCategory || 'Pantry', icon: '📍' };
@@ -2372,133 +2969,80 @@ function renderItems() {
       `;
     }
 
-    const hasNoPrice = (!item.hargaSatuan || item.hargaSatuan <= 0);
+    const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+    const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
+    const isSameStore = (!item.store || item.store === AppState.currentStore);
+    const analysis = getRepurchaseAnalysis(item.hargaSatuan || 0, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore } : null), isSameStore);
 
-    if (hasNoPrice) {
-      // PRE-SHOPPING CHECKLIST MODE: [ Checkbox | Nama Barang | Kuantitas & Satuan | Riwayat Beli Lalu | Tombol +Isi Harga ]
-      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
-      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
-      const analysis = getRepurchaseAnalysis(0, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore: true } : null));
+    const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+    const subtotal = disc.finalPrice * item.qty;
 
-      html += `
-        <div class="shopee-item-card unpriced-plan-item ${item.checked ? 'checked' : ''}" data-item-id="${item.id}" onclick="handleItemRowClick('${item.id}', event)">
-          <!-- Checkbox: Memicu popover input harga riil saat belanja di toko -->
-          <label class="cart-item-checkbox-wrap" title="Centang untuk masukkan harga riil di toko">
-            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="handleItemCheckOrPricePrompt('${item.id}', this)">
-          </label>
-
-          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
-          <div class="shopee-compact-body">
-            <!-- Top Row: Judul Produk + Kuantitas Satuan + Badge Riwayat Beli Ulang -->
-            <div class="shopee-compact-top">
-              <div class="shopee-compact-title-wrap">
-                <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
-                  ${escapeHtml(item.namaBarang)}
-                </span>
-                <div class="shopee-compact-meta-left">
-                  <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-                  ${analysis.isRepurchase ? `<span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
-                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
-                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
-                  </button>
-                </div>
-              </div>
-              <div class="shopee-compact-actions">
-                <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
-                <button type="button" class="btn-shopee-delete" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item">🗑️</button>
+    html += `
+      <div class="shopee-item-card plan-item-card" data-item-id="${item.id}">
+        <div class="shopee-compact-body">
+          <div class="shopee-compact-top">
+            <div class="shopee-compact-title-wrap">
+              <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
+                ${escapeHtml(item.namaBarang)}
+              </span>
+              <div class="shopee-compact-meta-left">
+                <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                ${analysis.isRepurchase ? `<span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
+                <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                  🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
+                </button>
               </div>
             </div>
+            <div class="shopee-compact-actions">
+              <button type="button" class="btn-action-edit-icon touch-target" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Rincian Item">✏️</button>
+              <button type="button" class="btn-shopee-delete touch-target" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item">🗑️</button>
+            </div>
+          </div>
 
-            <!-- Bottom Row: Dulu Rp X / Belum Ada Harga + Stepper -->
-            <div class="shopee-compact-bottom">
-              <div class="shopee-compact-price-wrap">
-                <button type="button" class="badge-no-price touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga riil di toko">
+          <div class="shopee-compact-bottom">
+            <div class="shopee-compact-price-wrap">
+              ${item.hargaSatuan > 0 ? `
+                <span class="subtotal-amount price-tag" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga perkiraan">${formatRupiah(subtotal)}</span>
+              ` : `
+                <button type="button" class="badge-no-price touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga perkiraan">
                   ${analysis.previousPrice ? `💡 Dulu: ${formatRupiah(analysis.previousPrice)}` : '🏷️ Belum Ada Harga'}
                 </button>
-                <button type="button" class="btn-enter-price-pill touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Masukkan harga riil di toko">
-                  + Isi Harga
-                </button>
+              `}
+            </div>
+
+            <div class="shopee-compact-stepper-wrap" style="display: flex; align-items: center; gap: 6px;">
+              <div class="shopee-stepper">
+                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas">&minus;</button>
+                <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
+                       oninput="handleQtyDirectInput('${item.id}', this.value)"
+                       onblur="handleQtyBlur('${item.id}', this.value)"
+                       onclick="event.stopPropagation()">
+                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas">+</button>
               </div>
 
-              <div class="shopee-compact-stepper-wrap">
-                <div class="shopee-stepper">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurang">&minus;</button>
-                  <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
-                         oninput="handleQtyDirectInput('${item.id}', this.value)"
-                         onblur="handleQtyBlur('${item.id}', this.value)"
-                         onclick="event.stopPropagation()">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah">+</button>
-                </div>
-              </div>
+              <!-- Dedicated Touch-Target Button to Move to Cart -->
+              <button type="button" class="btn-move-to-cart touch-target" onclick="moveItemToCart('${item.id}'); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja">
+                <span>🛒 Ke Keranjang</span>
+              </button>
             </div>
           </div>
         </div>
-      `;
-    } else {
-      // IN-STORE PRICED ITEM MODE: Analisis Akurat Kenaikan / Penurunan Harga Beli Ulang
-      const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
-      const subtotal = disc.finalPrice * item.qty;
-      const isSameStore = (!item.store || item.store === AppState.currentStore);
-      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
-      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
-      const analysis = getRepurchaseAnalysis(disc.finalPrice, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore } : null), isSameStore);
-
-      let promoBadge = '';
-      if (item.diskonTipe === 'single') promoBadge = `🏷️ -${item.diskonValue}%`;
-      else if (item.diskonTipe === 'tiered') promoBadge = `🔥 ${item.diskonValue}`;
-
-      html += `
-        <div class="shopee-item-card ${item.checked ? 'checked' : ''}" data-item-id="${item.id}">
-          <!-- Checkbox -->
-          <label class="cart-item-checkbox-wrap" title="Pilih Item untuk Dihitung">
-            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItemCheck('${item.id}')">
-          </label>
-
-          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
-          <div class="shopee-compact-body">
-            <!-- Top Row: Judul Produk + Badge Akurat Kenaikan/Penurunan Beli Ulang -->
-            <div class="shopee-compact-top">
-              <div class="shopee-compact-title-wrap">
-                <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
-                  ${escapeHtml(item.namaBarang)}
-                </span>
-                <div class="shopee-compact-meta-left">
-                  <span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>
-                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
-                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
-                  </button>
-                  ${promoBadge ? `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">${promoBadge}</button>` : `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">🏷️ +Diskon</button>`}
-                </div>
-              </div>
-              <div class="shopee-compact-actions">
-                <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}')" title="Ubah Item">✏️</button>
-                <button type="button" class="btn-shopee-delete" onclick="confirmDeleteItem('${item.id}')" title="Hapus Item">🗑️</button>
-              </div>
-            </div>
-
-            <!-- Bottom Row: Subtotal, Satuan, dan Komparasi Detail Beli Ulang -->
-            <div class="shopee-compact-bottom">
-              <div class="shopee-compact-price-wrap">
-                <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false)" style="cursor: pointer;" title="Klik untuk ubah harga">${formatRupiah(subtotal)}</span>
-                <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-                ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
-              </div>
-
-              <div class="shopee-compact-stepper-wrap">
-                <div class="shopee-stepper">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1)" title="Kurang">&minus;</button>
-                  <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
-                         oninput="handleQtyDirectInput('${item.id}', this.value)"
-                         onblur="handleQtyBlur('${item.id}', this.value)">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1)" title="Tambah">+</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
+      </div>
+    `;
   });
+
+  // Summary strip if some items are already in cart
+  if (inCart.length > 0) {
+    html += `
+      <div class="plan-incart-summary touch-target" onclick="switchTab('cart')" title="Buka Keranjang Belanja">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">🛒</span>
+          <span style="font-size: 0.8rem; font-weight: 700; color: #1E293B;">${inCart.length} barang sudah di Keranjang</span>
+        </div>
+        <span style="font-size: 0.74rem; font-weight: 800; color: #E91E63;">Buka Keranjang ➔</span>
+      </div>
+    `;
+  }
 
   container.innerHTML = html;
   updateCartBadges();
@@ -4898,7 +5442,7 @@ function initTheme() {
 }
 
 function toggleTheme() {
-  const isDark = !document.body.classList.contains('dark-mode');
+  const isDark = !document.body.classList.contains('dark-mode') && !document.body.classList.contains('theme-dark');
   applyTheme(isDark);
   localStorage.setItem(STORAGE_KEYS.DARK_MODE, isDark.toString());
   showToast(isDark ? 'Mode Gelap (Night Rose) diaktifkan 🌙' : 'Mode Terang diaktifkan ☀️', 'info');
@@ -4910,12 +5454,14 @@ function applyTheme(isDark) {
   const settingsToggle = document.getElementById('settingsThemeToggle');
 
   if (isDark) {
-    document.body.classList.add('dark-mode');
-    if (metaTheme) metaTheme.setAttribute('content', '#1A0B14');
+    document.body.classList.add('dark-mode', 'theme-dark');
+    document.documentElement.classList.add('dark-mode', 'theme-dark');
+    if (metaTheme) metaTheme.setAttribute('content', '#160810');
     if (toggleBtn) toggleBtn.textContent = '☀️';
     if (settingsToggle) settingsToggle.checked = true;
   } else {
-    document.body.classList.remove('dark-mode');
+    document.body.classList.remove('dark-mode', 'theme-dark');
+    document.documentElement.classList.remove('dark-mode', 'theme-dark');
     if (metaTheme) metaTheme.setAttribute('content', '#FCE7F3');
     if (toggleBtn) toggleBtn.textContent = '🌙';
     if (settingsToggle) settingsToggle.checked = false;
@@ -4964,7 +5510,7 @@ function openProfileSettingsModal() {
   // 2. Populate Dark Mode toggle switch
   const themeToggle = document.getElementById('settingsThemeToggle');
   if (themeToggle) {
-    themeToggle.checked = document.body.classList.contains('dark-mode');
+    themeToggle.checked = document.body.classList.contains('dark-mode') || document.body.classList.contains('theme-dark');
   }
 
   // 3. Populate Sound FX toggle switch
@@ -5089,20 +5635,32 @@ function switchTab(tab, force = false) {
     tabPantry.classList.toggle('active', isTarget);
   }
 
-  // Update floating controls state instantly (0 ms) without re-rendering
+    // Update floating controls state dynamically to power seamless flow
   const fab = document.getElementById('fabStoreMode');
+  const fabIcon = document.getElementById('fabIcon');
+  const fabText = document.getElementById('fabText');
   const runningBar = document.getElementById('runningCartBar');
+
+  if (runningBar) runningBar.classList.add('d-none');
+
   if (tab === 'planner') {
-    if (AppState.inStoreMode) {
-      if (fab) fab.style.display = 'none';
-      if (runningBar) runningBar.classList.remove('d-none');
-    } else {
-      if (fab) fab.style.display = 'inline-flex';
-      if (runningBar) runningBar.classList.add('d-none');
+    if (fab) {
+      fab.style.display = 'inline-flex';
+      if (fabIcon) fabIcon.textContent = '🛍️';
+      if (fabText) fabText.textContent = 'Mulai Belanja';
+      fab.title = 'Mulai Belanja: Pindahkan semua rencana ke keranjang';
+      fab.onclick = startShoppingFromPlan;
+    }
+  } else if (tab === 'cart') {
+    if (fab) {
+      fab.style.display = 'inline-flex';
+      if (fabIcon) fabIcon.textContent = '📋';
+      if (fabText) fabText.textContent = 'Ke Rencana';
+      fab.title = 'Buka Rencana Belanja';
+      fab.onclick = () => switchTab('planner');
     }
   } else {
     if (fab) fab.style.display = 'none';
-    if (runningBar) runningBar.classList.add('d-none');
   }
 
   // Synchronize segmented buttons between planner and cart
@@ -5169,6 +5727,11 @@ let activeToastTimeout = null;
 function showToast(message, type = 'info') {
   if (typeof document === 'undefined') return;
 
+  // Guard: Never display budget or saldo alerts when user is on the login screen (unauthenticated)
+  if (!AppState.user && (message.includes('saldo') || message.includes('belanja') || message.includes('limit'))) {
+    return;
+  }
+
   const now = Date.now();
   // Cegah pemanggilan ganda jika pesan yang sama dipanggil berulang kali dalam jeda singkat (debounce 1.5s)
   if (message === lastToastMessage && (now - lastToastTimestamp < 1500)) {
@@ -5192,16 +5755,46 @@ function showToast(message, type = 'info') {
     document.body.appendChild(container);
   }
 
-  // Buat SATU elemen toast baru
+  // Buat SATU elemen toast baru dengan format bertingkat 2 baris (intentional multi-tier layout)
   const toast = document.createElement('div');
   toast.className = `app-toast toast-message ${type}`;
 
   let icon = 'ℹ️';
-  if (type === 'danger' || type === 'error') icon = '⚠️';
+  if (type === 'danger' || type === 'error') icon = '🚨';
   else if (type === 'success') icon = '✅';
   else if (type === 'warning') icon = '⚠️';
 
-  toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-text">${escapeHtml(message)}</span>`;
+  // Pecah pesan menjadi 2 baris bertingkat sengaja jika memuat tanda titik dua (:), seru (!), atau teks panjang
+  let contentHtml = '';
+  if (message.includes(':')) {
+    const colonIdx = message.indexOf(':');
+    const titlePart = message.substring(0, colonIdx).trim();
+    const descPart = message.substring(colonIdx + 1).trim();
+    contentHtml = `
+      <div class="toast-stacked-wrap">
+        <div class="toast-title">${escapeHtml(titlePart)}</div>
+        <div class="toast-desc">${escapeHtml(descPart)}</div>
+      </div>
+    `;
+  } else if (message.includes('!') && message.length > 30) {
+    const exclIdx = message.indexOf('!');
+    const titlePart = message.substring(0, exclIdx + 1).trim();
+    const descPart = message.substring(exclIdx + 1).trim();
+    contentHtml = `
+      <div class="toast-stacked-wrap">
+        <div class="toast-title">${escapeHtml(titlePart)}</div>
+        <div class="toast-desc">${escapeHtml(descPart)}</div>
+      </div>
+    `;
+  } else {
+    contentHtml = `
+      <div class="toast-stacked-wrap">
+        <div class="toast-desc single-flow">${escapeHtml(message)}</div>
+      </div>
+    `;
+  }
+
+  toast.innerHTML = `<span class="toast-icon">${icon}</span>${contentHtml}`;
   container.appendChild(toast);
 
   const isUndoToast = message.includes('Urungkan');
@@ -5275,6 +5868,9 @@ if (typeof document !== 'undefined') {
 // 21. APP INITIALIZATION
 // =========================================================================
 function initApp() {
+  isInitialAppLoad = true;
+  AppState.previousSafetyLevel = null;
+  purgeLegacyAudreyData();
   initTheme();
   loadLocalState();
   initFirestoreSync();
@@ -5300,6 +5896,11 @@ function initApp() {
   switchTab(AppState.currentTab || 'planner', true);
   initDiscountChips();
   renderAll();
+
+  // Allow initial rendering pass to settle quietly without firing unsolicited toasts
+  setTimeout(() => {
+    isInitialAppLoad = false;
+  }, 600);
 }
 
 if (typeof document !== 'undefined') {
@@ -5819,10 +6420,13 @@ function renderCartSection() {
 
   if (storeDisplay) storeDisplay.textContent = AppState.currentStore;
 
+  const inCartItems = AppState.cart.filter(i => i.checked);
+  const unboughtItems = AppState.cart.filter(i => !i.checked);
+
   const metrics = getCartMetrics();
   if (grandTotalEl) grandTotalEl.textContent = formatRupiah(metrics.totalBelanja);
-  if (selectedCountEl) selectedCountEl.textContent = metrics.checkedItemsCount;
-  if (checkoutBtnCount) checkoutBtnCount.textContent = `(${metrics.checkedItemsCount})`;
+  if (selectedCountEl) selectedCountEl.textContent = `${inCartItems.length} item`;
+  if (checkoutBtnCount) checkoutBtnCount.textContent = `(${inCartItems.length})`;
 
   if (budgetSubEl) {
     if (metrics.safety.sisa >= 0) {
@@ -5836,17 +6440,21 @@ function renderCartSection() {
 
   if (!container) return;
 
-  // Requirement 1: Empty State Visual (UX)
-  if (AppState.cart.length === 0) {
+  // Empty cart state
+  if (inCartItems.length === 0) {
     container.innerHTML = `
       <div class="empty-state" style="padding: 36px 16px; text-align: center;">
         <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Troli belanja masih kosong</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Belanjaan sebelumnya sudah selesai. Mulai belanja baru sekarang!</p>
+        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang belanja masih kosong</p>
+        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">
+          ${unboughtItems.length > 0 ? `Ada ${unboughtItems.length} barang di Rencana Belanja yang siap dipindahkan ke keranjang!` : 'Belum ada barang di rencana belanja. Mulai catat kebutuhanmu!'}
+        </p>
         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 18px; font-size: 0.82rem; font-weight: 800;" onclick="startNewShoppingSession()">
-            🛍️ Mulai Belanja Lagi
-          </button>
+          ${unboughtItems.length > 0 ? `
+            <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 18px; font-size: 0.82rem; font-weight: 800;" onclick="startShoppingFromPlan()">
+              🛍️ Pindahkan Semua (${unboughtItems.length}) ke Keranjang
+            </button>
+          ` : ''}
           <button type="button" class="btn-demo-quick" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="switchTab('planner')">
             📋 Buka Rencana Belanja
           </button>
@@ -5858,176 +6466,85 @@ function renderCartSection() {
     return;
   }
 
-  const allChecked = AppState.cart.length > 0 && AppState.cart.every(i => i.checked);
-  if (selectAllCb) selectAllCb.checked = allChecked;
+  if (selectAllCb) selectAllCb.checked = true;
 
   let html = '';
-  let repurchaseUpCount = 0;
-  let repurchaseDownCount = 0;
-  let repurchaseStableCount = 0;
-  let totalNetRepurchaseDiff = 0;
 
-  AppState.cart.forEach(item => {
-    const hasNoPrice = (!item.hargaSatuan || item.hargaSatuan <= 0);
-
-    if (hasNoPrice) {
-      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
-      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
-      const analysis = getRepurchaseAnalysis(0, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore: true } : null));
-
-      html += `
-        <div class="shopee-item-card unpriced-plan-item ${item.checked ? 'checked' : ''}" data-item-id="${item.id}" onclick="handleItemRowClick('${item.id}', event)">
-          <!-- Checkbox: Memicu popover input harga riil saat belanja di toko -->
-          <label class="cart-item-checkbox-wrap" title="Centang untuk masukkan harga riil di toko">
-            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="handleItemCheckOrPricePrompt('${item.id}', this)">
-          </label>
-
-          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
-          <div class="shopee-compact-body">
-            <!-- Top Row: Judul Produk + Kuantitas Satuan + Badge Riwayat Beli Ulang -->
-            <div class="shopee-compact-top">
-              <div class="shopee-compact-title-wrap">
-                <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
-                  ${escapeHtml(item.namaBarang)}
-                </span>
-                <div class="shopee-compact-meta-left">
-                  <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-                  ${analysis.isRepurchase ? `<span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
-                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
-                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
-                  </button>
-                </div>
-              </div>
-              <div class="shopee-compact-actions">
-                <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
-                <button type="button" class="btn-shopee-delete" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item">🗑️</button>
-              </div>
-            </div>
-
-            <!-- Bottom Row: Dulu Rp X / Belum Ada Harga + Stepper -->
-            <div class="shopee-compact-bottom">
-              <div class="shopee-compact-price-wrap">
-                <button type="button" class="badge-no-price touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga di toko">
-                  ${analysis.previousPrice ? `💡 Dulu: ${formatRupiah(analysis.previousPrice)}` : '🏷️ Belum Ada Harga'}
-                </button>
-                <button type="button" class="btn-enter-price-pill touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Masukkan harga riil di toko">
-                  + Isi Harga
-                </button>
-              </div>
-
-              <div class="shopee-compact-stepper-wrap">
-                <div class="shopee-stepper">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurang">&minus;</button>
-                  <input type="number" inputmode="numeric" id="cart-qty-${item.id}" min="1" value="${item.qty}"
-                         oninput="handleQtyDirectInput('${item.id}', this.value)"
-                         onblur="handleQtyBlur('${item.id}', this.value)"
-                         onclick="event.stopPropagation()">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah">+</button>
-                </div>
-              </div>
-            </div>
-          </div>
+  // Notice banner in cart if there are still items remaining in Rencana
+  if (unboughtItems.length > 0) {
+    html += `
+      <div class="cart-unbought-notice" onclick="switchTab('planner')" style="cursor: pointer;" title="Lihat barang yang masih di Rencana">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span>📋</span>
+          <span style="font-size: 11.5px; font-weight: 700;">Masih ada <strong>${unboughtItems.length} barang</strong> di Rencana Belanja</span>
         </div>
-      `;
-    } else {
-      const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
-      const subtotal = disc.finalPrice * item.qty;
-      const isSameStore = (!item.store || item.store === AppState.currentStore);
-      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
-      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
-      const analysis = getRepurchaseAnalysis(disc.finalPrice, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore } : null), isSameStore);
-
-      if (analysis.isRepurchase) {
-        if (analysis.status === 'up') {
-          repurchaseUpCount++;
-          totalNetRepurchaseDiff += (analysis.diff * item.qty);
-        } else if (analysis.status === 'down') {
-          repurchaseDownCount++;
-          totalNetRepurchaseDiff -= (analysis.absDiff * item.qty);
-        } else if (analysis.status === 'stable') {
-          repurchaseStableCount++;
-        }
-      }
-
-      let promoBadge = '';
-      if (item.diskonTipe === 'single') promoBadge = `🏷️ -${item.diskonValue}%`;
-      else if (item.diskonTipe === 'tiered') promoBadge = `🔥 ${item.diskonValue}`;
-
-      html += `
-        <div class="shopee-item-card ${item.checked ? 'checked' : ''}" data-item-id="${item.id}">
-          <!-- Checkbox -->
-          <label class="cart-item-checkbox-wrap" title="Pilih Item untuk Dihitung">
-            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItemCheck('${item.id}')">
-          </label>
-
-          <!-- Compact Body (Flexbox Horizontal, Compact Cart Item Layout) -->
-          <div class="shopee-compact-body">
-            <!-- Top Row: Judul Produk + Badge Diskon/Fluktuasi in Center, Edit & Trash on Right Top -->
-            <div class="shopee-compact-top">
-              <div class="shopee-compact-title-wrap">
-                <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
-                  ${escapeHtml(item.namaBarang)}
-                </span>
-                <div class="shopee-compact-meta-left">
-                  <span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>
-                  <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
-                    🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
-                  </button>
-                  ${promoBadge ? `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">${promoBadge}</button>` : `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">🏷️ +Diskon</button>`}
-                </div>
-              </div>
-              <div class="shopee-compact-actions">
-                <button type="button" class="btn-action-edit-icon" onclick="openDetailedItemModal('${item.id}')" title="Ubah Item">✏️</button>
-                <button type="button" class="btn-shopee-delete" onclick="confirmDeleteItem('${item.id}')" title="Hapus Item">🗑️</button>
-              </div>
-            </div>
-
-            <!-- Bottom Row (Bottom Action Row): Harga Satuan on Left, Stepper on Right -->
-            <div class="shopee-compact-bottom">
-              <div class="shopee-compact-price-wrap">
-                <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false)" style="cursor: pointer;" title="Klik untuk ubah harga">${formatRupiah(subtotal)}</span>
-                <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-                ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
-              </div>
-
-              <div class="shopee-compact-stepper-wrap">
-                <div class="shopee-stepper">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1)" title="Kurang">&minus;</button>
-                  <input type="number" inputmode="numeric" id="cart-qty-${item.id}" min="1" value="${item.qty}"
-                         oninput="handleQtyDirectInput('${item.id}', this.value)"
-                         onblur="handleQtyBlur('${item.id}', this.value)">
-                  <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1)" title="Tambah">+</button>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="btn-quick-take-all touch-target" onclick="startShoppingFromPlan(); event.stopPropagation();" title="Ambil semua barang rencana ke keranjang">
+            + Ambil Semua
+          </button>
+          <span style="font-size: 11px; font-weight: 800; color: #E91E63;">Lihat ➔</span>
         </div>
-      `;
-    }
-  });
-
-  // Tampilkan ringkasan fluktuasi harga belanja ulang di troli
-  const summaryBanner = document.getElementById('cartRepurchaseSummaryBanner');
-  if (summaryBanner) {
-    if (repurchaseUpCount > 0 || repurchaseDownCount > 0 || repurchaseStableCount > 0) {
-      summaryBanner.style.display = 'flex';
-      let summaryText = '🔁 <strong>Beli Ulang:</strong> ';
-      const parts = [];
-      if (repurchaseUpCount > 0) parts.push(`<span style="color:#DC2626; font-weight:700;">📈 ${repurchaseUpCount} Naik</span>`);
-      if (repurchaseDownCount > 0) parts.push(`<span style="color:#059669; font-weight:700;">📉 ${repurchaseDownCount} Turun</span>`);
-      if (repurchaseStableCount > 0) parts.push(`<span style="color:#64748B; font-weight:700;">⚖️ ${repurchaseStableCount} Stabil</span>`);
-      summaryText += parts.join(' • ');
-
-      if (totalNetRepurchaseDiff > 0) {
-        summaryText += ` <span style="font-size:10.5px; color:#DC2626;">(Total +${formatRupiah(totalNetRepurchaseDiff)} vs lalu)</span>`;
-      } else if (totalNetRepurchaseDiff < 0) {
-        summaryText += ` <span style="font-size:10.5px; color:#059669;">(Total Hemat ${formatRupiah(Math.abs(totalNetRepurchaseDiff))} vs lalu)</span>`;
-      }
-      summaryBanner.innerHTML = summaryText;
-    } else {
-      summaryBanner.style.display = 'none';
-    }
+      </div>
+    `;
   }
+
+  inCartItems.forEach(item => {
+    const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+    const subtotal = disc.finalPrice * item.qty;
+    const isSameStore = (!item.store || item.store === AppState.currentStore);
+    const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+    const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
+    const analysis = getRepurchaseAnalysis(disc.finalPrice, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore } : null), isSameStore);
+
+    let promoBadge = '';
+    if (item.diskonTipe === 'single') promoBadge = `🏷️ -${item.diskonValue}%`;
+    else if (item.diskonTipe === 'tiered') promoBadge = `🔥 ${item.diskonValue}`;
+
+    html += `
+      <div class="shopee-item-card checked" data-item-id="${item.id}">
+        <div class="shopee-compact-body">
+          <div class="shopee-compact-top">
+            <div class="shopee-compact-title-wrap">
+              <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
+                ${escapeHtml(item.namaBarang)}
+              </span>
+              <div class="shopee-compact-meta-left">
+                <span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>
+                ${promoBadge ? `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">${promoBadge}</button>` : `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">🏷️ +Diskon</button>`}
+              </div>
+            </div>
+            <div class="shopee-compact-actions">
+              <!-- Fat-finger safe return to plan button -->
+              <button type="button" class="btn-return-to-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja (belum dibeli)">
+                <span>↩️ Ke Rencana</span>
+              </button>
+              <button type="button" class="btn-action-edit-icon touch-target" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
+              <button type="button" class="btn-shopee-delete touch-target" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item">🗑️</button>
+            </div>
+          </div>
+
+          <div class="shopee-compact-bottom">
+            <div class="shopee-compact-price-wrap">
+              <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga">${formatRupiah(subtotal)}</span>
+              <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+              ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
+            </div>
+
+            <div class="shopee-compact-stepper-wrap">
+              <div class="shopee-stepper">
+                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas">&minus;</button>
+                <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
+                       oninput="handleQtyDirectInput('${item.id}', this.value)"
+                       onblur="handleQtyBlur('${item.id}', this.value)"
+                       onclick="event.stopPropagation()">
+                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
 
   container.innerHTML = html;
   updateCartBadges();
@@ -6468,6 +6985,8 @@ if (typeof window !== 'undefined') {
   });
 
   // Global window bindings for HTML event handlers
+  window.triggerCuteLoginConfetti = triggerCuteLoginConfetti;
+  window.playCelebrationFanfare = playCelebrationFanfare;
   window.openGoogleAuthModal = openGoogleAuthModal;
   window.closeGoogleAuthModal = closeGoogleAuthModal;
   window.toggleGoogleNewAccount = toggleGoogleNewAccount;
@@ -6490,6 +7009,10 @@ if (typeof window !== 'undefined') {
   window.prepareRoutineItemsForNewShopping = prepareRoutineItemsForNewShopping;
   window.confirmFinishShopping = confirmFinishShopping;
   window.toggleShoppingMode = toggleShoppingMode;
+  window.moveItemToCart = moveItemToCart;
+  window.moveItemToPlan = moveItemToPlan;
+  window.startShoppingFromPlan = startShoppingFromPlan;
+  window.showToastWithUndo = showToastWithUndo;
   window.toggleItemCheck = toggleItemCheck;
   window.toggleCatalogExpand = toggleCatalogExpand;
   window.togglePantryCatalogExpand = togglePantryCatalogExpand;

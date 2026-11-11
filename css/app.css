@@ -53,11 +53,16 @@
 }
 
 /* A.2 ELEGANT DARK MODE (DEEP BURGUNDY & NIGHT ROSE PALETTE) */
+html.dark-mode,
+html.theme-dark,
+body.dark-mode,
 body.theme-dark {
   --canvas-bg: #160810;
   --surface-white: #240F1B;
   --surface-soft: #341527;
 
+  --border-card: #4A1D36;
+  --border-soft: #341527;
   --pastel-light-1: #4A1D36;
   --pastel-light-2: #65254A;
   --blush-accent: #F472B6;
@@ -66,6 +71,7 @@ body.theme-dark {
   --border-accent: #762A53;
 
   --text-headline: #FFF1F5;
+  --text-main: #FFF1F5;
   --text-subtle: #E2B9CB;
   --text-faint: #A6748B;
 
@@ -80,12 +86,8 @@ body.theme-dark {
   --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.45);
   --shadow-floating: 0 16px 40px rgba(0, 0, 0, 0.65);
 
-  background-color: #160810;
-  background-image:
-    radial-gradient(circle at 12% 10%, rgba(101, 37, 74, 0.35) 0%, transparent 45%),
-    radial-gradient(circle at 88% 88%, rgba(74, 29, 54, 0.4) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, #160810 0%, #0F050B 100%);
-  color: var(--text-headline);
+  background-color: #12050D !important;
+  color: #FFF1F5 !important;
 }
 
 /* Reset & Base */
@@ -133,7 +135,7 @@ body {
   background: #FFF0F5;
 }
 
-body.theme-dark ::-webkit-scrollbar-track {
+body.theme-dark, body.dark-mode ::-webkit-scrollbar-track {
   background: #240F1B;
 }
 
@@ -165,7 +167,7 @@ body.theme-dark ::-webkit-scrollbar-track {
   transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
 
-body.theme-dark .app-viewport {
+body.theme-dark, body.dark-mode .app-viewport {
   border-left-color: rgba(101, 37, 74, 0.4);
   border-right-color: rgba(101, 37, 74, 0.4);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
@@ -215,7 +217,7 @@ h4,
   padding: 18px;
 }
 
-body.theme-dark .auth-gate-wrapper {
+body.theme-dark, body.dark-mode .auth-gate-wrapper {
   background: linear-gradient(135deg, #160810 0%, #290F1E 50%, #12050D 100%);
 }
 
@@ -247,7 +249,7 @@ body.theme-dark .auth-gate-wrapper {
   border: 2px solid #FFFFFF;
 }
 
-body.theme-dark .auth-badge-icon {
+body.theme-dark, body.dark-mode .auth-badge-icon {
   border-color: var(--pastel-light-2);
 }
 
@@ -317,7 +319,7 @@ body.theme-dark .auth-badge-icon {
   margin-top: 8px;
 }
 
-body.theme-dark .btn-primary {
+body.theme-dark, body.dark-mode .btn-primary {
   background: linear-gradient(135deg, #BE185D 0%, #9D174D 100%);
 }
 
@@ -361,7 +363,7 @@ body.theme-dark .btn-primary {
   padding: 10px 16px;
 }
 
-body.theme-dark .app-header {
+body.theme-dark, body.dark-mode .app-header {
   background: #240F1B;
   border-bottom-color: #3B162B;
 }
@@ -521,7 +523,7 @@ body.theme-dark .app-header {
   justify-content: center;
 }
 
-body.theme-dark .bottom-nav-bar {
+body.theme-dark, body.dark-mode .bottom-nav-bar {
   background: #240F1B;
   border-top-color: #3B162B;
 }
@@ -581,7 +583,7 @@ body.theme-dark .bottom-nav-bar {
   background: rgba(252, 231, 243, 0.5);
 }
 
-body.theme-dark .bottom-nav-item:hover .nav-icon-wrap {
+body.theme-dark, body.dark-mode .bottom-nav-item:hover .nav-icon-wrap {
   background: rgba(101, 37, 74, 0.4);
 }
 
@@ -760,7 +762,7 @@ body.theme-dark .bottom-nav-item:hover .nav-icon-wrap {
   transition: all 0.3s ease-in-out;
 }
 
-body.theme-dark .btn-smart-submit {
+body.theme-dark, body.dark-mode .btn-smart-submit {
   background: linear-gradient(135deg, #BE185D 0%, #9D174D 100%);
 }
 
@@ -956,7 +958,7 @@ body.theme-dark .btn-smart-submit {
   min-height: 52px;
 }
 
-body.theme-dark .fab-store-mode {
+body.theme-dark, body.dark-mode .fab-store-mode {
   background: linear-gradient(135deg, #BE185D 0%, #9D174D 100%);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
@@ -996,7 +998,7 @@ body.theme-dark .fab-store-mode {
   margin-bottom: 6px;
 }
 
-body.theme-dark .aisle-header {
+body.theme-dark, body.dark-mode .aisle-header {
   background: linear-gradient(135deg, #341527 0%, #4A1D36 100%);
   border-color: var(--pastel-light-2);
 }
@@ -1034,7 +1036,7 @@ body.theme-dark .aisle-header {
   border-color: var(--blush-accent);
 }
 
-body.theme-dark .grocery-card.checked {
+body.theme-dark, body.dark-mode .grocery-card.checked {
   background: #2D1422;
 }
 
@@ -1110,19 +1112,19 @@ body.theme-dark .grocery-card.checked {
   border: 1px solid var(--pastel-light-2);
 }
 
-body.theme-dark .fluct-down {
+body.theme-dark, body.dark-mode .fluct-down {
   background: #064E3B;
   color: #34D399;
   border-color: #047857;
 }
 
-body.theme-dark .fluct-up {
+body.theme-dark, body.dark-mode .fluct-up {
   background: #881337;
   color: #FB7185;
   border-color: #BE123C;
 }
 
-body.theme-dark .fluct-same {
+body.theme-dark, body.dark-mode .fluct-same {
   background: #1E293B;
   color: #94A3B8;
   border-color: #334155;
@@ -1194,7 +1196,7 @@ body.theme-dark .fluct-same {
   transition: all 0.3s ease-in-out;
 }
 
-body.theme-dark .running-cart-bar {
+body.theme-dark, body.dark-mode .running-cart-bar {
   background: rgba(36, 15, 27, 0.95);
   border-top-color: var(--pastel-light-2);
   box-shadow: 0 -6px 22px rgba(0, 0, 0, 0.5);
@@ -1238,7 +1240,7 @@ body.theme-dark .running-cart-bar {
   white-space: nowrap;
 }
 
-body.theme-dark .btn-scan-instore {
+body.theme-dark, body.dark-mode .btn-scan-instore {
   background: rgba(60, 20, 40, 0.6);
   color: #FDA4AF;
   border-color: #FDA4AF;
@@ -1267,7 +1269,7 @@ body.theme-dark .btn-scan-instore {
   white-space: nowrap;
 }
 
-body.theme-dark .btn-finish-shopping {
+body.theme-dark, body.dark-mode .btn-finish-shopping {
   background: #BE185D;
 }
 
@@ -1289,7 +1291,7 @@ body.theme-dark .btn-finish-shopping {
   animation: itemSlideFadeIn 0.3s ease-in-out both;
 }
 
-body.theme-dark .instore-companion-card {
+body.theme-dark, body.dark-mode .instore-companion-card {
   background: linear-gradient(135deg, #2D1121 0%, #3B162B 100%);
   border-color: #BE185D;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -1348,7 +1350,7 @@ body.theme-dark .instore-companion-card {
   border: 1px solid var(--pastel-light-2);
 }
 
-body.theme-dark .instore-progress-bar-bg {
+body.theme-dark, body.dark-mode .instore-progress-bar-bg {
   background: rgba(0, 0, 0, 0.3);
 }
 
@@ -1397,7 +1399,7 @@ body.theme-dark .instore-progress-bar-bg {
   border: 1.5px solid var(--pastel-light-2);
 }
 
-body.theme-dark .instore-action-btn.secondary {
+body.theme-dark, body.dark-mode .instore-action-btn.secondary {
   background: var(--surface-soft);
   color: #FDA4AF;
   border-color: var(--pastel-light-2);
@@ -1419,7 +1421,7 @@ body.theme-dark .instore-action-btn.secondary {
   box-shadow: var(--shadow-card);
 }
 
-body.theme-dark .budget-controller-hero {
+body.theme-dark, body.dark-mode .budget-controller-hero {
   background: linear-gradient(135deg, #240F1B 0%, #1A0B14 100%);
   border-color: var(--pastel-light-2);
 }
@@ -1726,7 +1728,7 @@ body.theme-dark .budget-controller-hero {
   transition: opacity 0.25s ease-in-out, visibility 0.25s ease-in-out;
 }
 
-body.theme-dark .modal-backdrop {
+body.theme-dark, body.dark-mode .modal-backdrop {
   background: rgba(10, 4, 7, 0.75);
 }
 
@@ -1976,7 +1978,7 @@ body.theme-dark .modal-backdrop {
   box-sizing: border-box;
 }
 
-body.theme-dark .scanned-result-card {
+body.theme-dark, body.dark-mode .scanned-result-card {
   background: var(--card-bg);
   border-color: #BE185D;
 }
@@ -2001,7 +2003,7 @@ body.theme-dark .scanned-result-card {
   border-radius: 6px;
 }
 
-body.theme-dark .scanned-incart-badge {
+body.theme-dark, body.dark-mode .scanned-incart-badge {
   background: rgba(79, 70, 229, 0.3);
   color: #C7D2FE;
 }
@@ -2062,7 +2064,7 @@ body.theme-dark .scanned-incart-badge {
   white-space: nowrap;
 }
 
-body.theme-dark .barcode-preset-chip {
+body.theme-dark, body.dark-mode .barcode-preset-chip {
   background: var(--surface-soft);
   border-color: var(--border-soft);
   color: var(--text-headline);
@@ -2132,43 +2134,117 @@ body.theme-dark .barcode-preset-chip {
        SINGLETON FLOATING TOAST SYSTEM (ELEGANT TOP PILL)
        ========================================================================= */
 .toast-container {
-  position: fixed;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: auto;
-  max-width: 90vw;
+  position: fixed !important;
+  top: 60px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 10000 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: min(94vw, 450px) !important;
+  box-sizing: border-box !important;
+  padding: 0 10px !important;
 }
 
 .app-toast,
 .toast-message {
-  position: fixed;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  background: rgba(30, 41, 59, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #FFFFFF;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  pointer-events: none;
-  animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-  max-width: 90vw;
-  box-sizing: border-box;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: min(280px, 92vw) !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: #FFFFFF !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  transition: all 0.25s ease !important;
+}
+
+/* Stacked 2-line layout for intentional non-truncated display */
+.toast-stacked-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+.toast-title {
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  color: #FFFFFF !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+.toast-desc {
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.38 !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+.toast-desc.single-flow {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.toast-icon {
+  font-size: 18px !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Toast types variants */
+.app-toast.danger,
+.toast-message.danger {
+  background: rgba(220, 38, 38, 0.96) !important;
+  border-color: rgba(254, 202, 202, 0.45) !important;
+  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.35) !important;
+}
+
+.app-toast.warning,
+.toast-message.warning {
+  background: rgba(217, 119, 6, 0.96) !important;
+  border-color: rgba(253, 230, 138, 0.45) !important;
+  box-shadow: 0 10px 25px rgba(217, 119, 6, 0.35) !important;
+}
+
+.app-toast.success,
+.toast-message.success {
+  background: rgba(5, 150, 105, 0.96) !important;
+  border-color: rgba(167, 243, 208, 0.45) !important;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.35) !important;
+}
+
+.app-toast.info,
+.toast-message.info {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
 }
 
 @keyframes toastSlideDown {
@@ -2559,12 +2635,13 @@ body.dark-mode .planner-budget-alert.danger {
 }
 
 .planner-alert-desc {
-  font-size: 0.72rem;
-  opacity: 0.85;
+  font-size: 0.76rem;
+  line-height: 1.4 !important;
   margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
 }
 
 .planner-alert-badge {
@@ -2858,7 +2935,7 @@ body,
   font-weight: 800;
 }
 
-body.theme-dark .planner-seg-btn.active {
+body.theme-dark, body.dark-mode .planner-seg-btn.active {
   background: var(--card-bg);
   color: var(--rose-contrast);
 }
@@ -2876,7 +2953,7 @@ body.theme-dark .planner-seg-btn.active {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
-body.theme-dark .cart-store-header {
+body.theme-dark, body.dark-mode .cart-store-header {
   background: var(--surface-soft);
   border-color: var(--pastel-light-2);
 }
@@ -2939,7 +3016,7 @@ body.theme-dark .cart-store-header {
   box-sizing: border-box;
 }
 
-body.theme-dark .shopee-item-card {
+body.theme-dark, body.dark-mode .shopee-item-card {
   background: var(--surface-soft);
   border-color: var(--pastel-light-2);
 }
@@ -3181,7 +3258,7 @@ body.dark-mode .fluctuation-stable {
   outline: none;
 }
 
-body.theme-dark .shopee-stepper input {
+body.theme-dark, body.dark-mode .shopee-stepper input {
   background: var(--card-bg);
   border-color: var(--pastel-light-2);
   color: var(--text-headline);
@@ -3225,7 +3302,7 @@ body.theme-dark .shopee-stepper input {
   box-shadow: 0 4px 20px rgba(157, 23, 77, 0.15);
 }
 
-body.theme-dark .shopee-cart-checkout-bar {
+body.theme-dark, body.dark-mode .shopee-cart-checkout-bar {
   background: rgba(36, 15, 27, 0.98);
   border-color: var(--pastel-light-2);
 }
@@ -3323,7 +3400,7 @@ body.theme-dark .shopee-cart-checkout-bar {
   color: #7E22CE;
 }
 
-body.theme-dark .quick-disc-presets .frequent-chip.promo-highlight {
+body.theme-dark, body.dark-mode .quick-disc-presets .frequent-chip.promo-highlight {
   background: rgba(126, 34, 206, 0.25);
   color: #E9D5FF;
   border-color: #A855F7;
@@ -3691,7 +3768,7 @@ body.layout-mode-desktop .app-viewport {
   transform: scale(1) translateY(0);
 }
 
-body.theme-dark .modal-bubble-card {
+body.theme-dark, body.dark-mode .modal-bubble-card {
   background: var(--card-bg);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(101, 37, 74, 0.6);
 }
@@ -3710,7 +3787,7 @@ body.theme-dark .modal-bubble-card {
   box-shadow: 0 4px 14px rgba(244, 114, 182, 0.25);
 }
 
-body.theme-dark .modal-bubble-icon {
+body.theme-dark, body.dark-mode .modal-bubble-icon {
   background: #2D1022;
   border-color: #65254A;
 }
@@ -4556,11 +4633,12 @@ p.subtext,
   font-size: 13px !important;
   font-weight: 700 !important;
   color: #222222 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  max-width: 180px !important;
-  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  max-width: none !important;
+  line-height: 1.3 !important;
 }
 
 .store-header-right {
@@ -4623,15 +4701,16 @@ body.dark-mode .btn-store-edit:hover {
 }
 
 .cloud-sync-pill-compact {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
   background: #E8F5E9;
   border: 1px solid #C8E6C9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
+  width: auto !important;
+  height: auto !important;
 }
 
 .compact-store-popdown {
@@ -4975,9 +5054,10 @@ body.dark-mode .btn-store-edit:hover {
   font-weight: 600;
   color: #2E7D32;
   margin-top: 1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.3;
 }
   color: #E91E63 !important;
   font-variant-numeric: tabular-nums !important;
@@ -5728,10 +5808,11 @@ body {
   font-weight: 800 !important;
   font-size: 13.5px !important;
   color: #1E293B !important;
-  line-height: 1.25 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
 }
 
 .budget-status-badge-group {
@@ -5802,7 +5883,14 @@ body.dark-mode .budget-status-card.danger {
 }
 
 body.dark-mode .budget-status-title-group .planner-alert-title {
-  color: #F8FAFC !important;
+  font-weight: 800 !important;
+  font-size: 13.5px !important;
+  color: #1E293B !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
 }
 
 body.dark-mode .budget-status-card-bottom .planner-alert-desc {
@@ -5890,9 +5978,10 @@ body.dark-mode .budget-status-card-bottom {
   text-transform: uppercase !important;
   letter-spacing: 0.01em !important;
   margin-bottom: 3px !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
   display: block !important;
 }
 
@@ -8079,13 +8168,13 @@ body.dark-mode details.advanced-options[open] {
 
 /* Dark mode product title and cards in list */
 body.dark-mode .shopee-item-card,
-body.theme-dark .shopee-item-card {
+body.theme-dark, body.dark-mode .shopee-item-card {
   background: #1E293B !important;
   border-color: #334155 !important;
 }
 
 body.dark-mode .shopee-compact-name,
-body.theme-dark .shopee-compact-name,
+body.theme-dark, body.dark-mode .shopee-compact-name,
 body.dark-mode .shopee-item-name,
 body.dark-mode .cart-item-title,
 body.dark-mode .item-name {
@@ -8566,4 +8655,1107 @@ body.dark-mode .quick-price-repurchase-detail {
 }
 .receipt-item-repurchase-tag.diff-stable {
   color: #64748B;
+}
+
+
+/* ==========================================================================
+   STICKY COMPACT DASHBOARD TRACKER SALDO & REALTIME STATUS (NO REPETITION)
+   ========================================================================== */
+.sticky-dashboard-tracker {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 35 !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 14px !important;
+  padding: 8px 12px 9px 12px !important;
+  margin-top: 4px !important;
+  margin-bottom: 10px !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+/* Status variants for Sticky Dashboard Tracker with vibrant accent borders */
+.sticky-dashboard-tracker.safe {
+  border-left: 4px solid #10B981 !important;
+  border-color: #E2E8F0 !important;
+}
+
+.sticky-dashboard-tracker.warning {
+  border-left: 4px solid #F59E0B !important;
+  border-color: #FDE68A !important;
+  background: rgba(255, 251, 235, 0.96) !important;
+}
+
+.sticky-dashboard-tracker.danger {
+  border-left: 4px solid #EF4444 !important;
+  border-color: #FECDD3 !important;
+  background: rgba(254, 242, 242, 0.96) !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.12) !important;
+}
+
+/* Dark mode for Sticky Dashboard Tracker */
+body.dark-mode .sticky-dashboard-tracker {
+  background: rgba(30, 41, 59, 0.96) !important;
+  border-color: rgba(51, 65, 85, 0.9) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .sticky-dashboard-tracker.safe {
+  border-left-color: #10B981 !important;
+}
+
+body.dark-mode .sticky-dashboard-tracker.warning {
+  border-left-color: #F59E0B !important;
+  background: rgba(69, 26, 3, 0.92) !important;
+  border-color: #78350F !important;
+}
+
+body.dark-mode .sticky-dashboard-tracker.danger {
+  border-left-color: #EF4444 !important;
+  background: rgba(76, 5, 25, 0.92) !important;
+  border-color: #881337 !important;
+}
+
+/* 1. Header Row inside Sticky Tracker (Status Aktif + Badge Saldo + Atur Link) */
+.tracker-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.tracker-header-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  flex-wrap: nowrap !important;
+}
+
+.tracker-header-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Glowing Pulsing Active Status Dot */
+.cloud-sync-dot {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.cloud-sync-dot.online,
+.cloud-sync-dot.pulsing {
+  background-color: #10B981 !important;
+  animation: liveActivePulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1) !important;
+}
+
+.cloud-sync-dot.offline {
+  background-color: #94A3B8 !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+@keyframes liveActivePulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.75);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Anti-overlapping Cloud Sync / Status Pill */
+.cloud-sync-pill,
+#cloud-sync-status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 3px 8px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  user-select: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  max-width: fit-content !important;
+  box-sizing: border-box !important;
+}
+
+#cloud-sync-status-pill.status-online,
+#cloud-sync-status-pill:not(.status-offline) {
+  background: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+  color: #065F46 !important;
+}
+
+#cloud-sync-status-pill.status-offline {
+  background: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #475569 !important;
+}
+
+body.dark-mode #cloud-sync-status-pill.status-online {
+  background: rgba(6, 78, 59, 0.45) !important;
+  border-color: #047857 !important;
+  color: #6EE7B7 !important;
+}
+
+body.dark-mode #cloud-sync-status-pill.status-offline {
+  background: rgba(51, 65, 85, 0.45) !important;
+  border-color: #475569 !important;
+  color: #94A3B8 !important;
+}
+
+.cloud-sync-text {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1 !important;
+}
+
+/* 2. Main Metrics Row (Saldo & Spent Ratio) */
+.tracker-main-row {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 1px 0 !important;
+}
+
+.tracker-saldo-group {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+}
+
+.tracker-saldo-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  line-height: 1.1 !important;
+}
+
+body.dark-mode .tracker-saldo-label {
+  color: #94A3B8 !important;
+}
+
+.tracker-saldo-value {
+  font-size: 1.18rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  color: #0F172A !important;
+  white-space: nowrap !important;
+  letter-spacing: -0.3px !important;
+}
+
+.tracker-saldo-value.safe {
+  color: #047857 !important;
+}
+
+.tracker-saldo-value.warning {
+  color: #B45309 !important;
+}
+
+.tracker-saldo-value.danger {
+  color: #DC2626 !important;
+}
+
+body.dark-mode .tracker-saldo-value {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .tracker-saldo-value.safe {
+  color: #34D399 !important;
+}
+
+body.dark-mode .tracker-saldo-value.warning {
+  color: #FBBF24 !important;
+}
+
+body.dark-mode .tracker-saldo-value.danger {
+  color: #F87171 !important;
+}
+
+/* Spent summary on right side of tracker */
+.tracker-spent-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 1px !important;
+  flex-shrink: 0 !important;
+}
+
+.tracker-spent-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  line-height: 1.1 !important;
+}
+
+body.dark-mode .tracker-spent-label {
+  color: #94A3B8 !important;
+}
+
+.tracker-spent-figures {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 3px !important;
+  white-space: nowrap !important;
+}
+
+.tracker-spent-val {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #1E293B !important;
+}
+
+body.dark-mode .tracker-spent-val {
+  color: #E2E8F0 !important;
+}
+
+.tracker-percent-val {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+}
+
+body.dark-mode .tracker-percent-val {
+  color: #94A3B8 !important;
+}
+
+/* 3. Slim Progress Bar inside tracker */
+.tracker-progress-track {
+  width: 100% !important;
+  height: 5px !important;
+  border-radius: 999px !important;
+  background: rgba(148, 163, 184, 0.2) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  margin-top: 2px !important;
+}
+
+.tracker-progress-fill {
+  height: 100% !important;
+  border-radius: 999px !important;
+  transition: width 0.35s ease, background-color 0.35s ease !important;
+}
+
+/* Inline Overbudget Deficit Alert */
+.tracker-overbudget-note {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #DC2626 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-top: 2px !important;
+  line-height: 1.2 !important;
+}
+
+body.dark-mode .tracker-overbudget-note {
+  color: #FCA5A5 !important;
+}
+
+/* Atur Saldo button in Tracker */
+.tracker-budget-btn {
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #E91E63 !important;
+  background: rgba(233, 30, 99, 0.08) !important;
+  border: 1px solid rgba(233, 30, 99, 0.2) !important;
+  padding: 2px 7px !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+}
+
+.tracker-budget-btn:hover {
+  background: rgba(233, 30, 99, 0.16) !important;
+  transform: translateY(-0.5px) !important;
+}
+
+body.dark-mode .tracker-budget-btn {
+  color: #F472B6 !important;
+  background: rgba(233, 30, 99, 0.18) !important;
+  border-color: rgba(233, 30, 99, 0.35) !important;
+}
+
+
+/* ==========================================================================
+   ENHANCED SHOPPING FLOW & FAT-FINGER SAFEGUARDS (RENCANA VS KERANJANG)
+   ========================================================================== */
+
+/* Button to move planned item to cart */
+.btn-move-to-cart {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #ECFDF5 !important;
+  color: #065F46 !important;
+  border: 1px solid #A7F3D0 !important;
+  border-radius: 8px !important;
+  padding: 5px 10px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-move-to-cart:hover {
+  background: #D1FAE5 !important;
+  border-color: #6EE7B7 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2) !important;
+}
+
+body.dark-mode .btn-move-to-cart {
+  background: rgba(6, 78, 59, 0.5) !important;
+  border-color: #047857 !important;
+  color: #6EE7B7 !important;
+}
+
+/* Button to return cart item back to plan */
+.btn-return-to-plan {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #F8FAFC !important;
+  color: #475569 !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-return-to-plan:hover {
+  background: #F1F5F9 !important;
+  color: #1E293B !important;
+  border-color: #94A3B8 !important;
+  transform: translateY(-1px) !important;
+}
+
+body.dark-mode .btn-return-to-plan {
+  background: rgba(51, 65, 85, 0.5) !important;
+  border-color: #475569 !important;
+  color: #CBD5E1 !important;
+}
+
+/* Primary "Mulai Belanja" action button in planner actions bar */
+.btn-start-shopping-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: linear-gradient(135deg, #E91E63 0%, #BE185D 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 5px 12px !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(233, 30, 99, 0.28) !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+}
+
+.btn-start-shopping-action:hover {
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 4px 14px rgba(233, 30, 99, 0.4) !important;
+}
+
+/* Toast with Undo button for accidental tap protection */
+.toast-with-undo {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  min-width: 280px !important;
+  max-width: 90vw !important;
+  padding: 10px 14px !important;
+}
+
+.btn-toast-undo {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  color: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-toast-undo:hover {
+  background: rgba(255, 255, 255, 0.45) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Celebration card when all items in plan have been moved to cart */
+.empty-plan-all-in-cart {
+  background: #F0FDF4 !important;
+  border: 1.5px dashed #86EFAC !important;
+  border-radius: 14px !important;
+  padding: 22px 16px !important;
+  text-align: center !important;
+  margin: 10px 0 !important;
+}
+
+body.dark-mode .empty-plan-all-in-cart {
+  background: rgba(6, 78, 59, 0.3) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+body.dark-mode .empty-plan-all-in-cart h4 {
+  color: #86EFAC !important;
+}
+
+body.dark-mode .empty-plan-all-in-cart p {
+  color: #A7F3D0 !important;
+}
+
+/* Strip in planner showing how many items are already in cart */
+.plan-incart-summary {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  margin: 10px 0 6px 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.plan-incart-summary:hover {
+  background: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+}
+
+body.dark-mode .plan-incart-summary {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .plan-incart-summary span {
+  color: #E2E8F0 !important;
+}
+
+/* Notice banner in cart reminding user if some items remain in plan */
+.cart-unbought-notice {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #FFFBEB !important;
+  border: 1px solid #FDE68A !important;
+  border-radius: 10px !important;
+  padding: 7px 12px !important;
+  margin-bottom: 10px !important;
+  font-size: 11.5px !important;
+  color: #92400E !important;
+}
+
+body.dark-mode .cart-unbought-notice {
+  background: rgba(69, 26, 3, 0.4) !important;
+  border-color: #78350F !important;
+  color: #FDE68A !important;
+}
+
+.btn-quick-take-all {
+  background: #F59E0B !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  padding: 3px 8px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.btn-quick-take-all:hover {
+  background: #D97706 !important;
+}
+
+
+/* ==========================================================================
+   DEDICATED BERTINGKAT ALERT NOTICE IN STICKY DASHBOARD (NO TRUNCATION / NO OVERLAP)
+   ========================================================================== */
+.tracker-alert-notice {
+  margin-top: 5px !important;
+  padding: 6px 10px !important;
+  border-radius: 9px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: all 0.25s ease !important;
+  cursor: pointer !important;
+}
+
+.tracker-alert-notice.safe {
+  background: #ECFDF5 !important;
+  border: 1px solid #A7F3D0 !important;
+}
+
+.tracker-alert-notice.warning {
+  background: #FFFBEB !important;
+  border: 1px solid #FDE68A !important;
+}
+
+.tracker-alert-notice.danger {
+  background: #FEF2F2 !important;
+  border: 1px solid #FECDD3 !important;
+  animation: pulseDangerNotice 2.2s infinite ease-in-out !important;
+}
+
+@keyframes pulseDangerNotice {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0);
+  }
+}
+
+.tracker-alert-notice-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+.tracker-alert-icon {
+  font-size: 13px !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+.tracker-alert-title {
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+}
+
+.tracker-alert-notice.safe .tracker-alert-title {
+  color: #065F46 !important;
+}
+
+.tracker-alert-notice.warning .tracker-alert-title {
+  color: #92400E !important;
+}
+
+.tracker-alert-notice.danger .tracker-alert-title {
+  color: #991B1B !important;
+}
+
+.tracker-alert-desc {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  margin: 0 !important;
+}
+
+.tracker-alert-notice.safe .tracker-alert-desc {
+  color: #047857 !important;
+}
+
+.tracker-alert-notice.warning .tracker-alert-desc {
+  color: #B45309 !important;
+}
+
+.tracker-alert-notice.danger .tracker-alert-desc {
+  color: #DC2626 !important;
+}
+
+/* Dark Mode Support for tracker-alert-notice */
+body.dark-mode .tracker-alert-notice.safe {
+  background: rgba(6, 78, 59, 0.35) !important;
+  border-color: rgba(5, 150, 105, 0.45) !important;
+}
+
+body.dark-mode .tracker-alert-notice.safe .tracker-alert-title {
+  color: #6EE7B7 !important;
+}
+
+body.dark-mode .tracker-alert-notice.safe .tracker-alert-desc {
+  color: #A7F3D0 !important;
+}
+
+body.dark-mode .tracker-alert-notice.warning {
+  background: rgba(120, 53, 15, 0.35) !important;
+  border-color: rgba(217, 119, 6, 0.45) !important;
+}
+
+body.dark-mode .tracker-alert-notice.warning .tracker-alert-title {
+  color: #FDE68A !important;
+}
+
+body.dark-mode .tracker-alert-notice.warning .tracker-alert-desc {
+  color: #FCD34D !important;
+}
+
+body.dark-mode .tracker-alert-notice.danger {
+  background: rgba(127, 29, 29, 0.4) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+body.dark-mode .tracker-alert-notice.danger .tracker-alert-title {
+  color: #FCA5A5 !important;
+}
+
+body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
+  color: #FECDD3 !important;
+}
+
+
+/* ==========================================================================
+   COMPREHENSIVE FULL-APPLICATION DARK MODE OVERRIDES (NIGHT ROSE PALETTE)
+   Guarantees 100% of screens, viewports, cards, modals, tabs & controls turn dark
+   ========================================================================== */
+
+/* Main Viewport & Canvas */
+body.dark-mode .app-viewport,
+body.theme-dark .app-viewport {
+  background-color: #160810 !important;
+  background: #160810 !important;
+  border-left: 1px solid #341527 !important;
+  border-right: 1px solid #341527 !important;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.6) !important;
+  color: #FFF1F5 !important;
+}
+
+/* App Header */
+body.dark-mode .app-header,
+body.theme-dark .app-header {
+  background: #240F1B !important;
+  border-bottom: 1px solid #3B162B !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35) !important;
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .app-title,
+body.theme-dark .app-title {
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .app-subtitle,
+body.theme-dark .app-subtitle {
+  color: #E2B9CB !important;
+}
+
+body.dark-mode .user-header-avatar,
+body.dark-mode .user-header-gear,
+body.theme-dark .user-header-avatar,
+body.theme-dark .user-header-gear {
+  background: #341527 !important;
+  border: 1px solid #4A1D36 !important;
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .user-header-name,
+body.theme-dark .user-header-name {
+  color: #FFF1F5 !important;
+}
+
+/* Bottom Navigation Dock */
+body.dark-mode .bottom-nav-bar,
+body.theme-dark .bottom-nav-bar {
+  background: rgba(36, 15, 27, 0.98) !important;
+  border-top: 1px solid #3B162B !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode .bottom-nav-item,
+body.theme-dark .bottom-nav-item {
+  color: #A6748B !important;
+}
+
+body.dark-mode .bottom-nav-item.active,
+body.theme-dark .bottom-nav-item.active {
+  color: #F472B6 !important;
+}
+
+body.dark-mode .bottom-nav-item.active .nav-icon-wrap,
+body.theme-dark .bottom-nav-item.active .nav-icon-wrap {
+  background: rgba(244, 114, 182, 0.18) !important;
+}
+
+/* Global Headings & Typography */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.theme-dark h1,
+body.theme-dark h2,
+body.theme-dark h3,
+body.theme-dark h4,
+body.theme-dark h5,
+body.theme-dark h6 {
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .serif-font,
+body.theme-dark .serif-font {
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode p,
+body.theme-dark p {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode label,
+body.theme-dark label {
+  color: #E2B9CB !important;
+}
+
+/* All Cards across all 4 Tabs */
+body.dark-mode .budget-card,
+body.dark-mode .smart-input-card,
+body.dark-mode .shopee-item-card,
+body.dark-mode .product-catalog-card,
+body.dark-mode .catalog-card,
+body.dark-mode .pantry-card,
+body.dark-mode .pantry-item,
+body.dark-mode .pantry-stats-card,
+body.dark-mode .receipt-history-card,
+body.theme-dark .budget-card,
+body.theme-dark .smart-input-card,
+body.theme-dark .shopee-item-card,
+body.theme-dark .product-catalog-card,
+body.theme-dark .catalog-card,
+body.theme-dark .pantry-card,
+body.theme-dark .pantry-item,
+body.theme-dark .pantry-stats-card,
+body.theme-dark .receipt-history-card {
+  background: #240F1B !important;
+  border: 1px solid #4A1D36 !important;
+  color: #FFF1F5 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Metric Boxes in Budget Controller */
+body.dark-mode .metric-box,
+body.dark-mode .budget-metrics-4grid .metric-box,
+body.theme-dark .metric-box,
+body.theme-dark .budget-metrics-4grid .metric-box {
+  background: #2D1422 !important;
+  border: 1px solid #4A1D36 !important;
+  color: #FFF1F5 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.dark-mode .metric-val,
+body.theme-dark .metric-val {
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .metric-label,
+body.theme-dark .metric-label {
+  color: #E2B9CB !important;
+}
+
+/* Form Controls, Inputs, Selects, & Textareas */
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+body.dark-mode select,
+body.dark-mode textarea,
+body.theme-dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+body.theme-dark select,
+body.theme-dark textarea {
+  background-color: #1A0B14 !important;
+  color: #FFF1F5 !important;
+  border: 1.5px solid #4A1D36 !important;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus,
+body.theme-dark input:focus,
+body.theme-dark select:focus,
+body.theme-dark textarea:focus {
+  border-color: #F472B6 !important;
+  box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2) !important;
+}
+
+body.dark-mode ::placeholder,
+body.theme-dark ::placeholder {
+  color: #A6748B !important;
+  opacity: 0.8 !important;
+}
+
+/* Stepper Component */
+body.dark-mode .shopee-stepper,
+body.theme-dark .shopee-stepper {
+  background: #1A0B14 !important;
+  border: 1px solid #4A1D36 !important;
+}
+
+body.dark-mode .shopee-step-btn,
+body.theme-dark .shopee-step-btn {
+  background: #2D1422 !important;
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .shopee-stepper input,
+body.theme-dark .shopee-stepper input {
+  background: #1A0B14 !important;
+  color: #FFF1F5 !important;
+  border-color: #4A1D36 !important;
+}
+
+/* Modals (Clean, Deep Dark Backdrop & Card) */
+body.dark-mode .modal-backdrop,
+body.dark-mode .google-auth-modal-backdrop,
+body.theme-dark .modal-backdrop,
+body.theme-dark .google-auth-modal-backdrop {
+  background: rgba(10, 3, 8, 0.82) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+body.dark-mode .modal-card,
+body.dark-mode .google-auth-card,
+body.dark-mode .profile-modal-card,
+body.dark-mode .profile-settings-sheet,
+body.dark-mode .quick-price-modal,
+body.dark-mode .modal-bubble-card,
+body.theme-dark .modal-card,
+body.theme-dark .google-auth-card,
+body.theme-dark .profile-modal-card,
+body.theme-dark .profile-settings-sheet,
+body.theme-dark .quick-price-modal,
+body.theme-dark .modal-bubble-card {
+  background: #240F1B !important;
+  border: 1.5px solid #4A1D36 !important;
+  color: #FFF1F5 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75) !important;
+}
+
+body.dark-mode .modal-header,
+body.theme-dark .modal-header {
+  border-bottom-color: #341527 !important;
+}
+
+body.dark-mode .modal-header h3,
+body.dark-mode .modal-header h4,
+body.theme-dark .modal-header h3,
+body.theme-dark .modal-header h4 {
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .modal-close-btn,
+body.theme-dark .modal-close-btn {
+  background: #3B162B !important;
+  color: #FFF1F5 !important;
+  border: 1px solid #551D3E !important;
+}
+
+body.dark-mode details,
+body.theme-dark details {
+  background: #1A0B14 !important;
+  border: 1px solid #341527 !important;
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode details summary,
+body.theme-dark details summary {
+  color: #E2B9CB !important;
+}
+
+/* Pills, Chips, & Badges */
+body.dark-mode .frequent-chip,
+body.dark-mode .catalog-pill,
+body.theme-dark .frequent-chip,
+body.theme-dark .catalog-pill {
+  background: #240F1B !important;
+  color: #E2B9CB !important;
+  border: 1px solid #4A1D36 !important;
+}
+
+body.dark-mode .frequent-chip:hover,
+body.dark-mode .catalog-pill:hover,
+body.theme-dark .frequent-chip:hover,
+body.theme-dark .catalog-pill:hover {
+  background: #341527 !important;
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .catalog-pill.active,
+body.theme-dark .catalog-pill.active {
+  background: #E91E63 !important;
+  color: #FFFFFF !important;
+  border-color: #E91E63 !important;
+}
+
+body.dark-mode .badge-no-price,
+body.theme-dark .badge-no-price {
+  background: #341527 !important;
+  color: #FBBF24 !important;
+  border: 1px solid #78350F !important;
+}
+
+/* Shopee Cart Sticky Bottom Bar */
+body.dark-mode .shopee-cart-checkout-bar,
+body.dark-mode .shopee-sticky-bottom-bar,
+body.theme-dark .shopee-cart-checkout-bar,
+body.theme-dark .shopee-sticky-bottom-bar {
+  background: #240F1B !important;
+  border-top: 1px solid #3B162B !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Empty States */
+body.dark-mode .empty-state,
+body.theme-dark .empty-state {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode .empty-state p,
+body.theme-dark .empty-state p {
+  color: #E2B9CB !important;
+}
+
+/* Auth Gate (Login/Register Screen) */
+body.dark-mode #authGate,
+body.theme-dark #authGate {
+  background: linear-gradient(135deg, #12050D 0%, #200B17 50%, #12050D 100%) !important;
+}
+
+body.dark-mode .auth-card,
+body.theme-dark .auth-card {
+  background: #240F1B !important;
+  border: 1px solid #4A1D36 !important;
+  color: #FFF1F5 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.dark-mode .auth-segmented-tabs,
+body.theme-dark .auth-segmented-tabs {
+  background: #1A0B14 !important;
+  border: 1px solid #341527 !important;
+}
+
+body.dark-mode .auth-tab-btn,
+body.theme-dark .auth-tab-btn {
+  color: #A6748B !important;
+}
+
+body.dark-mode .auth-tab-btn.active,
+body.theme-dark .auth-tab-btn.active {
+  background: #341527 !important;
+  color: #F472B6 !important;
+  border: 1px solid #F472B6 !important;
+}
+
+/* Quick Discount Popover */
+body.dark-mode .quick-discount-popover,
+body.theme-dark .quick-discount-popover {
+  background: #240F1B !important;
+  border: 1px solid #4A1D36 !important;
+  color: #FFF1F5 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Override any inline light colors across elements */
+body.dark-mode [style*="color: #222"],
+body.dark-mode [style*="color: #222222"],
+body.dark-mode [style*="color: #1E293B"],
+body.dark-mode [style*="color: #111827"],
+body.theme-dark [style*="color: #222"],
+body.theme-dark [style*="color: #222222"],
+body.theme-dark [style*="color: #1E293B"],
+body.theme-dark [style*="color: #111827"] {
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode [style*="color: #64748B"],
+body.dark-mode [style*="color: #757575"],
+body.dark-mode [style*="color: #475569"],
+body.theme-dark [style*="color: #64748B"],
+body.theme-dark [style*="color: #757575"],
+body.theme-dark [style*="color: #475569"] {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode [style*="background: #FFFFFF"],
+body.dark-mode [style*="background: white"],
+body.dark-mode [style*="background-color: #FFFFFF"],
+body.dark-mode [style*="background-color: white"],
+body.theme-dark [style*="background: #FFFFFF"],
+body.theme-dark [style*="background: white"],
+body.theme-dark [style*="background-color: #FFFFFF"],
+body.theme-dark [style*="background-color: white"] {
+  background: #240F1B !important;
+}
+
+body.dark-mode [style*="background: #FAF7F8"],
+body.dark-mode [style*="background: #F8FAFC"],
+body.dark-mode [style*="background: #FFF5F7"],
+body.theme-dark [style*="background: #FAF7F8"],
+body.theme-dark [style*="background: #F8FAFC"],
+body.theme-dark [style*="background: #FFF5F7"] {
+  background: #1A0B14 !important;
 }

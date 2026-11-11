@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=66">
+  <link rel="stylesheet" href="./css/app.css?v=75">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -205,7 +205,7 @@
         <div style="flex: 1;">
           <div style="font-weight: 900; line-height: 1.2;">Total belanja melebihi batas saldo dompet!</div>
           <div id="overbudget-detail-text"
-            style="font-size: 0.72rem; opacity: 0.95; font-weight: 600; margin-top: 2px;">
+            style="font-size: 0.74rem; opacity: 0.95; font-weight: 600; margin-top: 2px; white-space: normal; line-height: 1.35; word-break: break-word;">
             Kurangi kuantitas atau batalkan barang sekunder.
           </div>
         </div>
@@ -250,8 +250,8 @@
           <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
             <div style="font-size: 22px; flex-shrink: 0;">🛡️</div>
             <div style="min-width: 0; flex: 1;">
-              <h2 class="serif-font budget-main-title" style="white-space: nowrap; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222222; margin: 0; overflow: hidden; text-overflow: ellipsis;">Pengendali Anggaran</h2>
-              <p style="font-size: 0.72rem; color: var(--text-subtle); margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Monitor saldo &amp; batas belanja realtime</p>
+              <h2 class="serif-font budget-main-title" style="white-space: normal; line-height: 1.3; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: #222222; margin: 0; overflow: visible; text-overflow: clip;">Pengendali Anggaran</h2>
+              <p style="font-size: 0.76rem; color: var(--text-subtle); margin: 2px 0 0; white-space: normal; line-height: 1.35; overflow: visible; text-overflow: clip;">Monitor saldo &amp; batas belanja realtime</p>
             </div>
           </div>
           <div style="text-align: right; flex-shrink: 0;">
@@ -297,7 +297,7 @@
               Tersisa</span>
           </div>
           <div class="metric-box">
-            <span class="metric-label metric-label-bokek" style="font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">ZONA SIAP-SIAP BOKEK</span>
+            <span class="metric-label metric-label-bokek" style="font-size: 10px; font-weight: 800; white-space: normal; line-height: 1.25; overflow: visible; text-overflow: clip; letter-spacing: -0.3px;">ZONA SIAP-SIAP BOKEK</span>
             <span class="metric-val" id="metricWarningThreshold" style="color: #D97706;">Rp 90.000</span>
             <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px;">Batas 90% Limit</span>
           </div>
@@ -433,24 +433,70 @@
         </button>
       </div>
 
-      <!-- DYNAMIC PLANNER BUDGET ALERT (KOTAK KHUSUS STATUS SALDO) -->
-      <div id="plannerBudgetAlert" class="planner-budget-alert budget-status-card safe" onclick="switchTab('budget')"
-        style="cursor: pointer;" title="Buka Halaman Pengendali Anggaran">
-        <!-- Baris 1: Header Kotak (Ikon + Judul + Lencana Status + Tombol Atur) -->
-        <div class="budget-status-card-top planner-alert-left">
-          <div class="budget-status-title-group">
-            <span id="plannerAlertIcon" class="planner-alert-icon">💚</span>
-            <div id="plannerAlertTitle" class="planner-alert-title">Status Saldo: Terkendali</div>
+      <!-- ========================================================================
+           STICKY COMPACT DASHBOARD TRACKER (TRACKER SALDO, STATUS AKTIF & REALTIME BUDGET)
+           ======================================================================== -->
+      <div id="plannerBudgetAlert" class="sticky-dashboard-tracker planner-budget-alert safe"
+        title="Kotak Dashboard Pengendali Anggaran">
+        <!-- Baris 1: Status Aktif (Blinking Live Pulse), Badge Saldo & Link Atur -->
+        <div class="tracker-header-row">
+          <div class="tracker-header-left">
+            <!-- Active / Online Status Pill with Glowing Blinking Animation -->
+            <div id="cloud-sync-status-pill" class="cloud-sync-pill status-online touch-target"
+              onclick="openCloudSyncModal()" title="Status Koneksi &amp; Cloud Sync">
+              <span id="cloud-sync-dot" class="cloud-sync-dot online pulsing"></span>
+              <span id="cloud-sync-text" class="cloud-sync-text">Aktif</span>
+            </div>
+
+            <!-- Safety / Budget Level Badge -->
+            <div id="plannerAlertBadge" class="planner-alert-badge badge-safe">Aman</div>
           </div>
-          <div class="budget-status-badge-group">
-            <div id="plannerAlertBadge" class="planner-alert-badge badge-safe">0%</div>
-            <span class="budget-status-link">Atur ➔</span>
+
+          <div class="tracker-header-right">
+            <button type="button" class="tracker-budget-btn touch-target" onclick="switchTab('budget')"
+              title="Atur Batas Anggaran">
+              <span>Atur Saldo</span>
+              <span aria-hidden="true">⚙️</span>
+            </button>
           </div>
         </div>
 
-        <!-- Baris 2: Deskripsi & Rincian Saldo (100% Lebar Penuh, Anti-Numpuk) -->
-        <div class="budget-status-card-bottom">
-          <div id="plannerAlertDesc" class="planner-alert-desc">Total belanja: Rp 0 • Sisa saldo dompet: Rp 100.000</div>
+        <!-- Baris 2: Sisa Saldo (Highlight) & Ringkasan Terpakai vs Limit -->
+        <div class="tracker-main-row" onclick="switchTab('budget')" style="cursor: pointer;"
+          title="Klik untuk buka Pengendali Anggaran">
+          <div class="tracker-saldo-group">
+            <span class="tracker-saldo-label" id="trackerSaldoLabel">Sisa Saldo</span>
+            <span class="tracker-saldo-value safe" id="trackerSaldoValue">Rp 100.000</span>
+          </div>
+
+          <div class="tracker-spent-wrap">
+            <span class="tracker-spent-label">Total Belanja</span>
+            <div class="tracker-spent-figures">
+              <span class="tracker-spent-val" id="trackerSpentVal">Rp 0 / Rp 100.000</span>
+              <span class="tracker-percent-val" id="trackerPercentVal">(0%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris 3: Integrated Slim 5px Progress Bar -->
+        <div class="tracker-progress-track" title="Persentase Anggaran Terpakai">
+          <div id="budgetSlimProgressBar" class="tracker-progress-fill" style="width: 0%; background: #10B981;"></div>
+        </div>
+
+        <!-- Baris 4: Kotak Peringatan Bertingkat (Sengaja Didesain Rapi Kebawah, Bebas Overlapping & No Ellipsis) -->
+        <div id="trackerAlertNotice" class="tracker-alert-notice safe" onclick="switchTab('budget')" style="cursor: pointer;" title="Klik untuk kelola anggaran belanja">
+          <div class="tracker-alert-notice-header">
+            <span id="plannerAlertIcon" class="tracker-alert-icon">💚</span>
+            <div id="plannerAlertTitle" class="tracker-alert-title">Status Saldo: Terkendali</div>
+          </div>
+          <div id="plannerAlertDesc" class="tracker-alert-desc">
+            Total belanja Rp 0 dari batas saldo Rp 100.000 • Sisa saldo aman: Rp 100.000.
+          </div>
+        </div>
+
+        <!-- Hidden Compatibility Hook -->
+        <div id="overbudget-slim-badge" style="display: none !important;">
+          <strong id="overbudget-slim-diff">Rp 0</strong>
         </div>
       </div>
 
@@ -519,17 +565,12 @@
           </button>
         </div>
 
-        <!-- Baris 2: Tanggal Belanja & Status Cloud -->
+        <!-- Baris 2: Tanggal Belanja -->
         <div class="store-header-row store-header-row-date store-header-right">
-          <div class="store-date-group">
+          <div class="store-date-group" style="width: 100%;">
             <span class="store-header-date-icon">📅</span>
             <input type="date" id="session-date-picker" class="store-header-date" onchange="handleDateChange(this.value)"
-              title="Tanggal Belanja">
-          </div>
-          <div id="cloud-sync-status-pill" class="cloud-sync-pill-compact" onclick="openCloudSyncModal()"
-            title="Cloud Realtime Sync">
-            <span id="cloud-sync-dot" class="cloud-sync-dot"></span>
-            <span id="cloud-sync-text" class="cloud-sync-text">Cloud Sync</span>
+              title="Tanggal Belanja" style="flex: 1; width: 100%;">
           </div>
         </div>
       </div>
@@ -547,20 +588,6 @@
             title="Batal">✕</button>
         </div>
       </div>
-
-      <!-- SLIM 4PX BUDGET SAFETY PROGRESS BAR -->
-      <div class="slim-budget-progress-wrap" title="Indikator Saldo Dompet">
-        <div id="budgetSlimProgressBar" class="slim-budget-progress-fill"
-          style="width: 0%; height: 100%; background: #2E7D32; transition: width 0.3s ease, background 0.3s ease;">
-        </div>
-      </div>
-
-      <!-- SLIM 1-LINE OVERBUDGET BADGE -->
-      <div id="overbudget-slim-badge" class="overbudget-slim-badge hidden">
-        <span>🚨 Limit dompet terlampaui! <span id="overbudget-slim-diff">Defisit: Rp 0</span>. Kurangi barang
-          sekunder.</span>
-      </div>
-
 
       <!-- SINGLE SMART INPUT BAR -->
       <div class="smart-input-card">
@@ -623,9 +650,13 @@
       <!-- Planner Actions Bar: Item Count, Share WhatsApp, & Manage Blacklist -->
       <div class="planner-actions-bar">
         <span style="font-size: 0.8rem; font-weight: 700; color: #222222;">
-          Daftar Belanja (<span id="unboughtItemCount">0</span>)
+          Daftar Rencana (<span id="unboughtItemCount">0</span>)
         </span>
         <div class="planner-actions-right">
+          <button type="button" class="btn-start-shopping-action touch-target" onclick="startShoppingFromPlan()"
+            title="Mulai Belanja: Pindahkan semua rencana ke keranjang belanja">
+            <span>🛍️ Mulai Belanja</span>
+          </button>
           <button class="btn-manage-blacklist touch-target" onclick="openBlacklistManagerModal()"
             title="Kelola daftar pantangan (Anti-List)">
             <span>🛑</span>
@@ -1937,7 +1968,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=66"></script>
+  <script src="./js/app.js?v=76"></script>
 
   <!-- Service Worker Registration -->
   <script>
