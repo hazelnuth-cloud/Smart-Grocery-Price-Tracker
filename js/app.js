@@ -1488,8 +1488,22 @@ function setupAuthListener() {
   try {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
+        // Never allow legacy demo/audrey account
+        if ((user.displayName && user.displayName.toLowerCase().includes('audrey')) || 
+            (user.email && user.email.toLowerCase().includes('audrey'))) {
+          return;
+        }
+
         user.isLiveFirebaseSession = true;
-        handleSuccessfulAuth(user, user.providerData && user.providerData[0] ? user.providerData[0].providerId : 'google', false);
+        const rawProv = (user.providerData && user.providerData[0] && user.providerData[0].providerId) 
+          ? user.providerData[0].providerId 
+          : 'google';
+        const cleanProv = rawProv.includes('google') ? 'google' : (rawProv.includes('password') || rawProv.includes('email')) ? 'email' : 'google';
+
+        // Only switch if no user or different user
+        if (!AppState.user || AppState.user.uid !== user.uid) {
+          handleSuccessfulAuth(user, cleanProv, false);
+        }
       } else {
         // DO NOT log out on initial null or pending Firebase state during page refresh!
         // Logout should only occur via explicit user action (e.g. clicking 'Keluar Akun').
@@ -1511,14 +1525,21 @@ async function handleRedirectResult() {
     } catch (err) {
       if (err.code && err.code !== 'auth/null-user') {
         console.warn('Redirect sign-in notice:', err.code, err.message);
+        showToast(getAuthErrorMessage(err), 'error');
       }
     }
   }
 }
 
 function handleSuccessfulAuth(u, providerType, notify = true) {
+  const cleanProvider = (providerType && (providerType.includes('google') || providerType === 'google.com'))
+    ? 'google'
+    : (providerType && (providerType.includes('password') || providerType === 'email'))
+      ? 'email'
+      : (providerType || 'google');
+
   const displayName = u.displayName || (u.email ? u.email.split('@')[0] : 'Pengguna');
-  const uid = u.uid || getDeterministicUid(u.email, providerType === 'google' ? 'google_' : 'usr_');
+  const uid = u.uid || getDeterministicUid(u.email, cleanProvider === 'google' ? 'google_' : 'usr_');
   const photoURL = u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4285F4&color=fff&bold=true`;
 
   AppState.user = {
@@ -1526,23 +1547,10 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
     email: u.email || 'user@email.com',
     photoURL: photoURL,
     uid: uid,
-    authProvider: providerType || 'google',
+    authProvider: cleanProvider,
     isLiveFirebaseSession: !!u.isLiveFirebaseSession,
     loggedAt: new Date().toISOString()
   };
-
-  // If Google provider, record in Google accounts list for fast switching
-  if (providerType === 'google' && u.email) {
-    let accounts = getSavedGoogleAccounts();
-    const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === u.email.toLowerCase());
-    const accObj = { name: displayName, email: u.email, photoURL, lastLogin: new Date().toISOString() };
-    if (existingIdx >= 0) {
-      accounts[existingIdx] = accObj;
-    } else {
-      accounts.push(accObj);
-    }
-    saveSavedGoogleAccounts(accounts);
-  }
 
   // Backup profile to Cloud Firestore registered_accounts
   if (firestoreDb && u.email) {
@@ -1552,7 +1560,7 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
       email: u.email.toLowerCase().trim(),
       uid: uid,
       photoURL: photoURL,
-      authProvider: providerType || 'google',
+      authProvider: cleanProvider,
       lastLogin: new Date().toISOString()
     }, { merge: true }).catch(err => console.info('Firestore profile sync notice:', err));
   }
@@ -1787,232 +1795,6 @@ function toggleAuthMode() {
 
 // -------------------------------------------------------------------------
 // GOOGLE ACCOUNT CHOOSER MODAL HANDLERS
-// -------------------------------------------------------------------------
-
-function openGoogleAuthModal() {
-  const modal = document.getElementById('googleAuthModal');
-  if (!modal) return;
-  renderGoogleAccountsList();
-  modal.style.display = 'flex';
-  modal.classList.add('active');
-}
-
-function closeGoogleAuthModal() {
-  const modal = document.getElementById('googleAuthModal');
-  if (modal) {
-    modal.style.display = 'none';
-    modal.classList.remove('active');
-  }
-  toggleGoogleNewAccount(false);
-}
-
-function toggleGoogleNewAccount(show) {
-  const box = document.getElementById('googleNewAccountSection');
-  const addBtnWrap = document.getElementById('googleAddAccountBtnWrap');
-  if (box) box.style.display = show ? 'block' : 'none';
-  if (addBtnWrap) addBtnWrap.style.display = show ? 'none' : 'block';
-  if (show) {
-    const nameInput = document.getElementById('googleNewNameInput');
-    if (nameInput) nameInput.focus();
-  }
-}
-
-function renderGoogleAccountsList() {
-  const listEl = document.getElementById('googleAccountsList');
-  if (!listEl) return;
-  const accounts = getSavedGoogleAccounts();
-
-  if (accounts.length === 0) {
-    listEl.innerHTML = '';
-    listEl.style.display = 'none';
-    toggleGoogleNewAccount(true);
-    return;
-  }
-
-  listEl.style.display = 'flex';
-  listEl.innerHTML = accounts.map(acc => {
-    const initial = (acc.name || acc.email || 'G').charAt(0).toUpperCase();
-    return `
-      <div class="google-account-item" onclick="selectGoogleAccount('${escapeHtml(acc.email)}')">
-        ${acc.photoURL ? 
-          `<img src="${escapeHtml(acc.photoURL)}" alt="Avatar" class="google-account-avatar">` : 
-          `<div class="google-account-avatar">${initial}</div>`
-        }
-        <div class="google-account-info">
-          <div class="google-account-name">${escapeHtml(acc.name || acc.email)}</div>
-          <div class="google-account-email">${escapeHtml(acc.email)}</div>
-        </div>
-        <button type="button" class="google-account-delete" title="Hapus dari daftar ini" onclick="removeSavedGoogleAccount('${escapeHtml(acc.email)}', event)">✕</button>
-      </div>
-    `;
-  }).join('');
-
-  toggleGoogleNewAccount(false);
-}
-
-function selectGoogleAccount(email) {
-  const accounts = getSavedGoogleAccounts();
-  const acc = accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
-  if (!acc) return;
-
-  const uid = getDeterministicUid(acc.email, 'google_');
-  AppState.user = {
-    name: acc.name,
-    email: acc.email,
-    photoURL: acc.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(acc.name)}&background=4285F4&color=fff&bold=true`,
-    uid: uid,
-    authProvider: 'google',
-    isLiveFirebaseSession: false,
-    loggedAt: new Date().toISOString()
-  };
-
-  closeGoogleAuthModal();
-  loadUserIsolatedState(uid);
-  saveLocalState();
-  playCelebrationFanfare();
-  triggerCuteLoginConfetti();
-  checkAuth();
-  setupFirestoreListener();
-  showToast(`Selamat datang kembali, ${acc.name}! ✨ (Akun Google)`, 'success');
-}
-
-function removeSavedGoogleAccount(email, evt) {
-  if (evt) evt.stopPropagation();
-  let accounts = getSavedGoogleAccounts();
-  accounts = accounts.filter(a => a.email.toLowerCase() !== email.toLowerCase());
-  saveSavedGoogleAccounts(accounts);
-  renderGoogleAccountsList();
-  showToast('Akun Google dihapus dari daftar cepat', 'info');
-}
-
-function submitNewGoogleAccount() {
-  const nameInput = document.getElementById('googleNewNameInput');
-  const emailInput = document.getElementById('googleNewEmailInput');
-
-  let name = nameInput ? nameInput.value.trim() : '';
-  let email = emailInput ? emailInput.value.trim().toLowerCase() : '';
-
-  if (!email) {
-    showToast('Masukkan alamat email Google Anda!', 'warning');
-    if (emailInput) emailInput.focus();
-    return;
-  }
-
-  if (!email.includes('@')) {
-    email += '@gmail.com';
-  }
-
-  if (!name) {
-    name = email.split('@')[0];
-    name = name.charAt(0).toUpperCase() + name.slice(1);
-  }
-
-  const uid = getDeterministicUid(email, 'google_');
-  const photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4285F4&color=fff&bold=true`;
-
-  // Save to Google Accounts list
-  let accounts = getSavedGoogleAccounts();
-  const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === email);
-  const accObj = { name, email, photoURL, lastLogin: new Date().toISOString() };
-  if (existingIdx >= 0) {
-    accounts[existingIdx] = accObj;
-  } else {
-    accounts.push(accObj);
-  }
-  saveSavedGoogleAccounts(accounts);
-
-  // Also register in registered users list
-  let regUsers = getRegisteredUsers();
-  const regIdx = regUsers.findIndex(u => u.email.toLowerCase() === email);
-  const regObj = { name, email, uid, photoURL, authProvider: 'google', createdAt: new Date().toISOString() };
-  if (regIdx >= 0) {
-    regUsers[regIdx] = { ...regUsers[regIdx], ...regObj };
-  } else {
-    regUsers.push(regObj);
-  }
-  saveRegisteredUsers(regUsers);
-
-  AppState.user = {
-    name,
-    email,
-    photoURL,
-    uid,
-    authProvider: 'google',
-    isLiveFirebaseSession: false,
-    loggedAt: new Date().toISOString()
-  };
-
-  closeGoogleAuthModal();
-  if (nameInput) nameInput.value = '';
-  if (emailInput) emailInput.value = '';
-
-  loadUserIsolatedState(uid);
-  saveLocalState();
-  playCelebrationFanfare();
-  triggerCuteLoginConfetti();
-  checkAuth();
-  setupFirestoreListener();
-  showToast(`Selamat datang, ${name}! ✨ (Akun Google)`, 'success');
-}
-
-// Global Google Auth Popup Message Handler
-if (typeof window !== 'undefined') {
-  window.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.user) {
-      handleGooglePopupSuccess(event.data.user);
-    }
-  });
-}
-
-function handleGooglePopupSuccess(u) {
-  if (!u || !u.email) return;
-
-  // Never allow legacy demo/audrey account
-  if ((u.name && u.name.toLowerCase().includes('audrey')) || (u.email && u.email.toLowerCase().includes('audrey'))) {
-    return;
-  }
-
-  const displayName = u.name || (u.email ? u.email.split('@')[0] : 'Pengguna Google');
-  const uid = u.uid || getDeterministicUid(u.email, 'google_');
-  const photoURL = u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4285F4&color=fff&bold=true`;
-
-  AppState.user = {
-    name: displayName,
-    email: u.email,
-    photoURL: photoURL,
-    uid: uid,
-    authProvider: 'google',
-    isLiveFirebaseSession: false,
-    loggedAt: new Date().toISOString()
-  };
-
-  // Record in saved Google accounts
-  let accounts = getSavedGoogleAccounts();
-  const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === u.email.toLowerCase());
-  const accObj = { name: displayName, email: u.email, photoURL, lastLogin: new Date().toISOString() };
-  if (existingIdx >= 0) {
-    accounts[existingIdx] = accObj;
-  } else {
-    accounts.push(accObj);
-  }
-  saveSavedGoogleAccounts(accounts);
-
-  // Close in-page modal if open
-  closeGoogleAuthModal();
-
-  // Load user isolated state
-  isInitialAppLoad = true;
-  AppState.previousSafetyLevel = null;
-  loadUserIsolatedState(uid);
-  saveLocalState();
-  playCelebrationFanfare();
-  triggerCuteLoginConfetti();
-  checkAuth();
-  setupFirestoreListener();
-  showToast(`Selamat datang, ${displayName}! ✨ (Akun Google)`, 'success');
-  setTimeout(() => { isInitialAppLoad = false; }, 600);
-}
-
 function getAuthErrorMessage(err) {
   if (!err) return 'Terjadi kesalahan saat masuk.';
   switch (err.code) {
@@ -2039,55 +1821,66 @@ async function loginWithGoogle() {
   clearAuthAlert();
   purgeLegacyAudreyData();
 
-  // 1. Official Firebase Google Auth (Popup for Desktop, Seamless Redirect for Mobile/Blocked popups)
-  if (typeof firebase !== 'undefined' && firebase.auth && typeof window.initGoogleAuthProvider === 'function') {
-    const provider = window.initGoogleAuthProvider();
-    if (provider) {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      showToast('Menghubungkan ke Google...', 'info');
-
-      try {
-        const result = await firebase.auth().signInWithPopup(provider);
-        if (result && result.user) {
-          result.user.isLiveFirebaseSession = true;
-          handleSuccessfulAuth(result.user, 'google', true);
-          return;
-        }
-      } catch (popupError) {
-        console.warn('Firebase signInWithPopup notice:', popupError);
-
-        // Jika user menutup jendela pop-up secara manual
-        if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
-          showToast('Masuk dengan Google dibatalkan.', 'info');
-          return;
-        }
-
-        // Jika pop-up diblokir peramban atau di perangkat mobile: alihkan langsung ke Google resmi via redirect
-        if (popupError.code === 'auth/popup-blocked' || isMobile) {
-          showToast('Mengalihkan ke pemilih akun Google resmi di perangkat Anda...', 'info');
-          try {
-            await firebase.auth().signInWithRedirect(provider);
-            return;
-          } catch (redirErr) {
-            console.error('signInWithRedirect error:', redirErr);
-            showToast(getAuthErrorMessage(redirErr), 'error');
-            return;
-          }
-        }
-
-        showToast(getAuthErrorMessage(popupError), 'error');
-        return;
-      }
-    }
+  if (typeof firebase === 'undefined' || !firebase.auth) {
+    showToast('Layanan Firebase tidak dapat dijangkau. Periksa koneksi internet Anda.', 'error');
+    return;
   }
 
-  showToast('Layanan Firebase tidak dapat dijangkau. Periksa koneksi internet Anda.', 'error');
+  const provider = (typeof window.initGoogleAuthProvider === 'function')
+    ? window.initGoogleAuthProvider()
+    : new firebase.auth.GoogleAuthProvider();
+
+  if (!provider) {
+    showToast('Inisialisasi Google Auth gagal.', 'error');
+    return;
+  }
+
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Pada perangkat smartphone / mobile: standar resmi Google & Firebase adalah redirect langsung ke accounts.google.com
+  // Ini mencegah pemblokiran pop-up di Android Chrome & iOS Safari serta memunculkan pemilih akun Google bawaan perangkat
+  if (isMobile) {
+    showToast('Membuka Google Sign-In di perangkat Anda...', 'info');
+    try {
+      await firebase.auth().signInWithRedirect(provider);
+    } catch (redirErr) {
+      console.error('Firebase signInWithRedirect error:', redirErr);
+      showToast(getAuthErrorMessage(redirErr), 'error');
+    }
+    return;
+  }
+
+  // Pada komputer / laptop desktop: gunakan popup resmi Google OAuth
+  showToast('Menghubungkan ke Google...', 'info');
+  try {
+    const result = await firebase.auth().signInWithPopup(provider);
+    if (result && result.user) {
+      result.user.isLiveFirebaseSession = true;
+      handleSuccessfulAuth(result.user, 'google', true);
+    }
+  } catch (popupError) {
+    console.warn('Firebase signInWithPopup notice:', popupError);
+
+    if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
+      showToast('Masuk dengan Google dibatalkan.', 'info');
+      return;
+    }
+
+    if (popupError.code === 'auth/popup-blocked') {
+      showToast('Pop-up diblokir. Mengalihkan ke login resmi Google...', 'info');
+      try {
+        await firebase.auth().signInWithRedirect(provider);
+      } catch (redirErr) {
+        console.error('signInWithRedirect error:', redirErr);
+        showToast(getAuthErrorMessage(redirErr), 'error');
+      }
+      return;
+    }
+
+    showToast(getAuthErrorMessage(popupError), 'error');
+  }
 }
 
-/**
- * Sinkronisasi Akun Lokal ke Cloud Firestore & Firebase Auth
- * Menjamin akun yang dibuat di HP langsung terbaca di laptop atau perangkat lain
- */
 async function syncLocalAccountsToCloud() {
   if (typeof firebase === 'undefined') return;
   try {
@@ -6098,8 +5891,6 @@ if (typeof document !== 'undefined') {
         closeBlacklistManagerModal();
       } else if (modalId === 'cloudSyncModal') {
         closeCloudSyncModal();
-      } else if (modalId === 'googleAuthModal') {
-        closeGoogleAuthModal();
       } else {
         e.target.classList.remove('active', 'show');
         if (e.target.style) e.target.style.display = 'none';
@@ -7233,12 +7024,6 @@ if (typeof window !== 'undefined') {
   // Global window bindings for HTML event handlers
   window.triggerCuteLoginConfetti = triggerCuteLoginConfetti;
   window.playCelebrationFanfare = playCelebrationFanfare;
-  window.openGoogleAuthModal = openGoogleAuthModal;
-  window.closeGoogleAuthModal = closeGoogleAuthModal;
-  window.toggleGoogleNewAccount = toggleGoogleNewAccount;
-  window.selectGoogleAccount = selectGoogleAccount;
-  window.removeSavedGoogleAccount = removeSavedGoogleAccount;
-  window.submitNewGoogleAccount = submitNewGoogleAccount;
   window.switchAuthMode = switchAuthMode;
   window.toggleAuthMode = toggleAuthMode;
   window.loginWithGoogle = loginWithGoogle;

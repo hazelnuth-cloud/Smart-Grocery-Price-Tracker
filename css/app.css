@@ -8311,173 +8311,6 @@ body.dark-mode #appContainer {
   border: 1px solid #86EFAC;
 }
 
-.google-auth-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10001;
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  animation: fadeIn 0.2s ease;
-  box-sizing: border-box;
-}
-.google-auth-card {
-  background: #FFFFFF;
-  border-radius: 20px;
-  max-width: 400px;
-  width: 100%;
-  padding: 24px 20px;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
-  border: 1px solid #E2E8F0;
-  animation: slideUpScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-sizing: border-box;
-}
-.google-auth-header {
-  text-align: center;
-  margin-bottom: 18px;
-}
-.google-icon-large {
-  display: block;
-  margin: 0 auto 10px;
-}
-.google-auth-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1E293B;
-  margin: 0 0 4px;
-}
-.google-auth-subtitle {
-  font-size: 0.82rem;
-  color: #64748B;
-  margin: 0;
-}
-.google-accounts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-  max-height: 220px;
-  overflow-y: auto;
-}
-.google-account-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1.5px solid #E2E8F0;
-  background: #F8FAFC;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  text-align: left;
-  width: 100%;
-  box-sizing: border-box;
-}
-.google-account-item:hover {
-  background: #F1F5F9;
-  border-color: #4285F4;
-  transform: translateY(-1px);
-}
-.google-account-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #4285F4;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-.google-account-info {
-  flex: 1;
-  min-width: 0;
-}
-.google-account-name {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #1E293B;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.google-account-email {
-  font-size: 0.76rem;
-  color: #64748B;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.google-account-delete {
-  background: none;
-  border: none;
-  color: #94A3B8;
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 6px;
-  transition: color 0.15s;
-}
-.google-account-delete:hover {
-  color: #EF4444;
-}
-.btn-google-add-account {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px dashed #CBD5E1;
-  background: transparent;
-  border-radius: 12px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #475569;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-  margin-bottom: 12px;
-}
-.btn-google-add-account:hover {
-  border-color: #4285F4;
-  color: #1D4ED8;
-  background: #EFF6FF;
-}
-.google-new-account-box {
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 12px;
-  animation: fadeIn 0.2s ease;
-}
-.google-auth-footer {
-  text-align: center;
-  border-top: 1px solid #F1F5F9;
-  padding-top: 12px;
-}
-.btn-ghost-cancel {
-  background: none;
-  border: none;
-  color: #64748B;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 6px 14px;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-.btn-ghost-cancel:hover {
-  background: #F1F5F9;
-  color: #1E293B;
-}
 
 @keyframes slideUpScale {
   from {
@@ -9717,22 +9550,19 @@ body.theme-dark .shopee-stepper input {
 
 /* Modals (Clean, Deep Dark Backdrop & Card) */
 body.dark-mode .modal-backdrop,
-body.dark-mode .google-auth-modal-backdrop,
 body.theme-dark .modal-backdrop,
-body.theme-dark .google-auth-modal-backdrop {
+{
   background: rgba(10, 3, 8, 0.82) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
 }
 
 body.dark-mode .modal-card,
-body.dark-mode .google-auth-card,
 body.dark-mode .profile-modal-card,
 body.dark-mode .profile-settings-sheet,
 body.dark-mode .quick-price-modal,
 body.dark-mode .modal-bubble-card,
 body.theme-dark .modal-card,
-body.theme-dark .google-auth-card,
 body.theme-dark .profile-modal-card,
 body.theme-dark .profile-settings-sheet,
 body.theme-dark .quick-price-modal,
