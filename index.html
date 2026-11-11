@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=62">
+  <link rel="stylesheet" href="./css/app.css?v=63">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -538,6 +538,7 @@
       <div id="custom-store-wrap" class="custom-store-wrap compact-store-popdown" style="display: none;">
         <input type="text" id="custom-store-input"
           placeholder="Ketik nama toko baru (misal: Superindo, Pasar Mayestik)..." class="form-control"
+          maxlength="60" autocomplete="off"
           onkeydown="if(event.key==='Enter'){event.preventDefault();saveCustomStoreInput();}">
         <div class="custom-store-actions">
           <button type="button" class="btn-primary touch-target btn-save-store"
@@ -583,7 +584,7 @@
               📷
             </button>
             <input type="text" id="smartInputField" class="smart-input-field"
-              placeholder="Cari di katalog atau ketik barang baru..." autocomplete="off"
+              placeholder="Cari di katalog atau ketik barang baru..." autocomplete="off" maxlength="80"
               oninput="handleCatalogSearch(this.value)">
             <button type="submit" class="btn-smart-submit touch-target" title="Tambahkan ke checklist">
               ➔
@@ -903,6 +904,7 @@
           <label class="form-label" style="font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Nama Barang *</label>
           <input type="text" id="detailInputName" class="form-control" placeholder="Contoh: Minyak Goreng 2L"
             required list="detail-item-suggestions" oninput="handleDetailNameInput(this.value)"
+            maxlength="80" autocomplete="off"
             style="font-size: 13px; font-weight: 700; height: 38px;">
           <datalist id="detail-item-suggestions">
             <option value="Beras Rojolele"></option>
@@ -927,14 +929,14 @@
             <label class="form-label" style="font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Jumlah (Qty)</label>
             <div class="shopee-stepper" style="height: 38px; border: 1px solid #CBD5E1; border-radius: 8px; overflow: hidden; display: flex; align-items: center; background: #FFFFFF;">
               <button type="button" class="stepper-btn shopee-step-btn" style="width: 34px; height: 38px; background: #F8FAFC; border: none; font-weight: 800; font-size: 15px; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="adjustDetailModalQty(-1)">&minus;</button>
-              <input type="number" inputmode="numeric" id="detailInputQty" class="form-control shopee-step-input" min="1" value="1" required
+              <input type="number" inputmode="numeric" id="detailInputQty" class="form-control shopee-step-input" min="1" max="9999" value="1" required
                 style="flex: 1; width: 44px; height: 38px; text-align: center; border: none; border-left: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; font-size: 13px; font-weight: 800; color: #1E293B; padding: 0; border-radius: 0;" oninput="updateDetailModalPreview()">
               <button type="button" class="stepper-btn shopee-step-btn" style="width: 34px; height: 38px; background: #F8FAFC; border: none; font-weight: 800; font-size: 15px; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="adjustDetailModalQty(1)">+</button>
             </div>
           </div>
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" style="font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Harga Satuan</label>
-            <input type="number" inputmode="numeric" id="detailInputPrice" class="form-control" min="0" step="100"
+            <input type="number" inputmode="numeric" id="detailInputPrice" class="form-control" min="0" max="999999999" step="100"
               placeholder="Rp 0" oninput="updateDetailModalPreview()"
               style="font-size: 13px; font-weight: 800; color: #E91E63; height: 38px;">
           </div>
@@ -1229,24 +1231,24 @@
         <div class="form-group">
           <label class="form-label">Nama Bahan / Barang</label>
           <input type="text" id="pantryInputName" class="form-control" placeholder="Contoh: Keju Cheddar, Tomat..."
-            required>
+            maxlength="80" autocomplete="off" required>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label class="form-label">Jumlah (Qty)</label>
-            <input type="number" inputmode="numeric" id="pantryInputQty" class="form-control" value="1" min="1"
+            <input type="number" inputmode="numeric" id="pantryInputQty" class="form-control" value="1" min="1" max="9999"
               required>
           </div>
           <div class="form-group">
             <label class="form-label">Satuan</label>
-            <input type="text" id="pantryInputUnit" class="form-control" value="pcs" required>
+            <input type="text" id="pantryInputUnit" class="form-control" value="pcs" maxlength="20" required>
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label">Estimasi Masa Simpan (Hari)</label>
-          <input type="number" inputmode="numeric" id="pantryInputDays" class="form-control" value="7" min="1" required>
+          <input type="number" inputmode="numeric" id="pantryInputDays" class="form-control" value="7" min="1" max="3650" required>
         </div>
 
         <button type="submit" class="btn-primary" style="margin-top: 12px;">
@@ -1277,7 +1279,7 @@
 
         <div class="form-group" style="margin-bottom: 16px;">
           <label class="form-label">Nominal Batas Anggaran (Rp)</label>
-          <input type="number" inputmode="numeric" id="modalBudgetAmount" class="form-control" min="10000" step="5000"
+          <input type="number" inputmode="numeric" id="modalBudgetAmount" class="form-control" min="10000" max="999999999" step="5000"
             required>
         </div>
 
@@ -1555,7 +1557,7 @@
         <div class="shopee-stepper" style="border: 1px solid var(--pastel-light-1); background: #FFFFFF; flex-shrink: 0;">
           <button type="button" class="shopee-step-btn" onclick="adjustQuickPriceQty(-1)"
             title="Kurang">&minus;</button>
-          <input type="number" inputmode="numeric" id="quickPriceQtyInput" min="1" value="1"
+          <input type="number" inputmode="numeric" id="quickPriceQtyInput" min="1" max="9999" value="1"
             oninput="handleQuickPriceQtyChange(this.value)" style="width: 42px; text-align: center; font-weight: 800;">
           <button type="button" class="shopee-step-btn" onclick="adjustQuickPriceQty(1)" title="Tambah">+</button>
         </div>
@@ -1567,7 +1569,7 @@
           *</label>
         <div style="display: flex; gap: 6px; align-items: center;">
           <input type="number" inputmode="numeric" id="quickPriceInput" class="form-control" placeholder="Contoh: 25000"
-            min="100" step="500" style="font-size: 0.95rem; font-weight: 800; color: #E91E63;"
+            min="100" max="999999999" step="500" style="font-size: 0.95rem; font-weight: 800; color: #E91E63;"
             oninput="updateQuickPricePreview()"
             onkeydown="if(event.key==='Enter'){event.preventDefault();saveQuickPrice();}">
           <button type="button" class="btn-demo-quick"
@@ -1914,6 +1916,9 @@
         <button type="button" class="btn-receipt-action btn-receipt-new-shop touch-target" onclick="startNewShoppingSession()">
           🛍️ Belanja Lagi Sekarang
         </button>
+        <button type="button" class="btn-receipt-action btn-receipt-undo touch-target" onclick="undoFinishShopping()">
+          ↩️ Batal Selesai (Kembalikan Keranjang)
+        </button>
         <button type="button" class="btn-receipt-action btn-receipt-print touch-target" onclick="printReceipt()">
           🖨️ Cetak / Simpan Struk
         </button>
@@ -1931,7 +1936,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=62"></script>
+  <script src="./js/app.js?v=63"></script>
 
   <!-- Service Worker Registration -->
   <script>

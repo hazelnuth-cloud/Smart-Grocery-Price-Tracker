@@ -9,6 +9,19 @@
  * - Core Features: Mobile UX Ergonomics, Discount Formulas, Price History & Realtime Sync.
  */
 
+// =========================================================================
+// 0. GLOBAL ERROR SHIELD & ANTI-CRASH PROTECTION (JARI CEROBOH & OFFLINE RESILIENCY)
+// =========================================================================
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', function (e) {
+    console.warn('Proteksi Antigravity: Terdeteksi error tertangkap tanpa memutus UI:', e.message);
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    console.warn('Proteksi Antigravity: Terdeteksi unhandled Promise rejection:', e.reason);
+    if (e && e.preventDefault) e.preventDefault();
+  });
+}
+
 // Storage Keys
 const STORAGE_KEYS = {
   USER: 'smart_grocery_user',
@@ -1795,6 +1808,7 @@ function saveCustomStoreInput() {
 
   AppState.cart.forEach(item => { item.store = val; });
   if (wrap) wrap.style.display = 'none';
+  saveLocalState();
   pushStateToCloud();
   renderItems();
   showToast(`Toko belanja diubah ke "${val}"`, 'success');
@@ -1808,6 +1822,7 @@ function cancelCustomStoreInput() {
 function handleDateChange(val) {
   if (!val) return;
   AppState.currentDate = val;
+  saveLocalState();
   pushStateToCloud();
   showToast(`Tanggal belanja diatur ke ${val}`, 'info');
 }
@@ -2238,14 +2253,19 @@ function renderItems() {
   updateCartBadges();
 }
 
-// Reaktivitas Kuantitas & Subtotal Seketika
+// Reaktivitas Kuantitas & Subtotal Seketika (Proteksi Jari Ceroboh)
 function updateItemQty(itemId, delta) {
   const item = AppState.cart.find(i => i.id === itemId);
   if (!item) return;
 
-  const newQty = item.qty + delta;
+  const currentQty = parseInt(item.qty, 10) || 1;
+  const newQty = currentQty + delta;
   if (newQty <= 0) {
     confirmDeleteItem(itemId);
+    return;
+  }
+  if (newQty > 9999) {
+    showToast('Kuantitas maksimal 9.999 pcs!', 'warning');
     return;
   }
 
@@ -2276,9 +2296,9 @@ function handleQtyDirectInput(itemId, rawVal) {
   const val = parseInt(rawVal, 10);
   if (isNaN(val) || val <= 0) return;
 
-  item.qty = val;
+  item.qty = Math.min(val, 9999);
   const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
-  const subtotal = disc.finalPrice * val;
+  const subtotal = disc.finalPrice * item.qty;
   const subtotalEl = document.getElementById(`subtotal-${item.id}`);
   if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
 
@@ -2295,10 +2315,21 @@ function handleQtyBlur(itemId, rawVal) {
   const val = parseInt(rawVal, 10);
   if (isNaN(val) || val <= 0) {
     item.qty = 1;
-    renderItems();
   } else {
-    item.qty = val;
+    item.qty = Math.min(val, 9999);
   }
+
+  // Koreksi visual input agar user melihat angka yang aman dan valid
+  const inputEl = document.getElementById(`qty-input-${item.id}`);
+  if (inputEl) inputEl.value = item.qty;
+  const cartInputEl = document.getElementById(`cart-qty-${item.id}`);
+  if (cartInputEl) cartInputEl.value = item.qty;
+
+  const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+  const subtotal = disc.finalPrice * item.qty;
+  const subtotalEl = document.getElementById(`subtotal-${item.id}`);
+  if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
+
   saveLocalState();
   renderBudget();
   pushStateToCloud();
@@ -2340,7 +2371,8 @@ function handleItemCheckOrPricePrompt(itemId, checkboxEl) {
 }
 
 function handleItemRowClick(itemId, event) {
-  if (event.target.closest('button, input, label, a')) return;
+  // Proteksi sentuhan: abaikan jika klik mengenai elemen interaktif atau badge
+  if (event.target.closest('button, input, label, a, .shopee-stepper, .shopee-compact-actions, .planner-unit-badge, .routine-toggle-pill, .shopee-promo-pill, .cart-item-checkbox-wrap, .subtotal-amount, .badge-no-price, .btn-enter-price-pill')) return;
   const item = AppState.cart.find(i => i.id === itemId);
   if (!item) return;
   if (!item.hargaSatuan || item.hargaSatuan <= 0) {
@@ -2371,17 +2403,50 @@ function closeDeleteConfirmModal() {
   AppState.itemPendingDeleteId = null;
 }
 
+let isDeletingItem = false;
 function executeDeleteItem() {
+  if (isDeletingItem) return;
   if (!AppState.itemPendingDeleteId) return;
-  const item = AppState.cart.find(i => i.id === AppState.itemPendingDeleteId);
+
+  const idx = AppState.cart.findIndex(i => i.id === AppState.itemPendingDeleteId);
+  if (idx === -1) {
+    closeDeleteConfirmModal();
+    return;
+  }
+
+  isDeletingItem = true;
+  setTimeout(() => isDeletingItem = false, 500);
+
+  const item = AppState.cart[idx];
   const name = item ? item.namaBarang : 'Item';
-  AppState.cart = AppState.cart.filter(i => i.id !== AppState.itemPendingDeleteId);
+  // Simpan data cadangan untuk fitur Undo (Urungkan)
+  AppState._lastDeletedItem = { item: JSON.parse(JSON.stringify(item)), index: idx };
+  AppState.cart.splice(idx, 1);
+
   closeDeleteConfirmModal();
   playSoftPop();
   saveLocalState();
   pushStateToCloud();
   renderAll();
-  showToast(`"${name}" berhasil dihapus dari keranjang`, 'info');
+  showToast(`"${name}" dihapus • Ketuk toast ini untuk Urungkan ↩️`, 'info');
+}
+
+// Fitur Undo / Pemulihan Item yang Tidak Sengaja Terhapus
+function undoDeleteItem() {
+  if (!AppState._lastDeletedItem) {
+    showToast('Tidak ada item yang dapat dipulihkan', 'info');
+    return;
+  }
+  const restored = AppState._lastDeletedItem.item;
+  const insertIdx = Math.min(AppState._lastDeletedItem.index || 0, AppState.cart.length);
+  AppState.cart.splice(insertIdx, 0, restored);
+  AppState._lastDeletedItem = null;
+
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  playCalmChime();
+  showToast(`"${restored.namaBarang}" berhasil dipulihkan ke keranjang! ✨`, 'success');
 }
 
 // =========================================================================
@@ -2429,10 +2494,14 @@ function parseSmartInput(rawText) {
 }
 
 function cleanItemName(str) {
+  if (!str) return 'Barang Belanja';
+  str = String(str).trim().slice(0, 80);
+  if (str.length === 0) return 'Barang Belanja';
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function detectCategory(name) {
+  if (!name || typeof name !== 'string') return 'Kebutuhan Pokok';
   const lower = name.toLowerCase();
   if (lower.includes('susu') || lower.includes('milk') || lower.includes('yoghurt') || lower.includes('keju')) return 'Minuman';
   if (lower.includes('beras') || lower.includes('minyak') || lower.includes('telur') || lower.includes('gula')) return 'Kebutuhan Pokok';
@@ -2443,13 +2512,28 @@ function detectCategory(name) {
   return 'Kebutuhan Pokok';
 }
 
+let isSubmittingSmartInput = false;
 function handleSmartInputSubmit(e) {
   e.preventDefault();
+  if (isSubmittingSmartInput) return;
+
   const input = document.getElementById('smartInputField');
-  const val = input.value.trim();
-  if (!val) return;
+  if (!input) return;
+  const val = input.value.trim().slice(0, 80);
+  if (!val) {
+    showToast('Ketik nama barang terlebih dahulu!', 'info');
+    input.focus();
+    return;
+  }
+
+  isSubmittingSmartInput = true;
+  setTimeout(() => isSubmittingSmartInput = false, 350);
 
   const parsed = parseSmartInput(val);
+  if (!parsed.name || parsed.name.trim() === '') {
+    showToast('Nama barang tidak valid!', 'warning');
+    return;
+  }
 
   // Anti-List check (e.g. "Labu Siam")
   if (checkBlacklist(parsed.name)) {
@@ -2505,12 +2589,23 @@ function insertParsedItem(parsed) {
   const history = AppState.priceHistory[parsed.name] || {};
   const historyPrice = history.harga || null;
 
+  // Proteksi duplikasi tidak sengaja: jika nama barang persis sudah ada di rencana (belum dibeli), tambahkan kuantitasnya saja
+  const existing = AppState.cart.find(i => (i.namaBarang || '').toLowerCase() === parsed.name.toLowerCase() && !i.checked);
+  if (existing) {
+    existing.qty = Math.min(9999, (existing.qty || 1) + (parsed.qty || 1));
+    playSoftPop();
+    pushStateToCloud();
+    renderAll();
+    showToast(`"${parsed.name}" kuantitas ditambah jadi ${existing.qty} ✨`, 'success');
+    return;
+  }
+
   const newItem = {
-    id: 'item-' + Date.now(),
+    id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
     namaBarang: parsed.name,
     kategori: category,
     satuan: parsed.unit || history.satuan || 'pcs',
-    qty: parsed.qty || 1,
+    qty: Math.min(9999, Math.max(1, parsed.qty || 1)),
     hargaSatuan: 0, // Fase Shopping Planner: Catat Tanpa Harga (default Rp 0)
     diskonTipe: 'none',
     diskonValue: '',
@@ -2633,13 +2728,30 @@ function handleCatalogSearch(query) {
   renderProductCatalog();
 }
 
+let lastCatalogAddTimestamp = 0;
 function addCatalogItemToPlan(catalogId) {
+  const now = Date.now();
+  if (now - lastCatalogAddTimestamp < 250) return; // Anti-spam jari terburu-buru
+  lastCatalogAddTimestamp = now;
+
   const product = PRODUCT_CATALOG.find(p => p.id === catalogId);
   if (!product) return;
 
   if (checkBlacklist(product.name)) {
     AppState.pendingBlacklistItem = { name: product.name, qty: 1, unit: product.unit };
     showBlacklistWarning(product.name);
+    return;
+  }
+
+  // Proteksi Jari Ceroboh: Jika barang ini sudah ada di rencana & belum dibeli,
+  // tambahkan kuantitasnya saja agar daftar tidak dipenuhi kartu duplikat
+  const existing = AppState.cart.find(i => (i.namaBarang || '').toLowerCase() === product.name.toLowerCase() && !i.checked);
+  if (existing) {
+    existing.qty = Math.min(9999, (parseInt(existing.qty, 10) || 1) + 1);
+    playSoftPop();
+    pushStateToCloud();
+    renderAll();
+    showToast(`"${product.name}" kuantitas ditambah jadi ${existing.qty} ✨`, 'success');
     return;
   }
 
@@ -2663,7 +2775,7 @@ function addCatalogItemToPlan(catalogId) {
   playSoftPop();
   pushStateToCloud();
   renderAll();
-  showToast('Ditambahkan ke Rencana! 🛒', 'success');
+  showToast(`"${product.name}" dicatat di rencana belanja! 🛒`, 'success');
 }
 
 function quickAddFavorite(name, qty, unit, category, price, promoType = 'none', promoVal = '') {
@@ -2673,16 +2785,27 @@ function quickAddFavorite(name, qty, unit, category, price, promoType = 'none', 
     return;
   }
 
+  // Proteksi duplikasi tidak sengaja jika barang sudah ada
+  const existing = AppState.cart.find(i => (i.namaBarang || '').toLowerCase() === name.toLowerCase() && !i.checked);
+  if (existing) {
+    existing.qty = Math.min(9999, (parseInt(existing.qty, 10) || 1) + (parseInt(qty, 10) || 1));
+    playSoftPop();
+    pushStateToCloud();
+    renderAll();
+    showToast(`"${name}" kuantitas ditambah jadi ${existing.qty} ✨`, 'success');
+    return;
+  }
+
   const history = AppState.priceHistory[name] || {};
   const finalPrice = (price !== undefined && price !== null) ? price : (history.harga || 0);
 
   const newItem = {
-    id: 'item-' + Date.now(),
+    id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
     namaBarang: name,
     kategori: category || detectCategory(name),
     satuan: unit || 'pcs',
-    qty: qty || 1,
-    hargaSatuan: finalPrice,
+    qty: Math.min(9999, Math.max(1, parseInt(qty, 10) || 1)),
+    hargaSatuan: Math.max(0, finalPrice),
     diskonTipe: promoType || 'none',
     diskonValue: promoVal || '',
     hargaRiwayatBulanLalu: history.harga || null,
@@ -3414,17 +3537,36 @@ function toggleShoppingMode() {
   renderBudget();
 }
 
+let isFinishingShopping = false;
 function confirmFinishShopping() {
-  if (AppState.cart.length === 0) {
+  if (isFinishingShopping) return;
+
+  if (!AppState.cart || AppState.cart.length === 0) {
     showToast('Keranjang masih kosong!', 'info');
     return;
   }
 
+  const checkedItems = AppState.cart.filter(item => item.checked);
+  // Proteksi Jari Ceroboh: Jangan selesaikan belanja jika belum ada barang yang dicentang/masuk troli
+  if (checkedItems.length === 0) {
+    showToast('Pilih / centang barang yang sudah masuk troli terlebih dahulu! 🛒', 'warning');
+    return;
+  }
+
+  isFinishingShopping = true;
+  setTimeout(() => isFinishingShopping = false, 1500);
+
   // 1. Generate Thermal Supermarket Receipt Data Realtime
   const generatedReceipt = generateReceiptData();
 
-  const checkedItems = AppState.cart.filter(item => item.checked);
-  const itemsToPantry = checkedItems.length > 0 ? checkedItems : [...AppState.cart];
+  const itemsToPantry = [...checkedItems];
+
+  // Simpan data cadangan untuk fitur "Batalkan / Urungkan Selesai Belanja"
+  AppState._lastFinishedSessionBackup = {
+    cart: JSON.parse(JSON.stringify(AppState.cart)),
+    pantryItemsAddedCount: itemsToPantry.length
+  };
+  AppState._lastFinishedReceiptId = generatedReceipt ? generatedReceipt.id : null;
 
   // 2. Move checked items to Pantry
   itemsToPantry.forEach(item => {
@@ -3461,7 +3603,7 @@ function confirmFinishShopping() {
   }
 
   // 4. Update cart: clear purchased items
-  if (checkedItems.length > 0 && checkedItems.length < AppState.cart.length) {
+  if (checkedItems.length < AppState.cart.length) {
     AppState.cart = AppState.cart.filter(item => !item.checked);
   } else {
     AppState.cart = [];
@@ -3494,6 +3636,33 @@ function confirmFinishShopping() {
   // 5. Otomatis tampilkan modal Struk Belanja Supermarket Asli
   openReceiptModal();
   showToast('Belanja selesai! Struk resmi kasir siap dicetak 🧾✨', 'success');
+}
+
+// Fitur Undo / Pemulihan jika pengguna tidak sengaja menekan "Selesai Belanja"
+function undoFinishShopping() {
+  if (!AppState._lastFinishedSessionBackup) {
+    showToast('Tidak ada sesi yang dapat dikembalikan', 'info');
+    return;
+  }
+
+  AppState.cart = JSON.parse(JSON.stringify(AppState._lastFinishedSessionBackup.cart));
+  if (AppState._lastFinishedReceiptId && AppState.receipts) {
+    AppState.receipts = AppState.receipts.filter(r => r.id !== AppState._lastFinishedReceiptId);
+  }
+  if (AppState._lastFinishedSessionBackup.pantryItemsAddedCount > 0 && AppState.pantry) {
+    AppState.pantry.splice(0, AppState._lastFinishedSessionBackup.pantryItemsAddedCount);
+  }
+
+  AppState._lastFinishedSessionBackup = null;
+  AppState._lastFinishedReceiptId = null;
+
+  closeReceiptModal();
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  switchTab('cart', true);
+  playCalmChime();
+  showToast('Selesai belanja dibatalkan, keranjang Anda telah dipulihkan! ↩️', 'success');
 }
 
 // =========================================================================
@@ -3919,10 +4088,14 @@ function handleManualPantrySubmit(e) {
 }
 
 function removePantryItem(id) {
+  const item = (AppState.pantry || []).find(p => p.id === id);
+  const name = item ? item.name : 'Item pantry';
   AppState.pantry = AppState.pantry.filter(p => p.id !== id);
   saveLocalState();
+  pushStateToCloud();
   renderPantry();
   playSoftPop();
+  showToast(`"${name}" dihapus dari pantry`, 'info');
 }
 
 // =========================================================================
@@ -4148,10 +4321,19 @@ function renderHistory() {
 }
 
 function clearHistory() {
+  if (!AppState.receipts || AppState.receipts.length === 0) {
+    showToast('Riwayat struk belanja masih kosong!', 'info');
+    return;
+  }
+  // Proteksi Jari Ceroboh: Konfirmasi sebelum menghapus permanen riwayat struk
+  if (!confirm('Apakah Anda yakin ingin menghapus seluruh riwayat struk belanja? Tindakan ini tidak dapat dibatalkan.')) {
+    return;
+  }
   AppState.receipts = [];
   saveLocalState();
+  pushStateToCloud();
   renderHistory();
-  showToast('Riwayat struk dibersihkan', 'info');
+  showToast('Riwayat struk telah dibersihkan', 'info');
 }
 
 // =========================================================================
@@ -4583,6 +4765,11 @@ function switchTab(tab, force = false) {
 // 18. RESET DEMO DATA
 // =========================================================================
 function resetToInitialMockData() {
+  if (AppState.cart && AppState.cart.length > 0) {
+    if (!confirm('Perhatian: Memuat contoh data akan menggantikan daftar belanjaan Anda saat ini. Lanjutkan?')) {
+      return;
+    }
+  }
   AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
   AppState.currentStore = 'Lotte Mart Grocery - Puri Indah';
   AppState.currentDate = new Date().toISOString().split('T')[0];
@@ -4592,6 +4779,7 @@ function resetToInitialMockData() {
   AppState.pantry = JSON.parse(JSON.stringify(DEFAULT_PANTRY));
   AppState.blacklist = [...DEFAULT_BLACKLIST];
 
+  saveLocalState();
   pushStateToCloud();
   renderAll();
   showToast('Contoh data belanja berhasil dimuat kembali! ✨', 'success');
@@ -4665,7 +4853,24 @@ function showToast(message, type = 'info') {
   toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-text">${escapeHtml(message)}</span>`;
   container.appendChild(toast);
 
-  // Pasang timer otomatis hilang setelah 2 detik
+  const isUndoToast = message.includes('Urungkan');
+  if (isUndoToast) {
+    toast.style.cursor = 'pointer';
+    toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+    toast.onclick = () => {
+      if (AppState._lastDeletedItem && typeof undoDeleteItem === 'function') {
+        undoDeleteItem();
+        toast.remove();
+      }
+    };
+  } else {
+    // Memungkinkan user menutup toast langsung dengan mengetuknya
+    toast.style.cursor = 'pointer';
+    toast.onclick = () => { toast.remove(); };
+  }
+
+  // Pasang timer otomatis hilang (5 detik untuk undo, 2.5 detik untuk notifikasi biasa)
+  const duration = isUndoToast ? 5000 : 2500;
   activeToastTimeout = setTimeout(() => {
     toast.classList.add('fade-out');
     toast.style.opacity = '0';
@@ -4676,7 +4881,7 @@ function showToast(message, type = 'info') {
         toast.remove();
       }
     }, 250);
-  }, 2000);
+  }, duration);
 }
 
 function escapeHtml(str) {
@@ -4684,11 +4889,33 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// Close modal when tapping on backdrop outside modal card
+// Close modal when tapping on backdrop outside modal card with proper cleanup
 if (typeof document !== 'undefined') {
   document.addEventListener('click', (e) => {
     if (e.target && e.target.classList && e.target.classList.contains('modal-backdrop')) {
-      e.target.classList.remove('active', 'show');
+      const modalId = e.target.id;
+      if (modalId === 'deleteConfirmModal') {
+        closeDeleteConfirmModal();
+      } else if (modalId === 'quickPriceModal') {
+        closeQuickPriceModal(false);
+      } else if (modalId === 'addItemModal') {
+        closeDetailedItemModal();
+      } else if (modalId === 'productScannerModal') {
+        closeProductScannerModal();
+      } else if (modalId === 'budgetModal') {
+        closeBudgetModal();
+      } else if (modalId === 'addPantryModal') {
+        closeAddPantryModal();
+      } else if (modalId === 'blacklistManagerModal') {
+        closeBlacklistManagerModal();
+      } else if (modalId === 'cloudSyncModal') {
+        closeCloudSyncModal();
+      } else if (modalId === 'googleAuthModal') {
+        closeGoogleAuthModal();
+      } else {
+        e.target.classList.remove('active', 'show');
+        if (e.target.style) e.target.style.display = 'none';
+      }
     }
   });
 }
@@ -5398,8 +5625,24 @@ function renderCartSection() {
  * Centang / Hapus Semua Item di Keranjang Belanja
  */
 function handleCartSelectAll(checked) {
-  AppState.cart.forEach(item => { item.checked = checked; });
+  if (checked) {
+    let unpricedCount = 0;
+    AppState.cart.forEach(item => {
+      if (item.hargaSatuan && item.hargaSatuan > 0) {
+        item.checked = true;
+      } else {
+        item.checked = false;
+        unpricedCount++;
+      }
+    });
+    if (unpricedCount > 0) {
+      showToast(`${unpricedCount} barang belum memiliki harga riil. Ketuk barang untuk mengisi harga sebelum dicentang.`, 'info');
+    }
+  } else {
+    AppState.cart.forEach(item => { item.checked = false; });
+  }
   playSoftPop();
+  saveLocalState();
   pushStateToCloud();
   renderAll();
 }
@@ -5691,7 +5934,9 @@ function updateQuickPricePreview() {
   }
 }
 
+let isSavingQuickPrice = false;
 function saveQuickPrice() {
+  if (isSavingQuickPrice) return;
   if (!AppState.quickPriceTarget) return;
   const item = AppState.cart.find(i => i.id === AppState.quickPriceTarget.itemId);
   if (!item) return;
@@ -5705,9 +5950,19 @@ function saveQuickPrice() {
     return;
   }
 
-  const qty = parseInt(document.getElementById('quickPriceQtyInput')?.value, 10);
-  if (!isNaN(qty) && qty >= 1) {
-    item.qty = qty;
+  if (price > 999999999) {
+    showToast('Harga maksimal Rp 999.999.999!', 'warning');
+    return;
+  }
+
+  isSavingQuickPrice = true;
+  setTimeout(() => isSavingQuickPrice = false, 600);
+
+  const rawQty = parseInt(document.getElementById('quickPriceQtyInput')?.value, 10);
+  if (!isNaN(rawQty) && rawQty >= 1) {
+    item.qty = Math.min(rawQty, 9999);
+  } else {
+    item.qty = 1;
   }
 
   item.hargaSatuan = price;
@@ -5727,7 +5982,7 @@ function adjustQuickPriceQty(delta) {
   const input = document.getElementById('quickPriceQtyInput');
   if (!input) return;
   const cur = parseInt(input.value, 10) || 1;
-  input.value = Math.max(1, cur + delta);
+  input.value = Math.min(9999, Math.max(1, cur + delta));
   updateQuickPricePreview();
 }
 

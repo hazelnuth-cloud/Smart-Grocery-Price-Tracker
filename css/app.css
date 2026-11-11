@@ -4739,25 +4739,26 @@ body.dark-mode .btn-store-edit:hover {
 .shopee-compact-actions {
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 8px !important;
   flex-shrink: 0 !important;
 }
 
 .btn-action-edit-icon,
 .btn-shopee-delete {
-  width: 24px !important;
-  height: 24px !important;
+  width: 28px !important;
+  height: 28px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   background: transparent !important;
-  border: none !important;
-  border-radius: 4px !important;
-  font-size: 12px !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
   cursor: pointer !important;
   color: #94A3B8 !important;
   padding: 0 !important;
   transition: all 0.15s ease !important;
+  touch-action: manipulation !important;
 }
 
 .btn-action-edit-icon:hover {
@@ -6167,25 +6168,26 @@ body.dark-mode .budget-status-card-bottom {
 .shopee-compact-actions {
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 8px !important;
   flex-shrink: 0 !important;
 }
 
 .btn-action-edit-icon,
 .btn-shopee-delete {
-  width: 24px !important;
-  height: 24px !important;
+  width: 28px !important;
+  height: 28px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   background: transparent !important;
-  border: none !important;
-  border-radius: 4px !important;
-  font-size: 12px !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
   cursor: pointer !important;
   color: #94A3B8 !important;
   padding: 0 !important;
   transition: all 0.15s ease !important;
+  touch-action: manipulation !important;
 }
 
 .btn-action-edit-icon:hover {
@@ -8417,4 +8419,24 @@ body.dark-mode #appContainer {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+/* =========================================================================
+   PROTEKSI JARI CEROBOH & MOBILE ERGONOMICS (ANTI-FAT-FINGER)
+   ========================================================================= */
+button, input, select, textarea, a, .touch-target, .shopee-item-card, .stepper-btn, .shopee-step-btn, .catalog-card, .routine-chip {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-receipt-undo {
+  background: #FFFBEB !important;
+  color: #B45309 !important;
+  border: 1.5px solid #FCD34D !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease !important;
+}
+.btn-receipt-undo:active {
+  transform: scale(0.97) !important;
+  background: #FEF3C7 !important;
 }
