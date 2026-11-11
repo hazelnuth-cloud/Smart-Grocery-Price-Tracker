@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=84">
+  <link rel="stylesheet" href="./css/app.css?v=85">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -55,9 +55,14 @@
        ======================================================================== -->
   <div id="authGate" class="auth-gate-wrapper">
     <div class="auth-card">
-      <div class="auth-badge-icon">🛒</div>
-      <h1 class="auth-title serif-font">Smart Grocery Tracker &amp; Budget Planner</h1>
-      <p class="auth-subtitle">Catat kebutuhan belanja dan pantau anggaran harianmu dengan praktis.</p>
+      <div class="auth-badge-icon floating-bounce">🛒</div>
+      <div class="auth-welcome-sign">
+        <span class="welcome-wave">👋</span>
+        <span class="welcome-text">Selamat Datang!</span>
+        <span class="welcome-sparkle">✨</span>
+      </div>
+      <h1 class="auth-title serif-font animated-brand-title">Smart Grocery</h1>
+      <p class="auth-subtitle animated-subtitle">Belanja cerdas &amp; hemat anggaran.</p>
 
       <!-- Segmented Tab: Masuk (Sign In) vs Daftar (Sign Up) -->
       <div class="auth-segmented-tabs">
@@ -1963,7 +1968,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=84"></script>
+  <script src="./js/app.js?v=85"></script>
 
   <!-- Service Worker Registration -->
   <script>
