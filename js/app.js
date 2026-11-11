@@ -2539,16 +2539,7 @@ function renderBudget() {
     cartSlimBar.style.width = `${clampedPercent}%`;
     cartSlimBar.style.background = safety.barColor;
   }
-  if (overbudgetSlimBadge) {
-    if (safety.showOverbudgetBanner) {
-      overbudgetSlimBadge.style.display = 'flex';
-      if (overbudgetSlimDiff) {
-        overbudgetSlimDiff.textContent = formatRupiah(totalBelanja - budget);
-      }
-    } else {
-      overbudgetSlimBadge.style.display = 'none';
-    }
-  }
+  if (overbudgetSlimBadge) { overbudgetSlimBadge.style.display = 'none'; }
 
   if (progressPercentText) {
     progressPercentText.textContent = `Pengeluaran: ${Math.round(safety.percentage)}%`;
@@ -2559,12 +2550,13 @@ function renderBudget() {
     safetyBadge.textContent = safety.badgeText;
   }
 
-  // OVERBUDGET FIRM RED BANNER (>100% Limit) - 
+    // OVERBUDGET FIRM RED BANNER (>100% Limit) - With Strict Safety Guards
+  const activeSpend = AppState.inStoreMode ? totalBelanja : (totalBelanja > 0 ? totalBelanja : (metrics.totalAll || 0));
+  const overDiff = Math.max(0, activeSpend - budget);
   if (overbudgetBanner) {
-    if (safety.showOverbudgetBanner) {
+    if (safety.showOverbudgetBanner && overDiff > 0) {
       overbudgetBanner.classList.remove('hidden');
       if (overbudgetDetail) {
-        const overDiff = totalBelanja - budget;
         overbudgetDetail.innerHTML = `Defisit: <strong>${formatRupiah(overDiff)}</strong> (${Math.round(safety.percentage)}% dari saldo ${formatRupiah(budget)}). Kurangi kuantitas atau batalkan barang sekunder.`;
       }
     } else {

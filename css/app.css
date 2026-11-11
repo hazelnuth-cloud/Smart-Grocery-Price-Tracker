@@ -2712,7 +2712,7 @@ body.in-store-mode-active .app-viewport {
 
   .auth-card {
     padding: 24px 18px !important;
-    margin: auto 0 !important;
+    margin: auto !important;
     max-height: 92vh !important;
     overflow-y: auto !important;
   }
@@ -4528,44 +4528,11 @@ p.subtext,
   }
 }
 
-/* Dynamic Island on Top of iPhone 15/16 Pro Frame */
-.phone-dynamic-notch {
-  position: absolute !important;
-  top: 8px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: 110px !important;
-  height: 28px !important;
-  border-radius: 20px !important;
-  background: #000000 !important;
-  z-index: 1000 !important;
-  pointer-events: none !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
-}
-
-.phone-camera-lens {
-  width: 8px !important;
-  height: 8px !important;
-  border-radius: 50% !important;
-  background: #111827 !important;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25) !important;
-}
-
+/* Dynamic Island Mockup Removed - Hidden on All Viewports */
+.phone-dynamic-notch,
+.phone-camera-lens,
 .phone-speaker-earpiece {
-  width: 38px !important;
-  height: 3.5px !important;
-  border-radius: 3px !important;
-  background: #1F2937 !important;
-}
-
-@media (max-width: 420px) {
-  .phone-dynamic-notch {
-    display: none !important;
-  }
+  display: none !important;
 }
 
 /* Companion wings and ambient canvas removed for clean pure PWA */
@@ -5393,23 +5360,39 @@ body.authenticated #mainDashboard {
 }
 
 /* ==========================================================================
-   IPHONE 15/16 PRO PRECISION FRAME (390PX REAL PROPORTION) & MOBILE FLOW
+   TRUE MOBILE-FIRST RESPONSIVE VIEWPORT & CLEAN PWA CONTAINER (NO FAKE FRAME)
    ========================================================================== */
 #mainDashboard,
 .app-viewport {
-  max-width: 390px !important;
-  height: 844px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100dvh !important;
+  height: auto !important;
   margin: 0 auto !important;
-  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
   display: flex !important;
   flex-direction: column !important;
   position: relative !important;
-  width: 100% !important;
-  border-radius: 44px !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
-  border: 10px solid #1E1E1E !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
   background-color: #FAF7F8 !important;
   box-sizing: border-box !important;
+  padding-bottom: 0 !important;
+}
+
+@media (min-width: 640px) {
+  #mainDashboard,
+  .app-viewport {
+    max-width: 480px !important;
+    margin: 20px auto 30px auto !important;
+    border-radius: 28px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid #E2E8F0 !important;
+    min-height: calc(100dvh - 50px) !important;
+    overflow-y: visible !important;
+  }
 }
 
 body {
@@ -5419,20 +5402,21 @@ body {
   padding: 0 !important;
 }
 
-/* Header bar positioned below Dynamic Island */
+/* Mobile Sticky Header */
 .app-header {
+  position: -webkit-sticky !important;
   position: sticky !important;
   top: 0 !important;
-  z-index: 40 !important;
+  z-index: 50 !important;
   background: #FFFFFF !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
   border-bottom: 1px solid #FCE7F3 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
-  padding: 46px 12px 8px 12px !important;
-  padding-top: 46px !important;
+  padding: 10px 14px !important;
+  padding-top: calc(10px + env(safe-area-inset-top, 0px)) !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
   transition: none !important;
 }
 
@@ -5484,26 +5468,14 @@ body {
   display: none !important;
 }
 
-.btn-install-pwa {
-  padding: 0 !important;
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
-  font-size: 12px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: var(--radius-sm) !important;
-}
-
+.btn-install-pwa,
 .btn-action-icon {
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
   padding: 0 !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -5511,15 +5483,15 @@ body {
 }
 
 .user-pill {
-  padding: 2px 5px !important;
-  gap: 3px !important;
-  min-height: 28px !important;
-  height: 28px !important;
+  padding: 2px 7px !important;
+  gap: 4px !important;
+  min-height: 30px !important;
+  height: 30px !important;
 }
 
 .user-name-text {
-  font-size: 11px !important;
-  max-width: 50px !important;
+  font-size: 11.5px !important;
+  max-width: 65px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -5533,24 +5505,24 @@ body {
   padding: 0 !important;
 }
 
-/* Ensure all tabs use smooth scrolling inside the iPhone frame with bottom navigation clearance */
+/* Natural 60fps Scrolling for Tab Panes with Safe Bottom Clearance */
 .content-tab {
   display: none !important;
   width: 100% !important;
-  flex: 1 !important;
-  min-height: 0 !important;
-  max-height: calc(100% - 82px) !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
+  max-width: 100% !important;
+  flex: 1 0 auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
   box-sizing: border-box !important;
-  padding: 12px !important;
-  padding-bottom: 100px !important;
+  padding: 8px 12px 120px 12px !important;
+  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
   position: relative !important;
   opacity: 1 !important;
   transform: none !important;
   transition: none !important;
   animation: none !important;
-  scroll-behavior: smooth !important;
 }
 
 .content-tab.active {
@@ -5558,25 +5530,33 @@ body {
 }
 
 #tabCart.content-tab.active {
-  padding-bottom: 150px !important;
+  padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* Pinned Bottom Nav & Sticky Checkout Bar inside Frame */
+/* Pinned Bottom Nav & Sticky Checkout Bar */
 .bottom-nav-bar {
-  position: absolute !important;
+  position: fixed !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
   width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
   z-index: 50 !important;
   background: #FFFFFF !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
   border-top: 1px solid #FCE7F3 !important;
   box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.04) !important;
-  transform: translateZ(0) !important;
-  will-change: transform;
-  transition: none !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 640px) {
+  .bottom-nav-bar {
+    max-width: 480px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+  }
 }
 
 .bottom-nav-container {
@@ -5584,37 +5564,52 @@ body {
 }
 
 .shopee-sticky-bottom-bar {
-  position: absolute !important;
-  bottom: 60px !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  z-index: 48 !important;
-  background: #FFFFFF !important;
-  border-top: 1px solid #FCE7F3 !important;
-  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.04) !important;
-  box-sizing: border-box !important;
-  transform: translateZ(0) !important;
-  will-change: transform;
-  transition: none !important;
-}
-
-.running-cart-bar {
-  position: absolute !important;
-  bottom: 60px !important;
+  position: fixed !important;
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
   left: 0 !important;
   right: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
-  z-index: 46 !important;
+  margin: 0 auto !important;
+  z-index: 48 !important;
   background: #FFFFFF !important;
   border-top: 1px solid #FCE7F3 !important;
-  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 640px) {
+  .shopee-sticky-bottom-bar {
+    max-width: 480px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+  }
+}
+
+.running-cart-bar {
+  position: fixed !important;
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  z-index: 47 !important;
+  background: #FFFFFF !important;
+  border-top: 1px solid #FCE7F3 !important;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05) !important;
   box-sizing: border-box !important;
   padding: 8px 12px !important;
-  transform: translateZ(0) !important;
-  will-change: transform;
-  transition: none !important;
+}
+
+@media (min-width: 640px) {
+  .running-cart-bar {
+    max-width: 480px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+  }
 }
 
 .running-cart-container {
@@ -5641,13 +5636,7 @@ body {
   flex-shrink: 0 !important;
 }
 
-.btn-scan-instore {
-  padding: 6px 10px !important;
-  font-size: 0.74rem !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-}
-
+.btn-scan-instore,
 .btn-finish-shopping {
   padding: 6px 12px !important;
   font-size: 0.74rem !important;
@@ -5655,14 +5644,31 @@ body {
   flex-shrink: 0 !important;
 }
 
+/* FAB Store Mode Button */
+.fab-store-mode {
+  position: fixed !important;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 14px !important;
+  left: auto !important;
+  z-index: 49 !important;
+}
+
+.fab-store-mode.in-store-active {
+  bottom: calc(130px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (min-width: 640px) {
+  .fab-store-mode {
+    right: calc(50% - 226px) !important;
+    left: auto !important;
+  }
+}
+
 @media (max-width: 380px) {
   .running-cart-bar {
     padding: 6px 8px !important;
   }
-  .btn-scan-instore {
-    padding: 5px 8px !important;
-    font-size: 11px !important;
-  }
+  .btn-scan-instore,
   .btn-finish-shopping {
     padding: 5px 8px !important;
     font-size: 11px !important;
@@ -5678,62 +5684,6 @@ body {
   }
   .shopee-bottom-grand-total {
     font-size: 14.5px !important;
-  }
-}
-
-/* Native Mobile Viewport Overrides (<= 480px) */
-@media (max-width: 480px) {
-
-  #mainDashboard,
-  .app-viewport {
-    max-width: 390px !important;
-    width: 100% !important;
-    margin: 0 auto !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-x: hidden !important;
-  }
-
-  .app-header {
-    padding-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
-  }
-
-  .bottom-nav-bar {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    max-width: 390px !important;
-    width: 100% !important;
-    margin: 0 auto !important;
-    box-sizing: border-box !important;
-  }
-
-  .shopee-sticky-bottom-bar {
-    position: fixed !important;
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
-    left: 0 !important;
-    right: 0 !important;
-    max-width: 390px !important;
-    width: 100% !important;
-    margin: 0 auto !important;
-    box-sizing: border-box !important;
-    z-index: 48 !important;
-  }
-
-  .running-cart-bar {
-    position: fixed !important;
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
-    left: 0 !important;
-    right: 0 !important;
-    max-width: 390px !important;
-    width: 100% !important;
-    margin: 0 auto !important;
-    box-sizing: border-box !important;
-    z-index: 47 !important;
   }
 }
 
@@ -8245,18 +8195,39 @@ body.dark-mode .discount-chip.active {
 }
 
 /* =========================================================================
-   IPHONE FRAME LOCK (390PX CONTAINER - ANTI-MELEBAR DI DESKTOP/TABLET)
+   TRUE FULL-WIDTH MOBILE VIEWPORT & CLEAN DESKTOP RESPONSIVE CARD
    ========================================================================= */
-#appContainer,
+#appContainer {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  background: #FAF7F8 !important;
+  overflow-x: hidden !important;
+  box-shadow: none !important;
+}
+
 body {
-  max-width: 390px;
-  width: 100%;
-  min-height: 100dvh;
-  margin: 0 auto;
-  position: relative;
-  background: #FFFFFF;
-  overflow-x: hidden;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  min-height: 100dvh !important;
+  background-color: #FAF7F8 !important;
+}
+
+@media (min-width: 640px) {
+  #appContainer {
+    max-width: 480px !important;
+    margin: 20px auto 30px auto !important;
+    border-radius: 28px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid #E2E8F0 !important;
+    min-height: calc(100dvh - 50px) !important;
+  }
 }
 
 body.dark-mode,
@@ -8264,37 +8235,15 @@ body.dark-mode #appContainer {
   background: #0F172A !important;
 }
 
-@media (min-width: 480px) {
+@media (min-width: 640px) {
   html {
     background-color: #F1F5F9;
     min-height: 100dvh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  body {
-    margin: 20px auto;
-    border-radius: 40px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 10px #1E293B;
-    overflow: hidden;
-    height: 844px;
-    max-height: 92vh;
-  }
-
-  #appContainer {
-    max-width: 390px;
-    width: 100%;
-    height: 100%;
-    margin: 0 auto;
-    position: relative;
-    background: #FFFFFF;
-    overflow-x: hidden;
   }
 }
 
 /* =========================================================================
-   BEBAS BUG OVERFLOW & SCROLLING MULUS (CONTENT BODY & TAB PANE)
+   BEBAS BUG OVERFLOW & SCROLLING MULUS (NATURAL WINDOW TOUCH SCROLLING)
    ========================================================================= */
 .content-body,
 .tab-pane,
@@ -8302,11 +8251,12 @@ body.dark-mode #appContainer {
 #tabPlanner,
 #tabCart,
 #tabPantry {
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  height: calc(100dvh - 130px);
-  padding-bottom: 120px !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 /* Anti-Horizontal Overflow (Single-Line Text Protection) */
@@ -8664,7 +8614,7 @@ body.dark-mode .quick-price-repurchase-detail {
 .sticky-dashboard-tracker {
   position: -webkit-sticky !important;
   position: sticky !important;
-  top: 0 !important;
+  top: calc(52px + env(safe-area-inset-top, 0px)) !important;
   z-index: 35 !important;
   background: rgba(255, 255, 255, 0.96) !important;
   backdrop-filter: blur(12px) !important;
@@ -9758,4 +9708,75 @@ body.theme-dark [style*="background: #FAF7F8"],
 body.theme-dark [style*="background: #F8FAFC"],
 body.theme-dark [style*="background: #FFF5F7"] {
   background: #1A0B14 !important;
+}
+
+/* =========================================================================
+   AUTH GATE POLISH (LIGHT MODE CONTRAST & RESPONSIVE FIT)
+   ========================================================================= */
+.auth-segmented-tabs {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 999px !important;
+  padding: 3px !important;
+  margin-bottom: 14px !important;
+}
+
+.auth-tab-btn {
+  border: none !important;
+  background: transparent !important;
+  color: #64748B !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.auth-tab-btn.active {
+  background: #FFFFFF !important;
+  color: #E91E63 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.btn-google-auth {
+  width: 100% !important;
+  min-height: 44px !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  color: #1E293B !important;
+  font-weight: 700 !important;
+  font-size: 0.86rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+  margin-bottom: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-google-auth:hover {
+  background: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+}
+
+.auth-divider {
+  display: flex !important;
+  align-items: center !important;
+  text-align: center !important;
+  margin: 10px 0 14px !important;
+  color: #94A3B8 !important;
+  font-size: 0.74rem !important;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '' !important;
+  flex: 1 !important;
+  border-bottom: 1px dashed #E2E8F0 !important;
 }
