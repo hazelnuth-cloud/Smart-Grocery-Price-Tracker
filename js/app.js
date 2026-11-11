@@ -285,101 +285,107 @@ function calculateDiscount(originalPrice, discountType, discountValue) {
   return { finalPrice: price, savingsPerUnit: 0, effectivePercent: 0, steps: [] };
 }
 
+// =========================================================================
+// 2. FITUR AKURAT ANALISIS HARGA BELI ULANG (REPURCHASE PRICE COMPARISON)
+// =========================================================================
+
 /**
- * Komparator Fluktuasi Harga Realtime vs Histori Bulan Lalu
- * - Harga Naik: Panah MERAH naik (↑) + nominal kenaikan (+Rp 6.000)
- * - Harga Turun: Panah HIJAU turun (↓) + nominal penghematan (-Rp 4.000)
- * - Harga Stabil: Tanda ABU-ABU setara (=) jika harga sama persis
+ * Normalisasi nama barang untuk pencocokan riwayat yang presisi (anti-spasi, anti-simbol)
  */
-function comparePriceWithLastMonth(currentFinalUnitPrice, lastMonthPrice, isSameStore = true) {
-  const current = Math.round(parseFloat(currentFinalUnitPrice) || 0);
-  const baseline = Math.round(parseFloat(lastMonthPrice) || 0);
-
-  if (!isSameStore) {
-    return {
-      status: 'diff_store',
-      label: '📍 Toko Lain',
-      diff: 0,
-      text: '📍 Toko Lain',
-      badgeClass: 'fluctuation-badge fluctuation-stable'
-    };
-  }
-
-  if (!baseline || baseline <= 0) {
-    return {
-      status: 'new',
-      label: 'Baru',
-      diff: 0,
-      text: '✨ Baru',
-      badgeClass: 'fluctuation-badge fluctuation-stable'
-    };
-  }
-
-  const diff = current - baseline;
-
-  if (diff > 0) {
-    // Naik: Panah MERAH naik (↑) + nominal kenaikan
-    return {
-      status: 'up',
-      label: '↑ Naik',
-      diff,
-      text: `↑ +Rp ${formatNumber(diff)}`,
-      badgeClass: 'fluctuation-badge fluctuation-up'
-    };
-  } else if (diff < 0) {
-    // Turun: Panah HIJAU turun (↓) + nominal penghematan
-    const absDiff = Math.abs(diff);
-    return {
-      status: 'down',
-      label: '↓ Turun',
-      diff,
-      text: `↓ -Rp ${formatNumber(absDiff)}`,
-      badgeClass: 'fluctuation-badge fluctuation-down'
-    };
-  } else {
-    // Stabil: Tanda ABU-ABU setara (= Stabil) jika harga sama persis dengan bulan lalu
-    return {
-      status: 'stable',
-      label: '= Stabil',
-      diff: 0,
-      text: '= Stabil',
-      badgeClass: 'fluctuation-badge fluctuation-stable'
-    };
-  }
+function normalizeItemKey(name) {
+  if (!name || typeof name !== 'string') return '';
+  return name.toLowerCase()
+    .replace(/[^\w\s]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
- * Helper: Ambil harga histori bulan lalu untuk toko yang sama
+ * Temukan catatan pembelian riil sebelumnya untuk item ini.
+ * Memeriksa secara akurat:
+ * 1. Struk resmi kasir sebelumnya (AppState.receipts), diurutkan dari transaksi terbaru
+ * 2. Catatan harga riwayat toko (AppState.priceHistory)
+ * 3. Arsip harga bulan lalu (DEFAULT_PRICE_HISTORY)
  */
-function getStorePriceHistory(itemName, storeName) {
+function findPreviousPurchaseRecord(itemName, storeName = null) {
+  if (!itemName) return null;
+  const targetKey = normalizeItemKey(itemName);
+  if (!targetKey) return null;
   const targetStore = (storeName || AppState.currentStore || '').trim().toLowerCase();
-  const trimmed = (itemName || '').trim().toLowerCase();
-  if (!trimmed) return null;
 
-  if (AppState.priceHistory) {
-    for (const [key, val] of Object.entries(AppState.priceHistory)) {
-      if (key.toLowerCase() === trimmed) {
-        const histStore = (val.toko || '').trim().toLowerCase();
-        if (!histStore || histStore === targetStore) {
-          return val.harga;
+  // 1. Periksa riwayat struk resmi yang tersimpan (terbaru paling atas)
+  if (Array.isArray(AppState.receipts)) {
+    // Pass 1: Pencocokan di Toko yang Sama
+    for (const rec of AppState.receipts) {
+      const recStore = (rec.toko || '').trim().toLowerCase();
+      const isStoreMatch = (targetStore && recStore && (recStore === targetStore || recStore.includes(targetStore) || targetStore.includes(recStore)));
+      if (isStoreMatch && Array.isArray(rec.items)) {
+        const found = rec.items.find(i => {
+          const itemKey = normalizeItemKey(i.namaBarang);
+          return itemKey === targetKey || itemKey.startsWith(targetKey) || targetKey.startsWith(itemKey);
+        });
+        if (found && (found.hargaAkhirSatuan || found.hargaSatuan)) {
+          return {
+            price: Math.round(found.hargaAkhirSatuan || found.hargaSatuan),
+            store: rec.toko || targetStore,
+            date: rec.tanggal || null,
+            isSameStore: true,
+            source: 'receipt'
+          };
         }
       }
     }
-    for (const [key, val] of Object.entries(AppState.priceHistory)) {
-      if (key.toLowerCase().startsWith(trimmed) && key.toLowerCase().includes(targetStore)) {
-        return val.harga;
+
+    // Pass 2: Jika tidak ada di toko yang sama, periksa toko manapun user pernah beli barang ini
+    for (const rec of AppState.receipts) {
+      if (Array.isArray(rec.items)) {
+        const found = rec.items.find(i => {
+          const itemKey = normalizeItemKey(i.namaBarang);
+          return itemKey === targetKey || itemKey.startsWith(targetKey) || targetKey.startsWith(itemKey);
+        });
+        if (found && (found.hargaAkhirSatuan || found.hargaSatuan)) {
+          const recStore = (rec.toko || '').trim();
+          return {
+            price: Math.round(found.hargaAkhirSatuan || found.hargaSatuan),
+            store: recStore || 'Toko Lain',
+            date: rec.tanggal || null,
+            isSameStore: (recStore.toLowerCase() === targetStore),
+            source: 'receipt'
+          };
+        }
       }
     }
   }
 
-  if (Array.isArray(AppState.receipts)) {
-    for (const rec of AppState.receipts) {
-      const recStore = (rec.toko || '').trim().toLowerCase();
-      if (recStore === targetStore && Array.isArray(rec.items)) {
-        const matched = rec.items.find(i => (i.namaBarang || '').trim().toLowerCase() === trimmed);
-        if (matched && (matched.hargaAkhirSatuan || matched.hargaSatuan)) {
-          return matched.hargaAkhirSatuan || matched.hargaSatuan;
-        }
+  // 2. Periksa AppState.priceHistory
+  if (AppState.priceHistory && typeof AppState.priceHistory === 'object') {
+    for (const [key, val] of Object.entries(AppState.priceHistory)) {
+      const histKey = normalizeItemKey(key);
+      if ((histKey === targetKey || histKey.startsWith(targetKey) || targetKey.startsWith(histKey)) && val && val.harga > 0) {
+        const histStore = (val.toko || '').trim();
+        return {
+          price: Math.round(val.harga),
+          store: histStore || targetStore,
+          date: val.tanggal || null,
+          isSameStore: (!histStore || histStore.toLowerCase() === targetStore),
+          source: 'priceHistory'
+        };
+      }
+    }
+  }
+
+  // 3. Fallback ke DEFAULT_PRICE_HISTORY
+  if (typeof DEFAULT_PRICE_HISTORY !== 'undefined') {
+    for (const [key, val] of Object.entries(DEFAULT_PRICE_HISTORY)) {
+      const defKey = normalizeItemKey(key);
+      if ((defKey === targetKey || defKey.startsWith(targetKey) || targetKey.startsWith(defKey)) && val && val.harga > 0) {
+        return {
+          price: Math.round(val.harga),
+          store: val.toko || targetStore,
+          date: 'Bulan Lalu',
+          isSameStore: true,
+          source: 'default_history'
+        };
       }
     }
   }
@@ -387,19 +393,166 @@ function getStorePriceHistory(itemName, storeName) {
   return null;
 }
 
+/**
+ * Analisis Akurat Kenaikan / Penurunan Harga Barang Beli Ulang (Repurchase Price Analysis)
+ */
+function getRepurchaseAnalysis(currentPrice, prevRecord, isSameStore = true) {
+  const current = Math.round(parseFloat(currentPrice) || 0);
+
+  if (!prevRecord || !prevRecord.price || prevRecord.price <= 0) {
+    return {
+      status: 'new',
+      isRepurchase: false,
+      previousPrice: null,
+      currentPrice: current,
+      diff: 0,
+      absDiff: 0,
+      percent: 0,
+      badgeText: '✨ Baru',
+      text: '✨ Baru',
+      badgeClass: 'fluctuation-badge fluctuation-stable',
+      diffClass: 'diff-stable',
+      detailText: 'Belum ada catatan harga belanja sebelumnya.',
+      shortDetail: '',
+      arrow: ''
+    };
+  }
+
+  const baseline = Math.round(prevRecord.price);
+
+  if (current <= 0) {
+    return {
+      status: 'unpriced_repurchase',
+      isRepurchase: true,
+      previousPrice: baseline,
+      currentPrice: 0,
+      diff: 0,
+      absDiff: 0,
+      percent: 0,
+      badgeText: `💡 Terakhir: Rp ${formatNumber(baseline)}`,
+      text: `💡 Terakhir: Rp ${formatNumber(baseline)}`,
+      badgeClass: 'fluctuation-badge fluctuation-stable',
+      diffClass: 'diff-stable',
+      detailText: `Pernah dibeli seharga Rp ${formatNumber(baseline)}${prevRecord.store ? ' di ' + prevRecord.store : ''}`,
+      shortDetail: `Belanja lalu: Rp ${formatNumber(baseline)}`,
+      arrow: '💡'
+    };
+  }
+
+  const diff = current - baseline;
+  const absDiff = Math.abs(diff);
+  const percentNum = baseline > 0 ? ((absDiff / baseline) * 100).toFixed(1) : '0';
+  const percent = parseFloat(percentNum);
+  const storeContext = (!prevRecord.isSameStore && prevRecord.store) ? ` (vs ${prevRecord.store})` : '';
+
+  if (diff > 0) {
+    // NAIK (Lebih Mahal)
+    return {
+      status: 'up',
+      label: '↑ Naik',
+      isRepurchase: true,
+      previousPrice: baseline,
+      currentPrice: current,
+      diff,
+      absDiff,
+      percent,
+      badgeText: `↑ Naik Rp ${formatNumber(diff)} (+${percentNum}%)${storeContext}`,
+      text: `↑ +Rp ${formatNumber(diff)} (+${percentNum}%)`,
+      badgeClass: 'fluctuation-badge fluctuation-up',
+      diffClass: 'diff-up',
+      detailText: `Harga naik +Rp ${formatNumber(diff)} (+${percentNum}%) dibanding belanja sebelumnya (Rp ${formatNumber(baseline)}${storeContext})`,
+      shortDetail: `Dulu Rp ${formatNumber(baseline)} ➔ Naik Rp ${formatNumber(diff)}`,
+      arrow: '↑'
+    };
+  } else if (diff < 0) {
+    // TURUN (Lebih Murah / Hemat)
+    return {
+      status: 'down',
+      label: '↓ Turun',
+      isRepurchase: true,
+      previousPrice: baseline,
+      currentPrice: current,
+      diff,
+      absDiff,
+      percent,
+      badgeText: `↓ Turun Rp ${formatNumber(absDiff)} (-${percentNum}%)${storeContext}`,
+      text: `↓ -Rp ${formatNumber(absDiff)} (-${percentNum}%)`,
+      badgeClass: 'fluctuation-badge fluctuation-down',
+      diffClass: 'diff-down',
+      detailText: `Harga turun -Rp ${formatNumber(absDiff)} (-${percentNum}%) lebih hemat dibanding belanja sebelumnya (Rp ${formatNumber(baseline)}${storeContext})`,
+      shortDetail: `Dulu Rp ${formatNumber(baseline)} ➔ Hemat Rp ${formatNumber(absDiff)}`,
+      arrow: '↓'
+    };
+  } else {
+    // STABIL (Sama Persis)
+    return {
+      status: 'stable',
+      label: '= Stabil',
+      isRepurchase: true,
+      previousPrice: baseline,
+      currentPrice: current,
+      diff: 0,
+      absDiff: 0,
+      percent: 0,
+      badgeText: `= Stabil (Rp ${formatNumber(baseline)})`,
+      text: `= Stabil (Rp ${formatNumber(baseline)})`,
+      badgeClass: 'fluctuation-badge fluctuation-stable',
+      diffClass: 'diff-stable',
+      detailText: `Harga sama persis dengan belanja sebelumnya (Rp ${formatNumber(baseline)}${storeContext})`,
+      shortDetail: `Stabil = Rp ${formatNumber(baseline)}`,
+      arrow: '='
+    };
+  }
+}
+
+/**
+ * Komparator Fluktuasi Harga Realtime vs Histori Pembelian Lalu (Backward Compatible)
+ */
+function comparePriceWithLastMonth(currentFinalUnitPrice, lastMonthPrice, isSameStore = true, itemName = null) {
+  let baseline = Math.round(parseFloat(lastMonthPrice) || 0);
+
+  if ((!baseline || baseline <= 0) && itemName) {
+    const prev = findPreviousPurchaseRecord(itemName, AppState.currentStore);
+    if (prev && prev.price > 0) {
+      baseline = prev.price;
+      isSameStore = prev.isSameStore;
+    }
+  }
+
+  const prevRecord = baseline > 0 ? { price: baseline, isSameStore, store: isSameStore ? AppState.currentStore : 'Toko Lain' } : null;
+  return getRepurchaseAnalysis(currentFinalUnitPrice, prevRecord, isSameStore);
+}
+
+/**
+ * Helper: Ambil harga histori riil untuk toko yang sama atau toko sebelumnya
+ */
+function getStorePriceHistory(itemName, storeName) {
+  const prev = findPreviousPurchaseRecord(itemName, storeName || AppState.currentStore);
+  return prev ? prev.price : null;
+}
+
+/**
+ * Simpan harga riil item ke database riwayat harga toko
+ */
 function recordStorePrice(itemName, price, storeName, category, unit) {
   if (!itemName || !price) return;
   const trimmed = itemName.trim();
   const store = (storeName || AppState.currentStore || '').trim();
   if (!AppState.priceHistory) AppState.priceHistory = {};
-  
+
   AppState.priceHistory[trimmed] = {
     harga: Math.round(price),
     satuan: unit || 'pcs',
     kategori: category || 'Kebutuhan Pokok',
-    toko: store
+    toko: store,
+    tanggal: new Date().toISOString().slice(0, 10)
   };
-  localStorage.setItem(STORAGE_KEYS.PRICE_HISTORY, JSON.stringify(AppState.priceHistory));
+
+  try {
+    const uid = (AppState.user && AppState.user.uid) ? AppState.user.uid : 'guest';
+    localStorage.setItem(STORAGE_KEYS.PRICE_HISTORY, JSON.stringify(AppState.priceHistory));
+    localStorage.setItem('grocery_prices_' + uid, JSON.stringify(AppState.priceHistory));
+  } catch (e) {}
 }
 
 /**
@@ -2131,7 +2284,11 @@ function renderItems() {
     const hasNoPrice = (!item.hargaSatuan || item.hargaSatuan <= 0);
 
     if (hasNoPrice) {
-      // PRE-SHOPPING CHECKLIST MODE: [ Checkbox | Nama Barang | Kuantitas & Satuan | Badge 'Belum Ada Harga' ]
+      // PRE-SHOPPING CHECKLIST MODE: [ Checkbox | Nama Barang | Kuantitas & Satuan | Riwayat Beli Lalu | Tombol +Isi Harga ]
+      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
+      const analysis = getRepurchaseAnalysis(0, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore: true } : null));
+
       html += `
         <div class="shopee-item-card unpriced-plan-item ${item.checked ? 'checked' : ''}" data-item-id="${item.id}" onclick="handleItemRowClick('${item.id}', event)">
           <!-- Checkbox: Memicu popover input harga riil saat belanja di toko -->
@@ -2141,7 +2298,7 @@ function renderItems() {
 
           <!-- Compact Body (Flexbox Horizontal, Shopee Cart Item Layout) -->
           <div class="shopee-compact-body">
-            <!-- Top Row: Judul Produk + Kuantitas Satuan in Center, Edit & Trash on Right Top -->
+            <!-- Top Row: Judul Produk + Kuantitas Satuan + Badge Riwayat Beli Ulang -->
             <div class="shopee-compact-top">
               <div class="shopee-compact-title-wrap">
                 <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
@@ -2149,6 +2306,7 @@ function renderItems() {
                 </span>
                 <div class="shopee-compact-meta-left">
                   <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                  ${analysis.isRepurchase ? `<span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
                   <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
                     🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
                   </button>
@@ -2160,11 +2318,11 @@ function renderItems() {
               </div>
             </div>
 
-            <!-- Bottom Row (Bottom Action Row): Belum Ada Harga / + Isi Harga on Left, Stepper on Right -->
+            <!-- Bottom Row: Dulu Rp X / Belum Ada Harga + Stepper -->
             <div class="shopee-compact-bottom">
               <div class="shopee-compact-price-wrap">
-                <button type="button" class="badge-no-price touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga di toko">
-                  🏷️ Belum Ada Harga
+                <button type="button" class="badge-no-price touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga riil di toko">
+                  ${analysis.previousPrice ? `💡 Dulu: ${formatRupiah(analysis.previousPrice)}` : '🏷️ Belum Ada Harga'}
                 </button>
                 <button type="button" class="btn-enter-price-pill touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Masukkan harga riil di toko">
                   + Isi Harga
@@ -2186,12 +2344,13 @@ function renderItems() {
         </div>
       `;
     } else {
-      // IN-STORE PRICED ITEM MODE
+      // IN-STORE PRICED ITEM MODE: Analisis Akurat Kenaikan / Penurunan Harga Beli Ulang
       const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
       const subtotal = disc.finalPrice * item.qty;
       const isSameStore = (!item.store || item.store === AppState.currentStore);
-      const baseline = item.hargaRiwayatBulanLalu || (isSameStore ? getStorePriceHistory(item.namaBarang, item.store || AppState.currentStore) : null);
-      const comparator = comparePriceWithLastMonth(disc.finalPrice, baseline, isSameStore);
+      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
+      const analysis = getRepurchaseAnalysis(disc.finalPrice, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore } : null), isSameStore);
 
       let promoBadge = '';
       if (item.diskonTipe === 'single') promoBadge = `🏷️ -${item.diskonValue}%`;
@@ -2206,14 +2365,14 @@ function renderItems() {
 
           <!-- Compact Body (Flexbox Horizontal, Shopee Cart Item Layout) -->
           <div class="shopee-compact-body">
-            <!-- Top Row: Judul Produk + Badge Diskon/Fluktuasi in Center, Edit & Trash on Right Top -->
+            <!-- Top Row: Judul Produk + Badge Akurat Kenaikan/Penurunan Beli Ulang -->
             <div class="shopee-compact-top">
               <div class="shopee-compact-title-wrap">
                 <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
                   ${escapeHtml(item.namaBarang)}
                 </span>
                 <div class="shopee-compact-meta-left">
-                  <span class="${comparator.badgeClass}">${comparator.text}</span>
+                  <span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>
                   <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
                     🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
                   </button>
@@ -2226,11 +2385,12 @@ function renderItems() {
               </div>
             </div>
 
-            <!-- Bottom Row (Bottom Action Row): Harga Satuan on Left, Stepper on Right -->
+            <!-- Bottom Row: Subtotal, Satuan, dan Komparasi Detail Beli Ulang -->
             <div class="shopee-compact-bottom">
               <div class="shopee-compact-price-wrap">
                 <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false)" style="cursor: pointer;" title="Klik untuk ubah harga">${formatRupiah(subtotal)}</span>
                 <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
               </div>
 
               <div class="shopee-compact-stepper-wrap">
@@ -3444,20 +3604,26 @@ function prepareRoutineItemsForNewShopping() {
     ? AppState.routineItems
     : DEFAULT_ROUTINE_ITEMS;
 
-  AppState.cart = routineList.map(r => ({
-    id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
-    namaBarang: r.namaBarang || r.name,
-    kategori: r.kategori || r.aisle || 'Bahan Pokok',
-    satuan: r.satuan || r.unit || 'pcs',
-    qty: r.qty || 1,
-    hargaSatuan: r.hargaSatuan || r.price || 0,
-    diskonTipe: 'none',
-    diskonValue: '',
-    hargaRiwayatBulanLalu: r.hargaSatuan || r.price || null,
-    store: AppState.currentStore,
-    checked: false,
-    isRoutine: true
-  }));
+  AppState.cart = routineList.map(r => {
+    const itemName = r.namaBarang || r.name;
+    const prevRec = findPreviousPurchaseRecord(itemName, AppState.currentStore);
+    const lastPrice = prevRec ? prevRec.price : (r.hargaSatuan || r.price || null);
+
+    return {
+      id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+      namaBarang: itemName,
+      kategori: r.kategori || r.aisle || 'Bahan Pokok',
+      satuan: r.satuan || r.unit || 'pcs',
+      qty: r.qty || 1,
+      hargaSatuan: r.hargaSatuan || r.price || 0,
+      diskonTipe: 'none',
+      diskonValue: '',
+      hargaRiwayatBulanLalu: lastPrice,
+      store: AppState.currentStore,
+      checked: false,
+      isRoutine: true
+    };
+  });
 }
 
 function startNewShoppingSession() {
@@ -3568,8 +3734,14 @@ function confirmFinishShopping() {
   };
   AppState._lastFinishedReceiptId = generatedReceipt ? generatedReceipt.id : null;
 
-  // 2. Move checked items to Pantry
+  // 2. Move checked items to Pantry & Record Purchase Price History for accurate future repurchase tracking
   itemsToPantry.forEach(item => {
+    const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
+    const finalUnitPrice = Math.round(disc.finalPrice || item.hargaSatuan || 0);
+    if (finalUnitPrice > 0) {
+      recordStorePrice(item.namaBarang, finalUnitPrice, AppState.currentStore, item.kategori, item.satuan);
+    }
+
     AppState.pantry.unshift({
       id: 'pan-' + Date.now() + Math.random().toString(36).substr(2, 4),
       name: item.namaBarang,
@@ -3694,6 +3866,9 @@ function generateReceiptData(customReceipt = null) {
       subtotalRaw += (rawPrice > 0 ? rowRawSubtotal : rowFinalSubtotal);
       totalDiscount += rowSavings;
 
+      const prevRec = findPreviousPurchaseRecord(item.namaBarang, AppState.currentStore);
+      const repurchaseAnalysis = getRepurchaseAnalysis(finalPrice, prevRec);
+
       return {
         namaBarang: item.namaBarang,
         qty: item.qty,
@@ -3703,7 +3878,8 @@ function generateReceiptData(customReceipt = null) {
         subtotal: rowFinalSubtotal,
         diskonNominal: rowSavings,
         diskonTipe: item.diskonTipe,
-        diskonValue: item.diskonValue
+        diskonValue: item.diskonValue,
+        repurchaseAnalysis
       };
     });
 
@@ -3802,6 +3978,11 @@ function generateReceiptData(customReceipt = null) {
               <span>${item.qty} ${escapeHtml(item.satuan || 'pcs')} x ${formatRupiah(unitPrice)}</span>
               <span class="receipt-item-subtotal">${formatRupiah(rowSubtotal)}</span>
             </div>
+            ${(item.repurchaseAnalysis && item.repurchaseAnalysis.isRepurchase && item.repurchaseAnalysis.status !== 'new') ? `
+              <div class="receipt-item-repurchase-tag ${item.repurchaseAnalysis.diffClass}">
+                ${item.repurchaseAnalysis.status === 'up' ? `  ↑ Naik +Rp ${formatNumber(item.repurchaseAnalysis.diff)} vs belanja lalu` : (item.repurchaseAnalysis.status === 'down' ? `  ↓ Hemat -Rp ${formatNumber(item.repurchaseAnalysis.absDiff)} vs belanja lalu` : '  = Harga sama dengan belanja lalu')}
+              </div>
+            ` : ''}
             ${hasDisc ? `
               <div class="receipt-item-discount">
                 <span>  (HEMAT/DISKON)</span>
@@ -5497,10 +5678,19 @@ function renderCartSection() {
   if (selectAllCb) selectAllCb.checked = allChecked;
 
   let html = '';
+  let repurchaseUpCount = 0;
+  let repurchaseDownCount = 0;
+  let repurchaseStableCount = 0;
+  let totalNetRepurchaseDiff = 0;
+
   AppState.cart.forEach(item => {
     const hasNoPrice = (!item.hargaSatuan || item.hargaSatuan <= 0);
 
     if (hasNoPrice) {
+      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
+      const analysis = getRepurchaseAnalysis(0, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore: true } : null));
+
       html += `
         <div class="shopee-item-card unpriced-plan-item ${item.checked ? 'checked' : ''}" data-item-id="${item.id}" onclick="handleItemRowClick('${item.id}', event)">
           <!-- Checkbox: Memicu popover input harga riil saat belanja di toko -->
@@ -5510,7 +5700,7 @@ function renderCartSection() {
 
           <!-- Compact Body (Flexbox Horizontal, Shopee Cart Item Layout) -->
           <div class="shopee-compact-body">
-            <!-- Top Row: Judul Produk + Kuantitas Satuan in Center, Edit & Trash on Right Top -->
+            <!-- Top Row: Judul Produk + Kuantitas Satuan + Badge Riwayat Beli Ulang -->
             <div class="shopee-compact-top">
               <div class="shopee-compact-title-wrap">
                 <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
@@ -5518,6 +5708,7 @@ function renderCartSection() {
                 </span>
                 <div class="shopee-compact-meta-left">
                   <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                  ${analysis.isRepurchase ? `<span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
                   <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
                     🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
                   </button>
@@ -5529,11 +5720,11 @@ function renderCartSection() {
               </div>
             </div>
 
-            <!-- Bottom Row (Bottom Action Row): Belum Ada Harga / + Isi Harga on Left, Stepper on Right -->
+            <!-- Bottom Row: Dulu Rp X / Belum Ada Harga + Stepper -->
             <div class="shopee-compact-bottom">
               <div class="shopee-compact-price-wrap">
                 <button type="button" class="badge-no-price touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga di toko">
-                  🏷️ Belum Ada Harga
+                  ${analysis.previousPrice ? `💡 Dulu: ${formatRupiah(analysis.previousPrice)}` : '🏷️ Belum Ada Harga'}
                 </button>
                 <button type="button" class="btn-enter-price-pill touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Masukkan harga riil di toko">
                   + Isi Harga
@@ -5558,8 +5749,21 @@ function renderCartSection() {
       const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
       const subtotal = disc.finalPrice * item.qty;
       const isSameStore = (!item.store || item.store === AppState.currentStore);
-      const baseline = item.hargaRiwayatBulanLalu || (isSameStore ? getStorePriceHistory(item.namaBarang, item.store || AppState.currentStore) : null);
-      const comparator = comparePriceWithLastMonth(disc.finalPrice, baseline, isSameStore);
+      const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+      const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
+      const analysis = getRepurchaseAnalysis(disc.finalPrice, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore } : null), isSameStore);
+
+      if (analysis.isRepurchase) {
+        if (analysis.status === 'up') {
+          repurchaseUpCount++;
+          totalNetRepurchaseDiff += (analysis.diff * item.qty);
+        } else if (analysis.status === 'down') {
+          repurchaseDownCount++;
+          totalNetRepurchaseDiff -= (analysis.absDiff * item.qty);
+        } else if (analysis.status === 'stable') {
+          repurchaseStableCount++;
+        }
+      }
 
       let promoBadge = '';
       if (item.diskonTipe === 'single') promoBadge = `🏷️ -${item.diskonValue}%`;
@@ -5581,7 +5785,7 @@ function renderCartSection() {
                   ${escapeHtml(item.namaBarang)}
                 </span>
                 <div class="shopee-compact-meta-left">
-                  <span class="${comparator.badgeClass}">${comparator.text}</span>
+                  <span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>
                   <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
                     🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
                   </button>
@@ -5599,6 +5803,7 @@ function renderCartSection() {
               <div class="shopee-compact-price-wrap">
                 <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false)" style="cursor: pointer;" title="Klik untuk ubah harga">${formatRupiah(subtotal)}</span>
                 <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
               </div>
 
               <div class="shopee-compact-stepper-wrap">
@@ -5616,6 +5821,29 @@ function renderCartSection() {
       `;
     }
   });
+
+  // Tampilkan ringkasan fluktuasi harga belanja ulang di troli
+  const summaryBanner = document.getElementById('cartRepurchaseSummaryBanner');
+  if (summaryBanner) {
+    if (repurchaseUpCount > 0 || repurchaseDownCount > 0 || repurchaseStableCount > 0) {
+      summaryBanner.style.display = 'flex';
+      let summaryText = '🔁 <strong>Beli Ulang:</strong> ';
+      const parts = [];
+      if (repurchaseUpCount > 0) parts.push(`<span style="color:#DC2626; font-weight:700;">📈 ${repurchaseUpCount} Naik</span>`);
+      if (repurchaseDownCount > 0) parts.push(`<span style="color:#059669; font-weight:700;">📉 ${repurchaseDownCount} Turun</span>`);
+      if (repurchaseStableCount > 0) parts.push(`<span style="color:#64748B; font-weight:700;">⚖️ ${repurchaseStableCount} Stabil</span>`);
+      summaryText += parts.join(' • ');
+
+      if (totalNetRepurchaseDiff > 0) {
+        summaryText += ` <span style="font-size:10.5px; color:#DC2626;">(Total +${formatRupiah(totalNetRepurchaseDiff)} vs lalu)</span>`;
+      } else if (totalNetRepurchaseDiff < 0) {
+        summaryText += ` <span style="font-size:10.5px; color:#059669;">(Total Hemat ${formatRupiah(Math.abs(totalNetRepurchaseDiff))} vs lalu)</span>`;
+      }
+      summaryBanner.innerHTML = summaryText;
+    } else {
+      summaryBanner.style.display = 'none';
+    }
+  }
 
   container.innerHTML = html;
   updateCartBadges();
@@ -5837,7 +6065,8 @@ function openQuickPriceModal(itemId, fromCheck = false) {
   if (chipsContainer) {
     let chipsHtml = '';
     const isSameStore = (!item.store || item.store === AppState.currentStore);
-    const baseline = item.hargaRiwayatBulanLalu || (isSameStore ? getStorePriceHistory(item.namaBarang, item.store || AppState.currentStore) : null);
+    const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+    const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
 
     if (baseline && baseline > 0) {
       chipsHtml += `<button type="button" class="frequent-chip promo-highlight touch-target" onclick="setQuickPriceInput(${baseline})">💡 Riwayat: Rp ${formatNumber(baseline)}</button>`;
@@ -5899,15 +6128,26 @@ function updateQuickPricePreview() {
   const subtotalEl = document.getElementById('quickPriceSubtotalPreview');
   if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
 
-  // Evaluasi Indikator Fluktuasi Harga vs Riwayat Toko
+  // Evaluasi Indikator Fluktuasi Harga vs Riwayat Toko (Analisis Beli Ulang)
   const isSameStore = (!item.store || item.store === AppState.currentStore);
-  const baseline = item.hargaRiwayatBulanLalu || (isSameStore ? getStorePriceHistory(item.namaBarang, item.store || AppState.currentStore) : null);
-  const comparator = comparePriceWithLastMonth(disc.finalPrice, baseline, isSameStore);
+  const prevRec = findPreviousPurchaseRecord(item.namaBarang, item.store || AppState.currentStore);
+  const baseline = (prevRec && prevRec.price) ? prevRec.price : item.hargaRiwayatBulanLalu;
+  const analysis = getRepurchaseAnalysis(disc.finalPrice, prevRec || (baseline ? { price: baseline, store: item.store, isSameStore } : null), isSameStore);
 
   const fluctBadge = document.getElementById('quickPriceFluctBadge');
   if (fluctBadge) {
-    fluctBadge.className = comparator.badgeClass;
-    fluctBadge.textContent = comparator.text;
+    fluctBadge.className = analysis.badgeClass;
+    fluctBadge.textContent = analysis.badgeText;
+  }
+
+  const detailEl = document.getElementById('quickPriceRepurchaseDetail');
+  if (detailEl) {
+    if (analysis.isRepurchase) {
+      detailEl.style.display = 'block';
+      detailEl.innerHTML = `🔁 <strong>Perbandingan Beli Ulang:</strong> ${escapeHtml(analysis.detailText)}`;
+    } else {
+      detailEl.style.display = 'none';
+    }
   }
 
   // Evaluasi Dampak terhadap Batas Anggaran & Saldo Dompet Realtime
@@ -5968,6 +6208,9 @@ function saveQuickPrice() {
   item.hargaSatuan = price;
   item.checked = true; // Otomatis aktif & masuk hitungan keranjang
   item.store = AppState.currentStore;
+
+  // Rekam harga riil saat belanja ke database riwayat harga toko
+  recordStorePrice(item.namaBarang, price, AppState.currentStore, item.kategori, item.satuan);
 
   closeQuickPriceModal(true);
   playCalmChime();

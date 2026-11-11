@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=63">
+  <link rel="stylesheet" href="./css/app.css?v=64">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -680,6 +680,9 @@
           style="width: 0%; height: 100%; background: #2E7D32; transition: width 0.3s ease, background 0.3s ease;">
         </div>
       </div>
+
+      <!-- REPURCHASE PRICE COMPARISON SUMMARY BANNER -->
+      <div id="cartRepurchaseSummaryBanner" class="repurchase-summary-strip" style="display: none;"></div>
 
       <!-- Compact Trolley Items List -->
       <div id="cartItemsContainer" data-id="dedicatedCartItemsContainer" class="shopee-cart-list dedicated-cart-items-container">
@@ -1600,6 +1603,7 @@
           <span style="font-size: 0.72rem; color: var(--text-subtle);">Fluktuasi vs Histori:</span>
           <span id="quickPriceFluctBadge" class="fluctuation-badge fluctuation-stable">= Stabil</span>
         </div>
+        <div id="quickPriceRepurchaseDetail" class="quick-price-repurchase-detail" style="display: none;"></div>
         <div
           style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 4px; margin-top: 4px; font-size: 0.72rem;">
           <span style="color: var(--text-subtle);">Estimasi Saldo Dompet:</span>
@@ -1936,7 +1940,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=63"></script>
+  <script src="./js/app.js?v=64"></script>
 
   <!-- Service Worker Registration -->
   <script>
