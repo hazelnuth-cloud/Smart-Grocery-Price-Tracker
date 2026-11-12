@@ -2636,6 +2636,64 @@ function promptLogout(notify = true) {
   }
 }
 
+function updateHeaderAvatar(photoURL) {
+  const avatarImg = document.getElementById('headerUserAvatar');
+  const fallback = document.getElementById('headerUserAvatarFallback');
+  if (!avatarImg || !fallback) return;
+
+  if (photoURL && typeof photoURL === 'string' && photoURL.trim().length > 0) {
+    avatarImg.src = photoURL.trim();
+    avatarImg.style.setProperty('display', 'inline-block', 'important');
+    avatarImg.classList.remove('hidden');
+    avatarImg.removeAttribute('hidden');
+
+    fallback.style.setProperty('display', 'none', 'important');
+    fallback.classList.add('hidden');
+    fallback.setAttribute('hidden', 'true');
+  } else {
+    avatarImg.style.setProperty('display', 'none', 'important');
+    avatarImg.classList.add('hidden');
+    avatarImg.setAttribute('hidden', 'true');
+
+    fallback.style.setProperty('display', 'inline-flex', 'important');
+    fallback.classList.remove('hidden');
+    fallback.removeAttribute('hidden');
+  }
+}
+
+function updateModalAvatar(photoURL) {
+  const avatarImg = document.getElementById('modalUserAvatar');
+  const fallback = document.getElementById('modalUserAvatarFallback');
+  if (!avatarImg || !fallback) return;
+
+  if (photoURL && typeof photoURL === 'string' && photoURL.trim().length > 0) {
+    avatarImg.src = photoURL.trim();
+    avatarImg.style.setProperty('display', 'block', 'important');
+    avatarImg.classList.remove('hidden');
+    avatarImg.removeAttribute('hidden');
+
+    fallback.style.setProperty('display', 'none', 'important');
+    fallback.classList.add('hidden');
+    fallback.setAttribute('hidden', 'true');
+  } else {
+    avatarImg.style.setProperty('display', 'none', 'important');
+    avatarImg.classList.add('hidden');
+    avatarImg.setAttribute('hidden', 'true');
+
+    fallback.style.setProperty('display', 'flex', 'important');
+    fallback.classList.remove('hidden');
+    fallback.removeAttribute('hidden');
+  }
+}
+
+function handleHeaderAvatarError() {
+  updateHeaderAvatar(null);
+}
+
+function handleModalAvatarError() {
+  updateModalAvatar(null);
+}
+
 function checkAuth() {
   const authGate = document.getElementById('authGate');
   const dashboard = document.getElementById('mainDashboard');
@@ -2660,54 +2718,17 @@ function checkAuth() {
 
     const headerName = document.getElementById('headerUserName');
     const headerEmail = document.getElementById('headerUserEmail');
-    const headerAvatar = document.getElementById('headerUserAvatar');
-    const headerAvatarFallback = document.getElementById('headerUserAvatarFallback');
-
     if (headerName) headerName.textContent = AppState.user.name;
     if (headerEmail) headerEmail.textContent = AppState.user.email || 'user@email.com';
-    if (headerAvatar) {
-      if (AppState.user.photoURL) {
-        headerAvatar.src = AppState.user.photoURL;
-        headerAvatar.style.display = 'inline-block';
-        headerAvatar.classList.remove('hidden');
-        if (headerAvatarFallback) {
-          headerAvatarFallback.style.display = 'none';
-          headerAvatarFallback.classList.add('hidden');
-        }
-      } else {
-        headerAvatar.style.display = 'none';
-        headerAvatar.classList.add('hidden');
-        if (headerAvatarFallback) {
-          headerAvatarFallback.style.display = 'inline-flex';
-          headerAvatarFallback.classList.remove('hidden');
-        }
-      }
-    }
+
+    const userPhoto = AppState.user && (AppState.user.photoURL || AppState.user.photo);
+    updateHeaderAvatar(userPhoto);
 
     const modalName = document.getElementById('modalUserName');
     const modalEmail = document.getElementById('modalUserEmail');
-    const modalAvatar = document.getElementById('modalUserAvatar');
-    const modalAvatarFallback = document.getElementById('modalUserAvatarFallback');
     if (modalName) modalName.textContent = AppState.user.name;
     if (modalEmail) modalEmail.textContent = AppState.user.email || 'user@email.com';
-    if (modalAvatar) {
-      if (AppState.user.photoURL) {
-        modalAvatar.src = AppState.user.photoURL;
-        modalAvatar.style.display = 'block';
-        modalAvatar.classList.remove('hidden');
-        if (modalAvatarFallback) {
-          modalAvatarFallback.style.display = 'none';
-          modalAvatarFallback.classList.add('hidden');
-        }
-      } else {
-        modalAvatar.style.display = 'none';
-        modalAvatar.classList.add('hidden');
-        if (modalAvatarFallback) {
-          modalAvatarFallback.style.display = 'flex';
-          modalAvatarFallback.classList.remove('hidden');
-        }
-      }
-    }
+    updateModalAvatar(userPhoto);
 
     const syncName = document.getElementById('syncUserAccountName');
     const syncEmail = document.getElementById('syncUserAccountEmail');
@@ -6085,19 +6106,14 @@ function openProfileSettingsModal() {
 
   if (modalName) modalName.textContent = userName;
   if (modalEmail) modalEmail.textContent = userEmail;
-  if (modalAvatar && modalAvatarFallback) {
-    if (userPhoto) {
-      modalAvatar.src = userPhoto;
-      modalAvatar.style.display = 'block';
-      modalAvatar.classList.remove('hidden');
-      modalAvatarFallback.style.display = 'none';
-      modalAvatarFallback.classList.add('hidden');
-    } else {
-      modalAvatar.style.display = 'none';
-      modalAvatar.classList.add('hidden');
-      modalAvatarFallback.style.display = 'flex';
-      modalAvatarFallback.classList.remove('hidden');
-    }
+  updateModalAvatar(userPhoto);
+  updateHeaderAvatar(userPhoto);
+
+  // Update auth provider badge chip (Google vs Email)
+  const authChipText = document.getElementById('modalAuthChipText');
+  if (authChipText) {
+    const isGoogle = (user && (user.authProvider === 'google' || (user.providerData && user.providerData.some(p => p.providerId === 'google.com'))));
+    authChipText.textContent = isGoogle ? '✓ Terhubung Akun Google' : '✓ Akun Email Terdaftar';
   }
 
   // 2. Populate Dark Mode toggle switch

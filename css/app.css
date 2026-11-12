@@ -8001,6 +8001,8 @@ body.dark-mode .catalog-thumb-wrap {
   border-radius: 50% !important;
   object-fit: cover !important;
   border: 1px solid #FCE7F3 !important;
+  display: inline-block;
+  flex-shrink: 0 !important;
 }
 
 .user-header-avatar-fallback {
@@ -8009,16 +8011,19 @@ body.dark-mode .catalog-thumb-wrap {
   border-radius: 50% !important;
   background: #FCE7F3 !important;
   color: #E91E63 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 13px !important;
+  flex-shrink: 0 !important;
 }
 
 .user-header-avatar[style*="display: none"],
 .user-header-avatar.hidden,
+.user-header-avatar[hidden],
 .user-header-avatar-fallback[style*="display: none"],
-.user-header-avatar-fallback.hidden {
+.user-header-avatar-fallback.hidden,
+.user-header-avatar-fallback[hidden] {
   display: none !important;
 }
 
@@ -8150,7 +8155,10 @@ body.unauthenticated #profileSettingsModal,
   position: relative !important;
   width: 64px !important;
   height: 64px !important;
-  margin: 0 auto 8px auto !important;
+  margin: 0 auto 10px auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .modal-profile-avatar {
@@ -8160,6 +8168,7 @@ body.unauthenticated #profileSettingsModal,
   object-fit: cover !important;
   border: 3px solid #FCE7F3 !important;
   box-shadow: 0 4px 12px rgba(233, 30, 99, 0.15) !important;
+  display: block;
 }
 
 .modal-profile-avatar-fallback {
@@ -8168,17 +8177,19 @@ body.unauthenticated #profileSettingsModal,
   border-radius: 50% !important;
   background: #FCE7F3 !important;
   color: #E91E63 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 32px !important;
   border: 3px solid #FCE7F3 !important;
 }
 
 .modal-profile-avatar[style*="display: none"],
 .modal-profile-avatar.hidden,
+.modal-profile-avatar[hidden],
 .modal-profile-avatar-fallback[style*="display: none"],
-.modal-profile-avatar-fallback.hidden {
+.modal-profile-avatar-fallback.hidden,
+.modal-profile-avatar-fallback[hidden] {
   display: none !important;
 }
 
