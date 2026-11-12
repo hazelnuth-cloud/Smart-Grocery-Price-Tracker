@@ -6410,13 +6410,14 @@ body.dark-mode .budget-status-card-bottom {
   flex-shrink: 0 !important;
 }
 
-/* Required rules for test_clean_layout_and_store_header audit */
+/* Supermarket Store Location Display */
 .store-strip-name,
 #cartCurrentStoreDisplay {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  max-width: 180px !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
   font-size: 13px !important;
   font-weight: 700 !important;
   color: #222222 !important;
@@ -6563,19 +6564,41 @@ body.dark-mode .cloud-sync-text {
 .cart-select-all-bar,
 .cart-single-line-store {
   display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 8px !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
   width: 100% !important;
-  padding: 10px 12px !important;
+  padding: 8px 12px 8px 12px !important;
   box-sizing: border-box !important;
   background: #FFFFFF !important;
   border: 1px solid #FCE7F3 !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   margin-bottom: 6px !important;
   height: auto !important;
-  min-height: 38px !important;
-  flex-wrap: nowrap !important;
+  min-height: auto !important;
+  box-shadow: 0 1px 4px rgba(219, 39, 119, 0.04) !important;
+}
+
+/* Baris 1: Lokasi Supermarket 100% Lebar Penuh (Anti-Terpotong) */
+.cart-store-location-row {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding-bottom: 6px !important;
+  border-bottom: 1px dashed #FCE7F3 !important;
+  box-sizing: border-box !important;
+}
+
+/* Baris 2: Kontrol Pilih Semua & Item Count Badge */
+.cart-store-action-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 
 #selectAllLabel,
@@ -6606,37 +6629,42 @@ body.dark-mode .cloud-sync-text {
 #cartCurrentStoreDisplay,
 .cart-store-header .store-strip-name,
 .cart-select-all-bar .store-strip-name {
-  flex: 1 !important;
+  flex: 1 1 100% !important;
+  width: 100% !important;
   min-width: 0 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  font-size: 12px !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  font-size: 12.5px !important;
   font-weight: 700 !important;
-  color: #475569 !important;
-  text-align: center !important;
-  max-width: none !important;
-  line-height: 1.2 !important;
-  display: block !important;
+  color: #1E293B !important;
+  text-align: left !important;
+  line-height: 1.35 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 #cartCurrentStoreDisplay::before {
   content: "🏬 ";
-  font-size: 13px !important;
-  margin-right: 2px !important;
+  font-size: 14px !important;
+  margin-right: 5px !important;
+  flex-shrink: 0 !important;
 }
 
 #cartSelectedCountBadge,
 .cart-item-count-badge {
   flex-shrink: 0 !important;
-  font-size: 12px !important;
+  font-size: 11.5px !important;
   font-weight: 800 !important;
   color: #E91E63 !important;
   background: #FDF2F8 !important;
-  padding: 2px 8px !important;
+  padding: 2.5px 9px !important;
   border-radius: 12px !important;
   border: 1px solid #FCE7F3 !important;
   white-space: nowrap !important;
+  letter-spacing: -0.2px !important;
 }
 
 /* Dark Mode Overrides for Segmented Bar & Cart Store Header */
@@ -6657,24 +6685,40 @@ body.dark-mode .planner-seg-btn.active {
 
 body.dark-mode .cart-store-header,
 body.dark-mode .cart-select-all-bar,
-body.dark-mode .cart-single-line-store {
+body.dark-mode .cart-single-line-store,
+body.theme-dark .cart-store-header,
+body.theme-dark .cart-select-all-bar,
+body.theme-dark .cart-single-line-store {
   background: #1E293B !important;
   border-color: #334155 !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .cart-store-location-row,
+body.theme-dark .cart-store-location-row {
+  border-bottom-color: #334155 !important;
 }
 
 body.dark-mode #selectAllLabel,
-body.dark-mode .cart-checkbox-label {
+body.dark-mode .cart-checkbox-label,
+body.theme-dark #selectAllLabel,
+body.theme-dark .cart-checkbox-label {
   color: #F8FAFC !important;
 }
 
 body.dark-mode #cartCurrentStoreDisplay,
 body.dark-mode .cart-store-header .store-strip-name,
-body.dark-mode .cart-select-all-bar .store-strip-name {
-  color: #CBD5E1 !important;
+body.dark-mode .cart-select-all-bar .store-strip-name,
+body.theme-dark #cartCurrentStoreDisplay,
+body.theme-dark .cart-store-header .store-strip-name,
+body.theme-dark .cart-select-all-bar .store-strip-name {
+  color: #F1F5F9 !important;
 }
 
 body.dark-mode #cartSelectedCountBadge,
-body.dark-mode .cart-item-count-badge {
+body.dark-mode .cart-item-count-badge,
+body.theme-dark #cartSelectedCountBadge,
+body.theme-dark .cart-item-count-badge {
   background: #831843 !important;
   color: #FCE7F3 !important;
   border-color: #BE185D !important;
@@ -9403,6 +9447,32 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
     flex-shrink: 0 !important;
     word-break: keep-all !important;
     hyphens: none !important;
+  }
+
+  /* Dedicated Cart Store Header Mobile Ergonomics (Anti-Terpotong) */
+  .cart-store-header,
+  .cart-select-all-bar,
+  .cart-single-line-store {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+
+  .cart-store-location-row {
+    width: 100% !important;
+  }
+
+  #cartCurrentStoreDisplay,
+  .cart-store-header .store-strip-name,
+  .cart-select-all-bar .store-strip-name {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    max-width: 100% !important;
   }
 }
 

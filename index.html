@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=90">
+  <link rel="stylesheet" href="./css/app.css?v=91">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -636,14 +636,21 @@
         </button>
       </div>
 
-      <!-- SINGLE-LINE STORE HEADER & SLIM BUDGET BAR IN CART -->
-      <div class="cart-store-header cart-select-all-bar single-line-store-header cart-single-line-store">
-        <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
-          <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
-          <span>Pilih Semua</span>
-        </label>
-        <span id="cartCurrentStoreDisplay" class="store-strip-name">Lotte Mart Grocery - Puri Indah</span>
-        <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
+      <!-- STORE HEADER & SELECT ALL BAR IN CART (2 BARIS: LOKASI SUPERMARKET DI ATAS, PILIH SEMUA DI BAWAH) -->
+      <div class="cart-store-header cart-select-all-bar single-line-store-header cart-single-line-store cart-store-header-two-rows">
+        <!-- Baris 1: Lokasi Supermarket Penuh (100% Anti-Terpotong) -->
+        <div class="cart-store-location-row">
+          <span id="cartCurrentStoreDisplay" class="store-strip-name" title="Lokasi Supermarket Saat Ini">Lotte Mart Grocery - Puri Indah</span>
+        </div>
+
+        <!-- Baris 2: Kontrol Pilih Semua & Total Item Terpilih -->
+        <div class="cart-store-action-row">
+          <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
+            <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
+            <span>Pilih Semua</span>
+          </label>
+          <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
+        </div>
       </div>
 
       <!-- SLIM 4PX BUDGET PROGRESS BAR FOR CART -->
@@ -1909,7 +1916,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=90"></script>
+  <script src="./js/app.js?v=91"></script>
 
   <!-- Service Worker Registration -->
   <script>
