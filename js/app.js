@@ -2543,8 +2543,13 @@ function renderSessionControls() {
   const cartStoreDisplay = document.getElementById('cartCurrentStoreDisplay');
   const datePicker = document.getElementById('session-date-picker');
   const customStoreInput = document.getElementById('custom-store-input');
+  const dateHint = document.getElementById('sessionDateHint');
 
   if (datePicker) datePicker.value = AppState.currentDate;
+  if (dateHint) {
+    const today = new Date().toISOString().split('T')[0];
+    dateHint.textContent = (AppState.currentDate === today) ? 'Hari Ini 🌿' : 'Jadwal 🗓️';
+  }
   if (storeDisplay) storeDisplay.textContent = AppState.currentStore;
   if (cartStoreDisplay) cartStoreDisplay.textContent = AppState.currentStore;
 
@@ -2597,6 +2602,11 @@ function cancelCustomStoreInput() {
 function handleDateChange(val) {
   if (!val) return;
   AppState.currentDate = val;
+  const dateHint = document.getElementById('sessionDateHint');
+  if (dateHint) {
+    const today = new Date().toISOString().split('T')[0];
+    dateHint.textContent = (AppState.currentDate === today) ? 'Hari Ini 🌿' : 'Jadwal 🗓️';
+  }
   saveLocalState();
   pushStateToCloud();
   showToast(`Tanggal belanja diatur ke ${val}`, 'info');
@@ -2721,7 +2731,11 @@ function renderBudget() {
   }
 
   if (trackerSpentVal) {
-    trackerSpentVal.textContent = `${formatRupiah(activeSpend)} / ${formatRupiah(budget)}`;
+    trackerSpentVal.textContent = formatRupiah(activeSpend);
+  }
+  const trackerLimitVal = document.getElementById('trackerLimitVal');
+  if (trackerLimitVal) {
+    trackerLimitVal.textContent = formatRupiah(budget);
   }
   if (trackerPercentVal) {
     trackerPercentVal.textContent = `(${Math.round(safety.percentage)}%)`;

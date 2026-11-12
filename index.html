@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=92">
+  <link rel="stylesheet" href="./css/app.css?v=94">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -414,8 +414,10 @@
           <div class="tracker-spent-wrap">
             <span class="tracker-spent-label">Total Belanja</span>
             <div class="tracker-spent-figures">
-              <span class="tracker-spent-val" id="trackerSpentVal">Rp 0 / Rp 100.000</span>
-              <span class="tracker-percent-val" id="trackerPercentVal">(0%)</span>
+              <span class="tracker-spent-val" id="trackerSpentVal">Rp 0</span>
+            </div>
+            <div class="tracker-spent-sub" id="trackerLimitSub">
+              <span>/ Limit </span><span id="trackerLimitVal">Rp 100.000</span> <span class="tracker-percent-val" id="trackerPercentVal">(0%)</span>
             </div>
           </div>
         </div>
@@ -485,37 +487,50 @@
         </div>
       </div>
 
-      <!-- STORE & DATE HEADER (2 BARIS: LOKASI DI ATAS, TANGGAL DI BAWAH) -->
-      <div class="single-line-store-header">
-        <!-- Baris 1: Lokasi Toko & Tombol Edit (In-App Supermarket Picker) -->
-        <div class="store-header-row store-header-row-location store-header-left" onclick="openStorePickerModal()" style="cursor: pointer;" title="Pilih Lokasi Supermarket">
-          <div class="store-location-group">
-            <span class="store-header-icon">🏬</span>
-            <span id="session-store-display" class="store-header-display-name">Lotte Mart Grocery - Puri Indah</span>
-            <!-- Hidden fallback select for backward-compatibility -->
-            <select id="session-store-select" class="store-header-select" style="display: none;" onchange="handleStoreChange(this.value)"
-              title="Pilih Toko Belanja" tabindex="-1">
-              <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
-              <option value="Superindo - Kebon Jeruk">Superindo - Kebon Jeruk</option>
-              <option value="Grand Lucky - SCBD">Grand Lucky - SCBD</option>
-              <option value="Hypermart - Puri Mall">Hypermart - Puri Mall</option>
-              <option value="Alfamart / Indomaret">Alfamart / Indomaret</option>
-              <option value="custom">➕ Ketik Toko Baru Manual...</option>
-            </select>
+      <!-- STORE & DATE HEADER (KARTU LOKASI SUPERMARKET & JADWAL BELANJA) -->
+      <div class="single-line-store-header store-date-card modern-store-card">
+        <!-- Baris 1: Lokasi Supermarket (Interactive In-App Picker Tile) -->
+        <div class="modern-store-row" onclick="openStorePickerModal()" role="button" tabindex="0" title="Klik untuk ganti lokasi supermarket">
+          <div class="modern-store-left">
+            <div class="modern-store-icon-wrap">
+              <span class="modern-store-icon">🏬</span>
+            </div>
+            <div class="modern-store-info">
+              <span class="modern-store-micro-label">LOKASI SUPERMARKET</span>
+              <span id="session-store-display" class="modern-store-name">Lotte Mart Grocery - Puri Indah</span>
+            </div>
           </div>
-          <button type="button" id="btnToggleCustomStore" class="btn-store-edit touch-target" onclick="openStorePickerModal(); event.stopPropagation();"
-            title="Ganti Lokasi Supermarket">
-            ✏️
+          <button type="button" class="btn-store-change-pill touch-target" onclick="openStorePickerModal(); event.stopPropagation();" title="Ganti Lokasi Supermarket">
+            <span>Ubah</span>
+            <span>✏️</span>
           </button>
+          <!-- Hidden fallback select for backward-compatibility -->
+          <select id="session-store-select" class="store-header-select" style="display: none;" onchange="handleStoreChange(this.value)" tabindex="-1">
+            <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
+            <option value="Superindo - Kebon Jeruk">Superindo - Kebon Jeruk</option>
+            <option value="Grand Lucky - SCBD">Grand Lucky - SCBD</option>
+            <option value="Hypermart - Puri Mall">Hypermart - Puri Mall</option>
+            <option value="Alfamart / Indomaret">Alfamart / Indomaret</option>
+            <option value="custom">➕ Ketik Toko Baru Manual...</option>
+          </select>
+          <button type="button" id="btnToggleCustomStore" style="display: none;" onclick="openStorePickerModal()"></button>
         </div>
 
+        <!-- Divider Garis Halus -->
+        <div class="modern-store-divider"></div>
+
         <!-- Baris 2: Tanggal Belanja -->
-        <div class="store-header-row store-header-row-date store-header-right">
-          <div class="store-date-group" style="width: 100%;">
-            <span class="store-header-date-icon">📅</span>
-            <input type="date" id="session-date-picker" class="store-header-date" onchange="handleDateChange(this.value)"
-              title="Tanggal Belanja" style="flex: 1; width: 100%;">
+        <div class="modern-date-row">
+          <div class="modern-date-left">
+            <div class="modern-date-icon-wrap">
+              <span class="modern-date-icon">📅</span>
+            </div>
+            <div class="modern-date-info">
+              <span class="modern-store-micro-label">TANGGAL BELANJA</span>
+              <input type="date" id="session-date-picker" class="modern-date-input" onchange="handleDateChange(this.value)" title="Pilih Tanggal Belanja">
+            </div>
           </div>
+          <span class="modern-date-hint" id="sessionDateHint">Hari Ini 🌿</span>
         </div>
       </div>
 
@@ -555,7 +570,7 @@
               📷
             </button>
             <input type="text" id="smartInputField" class="smart-input-field"
-              placeholder="Cari di katalog atau ketik barang baru..." autocomplete="off" maxlength="80"
+              placeholder="Cari atau ketik barang..." autocomplete="off" maxlength="80"
               oninput="handleCatalogSearch(this.value)">
             <button type="submit" class="btn-smart-submit touch-target" title="Tambahkan ke checklist">
               ➔
@@ -1969,7 +1984,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=92"></script>
+  <script src="./js/app.js?v=94"></script>
 
   <!-- Service Worker Registration -->
   <script>
