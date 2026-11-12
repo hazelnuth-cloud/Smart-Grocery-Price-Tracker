@@ -8015,6 +8015,13 @@ body.dark-mode .catalog-thumb-wrap {
   font-size: 13px !important;
 }
 
+.user-header-avatar[style*="display: none"],
+.user-header-avatar.hidden,
+.user-header-avatar-fallback[style*="display: none"],
+.user-header-avatar-fallback.hidden {
+  display: none !important;
+}
+
 .user-header-name {
   font-size: 12px !important;
   font-weight: 700 !important;
@@ -8168,6 +8175,13 @@ body.unauthenticated #profileSettingsModal,
   border: 3px solid #FCE7F3 !important;
 }
 
+.modal-profile-avatar[style*="display: none"],
+.modal-profile-avatar.hidden,
+.modal-profile-avatar-fallback[style*="display: none"],
+.modal-profile-avatar-fallback.hidden {
+  display: none !important;
+}
+
 .profile-online-badge {
   position: absolute !important;
   bottom: 2px !important;
@@ -8311,13 +8325,18 @@ body.unauthenticated #profileSettingsModal,
 
 /* Status Pills & Buttons */
 .settings-status-pill {
-  display: inline-flex !important;
-  align-items: center !important;
+  display: inline-flex;
+  align-items: center;
   padding: 4px 8px !important;
   border-radius: 8px !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
+}
+
+.settings-status-pill[style*="display: none"],
+.settings-status-pill.hidden {
+  display: none !important;
 }
 
 .settings-status-pill.online {
@@ -8360,6 +8379,31 @@ body.unauthenticated #profileSettingsModal,
   color: #334155 !important;
   white-space: nowrap !important;
   transition: all 0.12s ease !important;
+}
+
+.btn-settings-action[style*="display: none"],
+.btn-settings-action.hidden {
+  display: none !important;
+}
+
+.btn-settings-action.btn-settings-primary {
+  background: #FFF1F2 !important;
+  color: #BE185D !important;
+  border-color: #FCE7F3 !important;
+  font-weight: 800 !important;
+}
+
+.btn-settings-action.btn-settings-primary:hover,
+.btn-settings-action.btn-settings-primary:active {
+  background: #FCE7F3 !important;
+  color: #9D174D !important;
+}
+
+body.dark-mode .btn-settings-action.btn-settings-primary,
+body.theme-dark .btn-settings-action.btn-settings-primary {
+  background: #3B162B !important;
+  color: #F472B6 !important;
+  border-color: #551D3E !important;
 }
 
 .btn-settings-action:active {
@@ -8542,7 +8586,7 @@ body.dark-mode .user-header-name {
 .app-header #btnSoundToggle,
 .app-header #btnLayoutToggle,
 .app-header .user-pill,
-.app-header .header-actions>*:not(#userProfileTrigger):not(#btnHeaderInstallPwa) {
+.app-header .header-actions>*:not(#userProfileTrigger) {
   display: none !important;
 }
 
@@ -10769,38 +10813,13 @@ body.theme-dark .animated-subtitle {
    PWA INSTALLATION (DESKTOP & MOBILE) & PWA GUIDE MODAL STYLING
    ========================================================================== */
 
-/* Header Install Button (Computer & Mobile) */
+/* Header Install Button (Removed / Kept Clean in Profile Settings) */
 .btn-header-install {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  padding: 4px 10px !important;
-  font-size: 11.5px !important;
-  font-weight: 700 !important;
-  color: #BE185D !important;
-  background: #FDF2F8 !important;
-  border: 1px solid #FCE7F3 !important;
-  border-radius: 20px !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  white-space: nowrap !important;
-  box-shadow: 0 1px 3px rgba(190, 24, 93, 0.08) !important;
-  flex-shrink: 0 !important;
+  display: none !important;
 }
 
-.btn-header-install:hover,
-.btn-header-install:active {
-  background: #FCE7F3 !important;
-  color: #9D174D !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 3px 8px rgba(190, 24, 93, 0.15) !important;
-}
-
-body.dark-mode .btn-header-install,
-body.theme-dark .btn-header-install {
-  background: rgba(219, 39, 119, 0.18) !important;
-  border-color: rgba(219, 39, 119, 0.35) !important;
-  color: #F472B6 !important;
+#pwaInstallGuideModal {
+  z-index: 10005 !important;
 }
 
 /* PWA Install Guide Modal */

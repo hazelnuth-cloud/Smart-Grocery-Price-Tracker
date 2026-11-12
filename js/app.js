@@ -2669,10 +2669,18 @@ function checkAuth() {
       if (AppState.user.photoURL) {
         headerAvatar.src = AppState.user.photoURL;
         headerAvatar.style.display = 'inline-block';
-        if (headerAvatarFallback) headerAvatarFallback.style.display = 'none';
+        headerAvatar.classList.remove('hidden');
+        if (headerAvatarFallback) {
+          headerAvatarFallback.style.display = 'none';
+          headerAvatarFallback.classList.add('hidden');
+        }
       } else {
         headerAvatar.style.display = 'none';
-        if (headerAvatarFallback) headerAvatarFallback.style.display = 'inline-flex';
+        headerAvatar.classList.add('hidden');
+        if (headerAvatarFallback) {
+          headerAvatarFallback.style.display = 'inline-flex';
+          headerAvatarFallback.classList.remove('hidden');
+        }
       }
     }
 
@@ -2686,10 +2694,18 @@ function checkAuth() {
       if (AppState.user.photoURL) {
         modalAvatar.src = AppState.user.photoURL;
         modalAvatar.style.display = 'block';
-        if (modalAvatarFallback) modalAvatarFallback.style.display = 'none';
+        modalAvatar.classList.remove('hidden');
+        if (modalAvatarFallback) {
+          modalAvatarFallback.style.display = 'none';
+          modalAvatarFallback.classList.add('hidden');
+        }
       } else {
         modalAvatar.style.display = 'none';
-        if (modalAvatarFallback) modalAvatarFallback.style.display = 'flex';
+        modalAvatar.classList.add('hidden');
+        if (modalAvatarFallback) {
+          modalAvatarFallback.style.display = 'flex';
+          modalAvatarFallback.classList.remove('hidden');
+        }
       }
     }
 
@@ -6073,10 +6089,14 @@ function openProfileSettingsModal() {
     if (userPhoto) {
       modalAvatar.src = userPhoto;
       modalAvatar.style.display = 'block';
+      modalAvatar.classList.remove('hidden');
       modalAvatarFallback.style.display = 'none';
+      modalAvatarFallback.classList.add('hidden');
     } else {
       modalAvatar.style.display = 'none';
+      modalAvatar.classList.add('hidden');
       modalAvatarFallback.style.display = 'flex';
+      modalAvatarFallback.classList.remove('hidden');
     }
   }
 
@@ -6276,8 +6296,13 @@ async function resetToInitialMockData() {
 // =========================================================================
 function isAppStandalone() {
   if (typeof window === 'undefined') return false;
-  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-         (window.navigator && window.navigator.standalone === true);
+  const isStandaloneMatch = window.matchMedia && (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches
+  );
+  return Boolean(isStandaloneMatch || (window.navigator && window.navigator.standalone === true));
 }
 
 function updatePwaInstallUI() {
@@ -6287,15 +6312,32 @@ function updatePwaInstallUI() {
   const modalBadge = document.getElementById('modalPwaInstalledBadge');
   const directBox = document.getElementById('pwaDirectInstallBox');
 
+  // Keep header neat & concise as requested by user (hidden from top bar)
+  if (headerBtn) {
+    headerBtn.style.setProperty('display', 'none', 'important');
+    headerBtn.classList.add('hidden');
+  }
+
+  // Inside Profile Settings: show exactly ONE element (either Install button OR Installed badge)
   if (isStandalone) {
-    if (headerBtn) headerBtn.style.display = 'none';
-    if (modalBtn) modalBtn.style.display = 'none';
-    if (modalBadge) modalBadge.style.display = 'inline-block';
+    if (modalBtn) {
+      modalBtn.style.setProperty('display', 'none', 'important');
+      modalBtn.classList.add('hidden');
+    }
+    if (modalBadge) {
+      modalBadge.style.setProperty('display', 'inline-flex', 'important');
+      modalBadge.classList.remove('hidden');
+    }
     if (directBox) directBox.style.display = 'none';
   } else {
-    if (headerBtn) headerBtn.style.display = 'inline-flex';
-    if (modalBtn) modalBtn.style.display = 'inline-flex';
-    if (modalBadge) modalBadge.style.display = 'none';
+    if (modalBtn) {
+      modalBtn.style.setProperty('display', 'inline-flex', 'important');
+      modalBtn.classList.remove('hidden');
+    }
+    if (modalBadge) {
+      modalBadge.style.setProperty('display', 'none', 'important');
+      modalBadge.classList.add('hidden');
+    }
     if (directBox) directBox.style.display = AppState.deferredInstallPrompt ? 'block' : 'none';
   }
 }
@@ -6361,6 +6403,7 @@ function openPwaInstallGuideModal() {
     directBox.style.display = AppState.deferredInstallPrompt ? 'block' : 'none';
   }
   if (modal) {
+    closeProfileSettingsModal();
     modal.classList.add('active', 'show');
   }
 }
