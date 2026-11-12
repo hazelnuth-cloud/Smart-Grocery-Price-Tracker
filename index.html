@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=91">
+  <link rel="stylesheet" href="./css/app.css?v=92">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -487,12 +487,14 @@
 
       <!-- STORE & DATE HEADER (2 BARIS: LOKASI DI ATAS, TANGGAL DI BAWAH) -->
       <div class="single-line-store-header">
-        <!-- Baris 1: Lokasi Toko & Tombol Edit -->
-        <div class="store-header-row store-header-row-location store-header-left">
+        <!-- Baris 1: Lokasi Toko & Tombol Edit (In-App Supermarket Picker) -->
+        <div class="store-header-row store-header-row-location store-header-left" onclick="openStorePickerModal()" style="cursor: pointer;" title="Pilih Lokasi Supermarket">
           <div class="store-location-group">
             <span class="store-header-icon">🏬</span>
-            <select id="session-store-select" class="store-header-select" onchange="handleStoreChange(this.value)"
-              title="Pilih Toko Belanja">
+            <span id="session-store-display" class="store-header-display-name">Lotte Mart Grocery - Puri Indah</span>
+            <!-- Hidden fallback select for backward-compatibility -->
+            <select id="session-store-select" class="store-header-select" style="display: none;" onchange="handleStoreChange(this.value)"
+              title="Pilih Toko Belanja" tabindex="-1">
               <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
               <option value="Superindo - Kebon Jeruk">Superindo - Kebon Jeruk</option>
               <option value="Grand Lucky - SCBD">Grand Lucky - SCBD</option>
@@ -501,8 +503,8 @@
               <option value="custom">➕ Ketik Toko Baru Manual...</option>
             </select>
           </div>
-          <button type="button" id="btnToggleCustomStore" class="btn-store-edit" onclick="toggleCustomStoreInput()"
-            title="Ketik Toko Lain">
+          <button type="button" id="btnToggleCustomStore" class="btn-store-edit touch-target" onclick="openStorePickerModal(); event.stopPropagation();"
+            title="Ganti Lokasi Supermarket">
             ✏️
           </button>
         </div>
@@ -638,9 +640,10 @@
 
       <!-- STORE HEADER & SELECT ALL BAR IN CART (2 BARIS: LOKASI SUPERMARKET DI ATAS, PILIH SEMUA DI BAWAH) -->
       <div class="cart-store-header cart-select-all-bar single-line-store-header cart-single-line-store cart-store-header-two-rows">
-        <!-- Baris 1: Lokasi Supermarket Penuh (100% Anti-Terpotong) -->
-        <div class="cart-store-location-row">
+        <!-- Baris 1: Lokasi Supermarket Penuh (100% Anti-Terpotong & Dapat Diganti) -->
+        <div class="cart-store-location-row" onclick="openStorePickerModal()" style="cursor: pointer;" title="Klik untuk ganti lokasi supermarket">
           <span id="cartCurrentStoreDisplay" class="store-strip-name" title="Lokasi Supermarket Saat Ini">Lotte Mart Grocery - Puri Indah</span>
+          <span class="cart-store-change-hint" title="Ganti Lokasi Supermarket">Ganti ✏️</span>
         </div>
 
         <!-- Baris 2: Kontrol Pilih Semua & Total Item Terpilih -->
@@ -1108,6 +1111,56 @@
       <div id="blacklistItemsList"
         style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 200px; overflow-y: auto;">
         <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: PILIH LOKASI SUPERMARKET (IN-APP STORE PICKER POPUP)
+       ======================================================================== -->
+  <div id="storePickerModal" class="modal-backdrop">
+    <div class="modal-card store-picker-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 24px;">🏬</span>
+          <div>
+            <h3 class="serif-font" style="font-size: 1.1rem; color: #222222; margin: 0; line-height: 1.2;">Pilih Lokasi Supermarket</h3>
+            <p style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0;">Sesuaikan toko untuk riwayat harga akurat</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn touch-target" onclick="closeStorePickerModal()">&times;</button>
+      </div>
+
+      <!-- Quick Search / Filter Input -->
+      <div class="store-picker-search-wrap">
+        <span class="store-picker-search-icon">🔍</span>
+        <input type="text" id="storePickerSearchInput" class="store-picker-search-input"
+          placeholder="Cari supermarket atau ketik toko baru..."
+          oninput="handleStorePickerSearch(this.value)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomStorePicker();}"
+          autocomplete="off">
+      </div>
+
+      <!-- Popular Preset Stores List -->
+      <div class="store-picker-section-title" style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+        Daftar Supermarket Pilihan
+      </div>
+      <div id="storePickerList" class="store-picker-list">
+        <!-- Rendered dynamically via JS -->
+      </div>
+
+      <!-- Custom Store Input Section -->
+      <div class="store-picker-custom-section" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--pastel-light-2);">
+        <div style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+          ➕ Ketik Toko / Pasar Baru
+        </div>
+        <form onsubmit="handleCustomStoreSubmit(event)" style="display: flex; gap: 8px;">
+          <input type="text" id="storePickerCustomInput" class="form-control"
+            placeholder="Contoh: Pasar Mayestik, Hero Pondok Indah" style="flex: 1;" maxlength="60">
+          <button type="submit" class="btn-primary touch-target" style="width: auto; margin-top: 0; padding: 0 16px; font-size: 0.82rem; font-weight: 800;">
+            Gunakan
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -1916,7 +1969,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=91"></script>
+  <script src="./js/app.js?v=92"></script>
 
   <!-- Service Worker Registration -->
   <script>

@@ -2357,95 +2357,236 @@ function renderAll() {
   updateCartBadges();
 }
 
+// =========================================================================
+// CUSTOM IN-APP SUPERMARKET / STORE PICKER POPUP MODAL
+// =========================================================================
+const PRESET_SUPERMARKETS = [
+  { name: 'Lotte Mart Grocery - Puri Indah', icon: '🏬', tag: 'Supermarket Lengkap • Puri Indah' },
+  { name: 'Superindo - Kebon Jeruk', icon: '🛒', tag: 'Produk Segar & Promo Harian • Kebon Jeruk' },
+  { name: 'Grand Lucky - SCBD', icon: '✨', tag: 'Supermarket Premium & Impor • SCBD' },
+  { name: 'Hypermart - Puri Mall', icon: '🛍️', tag: 'Kebutuhan Rumah Tangga Lengkap • Puri Mall' },
+  { name: 'Alfamart / Indomaret', icon: '🏪', tag: 'Minimarket Terdekat • Belanja Praktis' },
+  { name: 'Pasar Tradisional / Pasar Basah', icon: '🧺', tag: 'Bahan Dapur Segar & Ekonomis' }
+];
+
+function openStorePickerModal() {
+  const modal = document.getElementById('storePickerModal');
+  const searchInput = document.getElementById('storePickerSearchInput');
+  const customInput = document.getElementById('storePickerCustomInput');
+  if (searchInput) searchInput.value = '';
+  if (customInput) customInput.value = '';
+
+  renderStorePickerList('');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
+  if (searchInput) {
+    setTimeout(() => searchInput.focus(), 150);
+  }
+}
+
+function closeStorePickerModal() {
+  const modal = document.getElementById('storePickerModal');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
+}
+
+function renderStorePickerList(query = '') {
+  const container = document.getElementById('storePickerList');
+  if (!container) return;
+
+  const q = (query || '').trim().toLowerCase();
+
+  // Collect all known stores (presets + currentStore + any in receipts/priceHistory)
+  const knownStoresMap = new Map();
+  PRESET_SUPERMARKETS.forEach(s => knownStoresMap.set(s.name.toLowerCase(), s));
+
+  if (AppState.currentStore && !knownStoresMap.has(AppState.currentStore.toLowerCase())) {
+    knownStoresMap.set(AppState.currentStore.toLowerCase(), {
+      name: AppState.currentStore,
+      icon: '🏪',
+      tag: 'Toko Pilihan Anda'
+    });
+  }
+
+  if (Array.isArray(AppState.receipts)) {
+    AppState.receipts.forEach(r => {
+      if (r.store && !knownStoresMap.has(r.store.toLowerCase())) {
+        knownStoresMap.set(r.store.toLowerCase(), {
+          name: r.store,
+          icon: '🧾',
+          tag: 'Dari Riwayat Struk'
+        });
+      }
+    });
+  }
+
+  let storeList = Array.from(knownStoresMap.values());
+  if (q) {
+    storeList = storeList.filter(s => s.name.toLowerCase().includes(q) || (s.tag && s.tag.toLowerCase().includes(q)));
+  }
+
+  let html = '';
+
+  // If query does not match any existing store, offer quick "Add new store" button
+  if (q && !storeList.some(s => s.name.toLowerCase() === q)) {
+    const rawVal = query.trim();
+    html += `
+      <div class="store-picker-item store-picker-item-new" onclick="selectStoreFromPicker('${escapeHtml(rawVal)}')">
+        <div class="store-picker-item-left">
+          <div class="store-picker-item-icon">➕</div>
+          <div class="store-picker-item-info">
+            <span class="store-picker-item-name">Gunakan "${escapeHtml(rawVal)}"</span>
+            <span class="store-picker-item-desc">Pilih sebagai lokasi supermarket baru</span>
+          </div>
+        </div>
+        <span class="store-picker-item-badge" style="background: #E8F5E9; color: #2E7D32; border-color: #C8E6C9;">Pilih ➔</span>
+      </div>
+    `;
+  }
+
+  if (storeList.length === 0 && !q) {
+    html = '<div style="text-align: center; padding: 20px; font-size: 0.8rem; color: #757575;">Belum ada daftar supermarket.</div>';
+  } else {
+    html += storeList.map(s => {
+      const isSelected = (AppState.currentStore || '').trim().toLowerCase() === s.name.trim().toLowerCase();
+      return `
+        <div class="store-picker-item ${isSelected ? 'active' : ''}" onclick="selectStoreFromPicker('${escapeHtml(s.name)}')">
+          <div class="store-picker-item-left">
+            <div class="store-picker-item-icon">${s.icon || '🏬'}</div>
+            <div class="store-picker-item-info">
+              <span class="store-picker-item-name">${escapeHtml(s.name)}</span>
+              <span class="store-picker-item-desc">${escapeHtml(s.tag || 'Supermarket')}</span>
+            </div>
+          </div>
+          ${isSelected ? `
+            <span class="store-picker-item-badge">
+              <span>✓</span>
+              <span>Terpilih</span>
+            </span>
+          ` : `
+            <span style="font-size: 14px; color: #94A3B8; margin-left: 8px;">➔</span>
+          `}
+        </div>
+      `;
+    }).join('');
+  }
+
+  container.innerHTML = html;
+}
+
+function handleStorePickerSearch(val) {
+  renderStorePickerList(val);
+}
+
+function submitCustomStorePicker() {
+  const searchInput = document.getElementById('storePickerSearchInput');
+  if (searchInput && searchInput.value.trim()) {
+    selectStoreFromPicker(searchInput.value.trim());
+  }
+}
+
+function handleCustomStoreSubmit(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const customInput = document.getElementById('storePickerCustomInput');
+  if (!customInput) return;
+  const val = customInput.value.trim();
+  if (!val) {
+    showToast('Ketik nama supermarket terlebih dahulu!', 'warning');
+    customInput.focus();
+    return;
+  }
+  selectStoreFromPicker(val);
+}
+
+function selectStoreFromPicker(storeName) {
+  if (!storeName) return;
+  const val = storeName.trim();
+  AppState.currentStore = val;
+
+  // Sync to fallback select and display elements
+  const select = document.getElementById('session-store-select');
+  if (select) {
+    let opt = Array.from(select.options).find(o => o.value === val);
+    if (!opt) {
+      opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = val;
+      select.insertBefore(opt, select.firstChild);
+    }
+    select.value = val;
+  }
+
+  const dispPlanner = document.getElementById('session-store-display');
+  if (dispPlanner) dispPlanner.textContent = val;
+
+  const dispCart = document.getElementById('cartCurrentStoreDisplay');
+  if (dispCart) dispCart.textContent = val;
+
+  // Update store attribute for active cart items
+  AppState.cart.forEach(item => { item.store = val; });
+
+  saveLocalState();
+  pushStateToCloud();
+  renderItems();
+  renderCartSection();
+
+  playCalmChime();
+  showToast(`Lokasi supermarket diatur ke "${val}" ✨`, 'success');
+  closeStorePickerModal();
+}
+
 function renderSessionControls() {
   const storeSelect = document.getElementById('session-store-select');
+  const storeDisplay = document.getElementById('session-store-display');
+  const cartStoreDisplay = document.getElementById('cartCurrentStoreDisplay');
   const datePicker = document.getElementById('session-date-picker');
   const customStoreInput = document.getElementById('custom-store-input');
 
   if (datePicker) datePicker.value = AppState.currentDate;
+  if (storeDisplay) storeDisplay.textContent = AppState.currentStore;
+  if (cartStoreDisplay) cartStoreDisplay.textContent = AppState.currentStore;
+
   if (storeSelect) {
     const knownValues = storeSelect.options ? Array.from(storeSelect.options).map(o => o.value) : [];
-    if (knownValues.includes(AppState.currentStore)) {
-      storeSelect.value = AppState.currentStore;
-      if (customStoreInput) customStoreInput.style.display = 'none';
-    } else {
-      storeSelect.value = 'custom';
-      if (customStoreInput) {
-        customStoreInput.style.display = 'block';
-        customStoreInput.value = AppState.currentStore;
-      }
+    if (!knownValues.includes(AppState.currentStore)) {
+      const opt = document.createElement('option');
+      opt.value = AppState.currentStore;
+      opt.textContent = AppState.currentStore;
+      storeSelect.insertBefore(opt, storeSelect.firstChild);
     }
+    storeSelect.value = AppState.currentStore;
   }
 }
 
 function handleStoreChange(val) {
-  const customInput = document.getElementById('custom-store-input');
   if (val === 'custom') {
-    if (customInput) {
-      customInput.style.display = 'block';
-      customInput.focus();
-      AppState.currentStore = customInput.value.trim() || 'Lotte Mart Grocery - Puri Indah';
-    }
-  } else {
-    if (customInput) customInput.style.display = 'none';
-    AppState.currentStore = val;
+    openStorePickerModal();
+    return;
   }
-
-  AppState.cart.forEach(item => { item.store = AppState.currentStore; });
-  pushStateToCloud();
-  renderItems();
-  showToast(`Toko belanja diatur ke ${AppState.currentStore}`, 'info');
+  selectStoreFromPicker(val);
 }
 
 function toggleCustomStoreInput() {
-  const wrap = document.getElementById('custom-store-wrap');
-  const input = document.getElementById('custom-store-input');
-  if (!wrap) return;
-  const isHidden = wrap.style.display === 'none' || (typeof getComputedStyle !== 'undefined' && getComputedStyle(wrap).display === 'none');
-  if (isHidden) {
-    wrap.style.display = 'block';
-    if (input) {
-      input.value = (AppState.currentStore && AppState.currentStore !== 'custom') ? AppState.currentStore : '';
-      input.focus();
-    }
-  } else {
-    wrap.style.display = 'none';
-  }
+  openStorePickerModal();
 }
 
 function saveCustomStoreInput() {
-  const wrap = document.getElementById('custom-store-wrap');
   const input = document.getElementById('custom-store-input');
-  if (!input) return;
+  if (!input) {
+    openStorePickerModal();
+    return;
+  }
   const val = input.value.trim();
   if (!val) {
     showToast('Nama toko tidak boleh kosong!', 'warning');
     input.focus();
     return;
   }
-
-  AppState.currentStore = val;
-  const select = document.getElementById('session-store-select');
-  if (select) {
-    let customOpt = Array.from(select.options).find(o => o.value === val);
-    if (!customOpt) {
-      customOpt = document.createElement('option');
-      customOpt.value = val;
-      customOpt.textContent = val;
-      select.insertBefore(customOpt, select.firstChild);
-    }
-    select.value = val;
-  }
-
-  const disp = document.getElementById('cartCurrentStoreDisplay');
-  if (disp) disp.textContent = val;
-
-  AppState.cart.forEach(item => { item.store = val; });
+  selectStoreFromPicker(val);
+  const wrap = document.getElementById('custom-store-wrap');
   if (wrap) wrap.style.display = 'none';
-  saveLocalState();
-  pushStateToCloud();
-  renderItems();
-  showToast(`Toko belanja diubah ke "${val}"`, 'success');
 }
 
 function cancelCustomStoreInput() {
@@ -5891,6 +6032,8 @@ if (typeof document !== 'undefined') {
         closeBlacklistManagerModal();
       } else if (modalId === 'cloudSyncModal') {
         closeCloudSyncModal();
+      } else if (modalId === 'storePickerModal') {
+        closeStorePickerModal();
       } else {
         e.target.classList.remove('active', 'show');
         if (e.target.style) e.target.style.display = 'none';
