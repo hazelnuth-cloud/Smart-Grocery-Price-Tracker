@@ -1803,7 +1803,9 @@ function getAuthErrorMessage(err) {
   if (!err) return 'Terjadi kesalahan saat masuk.';
   switch (err.code) {
     case 'auth/unauthorized-domain':
-      return 'Domain aplikasi belum terdaftar di Firebase Authorized Domains.';
+      return 'Domain aplikasi belum terdaftar di Firebase Authorized Domains. Pastikan membuka dari domain resmi.';
+    case 'auth/operation-not-supported-in-this-environment':
+      return 'Lingkungan peramban membatasi pop-up OAuth. Mengalihkan ke login resmi Google...';
     case 'auth/popup-blocked':
       return 'Pop-up diblokir peramban. Mengalihkan ke login resmi Google...';
     case 'auth/popup-closed-by-user':
@@ -1825,8 +1827,24 @@ async function loginWithGoogle() {
   clearAuthAlert();
   purgeLegacyAudreyData();
 
+  // 1. Cek jika protokol file:// (dibuka langsung dari file explorer Windows/Mac tanpa web server)
+  if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
+    setAuthAlert(
+      '<strong>Google Sign-In memerlukan server web (http/https).</strong><br>' +
+      'Kebijakan keamanan Google OAuth memblokir login dari file lokal (<code>file:///</code>).<br><br>' +
+      '💡 <strong>Solusi:</strong><br>' +
+      '1. Buka via link web resmi: <a href="https://artgrocery-ashen.vercel.app" target="_blank" style="color: #BE185D; font-weight: 800; text-decoration: underline;">artgrocery-ashen.vercel.app</a><br>' +
+      '2. Atau gunakan opsi <strong>Masuk dengan Email &amp; Kata Sandi</strong> atau <strong>Akun Demo</strong> di bawah.',
+      'warning'
+    );
+    showToast('Buka via web resmi untuk masuk dengan Google 🌐', 'warning');
+    return;
+  }
+
+  // 2. Cek kesiapan Firebase SDK
   if (typeof firebase === 'undefined' || !firebase.auth) {
-    showToast('Layanan Firebase tidak dapat dijangkau. Periksa koneksi internet Anda.', 'error');
+    setAuthAlert('Layanan Firebase tidak dapat dijangkau. Periksa koneksi internet Anda atau muat ulang halaman.', 'danger');
+    showToast('Layanan Firebase tidak terjangkau. Periksa internet Anda.', 'error');
     return;
   }
 
@@ -1840,21 +1858,24 @@ async function loginWithGoogle() {
   }
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isStandalone = isAppStandalone();
 
-  // Pada perangkat smartphone / mobile: standar resmi Google & Firebase adalah redirect langsung ke accounts.google.com
-  // Ini mencegah pemblokiran pop-up di Android Chrome & iOS Safari serta memunculkan pemilih akun Google bawaan perangkat
-  if (isMobile) {
+  // 3. Pada perangkat HP ATAU Desktop PWA (standalone window):
+  // Standar terbaik dan terandal adalah signInWithRedirect (menghindari pemblokiran pop-up & batasan third-party cookie)
+  if (isMobile || isStandalone) {
     showToast('Membuka Google Sign-In di perangkat Anda...', 'info');
     try {
       await firebase.auth().signInWithRedirect(provider);
     } catch (redirErr) {
       console.error('Firebase signInWithRedirect error:', redirErr);
       showToast(getAuthErrorMessage(redirErr), 'error');
+      setAuthAlert(getAuthErrorMessage(redirErr), 'danger');
     }
     return;
   }
 
-  // Pada komputer / laptop desktop: gunakan popup resmi Google OAuth
+  // 4. Pada browser Komputer / Laptop Desktop:
+  // Coba signInWithPopup terlebih dahulu, lalu otomatis fallback ke signInWithRedirect jika pop-up / environment dibatasi
   showToast('Menghubungkan ke Google...', 'info');
   try {
     const result = await firebase.auth().signInWithPopup(provider);
@@ -1865,23 +1886,34 @@ async function loginWithGoogle() {
   } catch (popupError) {
     console.warn('Firebase signInWithPopup notice:', popupError);
 
+    // Pengguna membatalkan sendiri jendela pop-up
     if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
       showToast('Masuk dengan Google dibatalkan.', 'info');
       return;
     }
 
-    if (popupError.code === 'auth/popup-blocked') {
-      showToast('Pop-up diblokir. Mengalihkan ke login resmi Google...', 'info');
+    // Tangani auth/operation-not-supported-in-this-environment, popup-blocked, dan third-party storage restriction:
+    // Otomatis beralih ke signInWithRedirect agar sukses di semua komputer & peramban!
+    if (
+      popupError.code === 'auth/operation-not-supported-in-this-environment' ||
+      popupError.code === 'auth/popup-blocked' ||
+      popupError.code === 'auth/internal-error' ||
+      (popupError.message && popupError.message.toLowerCase().includes('supported')) ||
+      (popupError.message && popupError.message.toLowerCase().includes('popup'))
+    ) {
+      showToast('Mengalihkan ke halaman masuk resmi Google...', 'info');
       try {
         await firebase.auth().signInWithRedirect(provider);
       } catch (redirErr) {
-        console.error('signInWithRedirect error:', redirErr);
+        console.error('Firebase signInWithRedirect fallback error:', redirErr);
         showToast(getAuthErrorMessage(redirErr), 'error');
+        setAuthAlert(getAuthErrorMessage(redirErr), 'danger');
       }
       return;
     }
 
     showToast(getAuthErrorMessage(popupError), 'error');
+    setAuthAlert(getAuthErrorMessage(popupError), 'danger');
   }
 }
 
