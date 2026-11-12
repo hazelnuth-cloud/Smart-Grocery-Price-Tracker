@@ -2,7 +2,7 @@
  * Service Worker for Smart Grocery Tracker & Budget Planner
  * Production-ready offline caching for supermarket in-store experience
  */
-const CACHE_NAME = 'sgt-cache-v77';
+const CACHE_NAME = 'sgt-cache-v78';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

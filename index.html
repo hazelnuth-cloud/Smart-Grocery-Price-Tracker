@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=104">
+  <link rel="stylesheet" href="./css/app.css?v=105">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -850,9 +850,9 @@
 
 
     <!-- ========================================================================
-         FLOATING ACTION BUTTON (FAB): IN-STORE MODE TOGGLE
+         FLOATING ACTION BUTTON (FAB): IN-STORE MODE TOGGLE (Safely hidden to protect taps)
          ======================================================================== -->
-    <button id="fabStoreMode" class="fab-store-mode touch-target" onclick="toggleShoppingMode()"
+    <button id="fabStoreMode" class="fab-store-mode touch-target" style="display: none !important;" aria-hidden="true" onclick="toggleShoppingMode()"
       title="Beralih Mode Belanja Toko">
       <span id="fabIcon" class="fab-icon">🛒</span>
       <span id="fabText">Mulai Belanja</span>
@@ -2207,7 +2207,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=104"></script>
+  <script src="./js/app.js?v=105"></script>
 
   <!-- Service Worker Registration -->
   <script>

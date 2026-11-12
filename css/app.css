@@ -969,13 +969,16 @@ body.dark-mode .btn-smart-submit {
 }
 
 /* ==========================================================================
-       8. FLOATING ACTION BUTTON (FAB) FOR IN-STORE MODE
+       8. FLOATING ACTION BUTTON (FAB) FOR IN-STORE MODE (Safely hidden to prevent tap collision)
        ========================================================================== */
 .fab-store-mode {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
   position: fixed;
   bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   right: 20px;
-  z-index: 45;
+  z-index: -1;
   background: linear-gradient(135deg, var(--rose-contrast) 0%, #BE185D 100%);
   color: #FFFFFF;
   border: none;
@@ -10168,28 +10171,11 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
     font-size: 11px !important;
   }
 
-  /* Circular Mobile FAB to avoid blocking search input */
+  /* Mobile FAB safely disabled to prevent tap collision with catalog & checkout buttons */
   .fab-store-mode {
-    width: 50px !important;
-    height: 50px !important;
-    min-height: 50px !important;
-    border-radius: 50% !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-    right: 14px !important;
-    box-shadow: 0 6px 20px rgba(233, 30, 99, 0.45) !important;
-  }
-
-  .fab-store-mode #fabText {
     display: none !important;
-  }
-
-  .fab-store-mode #fabIcon {
-    font-size: 1.4rem !important;
-    margin: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   /* Planner Actions Bar & Anti-List Button Protection (Anti-Bertingkat) */

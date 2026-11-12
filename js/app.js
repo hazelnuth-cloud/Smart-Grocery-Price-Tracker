@@ -3833,7 +3833,7 @@ function executeDeleteItem() {
   saveLocalState();
   pushStateToCloud();
   renderAll();
-  showToast(`"${name}" dihapus • Ketuk toast ini untuk Urungkan ↩️`, 'info');
+  showToastWithUndo(`"${name}" dihapus dari daftar belanja`, () => undoDeleteItem());
 }
 
 // Fitur Undo / Pemulihan Item yang Tidak Sengaja Terhapus
@@ -4943,8 +4943,8 @@ function startNewShoppingSession() {
   const instoreCard = document.getElementById('inStoreCompanionCard');
 
   if (fabStoreMode) {
-    fabStoreMode.style.display = '';
-    fabStoreMode.classList.remove('d-none');
+    fabStoreMode.style.display = 'none';
+    fabStoreMode.classList.add('d-none');
   }
   if (fabIcon) fabIcon.textContent = '🛒';
   if (fabText) fabText.textContent = 'Mulai Belanja';
@@ -4993,8 +4993,8 @@ function toggleShoppingMode() {
     showToast('Mode Toko aktif • Checklist lorong & pantau sisa saldo', 'info');
   } else {
     if (fabStoreMode) {
-      fabStoreMode.style.display = '';
-      fabStoreMode.classList.remove('d-none');
+      fabStoreMode.style.display = 'none';
+      fabStoreMode.classList.add('d-none');
     }
     if (fabIcon) fabIcon.textContent = '🛒';
     if (fabText) fabText.textContent = 'Mulai Belanja';
@@ -5113,8 +5113,8 @@ async function confirmFinishShopping() {
   const runningBar = document.getElementById('runningCartBar');
   const instoreCard = document.getElementById('inStoreCompanionCard');
   if (fabStoreMode) {
-    fabStoreMode.style.display = '';
-    fabStoreMode.classList.remove('d-none');
+    fabStoreMode.style.display = 'none';
+    fabStoreMode.classList.add('d-none');
   }
   if (fabIcon) fabIcon.textContent = '🛒';
   if (fabText) fabText.textContent = 'Mulai Belanja';
@@ -6269,33 +6269,12 @@ function switchTab(tab, force = false) {
     tabPantry.classList.toggle('active', isTarget);
   }
 
-    // Update floating controls state dynamically to power seamless flow
+  // Update floating controls state dynamically (FAB disabled to prevent mobile tap collision)
   const fab = document.getElementById('fabStoreMode');
-  const fabIcon = document.getElementById('fabIcon');
-  const fabText = document.getElementById('fabText');
   const runningBar = document.getElementById('runningCartBar');
 
   if (runningBar) runningBar.classList.add('d-none');
-
-  if (tab === 'planner') {
-    if (fab) {
-      fab.style.display = 'inline-flex';
-      if (fabIcon) fabIcon.textContent = '🛍️';
-      if (fabText) fabText.textContent = 'Mulai Belanja';
-      fab.title = 'Mulai Belanja: Pindahkan semua rencana ke keranjang';
-      fab.onclick = startShoppingFromPlan;
-    }
-  } else if (tab === 'cart') {
-    if (fab) {
-      fab.style.display = 'inline-flex';
-      if (fabIcon) fabIcon.textContent = '📋';
-      if (fabText) fabText.textContent = 'Ke Rencana';
-      fab.title = 'Buka Rencana Belanja';
-      fab.onclick = () => switchTab('planner');
-    }
-  } else {
-    if (fab) fab.style.display = 'none';
-  }
+  if (fab) fab.style.display = 'none';
 
   // Synchronize segmented buttons between planner and cart
   const btnPlanner = document.getElementById('btnViewPlanner');
