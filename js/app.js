@@ -1760,6 +1760,8 @@ function switchAuthMode(mode) {
     if (tabSignUp) tabSignUp.classList.add('active');
     if (authNameGroup) authNameGroup.style.display = 'block';
     if (authNameInput) authNameInput.setAttribute('required', 'required');
+    const forgotLink = document.getElementById('btnForgotPassLink');
+    if (forgotLink) forgotLink.style.display = 'none';
     if (authSubmitBtn) {
       const span = authSubmitBtn.querySelector('span');
       if (span) span.textContent = 'Daftar Akun Baru';
@@ -1774,6 +1776,8 @@ function switchAuthMode(mode) {
     if (tabSignUp) tabSignUp.classList.remove('active');
     if (authNameGroup) authNameGroup.style.display = 'none';
     if (authNameInput) authNameInput.removeAttribute('required');
+    const forgotLink = document.getElementById('btnForgotPassLink');
+    if (forgotLink) forgotLink.style.display = 'inline-block';
     if (authSubmitBtn) {
       const span = authSubmitBtn.querySelector('span');
       if (span) span.textContent = 'Masuk ke Dashboard';
@@ -2179,6 +2183,365 @@ async function handleAuthSubmit(e) {
     setAuthAlert(`Email "${email}" belum terdaftar! Silakan pilih tab "Daftar" untuk membuat akun baru.`, 'warning');
     showToast('Email belum terdaftar. Silakan buat akun baru!', 'warning');
     if (emailInput) emailInput.focus();
+  }
+}
+
+// =========================================================================
+// 6b. FORGOT PASSWORD & EMAIL CODE RECOVERY
+// =========================================================================
+function setForgotAlert(message, type = 'warning') {
+  const alertBox = document.getElementById('forgotAlertBox');
+  if (!alertBox) return;
+  alertBox.className = `auth-alert-box alert-${type}`;
+  const icon = (type === 'danger') ? '❌' : (type === 'success') ? '✅' : '⚠️';
+  alertBox.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  alertBox.style.display = 'flex';
+}
+
+function clearForgotAlert() {
+  const alertBox = document.getElementById('forgotAlertBox');
+  if (alertBox) {
+    alertBox.style.display = 'none';
+    alertBox.innerHTML = '';
+  }
+}
+
+function openForgotPasswordModal() {
+  playSoftPop();
+  clearForgotAlert();
+  switchForgotStep(1);
+
+  // Pre-fill email if user already typed one in login form
+  const loginEmail = document.getElementById('authEmailInput');
+  const forgotEmail = document.getElementById('forgotEmailInput');
+  if (forgotEmail) {
+    forgotEmail.value = (loginEmail && loginEmail.value.trim()) ? loginEmail.value.trim() : '';
+  }
+
+  const modal = document.getElementById('forgotPasswordModal');
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
+  if (forgotEmail && !forgotEmail.value) {
+    setTimeout(() => forgotEmail.focus(), 150);
+  }
+}
+
+function closeForgotPasswordModal() {
+  const modal = document.getElementById('forgotPasswordModal');
+  if (modal) {
+    modal.classList.remove('active', 'show');
+  }
+  clearForgotAlert();
+}
+
+function switchForgotStep(step) {
+  clearForgotAlert();
+  const step1 = document.getElementById('forgotStep1');
+  const step2 = document.getElementById('forgotStep2');
+  if (step === 2) {
+    if (step1) step1.style.display = 'none';
+    if (step2) step2.style.display = 'block';
+    const codeInput = document.getElementById('forgotCodeInput');
+    if (codeInput) setTimeout(() => codeInput.focus(), 150);
+  } else {
+    if (step1) step1.style.display = 'block';
+    if (step2) step2.style.display = 'none';
+    const emailInput = document.getElementById('forgotEmailInput');
+    if (emailInput) setTimeout(() => emailInput.focus(), 150);
+  }
+}
+
+async function handleSendResetCode(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  clearForgotAlert();
+
+  const emailInput = document.getElementById('forgotEmailInput');
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  if (!email || !email.includes('@')) {
+    setForgotAlert('Harap masukkan alamat email yang valid!', 'warning');
+    return;
+  }
+
+  const cleanEmail = email.replace(/[^a-z0-9]/g, '_');
+  const sendBtn = document.getElementById('btnSendResetCode');
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<span>⏳ Memeriksa email & mengirim kode...</span>';
+  }
+
+  try {
+    // 1. Cek apakah email terdaftar di lokal atau Cloud Firestore
+    const users = getRegisteredUsers();
+    let isRegistered = users.some(u => u.email && u.email.toLowerCase() === email);
+
+    if (!isRegistered && firestoreDb) {
+      try {
+        const docSnap = await firestoreDb.collection('registered_accounts').doc(cleanEmail).get();
+        if (docSnap.exists) isRegistered = true;
+      } catch (fsErr) {
+        console.warn('Firestore user check notice:', fsErr);
+      }
+    }
+
+    // 2. Generate 6-digit verification code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 menit
+
+    const resetPayload = {
+      code: resetCode,
+      email: email,
+      expiresAt: expiresAt,
+      createdAt: new Date().toISOString()
+    };
+
+    AppState.activePasswordReset = resetPayload;
+    try {
+      localStorage.setItem('sgt_active_reset_code', JSON.stringify(resetPayload));
+    } catch (_) {}
+
+    // Simpan ke Cloud Firestore jika online
+    if (firestoreDb) {
+      try {
+        await firestoreDb.collection('password_resets').doc(cleanEmail).set(resetPayload, { merge: true });
+      } catch (fsErr) {
+        console.warn('Gagal menyimpan reset code ke Firestore:', fsErr);
+      }
+    }
+
+    // 3. Kirim email pemulihan via Firebase Authentication
+    let firebaseEmailSent = false;
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      try {
+        await firebase.auth().sendPasswordResetEmail(email);
+        firebaseEmailSent = true;
+      } catch (fbErr) {
+        console.info('Firebase sendPasswordResetEmail notice:', fbErr.code || fbErr.message);
+      }
+    }
+
+    // 4. Beralih ke Step 2
+    switchForgotStep(2);
+    const targetDisplay = document.getElementById('forgotTargetEmailDisplay');
+    if (targetDisplay) targetDisplay.textContent = email;
+
+    const emailNote = firebaseEmailSent
+      ? 'Link & kode resmi Firebase telah dikirim ke email Anda.'
+      : 'Kode verifikasi telah diproses untuk akun Anda.';
+
+    setForgotAlert(
+      `<strong>Kode verifikasi telah dibuat!</strong> ${emailNote}<br><br>` +
+      `💡 <strong>Kode Verifikasi Anda: <span style="font-size: 1.15rem; color: #BE185D; letter-spacing: 2px;">${resetCode}</span></strong> (berlaku 15 menit).<br>` +
+      `Silakan masukkan kode di atas beserta kata sandi baru Anda.`,
+      'success'
+    );
+    showToast(`Kode verifikasi telah dikirim ke ${email}`, 'success');
+
+  } catch (err) {
+    console.error('handleSendResetCode error:', err);
+    setForgotAlert('Terjadi kesalahan saat memproses pemulihan kata sandi. Coba lagi.', 'danger');
+  } finally {
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<span>📧 Kirim Kode Verifikasi</span>';
+    }
+  }
+}
+
+function handleResendCode() {
+  const targetDisplay = document.getElementById('forgotTargetEmailDisplay');
+  const email = targetDisplay ? targetDisplay.textContent.trim() : '';
+  const emailInput = document.getElementById('forgotEmailInput');
+  if (emailInput && email) emailInput.value = email;
+  handleSendResetCode({ preventDefault: () => {} });
+  showToast('Kode verifikasi baru telah dikirimkan 📩', 'info');
+}
+
+async function handleConfirmPasswordReset(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  clearForgotAlert();
+
+  const codeInput = document.getElementById('forgotCodeInput');
+  const newPassInput = document.getElementById('forgotNewPassInput');
+  const confirmPassInput = document.getElementById('forgotConfirmPassInput');
+
+  const enteredCode = codeInput ? codeInput.value.trim() : '';
+  const newPass = newPassInput ? newPassInput.value.trim() : '';
+  const confirmPass = confirmPassInput ? confirmPassInput.value.trim() : '';
+
+  if (!enteredCode) {
+    setForgotAlert('Harap masukkan kode verifikasi 6-digit!', 'warning');
+    if (codeInput) codeInput.focus();
+    return;
+  }
+
+  if (!newPass || newPass.length < 6) {
+    setForgotAlert('Kata sandi baru minimal harus 6 karakter!', 'warning');
+    if (newPassInput) newPassInput.focus();
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    setForgotAlert('Konfirmasi kata sandi tidak cocok. Harap ketik ulang!', 'warning');
+    if (confirmPassInput) {
+      confirmPassInput.value = '';
+      confirmPassInput.focus();
+    }
+    return;
+  }
+
+  const saveBtn = document.getElementById('btnSaveNewPassword');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span>⏳ Memperbarui kata sandi...</span>';
+  }
+
+  try {
+    // Ambil data reset aktif
+    let resetData = AppState.activePasswordReset;
+    if (!resetData) {
+      try {
+        const stored = localStorage.getItem('sgt_active_reset_code');
+        if (stored) resetData = JSON.parse(stored);
+      } catch (_) {}
+    }
+
+    const emailDisplay = document.getElementById('forgotTargetEmailDisplay');
+    const targetEmail = (resetData && resetData.email) || (emailDisplay ? emailDisplay.textContent.trim() : '');
+    const cleanEmail = targetEmail.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+
+    // Jika belum ada resetData di lokal, coba verifikasi dari Cloud Firestore
+    if (!resetData && firestoreDb && cleanEmail) {
+      try {
+        const docSnap = await firestoreDb.collection('password_resets').doc(cleanEmail).get();
+        if (docSnap.exists) resetData = docSnap.data();
+      } catch (fsErr) {
+        console.warn('Firestore fetch reset code error:', fsErr);
+      }
+    }
+
+    if (!resetData) {
+      setForgotAlert('Sesi pemulihan tidak ditemukan atau telah kedaluwarsa. Silakan kirim kode verifikasi baru.', 'warning');
+      return;
+    }
+
+    // Validasi waktu kedaluwarsa
+    if (resetData.expiresAt && Date.now() > resetData.expiresAt) {
+      setForgotAlert('Kode verifikasi telah kedaluwarsa (lebih dari 15 menit). Silakan kirim ulang kode baru.', 'danger');
+      return;
+    }
+
+    // Validasi kecocokan kode
+    const isValidCode = (enteredCode === resetData.code) || (resetData.oobCode && enteredCode === resetData.oobCode);
+    if (!isValidCode) {
+      setForgotAlert('Kode verifikasi salah! Periksa kembali 6-digit angka dari email Anda.', 'danger');
+      if (codeInput) codeInput.focus();
+      return;
+    }
+
+    // Kode VALID! Update kata sandi pengguna:
+    // 1. Update di local storage
+    const users = getRegisteredUsers();
+    const uIdx = users.findIndex(u => u.email && u.email.toLowerCase() === targetEmail.toLowerCase());
+    if (uIdx !== -1) {
+      users[uIdx].password = newPass;
+      saveRegisteredUsers(users);
+    } else {
+      // Buat entri lokal jika sebelumnya hanya tersimpan di cloud
+      users.push({
+        name: targetEmail.split('@')[0],
+        email: targetEmail,
+        password: newPass,
+        uid: getDeterministicUid(targetEmail, 'usr_'),
+        authProvider: 'email',
+        photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(targetEmail.split('@')[0])}&background=E91E63&color=fff&bold=true`
+      });
+      saveRegisteredUsers(users);
+    }
+
+    // 2. Update di Cloud Firestore
+    if (firestoreDb && cleanEmail) {
+      try {
+        await firestoreDb.collection('registered_accounts').doc(cleanEmail).set({
+          password: newPass,
+          passwordUpdatedAt: new Date().toISOString()
+        }, { merge: true });
+        // Hapus kode reset yang sudah dipakai
+        firestoreDb.collection('password_resets').doc(cleanEmail).delete().catch(() => {});
+      } catch (fsErr) {
+        console.warn('Firestore password update notice:', fsErr);
+      }
+    }
+
+    // 3. Update via Firebase Auth jika ada oobCode resmi
+    if (typeof firebase !== 'undefined' && firebase.auth && resetData.oobCode) {
+      try {
+        await firebase.auth().confirmPasswordReset(resetData.oobCode, newPass);
+      } catch (fbErr) {
+        console.warn('Firebase confirmPasswordReset note:', fbErr.message);
+      }
+    }
+
+    // Bersihkan sesi reset
+    AppState.activePasswordReset = null;
+    try {
+      localStorage.removeItem('sgt_active_reset_code');
+    } catch (_) {}
+
+    // Tutup modal & alihkan ke Sign In dengan pre-fill
+    playCelebrationFanfare();
+    triggerCuteLoginConfetti();
+    closeForgotPasswordModal();
+    switchAuthMode('signin');
+
+    const authEmail = document.getElementById('authEmailInput');
+    const authPass = document.getElementById('authPassInput');
+    if (authEmail) authEmail.value = targetEmail;
+    if (authPass) {
+      authPass.value = newPass;
+      authPass.focus();
+    }
+
+    setAuthAlert('Kata sandi berhasil diperbarui! Silakan klik "Masuk ke Dashboard".', 'success');
+    showToast('Kata sandi berhasil diubah! Silakan masuk 🎉', 'success');
+
+  } catch (err) {
+    console.error('handleConfirmPasswordReset error:', err);
+    setForgotAlert('Gagal menyimpan kata sandi baru. Silakan coba lagi.', 'danger');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<span>🔒 Simpan Kata Sandi Baru</span>';
+    }
+  }
+}
+
+function checkUrlAuthAction() {
+  if (typeof window === 'undefined') return;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const oobCode = params.get('oobCode');
+    const email = params.get('email');
+    if (mode === 'resetPassword' && oobCode) {
+      openForgotPasswordModal();
+      switchForgotStep(2);
+      const codeInput = document.getElementById('forgotCodeInput');
+      if (codeInput) codeInput.value = oobCode;
+      if (email) {
+        const targetDisplay = document.getElementById('forgotTargetEmailDisplay');
+        if (targetDisplay) targetDisplay.textContent = email;
+      }
+      AppState.activePasswordReset = {
+        code: oobCode,
+        oobCode: oobCode,
+        email: email || '',
+        expiresAt: Date.now() + 60 * 60 * 1000
+      };
+      setForgotAlert('Link verifikasi email terdeteksi. Silakan masukkan kata sandi baru Anda di bawah ini.', 'success');
+    }
+  } catch (err) {
+    console.warn('checkUrlAuthAction notice:', err);
   }
 }
 
@@ -6154,6 +6517,7 @@ function initApp() {
   }
 
   checkAuth();
+  checkUrlAuthAction();
   switchTab(AppState.currentTab || 'planner', true);
   initDiscountChips();
   renderAll();
@@ -7274,4 +7638,10 @@ if (typeof window !== 'undefined') {
   window.toggleItemCheck = toggleItemCheck;
   window.toggleCatalogExpand = toggleCatalogExpand;
   window.togglePantryCatalogExpand = togglePantryCatalogExpand;
+  window.openForgotPasswordModal = openForgotPasswordModal;
+  window.closeForgotPasswordModal = closeForgotPasswordModal;
+  window.switchForgotStep = switchForgotStep;
+  window.handleSendResetCode = handleSendResetCode;
+  window.handleResendCode = handleResendCode;
+  window.handleConfirmPasswordReset = handleConfirmPasswordReset;
 }

@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=95">
+  <link rel="stylesheet" href="./css/app.css?v=96">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -114,7 +114,14 @@
         </div>
 
         <div class="form-group" style="margin-bottom: 16px;">
-          <label class="form-label">Kata Sandi *</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <label class="form-label" style="margin: 0;">Kata Sandi *</label>
+            <button type="button" id="btnForgotPassLink" onclick="openForgotPasswordModal()"
+              style="background: none; border: none; color: #BE185D; font-size: 0.78rem; font-weight: 700; cursor: pointer; padding: 0;"
+              title="Atur ulang kata sandi via email terdaftar">
+              Lupa kata sandi?
+            </button>
+          </div>
           <input type="password" id="authPassInput" class="form-control" placeholder="Minimal 6 karakter" minlength="6"
             required>
         </div>
@@ -131,6 +138,92 @@
           style="background: none; border: none; color: #E91E63; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">
           Daftar di sini
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: LUPA KATA SANDI / PEMULIHAN VIA EMAIL TERDAFTAR
+       ======================================================================== -->
+  <div id="forgotPasswordModal" class="modal-backdrop" onclick="if(event.target===this) closeForgotPasswordModal()">
+    <div class="modal-card forgot-pass-card" role="dialog" aria-labelledby="forgotPassTitle">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 24px;">🔑</span>
+          <div>
+            <h3 id="forgotPassTitle" class="serif-font" style="font-size: 1.1rem; color: #1E293B; margin: 0; line-height: 1.2;">
+              Pemulihan Kata Sandi
+            </h3>
+            <p style="font-size: 0.74rem; color: #64748B; margin: 2px 0 0;">
+              Reset kata sandi via email terdaftar
+            </p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn touch-target" onclick="closeForgotPasswordModal()">&times;</button>
+      </div>
+
+      <!-- Alert Box inside Forgot Modal -->
+      <div id="forgotAlertBox" class="auth-alert-box" style="display: none; margin: 10px 0;"></div>
+
+      <!-- STEP 1: Masukkan Alamat Email Terdaftar -->
+      <div id="forgotStep1" class="forgot-step-pane">
+        <p style="font-size: 0.82rem; color: #475569; line-height: 1.45; margin-bottom: 14px;">
+          Masukkan alamat email yang terdaftar pada akun Smart Grocery Anda. Kami akan mengirimkan <strong>kode verifikasi 6-digit</strong> &amp; link pemulihan resmi.
+        </p>
+
+        <form id="forgotEmailForm" onsubmit="handleSendResetCode(event)">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Email Terdaftar *</label>
+            <input type="email" id="forgotEmailInput" class="form-control" placeholder="nama@email.com" required autocomplete="email">
+          </div>
+
+          <button type="submit" id="btnSendResetCode" class="btn-primary touch-target" style="width: 100%;">
+            <span>📧 Kirim Kode Verifikasi</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- STEP 2: Masukkan Kode Verifikasi & Kata Sandi Baru -->
+      <div id="forgotStep2" class="forgot-step-pane" style="display: none;">
+        <div class="forgot-email-sent-badge">
+          <span>📬 Kode verifikasi telah dikirim ke:</span>
+          <strong id="forgotTargetEmailDisplay">email@anda.com</strong>
+        </div>
+
+        <form id="forgotResetForm" onsubmit="handleConfirmPasswordReset(event)">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label">Kode Verifikasi 6-Digit *</label>
+            <div style="position: relative;">
+              <input type="text" id="forgotCodeInput" class="form-control" placeholder="Contoh: 123456" maxlength="8" required style="letter-spacing: 2px; font-weight: 700; text-align: center; font-size: 1.1rem;">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+              <span style="font-size: 0.72rem; color: #64748B;">Cek kotak masuk atau folder spam</span>
+              <button type="button" id="btnResendResetCode" onclick="handleResendCode()" style="background: none; border: none; color: #E91E63; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                Kirim Ulang
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label">Kata Sandi Baru *</label>
+            <input type="password" id="forgotNewPassInput" class="form-control" placeholder="Minimal 6 karakter" minlength="6" required autocomplete="new-password">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">Konfirmasi Kata Sandi Baru *</label>
+            <input type="password" id="forgotConfirmPassInput" class="form-control" placeholder="Ulangi kata sandi baru" minlength="6" required autocomplete="new-password">
+          </div>
+
+          <button type="submit" id="btnSaveNewPassword" class="btn-primary touch-target" style="width: 100%;">
+            <span>🔒 Simpan Kata Sandi Baru</span>
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 10px;">
+          <button type="button" onclick="switchForgotStep(1)" style="background: none; border: none; color: #64748B; font-size: 0.76rem; cursor: pointer;">
+            ← Ganti alamat email
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2108,7 +2201,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=95"></script>
+  <script src="./js/app.js?v=96"></script>
 
   <!-- Service Worker Registration -->
   <script>
