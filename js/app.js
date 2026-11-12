@@ -5041,7 +5041,7 @@ function handleAddNewBlacklistItem(e) {
     AppState.blacklist.push(val);
     saveLocalState();
     renderBlacklistChips();
-    showToast(`"${val}" ditambahkan ke Anti-List 🛑`, 'info');
+    showToast(`"${val}" ditambahkan ke Anti\u2011List 🛑`, 'info');
   }
   input.value = '';
 }

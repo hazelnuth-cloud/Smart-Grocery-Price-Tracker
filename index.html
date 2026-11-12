@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=89">
+  <link rel="stylesheet" href="./css/app.css?v=90">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -601,8 +601,7 @@
           </button>
           <button class="btn-manage-blacklist touch-target" onclick="openBlacklistManagerModal()"
             title="Kelola daftar pantangan (Anti-List)">
-            <span>🛑</span>
-            <span>Anti-List</span>
+            <span class="btn-manage-blacklist-label">🛑&nbsp;Anti&#8209;List</span>
           </button>
           <button class="btn-share-wa touch-target" onclick="shareToWhatsApp()"
             title="Kirim daftar kebutuhan belanja ke WhatsApp">
@@ -1051,7 +1050,7 @@
   <div id="blacklistWarningModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="serif-font" style="font-size: 1.1rem; color: var(--status-danger);">⚠️ Peringatan Anti-List</h3>
+        <h3 class="serif-font" style="font-size: 1.1rem; color: var(--status-danger); white-space: nowrap;">⚠️ Peringatan Anti&#8209;List</h3>
         <button class="modal-close-btn touch-target" onclick="cancelBlacklistAdd()">&times;</button>
       </div>
 
@@ -1084,7 +1083,7 @@
   <div id="blacklistManagerModal" class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="serif-font" style="font-size: 1.1rem; color: #222222;">🛑 Kelola Daftar Anti-List</h3>
+        <h3 class="serif-font" style="font-size: 1.1rem; color: #222222; white-space: nowrap;">🛑 Kelola Daftar Anti&#8209;List</h3>
         <button class="modal-close-btn touch-target" onclick="closeBlacklistManagerModal()">&times;</button>
       </div>
 
@@ -1910,7 +1909,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=89"></script>
+  <script src="./js/app.js?v=90"></script>
 
   <!-- Service Worker Registration -->
   <script>
