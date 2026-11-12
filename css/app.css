@@ -5,6 +5,9 @@
        1. COLOR SYSTEM & DESIGN TOKENS (LIGHT & DARK MODES)
        ========================================================================== */
 :root {
+  /* Dynamic App Header Height fallback */
+  --app-header-height: calc(64px + env(safe-area-inset-top, 0px));
+
   /* Backgrounds & Canvas (Shopee 60% Rule: Neutral Very Light Gray #F5F5F5 & Pure White #FFFFFF) */
   --canvas-bg: #F5F5F5;
   --surface-white: #FFFFFF;
@@ -2630,7 +2633,10 @@ body.dark-mode .fluctuation-stable {
   padding: 10px 14px;
   border-radius: var(--radius-md);
   margin-bottom: 12px;
-  transition: all 0.3s ease;
+  transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
   border: 1px solid transparent;
   box-sizing: border-box !important;
 }
@@ -9238,21 +9244,24 @@ body.dark-mode .quick-price-repurchase-detail {
 .sticky-dashboard-tracker {
   position: -webkit-sticky !important;
   position: sticky !important;
-  top: calc(52px + env(safe-area-inset-top, 0px)) !important;
+  top: calc(var(--app-header-height, calc(64px + env(safe-area-inset-top, 0px))) + 4px) !important;
   z-index: 45 !important;
-  background: rgba(255, 255, 255, 0.96) !important;
+  background: #FFFFFF !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border: 1px solid rgba(226, 232, 240, 0.95) !important;
   border-radius: 14px !important;
-  padding: 8px 12px 9px 12px !important;
+  padding: 10px 14px !important;
   margin-top: 4px !important;
   margin-bottom: 10px !important;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 6px !important;
   box-sizing: border-box !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  will-change: transform !important;
   transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease !important;
 }
 
@@ -9260,41 +9269,43 @@ body.dark-mode .quick-price-repurchase-detail {
 .sticky-dashboard-tracker.safe {
   border-left: 4px solid #10B981 !important;
   border-color: #E2E8F0 !important;
+  background: #FFFFFF !important;
 }
 
 .sticky-dashboard-tracker.warning {
   border-left: 4px solid #F59E0B !important;
   border-color: #FDE68A !important;
-  background: rgba(255, 251, 235, 0.96) !important;
+  background: #FFFBEB !important;
 }
 
 .sticky-dashboard-tracker.danger {
   border-left: 4px solid #EF4444 !important;
   border-color: #FECDD3 !important;
-  background: rgba(254, 242, 242, 0.96) !important;
+  background: #FFF1F2 !important;
   box-shadow: 0 4px 16px rgba(239, 68, 68, 0.12) !important;
 }
 
 /* Dark mode for Sticky Dashboard Tracker */
 body.dark-mode .sticky-dashboard-tracker {
-  background: rgba(30, 41, 59, 0.96) !important;
+  background: #1E293B !important;
   border-color: rgba(51, 65, 85, 0.9) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
 }
 
 body.dark-mode .sticky-dashboard-tracker.safe {
   border-left-color: #10B981 !important;
+  background: #1E293B !important;
 }
 
 body.dark-mode .sticky-dashboard-tracker.warning {
   border-left-color: #F59E0B !important;
-  background: rgba(69, 26, 3, 0.92) !important;
+  background: #451A03 !important;
   border-color: #78350F !important;
 }
 
 body.dark-mode .sticky-dashboard-tracker.danger {
   border-left-color: #EF4444 !important;
-  background: rgba(76, 5, 25, 0.92) !important;
+  background: #4C0519 !important;
   border-color: #881337 !important;
 }
 
@@ -9972,14 +9983,17 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
   .sticky-dashboard-tracker {
     position: -webkit-sticky !important;
     position: sticky !important;
-    top: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    top: calc(var(--app-header-height, calc(62px + env(safe-area-inset-top, 0px))) + 4px) !important;
     z-index: 45 !important;
-    padding: 6px 10px 5px 10px !important;
-    margin-top: 2px !important;
-    margin-bottom: 6px !important;
-    border-radius: 12px !important;
-    gap: 3px !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    padding: 8px 12px 8px 12px !important;
+    margin-top: 4px !important;
+    margin-bottom: 8px !important;
+    border-radius: 14px !important;
+    gap: 4px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+    will-change: transform !important;
   }
 
   /* Compact Tier 1: Micro Header Row */

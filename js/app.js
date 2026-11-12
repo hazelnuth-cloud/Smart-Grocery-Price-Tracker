@@ -6613,6 +6613,13 @@ function initApp() {
   initDiscountChips();
   renderAll();
   updatePwaInstallUI();
+  syncAppHeaderHeight();
+  if (typeof window !== 'undefined' && window.ResizeObserver) {
+    const headerEl = document.querySelector('.app-header');
+    if (headerEl) {
+      new ResizeObserver(() => syncAppHeaderHeight()).observe(headerEl);
+    }
+  }
 
   // Allow initial rendering pass to settle quietly without firing unsolicited toasts
   setTimeout(() => {
@@ -6622,6 +6629,24 @@ function initApp() {
 
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', initApp);
+}
+
+// Synchronize dynamic app header height for sticky tracker and subheaders
+function syncAppHeaderHeight() {
+  const header = document.querySelector('.app-header');
+  if (header) {
+    const rect = header.getBoundingClientRect();
+    const h = Math.ceil(rect.height);
+    if (h > 0) {
+      document.documentElement.style.setProperty('--app-header-height', `${h}px`);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', syncAppHeaderHeight, { passive: true });
+  window.addEventListener('orientationchange', syncAppHeaderHeight, { passive: true });
+  window.addEventListener('load', syncAppHeaderHeight, { passive: true });
 }
 
 // =========================================================================
