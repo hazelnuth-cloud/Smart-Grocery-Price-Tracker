@@ -3859,23 +3859,43 @@ function undoDeleteItem() {
 // =========================================================================
 
 /**
- * Natural language parser: "Susu UHT 2 liter" -> name: Susu UHT, qty: 2, unit: liter
+ * Natural language parser cerdas:
+ * "Beras 5kg 75000" -> name: Beras, qty: 5, unit: kg, price: 75000
+ * "Minyak 2L 38000" -> name: Minyak, qty: 2, unit: l, price: 38000
+ * "Susu UHT 2 liter Rp 18.000" -> name: Susu UHT, qty: 2, unit: liter, price: 18000
+ * "Roti Tawar 15k" -> name: Roti Tawar, qty: 1, unit: pcs, price: 15000
  */
 function parseSmartInput(rawText) {
   let text = rawText.trim();
   let qty = 1;
   let unit = 'pcs';
+  let price = 0;
 
-  const units = ['liter', 'litre', 'l', 'kg', 'kilogram', 'karung/5kg', 'g', 'gram', 'gr', 'pack', 'dus', 'ikat', 'botol', 'kaleng', 'bungkus', 'bks', 'butir', 'pcs', 'buah', 'lembar'];
+  // 1. Ekstraksi Harga jika dicantumkan di akhir (contoh: "Rp 75.000", "75000", "75k", "75.000")
+  const priceRegex = /(?:rp\.?\s*([0-9.,]+)|([0-9.,]+)\s*k|\b([0-9]{1,3}(?:\.[0-9]{3})+)\b|\b([1-9][0-9]{3,7})\b)$/i;
+  const priceMatch = text.match(priceRegex);
+  if (priceMatch) {
+    const rawPriceStr = priceMatch[1] || priceMatch[2] || priceMatch[3] || priceMatch[4];
+    if (rawPriceStr) {
+      if (priceMatch[2]) {
+        price = Math.round(parseFloat(rawPriceStr.replace(',', '.')) * 1000);
+      } else {
+        price = Math.round(parseFloat(rawPriceStr.replace(/\./g, '').replace(',', '.')) || 0);
+      }
+      text = text.substring(0, priceMatch.index).trim();
+    }
+  }
+
+  const units = ['liter', 'litre', 'l', 'kg', 'kilogram', 'karung/5kg', 'g', 'gram', 'gr', 'pack', 'pouch', 'dus', 'ikat', 'botol', 'kaleng', 'bungkus', 'bks', 'butir', 'pcs', 'buah', 'lembar'];
   const unitsPattern = units.join('|');
 
-  // Match: "2 liter susu uht"
+  // Match: "2 liter susu uht" atau "2 pouch minyak"
   const prefixMatch = text.match(new RegExp(`^(\\d+(?:[.,]\\d+)?)\\s*(${unitsPattern})\\s+(.*)$`, 'i'));
   if (prefixMatch) {
     qty = parseFloat(prefixMatch[1].replace(',', '.'));
     unit = prefixMatch[2].toLowerCase();
     text = prefixMatch[3].trim();
-    return { name: cleanItemName(text), qty, unit };
+    return { name: cleanItemName(text), qty, unit, price };
   }
 
   // Match: "susu uht 2 liter"
@@ -3884,18 +3904,21 @@ function parseSmartInput(rawText) {
     text = suffixMatch[1].trim();
     qty = parseFloat(suffixMatch[2].replace(',', '.'));
     unit = suffixMatch[3].toLowerCase();
-    return { name: cleanItemName(text), qty, unit };
+    return { name: cleanItemName(text), qty, unit, price };
   }
 
-  // Match trailing number: "susu uht 2"
+  // Match trailing number kuantitas: "susu uht 2" (hanya jika <= 500 pcs)
   const numberSuffix = text.match(/^(.*?)\s+(\d+)$/);
   if (numberSuffix) {
-    text = numberSuffix[1].trim();
-    qty = parseInt(numberSuffix[2], 10);
-    return { name: cleanItemName(text), qty, unit: 'pcs' };
+    const n = parseInt(numberSuffix[2], 10);
+    if (n <= 500) {
+      text = numberSuffix[1].trim();
+      qty = n;
+      return { name: cleanItemName(text), qty, unit: 'pcs', price };
+    }
   }
 
-  return { name: cleanItemName(text), qty, unit: 'pcs' };
+  return { name: cleanItemName(text), qty, unit: 'pcs', price };
 }
 
 function cleanItemName(str) {
@@ -4014,13 +4037,15 @@ function insertParsedItem(parsed) {
     return;
   }
 
+  const initialPrice = (parsed.price && parsed.price > 0) ? parsed.price : (historyPrice || 0);
+
   const newItem = {
     id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
     namaBarang: parsed.name,
     kategori: category,
     satuan: parsed.unit || history.satuan || 'pcs',
     qty: Math.min(9999, Math.max(1, parsed.qty || 1)),
-    hargaSatuan: 0, // Fase Shopping Planner: Catat Tanpa Harga (default Rp 0)
+    hargaSatuan: initialPrice,
     diskonTipe: 'none',
     diskonValue: '',
     hargaRiwayatBulanLalu: historyPrice,
@@ -4032,7 +4057,8 @@ function insertParsedItem(parsed) {
   playCalmChime();
   pushStateToCloud();
   renderAll();
-  showToast(`"${parsed.name}" (${newItem.qty} ${newItem.satuan}) dicatat di rencana belanja ✨`, 'success');
+  const priceNotice = initialPrice > 0 ? ` @ ${formatRupiah(initialPrice)}` : '';
+  showToast(`"${parsed.name}" (${newItem.qty} ${newItem.satuan}${priceNotice}) dicatat di rencana belanja ✨`, 'success');
 }
 
 // =========================================================================
