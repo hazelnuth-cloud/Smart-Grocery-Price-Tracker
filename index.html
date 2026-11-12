@@ -19,8 +19,10 @@
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23F472B6'/%3E%3Cstop offset='100%25' stop-color='%239D174D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='%23FFF5F8' stroke='%23FBCFE8' stroke-width='1.5'/%3E%3Cpath d='M16 13.5c-2.4-2.5-5.8-3.6-7.8-1.5-2 2.1-.9 5.8 1.6 7.8l6.2 5.2 6.2-5.2c2.5-2 3.6-5.7 1.6-7.8-2-2.1-5.4-1-7.8 1.5z' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='14.5' r='2.2' fill='%239D174D'/%3E%3C/svg%3E">
 
-  <!-- PWA MANIFEST -->
+  <!-- PWA MANIFEST & ICONS -->
   <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="./icons/icon-512.png">
 
   <!-- Google Fonts: Plus Jakarta Sans, Inter, & Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=94">
+  <link rel="stylesheet" href="./css/app.css?v=95">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -168,6 +170,10 @@
 
         <!-- Single Unified Profile & Settings Trigger Badge -->
         <div class="header-actions">
+          <button type="button" id="btnHeaderInstallPwa" class="btn-header-install touch-target"
+            onclick="installPwa()" title="Pasang di Komputer / HP" style="display: none;">
+            <span>💻 Pasang App</span>
+          </button>
           <button type="button" id="userProfileTrigger" class="user-profile-badge touch-target"
             onclick="openProfileSettingsModal()" title="Profil &amp; Pengaturan Akun">
             <img id="headerUserAvatar" src="" alt="Avatar" class="user-header-avatar" style="display: none;">
@@ -1746,11 +1752,11 @@
           <div class="settings-item-row">
             <div class="settings-item-info">
               <div class="settings-item-label">Pasang Aplikasi (PWA)</div>
-              <div class="settings-item-desc">Akses cepat tanpa browser langsung dari layar ponsel</div>
+              <div class="settings-item-desc">Akses instan tanpa browser di Komputer (PC/Laptop) &amp; HP</div>
             </div>
             <div>
               <button type="button" id="modalBtnInstallPwa" class="btn-settings-action" onclick="installPwa()">
-                📲 Pasang
+                📲 Pasang App
               </button>
               <span id="modalPwaInstalledBadge" class="settings-status-pill installed" style="display: none;">
                 ✓ Terpasang
@@ -1978,13 +1984,131 @@
     </div>
   </div>
 
+  <!-- ========================================================================
+       MODAL: PANDUAN INSTALASI APLIKASI (KOMPUTER & HP)
+       ======================================================================== -->
+  <div id="pwaInstallGuideModal" class="modal-backdrop" onclick="if(event.target===this) closePwaInstallGuideModal()">
+    <div class="modal-card pwa-guide-card" role="dialog" aria-labelledby="pwaGuideTitle">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 24px;">💻</span>
+          <div>
+            <h3 id="pwaGuideTitle" class="serif-font" style="font-size: 1.1rem; color: #1E293B; margin: 0; line-height: 1.2;">Pasang Smart Grocery</h3>
+            <p style="font-size: 0.74rem; color: #64748B; margin: 2px 0 0;">Gunakan sebagai aplikasi di Komputer (PC/Laptop) &amp; HP</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn touch-target" onclick="closePwaInstallGuideModal()">&times;</button>
+      </div>
+
+      <div class="pwa-guide-body">
+        <!-- Direct 1-Click Install Button if supported by browser -->
+        <div id="pwaDirectInstallBox" style="display: none; margin-bottom: 12px; text-align: center;">
+          <button type="button" class="btn-primary" style="width: 100%; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer;" onclick="triggerDirectPwaInstall()">
+            🚀 Pasang Sekarang (1-Klik)
+          </button>
+          <div style="font-size: 10.5px; color: #64748B; margin-top: 4px;">Klik untuk langsung menambahkan ke layar utama atau desktop</div>
+        </div>
+
+        <!-- Section 1: Komputer / Laptop -->
+        <div class="pwa-platform-card">
+          <div class="pwa-platform-header">
+            <span class="pwa-platform-icon">🖥️</span>
+            <div>
+              <div class="pwa-platform-name">Komputer / Laptop (Windows, Mac, Linux)</div>
+              <div class="pwa-platform-sub">Google Chrome, Microsoft Edge, Brave</div>
+            </div>
+          </div>
+          <div class="pwa-platform-steps">
+            <div class="pwa-step-item">
+              <span class="pwa-step-num">1</span>
+              <span>Perhatikan <strong>ujung kanan address bar (kolom URL browser)</strong> di atas.</span>
+            </div>
+            <div class="pwa-step-item">
+              <span class="pwa-step-num">2</span>
+              <span>Klik ikon <strong>Pasang / Install 🖥️</strong> atau tanda panah unduh <strong>⬇️</strong>.</span>
+            </div>
+            <div class="pwa-step-item">
+              <span class="pwa-step-num">3</span>
+              <span>Atau klik tombol menu titik tiga <strong>(⋮)</strong> di browser &gt; pilih <strong>"Instal Smart Grocery"</strong>.</span>
+            </div>
+            <div class="pwa-step-tip">
+              💡 <em>Aplikasi akan terbuka di jendela mandiri tanpa browser dan bisa langsung di-pin ke Taskbar!</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Ponsel Android & Solusi Play Protect -->
+        <div class="pwa-platform-card" style="margin-top: 10px;">
+          <div class="pwa-platform-header">
+            <span class="pwa-platform-icon">📱</span>
+            <div>
+              <div class="pwa-platform-name">Ponsel Android (Chrome &amp; Samsung Internet)</div>
+              <div class="pwa-platform-sub">PWA Resmi Bebas Google Play Store</div>
+            </div>
+          </div>
+          <div class="pwa-platform-steps">
+            <div class="pwa-step-item">
+              <span class="pwa-step-num">1</span>
+              <span>Buka menu browser: titik tiga <strong>(⋮)</strong> di Chrome atau garis tiga <strong>(☰)</strong> di Samsung Internet.</span>
+            </div>
+            <div class="pwa-step-item">
+              <span class="pwa-step-num">2</span>
+              <span>Pilih <strong>"Tambahkan ke Layar Utama"</strong> (<em>Add to Home screen</em>) atau <strong>"Instal Aplikasi"</strong>.</span>
+            </div>
+            <!-- Alert Khusus Google Play Protect Bug -->
+            <div class="pwa-protect-alert">
+              <div class="pwa-protect-title">
+                <span>🛡️</span>
+                <span>Penting: Solusi Jika Muncul "Unsafe app blocked"</span>
+              </div>
+              <div class="pwa-protect-text">
+                Pesan <em>"This app was built for an older version of Android"</em> terjadi jika di HP Anda masih tersimpan file APK / shortcut lama bernama <strong>GroceryTracker</strong>.<br><br>
+                <strong>Cara Mengatasinya:</strong><br>
+                1. Hapus (Uninstall) aplikasi lama bernama <code>GroceryTracker</code> di daftar aplikasi HP.<br>
+                2. Buka link web resmi ini di browser lalu pilih <strong>Add to Home screen</strong>.<br>
+                3. Versi web PWA baru ini 100% aman, resmi, dan selalu otomatis sinkron dengan data cloud.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: iPhone / iPad -->
+        <div class="pwa-platform-card" style="margin-top: 10px;">
+          <div class="pwa-platform-header">
+            <span class="pwa-platform-icon">🍏</span>
+            <div>
+              <div class="pwa-platform-name">iPhone / iPad (Safari)</div>
+              <div class="pwa-platform-sub">iOS &amp; iPadOS</div>
+            </div>
+          </div>
+          <div class="pwa-platform-steps">
+            <div class="pwa-step-item">
+              <span class="pwa-step-num">1</span>
+              <span>Tekan tombol <strong>Share ⎋</strong> (ikon kotak panah ke atas) di bagian bawah browser Safari.</span>
+            </div>
+            <div class="pwa-step-item">
+              <span class="pwa-step-num">2</span>
+              <span>Gulir ke bawah dan pilih <strong>"Add to Home Screen"</strong> (Tambahkan ke Layar Utama).</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-custom" style="margin-top: 14px; text-align: center;">
+        <button type="button" class="btn-secondary" style="width: 100%; border-radius: 12px; padding: 10px; cursor: pointer;" onclick="closePwaInstallGuideModal()">
+          Tutup Panduan
+        </button>
+      </div>
+    </div>
+  </div>
+
   </div> <!-- /#appContainer -->
 
   <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=94"></script>
+  <script src="./js/app.js?v=95"></script>
 
   <!-- Service Worker Registration -->
   <script>

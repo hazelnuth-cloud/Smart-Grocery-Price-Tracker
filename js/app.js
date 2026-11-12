@@ -5698,17 +5698,7 @@ function openProfileSettingsModal() {
   }
 
   // 4. Populate PWA status
-  const pwaBtn = document.getElementById('modalBtnInstallPwa');
-  const pwaBadge = document.getElementById('modalPwaInstalledBadge');
-  const isStandalone = (typeof window !== 'undefined') &&
-    ((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (window.navigator && window.navigator.standalone === true));
-  if (isStandalone) {
-    if (pwaBtn) pwaBtn.style.display = 'none';
-    if (pwaBadge) pwaBadge.style.display = 'inline-block';
-  } else {
-    if (pwaBtn) pwaBtn.style.display = 'inline-block';
-    if (pwaBadge) pwaBadge.style.display = 'none';
-  }
+  updatePwaInstallUI();
 
   // 5. Populate Cloud Sync status
   const cloudStatus = document.getElementById('modalCloudSyncStatus');
@@ -5887,25 +5877,103 @@ async function resetToInitialMockData() {
 }
 
 // =========================================================================
-// 19. PWA INSTALL PROMPT
+// 19. PWA INSTALL PROMPT & INSTALL GUIDE (KOMPUTER & HP)
 // =========================================================================
+function isAppStandalone() {
+  if (typeof window === 'undefined') return false;
+  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+         (window.navigator && window.navigator.standalone === true);
+}
+
+function updatePwaInstallUI() {
+  const isStandalone = isAppStandalone();
+  const headerBtn = document.getElementById('btnHeaderInstallPwa');
+  const modalBtn = document.getElementById('modalBtnInstallPwa');
+  const modalBadge = document.getElementById('modalPwaInstalledBadge');
+  const directBox = document.getElementById('pwaDirectInstallBox');
+
+  if (isStandalone) {
+    if (headerBtn) headerBtn.style.display = 'none';
+    if (modalBtn) modalBtn.style.display = 'none';
+    if (modalBadge) modalBadge.style.display = 'inline-block';
+    if (directBox) directBox.style.display = 'none';
+  } else {
+    if (headerBtn) headerBtn.style.display = 'inline-flex';
+    if (modalBtn) modalBtn.style.display = 'inline-flex';
+    if (modalBadge) modalBadge.style.display = 'none';
+    if (directBox) directBox.style.display = AppState.deferredInstallPrompt ? 'block' : 'none';
+  }
+}
+
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     AppState.deferredInstallPrompt = e;
-    const btn = document.getElementById('btnInstallPwa') || document.getElementById('modalBtnInstallPwa');
-    if (btn) btn.style.display = 'inline-flex';
+    updatePwaInstallUI();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    AppState.deferredInstallPrompt = null;
+    showToast('Aplikasi Smart Grocery berhasil dipasang! 🎉', 'success');
+    updatePwaInstallUI();
+    closePwaInstallGuideModal();
   });
 }
 
 function installPwa() {
+  if (isAppStandalone()) {
+    showToast('Aplikasi sudah terpasang dan berjalan dalam mode aplikasi ✨', 'info');
+    return;
+  }
   if (AppState.deferredInstallPrompt) {
     AppState.deferredInstallPrompt.prompt();
-    AppState.deferredInstallPrompt.userChoice.then(() => {
+    AppState.deferredInstallPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        showToast('Memasang Smart Grocery ke perangkat... 🚀', 'success');
+        updatePwaInstallUI();
+      } else {
+        showToast('Instalasi ditutup. Anda dapat memasangnya kapan saja.', 'info');
+      }
+      AppState.deferredInstallPrompt = null;
+    }).catch(() => {
+      openPwaInstallGuideModal();
+    });
+  } else {
+    openPwaInstallGuideModal();
+  }
+}
+
+function triggerDirectPwaInstall() {
+  if (AppState.deferredInstallPrompt) {
+    AppState.deferredInstallPrompt.prompt();
+    AppState.deferredInstallPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        showToast('Memasang Smart Grocery ke perangkat... 🚀', 'success');
+        closePwaInstallGuideModal();
+        updatePwaInstallUI();
+      }
       AppState.deferredInstallPrompt = null;
     });
   } else {
-    showToast('Aplikasi siap digunakan atau telah terpasang di Home Screen ✨', 'info');
+    showToast('Silakan ikuti petunjuk manual sesuai perangkat Anda di bawah ini 👇', 'info');
+  }
+}
+
+function openPwaInstallGuideModal() {
+  const modal = document.getElementById('pwaInstallGuideModal');
+  const directBox = document.getElementById('pwaDirectInstallBox');
+  if (directBox) {
+    directBox.style.display = AppState.deferredInstallPrompt ? 'block' : 'none';
+  }
+  if (modal) {
+    modal.classList.add('active', 'show');
+  }
+}
+
+function closePwaInstallGuideModal() {
+  const modal = document.getElementById('pwaInstallGuideModal');
+  if (modal) {
+    modal.classList.remove('active', 'show');
   }
 }
 
@@ -6089,6 +6157,7 @@ function initApp() {
   switchTab(AppState.currentTab || 'planner', true);
   initDiscountChips();
   renderAll();
+  updatePwaInstallUI();
 
   // Allow initial rendering pass to settle quietly without firing unsolicited toasts
   setTimeout(() => {
