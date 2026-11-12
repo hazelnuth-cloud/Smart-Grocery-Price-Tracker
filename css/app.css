@@ -6978,23 +6978,30 @@ body.theme-dark .cart-item-count-badge {
 }
 
 .cart-store-change-hint {
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  font-size: 13px !important;
   color: #E91E63 !important;
   background: #FDF2F8 !important;
   border: 1px solid #FCE7F3 !important;
-  padding: 2px 8px !important;
-  border-radius: 6px !important;
-  white-space: nowrap !important;
   flex-shrink: 0 !important;
   margin-left: 8px !important;
   transition: all 0.2s ease !important;
   cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(233, 30, 99, 0.08) !important;
 }
 
-.cart-store-location-row:hover .cart-store-change-hint {
-  background: #FCE4EC !important;
-  transform: scale(1.05) !important;
+.cart-store-location-row:hover .cart-store-change-hint,
+.cart-store-change-hint:active {
+  background: #FCE7F3 !important;
+  transform: scale(1.1) !important;
 }
 
 .store-header-display-name {
@@ -7188,14 +7195,17 @@ body.theme-dark .cart-store-change-hint {
 .btn-store-change-pill {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 4px !important;
-  padding: 4px 10px !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
   background: #FCE7F3 !important;
   color: #DB2777 !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  font-size: 13px !important;
   border: 1px solid #FBCFE8 !important;
-  border-radius: 20px !important;
+  border-radius: 50% !important;
   cursor: pointer !important;
   flex-shrink: 0 !important;
   transition: all 0.2s ease !important;
@@ -7206,7 +7216,7 @@ body.theme-dark .cart-store-change-hint {
 .btn-store-change-pill:active {
   background: #F472B6 !important;
   color: #FFFFFF !important;
-  transform: translateY(-1px) !important;
+  transform: scale(1.1) !important;
 }
 
 .modern-store-divider {
@@ -8027,6 +8037,14 @@ body.dark-mode .catalog-thumb-wrap {
   display: none !important;
 }
 
+.user-header-avatar[style*="display: none"],
+.user-header-avatar.hidden,
+.user-header-avatar-fallback[style*="display: none"],
+.user-header-avatar-fallback.hidden,
+.user-header-avatar-fallback[hidden] {
+  display: none !important;
+}
+
 .user-header-name {
   font-size: 12px !important;
   font-weight: 700 !important;
@@ -8187,6 +8205,14 @@ body.unauthenticated #profileSettingsModal,
 .modal-profile-avatar[style*="display: none"],
 .modal-profile-avatar.hidden,
 .modal-profile-avatar[hidden],
+.modal-profile-avatar-fallback[style*="display: none"],
+.modal-profile-avatar-fallback.hidden,
+.modal-profile-avatar-fallback[hidden] {
+  display: none !important;
+}
+
+.modal-profile-avatar[style*="display: none"],
+.modal-profile-avatar.hidden,
 .modal-profile-avatar-fallback[style*="display: none"],
 .modal-profile-avatar-fallback.hidden,
 .modal-profile-avatar-fallback[hidden] {

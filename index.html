@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=100">
+  <link rel="stylesheet" href="./css/app.css?v=101">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -595,8 +595,7 @@
               <span id="session-store-display" class="modern-store-name">Lotte Mart Grocery - Puri Indah</span>
             </div>
           </div>
-          <button type="button" class="btn-store-change-pill touch-target" onclick="openStorePickerModal(); event.stopPropagation();" title="Ganti Lokasi Supermarket">
-            <span>Ubah</span>
+          <button type="button" class="btn-store-change-pill touch-target" onclick="openStorePickerModal(); event.stopPropagation();" title="Ganti Lokasi Supermarket" aria-label="Ganti Lokasi Supermarket">
             <span>✏️</span>
           </button>
           <!-- Hidden fallback select for backward-compatibility -->
@@ -753,7 +752,7 @@
         <!-- Baris 1: Lokasi Supermarket Penuh (100% Anti-Terpotong & Dapat Diganti) -->
         <div class="cart-store-location-row" onclick="openStorePickerModal()" style="cursor: pointer;" title="Klik untuk ganti lokasi supermarket">
           <span id="cartCurrentStoreDisplay" class="store-strip-name" title="Lokasi Supermarket Saat Ini">Lotte Mart Grocery - Puri Indah</span>
-          <span class="cart-store-change-hint" title="Ganti Lokasi Supermarket">Ganti ✏️</span>
+          <span class="cart-store-change-hint" title="Ganti Lokasi Supermarket" aria-label="Ganti Lokasi Supermarket">✏️</span>
         </div>
 
         <!-- Baris 2: Kontrol Pilih Semua & Total Item Terpilih -->
@@ -2197,7 +2196,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=100"></script>
+  <script src="./js/app.js?v=101"></script>
 
   <!-- Service Worker Registration -->
   <script>
