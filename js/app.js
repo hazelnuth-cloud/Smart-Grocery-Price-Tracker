@@ -8233,25 +8233,33 @@ function renderCartSection() {
   const hasInCart = inCartItems.length > 0;
 
   const emptyCartBtn = document.getElementById('btnEmptyCart');
-  const emptyCartBtnBottom = document.getElementById('btnEmptyCartBottom');
-  const cancelShoppingBtnToolbar = document.getElementById('btnCancelShoppingToolbar');
   const cancelShoppingBtnBottom = document.getElementById('btnCancelShoppingBottom');
   const cartActionsToolbar = document.getElementById('cartActionsToolbar');
+  const cartStickyBottomBar = document.getElementById('cartStickyBottomBar') || document.querySelector('.shopee-sticky-bottom-bar');
 
+  if (cartActionsToolbar) {
+    if (hasInCart) {
+      cartActionsToolbar.classList.remove('hidden');
+      cartActionsToolbar.style.display = 'flex';
+    } else {
+      cartActionsToolbar.classList.add('hidden');
+      cartActionsToolbar.style.display = 'none';
+    }
+  }
+  if (cartStickyBottomBar) {
+    if (hasInCart) {
+      cartStickyBottomBar.classList.remove('hidden');
+      cartStickyBottomBar.style.display = 'flex';
+    } else {
+      cartStickyBottomBar.classList.add('hidden');
+      cartStickyBottomBar.style.display = 'none';
+    }
+  }
   if (emptyCartBtn) {
     emptyCartBtn.style.display = hasInCart ? 'inline-flex' : 'none';
   }
-  if (emptyCartBtnBottom) {
-    emptyCartBtnBottom.style.display = hasInCart ? 'inline-flex' : 'none';
-  }
-  if (cancelShoppingBtnToolbar) {
-    cancelShoppingBtnToolbar.style.display = hasInCart ? 'inline-flex' : 'none';
-  }
   if (cancelShoppingBtnBottom) {
-    cancelShoppingBtnBottom.style.display = 'inline-flex';
-  }
-  if (cartActionsToolbar) {
-    cartActionsToolbar.style.display = hasInCart ? 'flex' : 'none';
+    cancelShoppingBtnBottom.style.display = hasInCart ? 'inline-flex' : 'none';
   }
 
   const metrics = getCartMetrics();
@@ -8274,23 +8282,20 @@ function renderCartSection() {
   // Empty cart state
   if (inCartItems.length === 0) {
     container.innerHTML = `
-      <div class="empty-state" style="padding: 36px 16px; text-align: center;">
-        <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Keranjang belanja masih kosong</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">
+      <div class="empty-state" style="padding: 40px 16px; text-align: center;">
+        <div style="font-size: 44px; margin-bottom: 10px;">🛒</div>
+        <p style="font-weight: 700; font-size: 1.05rem; color: var(--text-headline, #222222); margin-bottom: 6px;">Keranjang belanja masih kosong</p>
+        <p style="font-size: 0.82rem; color: var(--text-subtle, #757575); margin-bottom: 18px; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.4;">
           ${unboughtItems.length > 0 ? `Ada ${unboughtItems.length} barang di Rencana Belanja yang siap dipindahkan ke keranjang!` : 'Belum ada barang di rencana belanja. Mulai catat kebutuhanmu!'}
         </p>
-        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
           ${unboughtItems.length > 0 ? `
-            <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 18px; font-size: 0.82rem; font-weight: 800;" onclick="startShoppingFromPlan()">
+            <button type="button" class="btn-primary touch-target" style="width: auto; padding: 10px 20px; font-size: 0.84rem; font-weight: 800; border-radius: 999px;" onclick="startShoppingFromPlan()">
               🛍️ Pindahkan Semua (${unboughtItems.length}) ke Keranjang
             </button>
           ` : ''}
-          <button type="button" class="btn-demo-quick" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="switchTab('planner')">
+          <button type="button" class="btn-demo-quick touch-target" style="width: auto; padding: 10px 20px; font-size: 0.84rem; font-weight: 700; border-radius: 999px;" onclick="switchShoppingView('planner')">
             📋 Buka Rencana Belanja
-          </button>
-          <button type="button" class="btn-cancel-shopping-empty touch-target" onclick="cancelShoppingSession()">
-            🚫 Batalkan Sesi Belanja
           </button>
         </div>
       </div>

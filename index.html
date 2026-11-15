@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=125">
+  <link rel="stylesheet" href="./css/app.css?v=126">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -733,25 +733,20 @@
             aria-label="Ganti Lokasi Supermarket">✏️</span>
         </div>
 
-        <!-- CART ACTIONS TOOLBAR: PILIH SEMUA & HAPUS SEMUA KERANJANG -->
-        <div class="cart-actions-toolbar cart-select-all-bar" id="cartActionsToolbar">
+        <!-- CART ACTIONS TOOLBAR: PILIH SEMUA & KOSONGKAN KERANJANG -->
+        <div class="cart-actions-toolbar cart-select-all-bar" id="cartActionsToolbar" style="display: none;">
           <div class="cart-action-left" style="display: flex; align-items: center; gap: 8px;">
             <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
               <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
               <span>Pilih Semua</span>
             </label>
-            <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
+            <span class="cart-item-count-badge" id="cartSelectedCountBadge">0 item</span>
           </div>
-          <div class="cart-action-right" style="display: flex; align-items: center; gap: 6px;">
-            <button type="button" id="btnCancelShoppingToolbar" class="btn-cancel-shopping-action touch-target"
-              onclick="cancelShoppingSession()" title="Batalkan Sesi Belanja">
-              <span class="btn-cancel-icon" aria-hidden="true">🚫</span>
-              <span class="btn-cancel-text">Batal Belanja</span>
-            </button>
+          <div class="cart-action-right" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0; white-space: nowrap;">
             <button type="button" id="btnEmptyCart" class="btn-clear-cart touch-target" onclick="clearCartAll()"
-              title="Hapus semua barang dari keranjang belanja">
+              title="Kosongkan seluruh isi keranjang belanja">
               <span class="btn-clear-cart-icon" aria-hidden="true">🗑️</span>
-              <span class="btn-clear-cart-text">Hapus Semua</span>
+              <span class="btn-clear-cart-text">Kosongkan</span>
             </button>
           </div>
         </div>
@@ -773,24 +768,19 @@
         </div>
 
         <!-- STICKY BOTTOM ACTION BAR -->
-        <div class="shopee-sticky-bottom-bar">
+        <div class="shopee-sticky-bottom-bar" id="cartStickyBottomBar" style="display: none;">
           <div class="shopee-bottom-left">
             <div class="shopee-bottom-total-row">
               <span class="shopee-bottom-label">Total</span>
               <span class="shopee-bottom-grand-total price-tag" id="checkoutGrandTotal">Rp 0</span>
             </div>
-            <div class="shopee-bottom-sub" id="checkoutBudgetRemaining">Sisa Saldo: Rp 150.000</div>
+            <div class="shopee-bottom-sub" id="checkoutBudgetRemaining">Sisa Saldo: Rp 0</div>
           </div>
-          <div class="shopee-bottom-right-actions" style="display: flex; align-items: center; gap: 6px;">
+          <div class="shopee-bottom-right-actions" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
             <button type="button" id="btnCancelShoppingBottom" class="btn-cancel-shopping-bottom touch-target"
               onclick="cancelShoppingSession()" title="Batalkan Sesi Belanja" aria-label="Batalkan Sesi Belanja">
               <span aria-hidden="true">🚫</span>
               <span class="btn-cancel-bottom-text">Batal</span>
-            </button>
-            <button type="button" id="btnEmptyCartBottom" class="btn-clear-cart-bottom touch-target"
-              onclick="clearCartAll()" title="Hapus semua barang di keranjang belanja"
-              aria-label="Hapus semua barang di keranjang belanja">
-              <span aria-hidden="true">🗑️</span>
             </button>
             <button type="button" id="btnFinishShoppingBottom" class="btn-shopee-finish-action touch-target"
               onclick="confirmFinishShopping()" title="Selesai Belanja & Simpan Struk">
@@ -2354,7 +2344,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=129"></script>
+  <script src="./js/app.js?v=130"></script>
 
   <!-- Service Worker Registration -->
   <script>
