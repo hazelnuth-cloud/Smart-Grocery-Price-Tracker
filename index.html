@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=118">
+  <link rel="stylesheet" href="./css/app.css?v=119">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -703,28 +703,25 @@
         </button>
       </div>
 
-      <!-- STORE HEADER & SELECT ALL BAR IN CART (2 BARIS: LOKASI SUPERMARKET DI ATAS, PILIH SEMUA DI BAWAH) -->
-      <div class="cart-store-header cart-select-all-bar single-line-store-header cart-single-line-store cart-store-header-two-rows">
-        <!-- Baris 1: Lokasi Supermarket Penuh (100% Anti-Terpotong & Dapat Diganti) -->
-        <div class="cart-store-location-row" onclick="openStorePickerModal()" style="cursor: pointer;" title="Klik untuk ganti lokasi supermarket">
-          <span id="cartCurrentStoreDisplay" class="store-strip-name" title="Lokasi Supermarket Saat Ini">Lotte Mart Grocery - Puri Indah</span>
-          <span class="cart-store-change-hint" title="Ganti Lokasi Supermarket" aria-label="Ganti Lokasi Supermarket">✏️</span>
-        </div>
+      <!-- STORE HEADER: LOKASI SUPERMARKET -->
+      <div class="cart-store-header cart-store-location-card" onclick="openStorePickerModal()" style="cursor: pointer;" title="Klik untuk ganti lokasi supermarket">
+        <span id="cartCurrentStoreDisplay" class="store-strip-name" title="Lokasi Supermarket Saat Ini">🏬 Lotte Mart Grocery - Puri Indah</span>
+        <span class="cart-store-change-hint" title="Ganti Lokasi Supermarket" aria-label="Ganti Lokasi Supermarket">✏️</span>
+      </div>
 
-        <!-- Baris 2: Kontrol Pilih Semua, Total Item & Tombol Hapus Semua Keranjang -->
-        <div class="cart-store-action-row">
-          <div class="cart-action-left" style="display: flex; align-items: center; gap: 8px;">
-            <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
-              <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
-              <span>Pilih Semua</span>
-            </label>
-            <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
-          </div>
-          <button type="button" id="btnEmptyCart" class="btn-clear-cart touch-target" onclick="clearCartAll()" title="Hapus semua barang dari keranjang belanja">
-            <span class="btn-clear-cart-icon" aria-hidden="true">🗑️</span>
-            <span class="btn-clear-cart-text">Hapus Semua</span>
-          </button>
+      <!-- CART ACTIONS TOOLBAR: PILIH SEMUA & HAPUS SEMUA KERANJANG -->
+      <div class="cart-actions-toolbar cart-select-all-bar" id="cartActionsToolbar">
+        <div class="cart-action-left" style="display: flex; align-items: center; gap: 8px;">
+          <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
+            <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
+            <span>Pilih Semua</span>
+          </label>
+          <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
         </div>
+        <button type="button" id="btnEmptyCart" class="btn-clear-cart touch-target" onclick="clearCartAll()" title="Hapus semua barang dari keranjang belanja">
+          <span class="btn-clear-cart-icon" aria-hidden="true">🗑️</span>
+          <span class="btn-clear-cart-text">Hapus Semua</span>
+        </button>
       </div>
 
       <!-- SLIM 4PX BUDGET PROGRESS BAR FOR CART -->
@@ -751,10 +748,16 @@
           </div>
           <div class="shopee-bottom-sub" id="checkoutBudgetRemaining">Sisa Saldo: Rp 150.000</div>
         </div>
-        <button type="button" class="btn-shopee-finish-action touch-target" onclick="confirmFinishShopping()"
-          title="Selesai Belanja & Simpan Struk">
-          <span>Selesai 🛍️ <span id="checkoutBtnCount"></span></span>
-        </button>
+        <div class="shopee-bottom-right-actions" style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" id="btnEmptyCartBottom" class="btn-clear-cart-bottom touch-target" onclick="clearCartAll()"
+            title="Hapus semua barang di keranjang belanja" aria-label="Hapus semua barang di keranjang belanja">
+            <span aria-hidden="true">🗑️</span>
+          </button>
+          <button type="button" class="btn-shopee-finish-action touch-target" onclick="confirmFinishShopping()"
+            title="Selesai Belanja & Simpan Struk">
+            <span>Selesai 🛍️ <span id="checkoutBtnCount"></span></span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -2205,7 +2208,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=118"></script>
+  <script src="./js/app.js?v=119"></script>
 
   <!-- Service Worker Registration -->
   <script>

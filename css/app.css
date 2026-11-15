@@ -6652,18 +6652,15 @@ body.dark-mode .cloud-sync-text {
 }
 
 /* ==========================================================================
-   CART STORE HEADER & SELECT ALL BAR (COMPACT STORE BAR)
+   CART STORE HEADER & ACTIONS TOOLBAR (COMPACT STORE BAR)
    ========================================================================== */
 .cart-store-header,
-.cart-select-all-bar,
-.cart-single-line-store {
+.cart-store-location-card {
   display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  gap: 7px !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   width: 100% !important;
-  padding: 8px 12px 8px 12px !important;
+  padding: 8px 12px !important;
   box-sizing: border-box !important;
   background: #FFFFFF !important;
   border: 1px solid #FCE7F3 !important;
@@ -6671,28 +6668,29 @@ body.dark-mode .cloud-sync-text {
   margin-bottom: 6px !important;
   height: auto !important;
   min-height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
   box-shadow: 0 1px 4px rgba(219, 39, 119, 0.04) !important;
+  cursor: pointer !important;
 }
 
-/* Baris 1: Lokasi Supermarket 100% Lebar Penuh (Anti-Terpotong) */
-.cart-store-location-row {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  padding-bottom: 6px !important;
-  border-bottom: 1px dashed #FCE7F3 !important;
-  box-sizing: border-box !important;
-}
-
-/* Baris 2: Kontrol Pilih Semua & Item Count Badge */
-.cart-store-action-row {
+.cart-actions-toolbar,
+.cart-select-all-bar {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   width: 100% !important;
-  min-width: 0 !important;
+  padding: 6px 12px !important;
   box-sizing: border-box !important;
+  background: #FFFFFF !important;
+  border: 1px solid #FCE7F3 !important;
+  border-radius: 10px !important;
+  margin-bottom: 8px !important;
+  height: auto !important;
+  min-height: 40px !important;
+  max-height: none !important;
+  overflow: visible !important;
+  box-shadow: 0 1px 4px rgba(219, 39, 119, 0.04) !important;
 }
 
 #selectAllLabel,
@@ -6722,7 +6720,7 @@ body.dark-mode .cloud-sync-text {
 
 #cartCurrentStoreDisplay,
 .cart-store-header .store-strip-name,
-.cart-select-all-bar .store-strip-name {
+.cart-store-location-card .store-strip-name {
   flex: 1 1 100% !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -6738,13 +6736,6 @@ body.dark-mode .cloud-sync-text {
   line-height: 1.35 !important;
   display: flex !important;
   align-items: center !important;
-}
-
-#cartCurrentStoreDisplay::before {
-  content: "🏬 ";
-  font-size: 14px !important;
-  margin-right: 5px !important;
-  flex-shrink: 0 !important;
 }
 
 #cartSelectedCountBadge,
@@ -6764,33 +6755,63 @@ body.dark-mode .cloud-sync-text {
 /* Tombol Hapus Semua Keranjang & Rencana */
 .btn-clear-cart,
 .btn-clear-plan {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: #FFF1F2;
-  color: #E11D48;
-  border: 1px solid #FECDD3;
-  border-radius: 9999px;
-  padding: 4px 11px;
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  min-height: 28px;
-  touch-action: manipulation;
-  user-select: none;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: #FFF1F2 !important;
+  color: #E11D48 !important;
+  border: 1px solid #FECDD3 !important;
+  border-radius: 9999px !important;
+  padding: 5px 12px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  min-height: 30px !important;
+  touch-action: manipulation !important;
+  user-select: none !important;
+  box-shadow: 0 1px 3px rgba(225, 29, 72, 0.08) !important;
 }
 
 .btn-clear-cart:hover,
 .btn-clear-cart:active,
 .btn-clear-plan:hover,
 .btn-clear-plan:active {
-  background: #FFE4E6;
-  border-color: #FDA4AF;
-  color: #BE123C;
-  transform: translateY(-1px);
+  background: #FFE4E6 !important;
+  border-color: #FDA4AF !important;
+  color: #BE123C !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Tombol Trash di Sticky Bottom Bar Keranjang */
+.btn-clear-cart-bottom {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 12px !important;
+  background: #FFF1F2 !important;
+  border: 1px solid #FECDD3 !important;
+  color: #E11D48 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  font-size: 17px !important;
+  box-shadow: 0 1px 4px rgba(225, 29, 72, 0.1) !important;
+}
+
+.btn-clear-cart-bottom:hover,
+.btn-clear-cart-bottom:active {
+  background: #FFE4E6 !important;
+  border-color: #FDA4AF !important;
+  color: #BE123C !important;
+  transform: scale(1.08) !important;
 }
 
 body.dark-mode .btn-clear-cart,
@@ -6806,6 +6827,20 @@ body.dark-mode .btn-clear-cart:hover,
 body.theme-dark .btn-clear-cart:hover,
 body.dark-mode .btn-clear-plan:hover,
 body.theme-dark .btn-clear-plan:hover {
+  background: #3E101D !important;
+  border-color: #881337 !important;
+  color: #FDA4AF !important;
+}
+
+body.dark-mode .btn-clear-cart-bottom,
+body.theme-dark .btn-clear-cart-bottom {
+  background: #2D0C15 !important;
+  border-color: #5C1D2E !important;
+  color: #FB7185 !important;
+}
+
+body.dark-mode .btn-clear-cart-bottom:hover,
+body.theme-dark .btn-clear-cart-bottom:hover {
   background: #3E101D !important;
   border-color: #881337 !important;
   color: #FDA4AF !important;
@@ -10621,12 +10656,14 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
 
   /* Dedicated Cart Store Header Mobile Ergonomics (Anti-Terpotong) */
   .cart-store-header,
+  .cart-store-location-card,
+  .cart-actions-toolbar,
   .cart-select-all-bar,
   .cart-single-line-store {
-    flex-direction: column !important;
-    align-items: stretch !important;
     padding: 8px 10px !important;
     gap: 6px !important;
+    height: auto !important;
+    max-height: none !important;
   }
 
   .cart-store-location-row {

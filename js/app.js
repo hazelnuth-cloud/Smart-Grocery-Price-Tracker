@@ -7418,10 +7418,20 @@ function renderCartSection() {
 
   const inCartItems = AppState.cart.filter(i => i.checked);
   const unboughtItems = AppState.cart.filter(i => !i.checked);
+  const hasInCart = inCartItems.length > 0;
 
   const emptyCartBtn = document.getElementById('btnEmptyCart');
+  const emptyCartBtnBottom = document.getElementById('btnEmptyCartBottom');
+  const cartActionsToolbar = document.getElementById('cartActionsToolbar');
+
   if (emptyCartBtn) {
-    emptyCartBtn.style.display = inCartItems.length > 0 ? 'inline-flex' : 'none';
+    emptyCartBtn.style.display = hasInCart ? 'inline-flex' : 'none';
+  }
+  if (emptyCartBtnBottom) {
+    emptyCartBtnBottom.style.display = hasInCart ? 'inline-flex' : 'none';
+  }
+  if (cartActionsToolbar) {
+    cartActionsToolbar.style.display = hasInCart ? 'flex' : 'none';
   }
 
   const metrics = getCartMetrics();
