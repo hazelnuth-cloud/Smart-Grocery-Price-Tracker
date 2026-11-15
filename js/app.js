@@ -688,6 +688,7 @@ function highlightOverbudgetBanner() {
   const targets = [firmBanner, slimBadge, plannerAlert].filter(Boolean);
 
   targets.forEach(el => {
+    if (el === plannerAlert && AppState.stickySaldoDismissed) return;
     el.classList.remove('hidden');
     el.classList.remove('pulse-highlight');
     void el.offsetWidth; // Trigger reflow
@@ -3739,7 +3740,7 @@ function renderItems() {
               `}
             </div>
 
-            <div class="shopee-compact-stepper-wrap" style="display: flex; align-items: center; gap: 6px;">
+            <div class="shopee-compact-stepper-wrap" style="display: flex; align-items: center; gap: 10px;">
               <div class="shopee-stepper">
                 <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas">&minus;</button>
                 <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
@@ -3749,9 +3750,14 @@ function renderItems() {
                 <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas">+</button>
               </div>
 
-              <!-- Dedicated Touch-Target Button to Move to Cart -->
-              <button type="button" class="btn-move-to-cart touch-target" onclick="moveItemToCart('${item.id}'); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja">
-                <span>🛒 Ke Keranjang</span>
+              <!-- Dedicated Touch-Target Button to Move to Cart (Crisp SVG, Pixel-Perfect Centered) -->
+              <button type="button" class="btn-move-to-cart touch-target" onclick="moveItemToCart('${item.id}'); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja" aria-label="Pindahkan ke Keranjang Belanja">
+                <svg class="btn-cart-arrow-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span>Ke Keranjang</span>
               </button>
             </div>
           </div>
@@ -7667,10 +7673,14 @@ function renderCartSection() {
               ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
             </div>
 
-            <div class="shopee-compact-stepper-wrap">
-              <!-- Fat-finger safe return to plan button (Symmetrically mirrors "Ke Keranjang" in planner) -->
-              <button type="button" class="btn-return-to-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja (belum dibeli)">
-                <span>↩️ Ke Rencana</span>
+            <div class="shopee-compact-stepper-wrap" style="display: flex; align-items: center; gap: 10px;">
+              <!-- Fat-finger safe return to plan button (Crisp SVG, Pixel-Perfect Centered) -->
+              <button type="button" class="btn-return-to-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja (belum dibeli)" aria-label="Kembalikan ke Rencana Belanja">
+                <svg class="btn-plan-arrow-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="9 14 4 9 9 4"></polyline>
+                  <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+                </svg>
+                <span>Ke Rencana</span>
               </button>
               <div class="shopee-stepper">
                 <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas">&minus;</button>

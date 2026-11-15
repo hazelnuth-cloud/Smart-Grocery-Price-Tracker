@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=120">
+  <link rel="stylesheet" href="./css/app.css?v=121">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -393,13 +393,13 @@
         </button>
         <!-- REOPEN TRIGGER PILL (VISIBLE WHEN STICKY SALDO IS COMPLETELY HIDDEN) -->
         <button type="button" id="btnReopenStickySaldo" class="planner-seg-btn seg-saldo-btn"
-          onclick="dismissStickySaldoCard(false)" style="display: none;" title="Tampilkan Kembali Kartu Saldo">
+          onclick="dismissStickySaldoCard(false)" style="display: none !important;" title="Tampilkan Kembali Kartu Saldo">
           <span>💳 Saldo</span>
         </button>
       </div>
 
       <!-- MINI STICKY SALDO BAR (MUNCUL SAAT KARTU UTAMA DITUTUP / DIMINIMALKAN) -->
-      <div id="stickySaldoMiniBar" class="sticky-saldo-mini-bar safe"
+      <div id="stickySaldoMiniBar" class="sticky-saldo-mini-bar safe" style="display: none !important;"
         title="Ketuk untuk membuka kartu saldo lengkap">
         <div class="mini-bar-main" onclick="dismissStickySaldoCard(false)">
           <span id="miniBarIcon" class="mini-bar-icon">💳</span>
@@ -2208,7 +2208,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=120"></script>
+  <script src="./js/app.js?v=121"></script>
 
   <!-- Service Worker Registration -->
   <script>
