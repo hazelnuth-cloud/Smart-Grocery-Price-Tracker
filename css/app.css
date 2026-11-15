@@ -9753,25 +9753,45 @@ body.theme-dark .sticky-dashboard-tracker.danger {
   flex-shrink: 0 !important;
 }
 
-/* Close / Dismiss Button on Sticky Tracker Card */
+/* Symmetrical Actions in Sticky Tracker Card (Setting ⚙️ and Close ✕) */
+.tracker-budget-btn,
 .tracker-close-btn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 22px !important;
-  height: 22px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
   border-radius: 50% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 11.5px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.tracker-budget-btn {
+  background: rgba(233, 30, 99, 0.08) !important;
+  border: 1px solid rgba(233, 30, 99, 0.2) !important;
+  color: #E91E63 !important;
+}
+
+.tracker-budget-btn:hover,
+.tracker-budget-btn:active {
+  background: rgba(233, 30, 99, 0.18) !important;
+  border-color: rgba(233, 30, 99, 0.4) !important;
+  transform: scale(1.08) !important;
+}
+
+.tracker-close-btn {
   background: rgba(0, 0, 0, 0.05) !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   color: #64748B !important;
-  font-size: 11px !important;
   font-weight: 700 !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  transition: all 0.2s ease !important;
-  flex-shrink: 0 !important;
-  box-sizing: border-box !important;
 }
 
 .tracker-close-btn:hover,
@@ -9779,7 +9799,24 @@ body.theme-dark .sticky-dashboard-tracker.danger {
   background: #FFE4E6 !important;
   color: #E11D48 !important;
   border-color: #FECDD3 !important;
-  transform: scale(1.06) !important;
+  transform: scale(1.08) !important;
+}
+
+/* Dark Mode */
+body.dark-mode .tracker-budget-btn,
+body.theme-dark .tracker-budget-btn {
+  background: rgba(233, 30, 99, 0.22) !important;
+  border-color: rgba(233, 30, 99, 0.45) !important;
+  color: #F472B6 !important;
+}
+
+body.dark-mode .tracker-budget-btn:hover,
+body.dark-mode .tracker-budget-btn:active,
+body.theme-dark .tracker-budget-btn:hover,
+body.theme-dark .tracker-budget-btn:active {
+  background: rgba(233, 30, 99, 0.35) !important;
+  border-color: #F472B6 !important;
+  transform: scale(1.08) !important;
 }
 
 body.dark-mode .tracker-close-btn,
@@ -9796,6 +9833,7 @@ body.theme-dark .tracker-close-btn:active {
   background: rgba(244, 114, 182, 0.25) !important;
   color: #FFF1F5 !important;
   border-color: rgba(244, 114, 182, 0.4) !important;
+  transform: scale(1.08) !important;
 }
 
 /* ==========================================================================
@@ -10313,34 +10351,61 @@ body.dark-mode .tracker-overbudget-note {
   color: #FCA5A5 !important;
 }
 
-/* Atur Saldo button in Tracker */
-.tracker-budget-btn {
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-  color: #E91E63 !important;
-  background: rgba(233, 30, 99, 0.08) !important;
-  border: 1px solid rgba(233, 30, 99, 0.2) !important;
-  padding: 2px 7px !important;
-  border-radius: 8px !important;
+/* =========================================================================
+   BUDGET PRESET CHIPS (MATCHING DISCOUNT CHIP ACTIVE STYLE)
+   ========================================================================= */
+.budget-preset-chip {
+  background: #F8FAFC !important;
+  color: #475569 !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 14px !important;
+  padding: 4px 10px !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 3px !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-  white-space: nowrap !important;
-  line-height: 1.2 !important;
+  justify-content: center !important;
+  line-height: 1.3 !important;
 }
 
-.tracker-budget-btn:hover {
-  background: rgba(233, 30, 99, 0.16) !important;
-  transform: translateY(-0.5px) !important;
+.budget-preset-chip:hover {
+  background: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #1E293B !important;
+  transform: translateY(-1px) !important;
 }
 
-body.dark-mode .tracker-budget-btn,
-body.theme-dark .tracker-budget-btn {
-  color: #F472B6 !important;
-  background: rgba(233, 30, 99, 0.18) !important;
-  border-color: rgba(233, 30, 99, 0.35) !important;
+.budget-preset-chip.active {
+  background: #E91E63 !important;
+  color: #FFFFFF !important;
+  border-color: #E91E63 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 3px 10px rgba(233, 30, 99, 0.32) !important;
+  transform: scale(1.04) !important;
+}
+
+body.dark-mode .budget-preset-chip,
+body.theme-dark .budget-preset-chip {
+  background: #1A0B14 !important;
+  color: #E2B9CB !important;
+  border-color: #3B162B !important;
+}
+
+body.dark-mode .budget-preset-chip:hover,
+body.theme-dark .budget-preset-chip:hover {
+  background: #341527 !important;
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .budget-preset-chip.active,
+body.theme-dark .budget-preset-chip.active {
+  background: #E91E63 !important;
+  color: #FFFFFF !important;
+  border-color: #E91E63 !important;
+  box-shadow: 0 3px 10px rgba(233, 30, 99, 0.45) !important;
 }
 
 
@@ -10807,18 +10872,16 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
     align-items: center !important;
   }
 
-  .tracker-budget-btn {
-    padding: 1.5px 7px !important;
-    font-size: 9.5px !important;
-    border-radius: 6px !important;
-    height: 18px !important;
-    line-height: 1 !important;
-  }
-
+  .tracker-budget-btn,
   .tracker-close-btn {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 10px !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    font-size: 11px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   /* Compact Tier 2: Main Metrics Row */

@@ -304,18 +304,18 @@
             </div>
 
             <!-- Preset Chips -->
-            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
-              <button type="button" class="frequent-chip touch-target" style="padding: 4px 10px; font-size: 0.74rem;"
+            <div id="quickBudgetPresetsContainer" class="quick-budget-presets" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000" style="padding: 4px 10px; font-size: 0.74rem;"
                 onclick="setQuickBudgetAmount(50000)">50k</button>
-              <button type="button" class="frequent-chip touch-target" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000" style="padding: 4px 10px; font-size: 0.74rem;"
                 onclick="setQuickBudgetAmount(100000)">100k</button>
-              <button type="button" class="frequent-chip touch-target" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000" style="padding: 4px 10px; font-size: 0.74rem;"
                 onclick="setQuickBudgetAmount(150000)">150k</button>
-              <button type="button" class="frequent-chip touch-target" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000" style="padding: 4px 10px; font-size: 0.74rem;"
                 onclick="setQuickBudgetAmount(200000)">200k</button>
-              <button type="button" class="frequent-chip touch-target" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000" style="padding: 4px 10px; font-size: 0.74rem;"
                 onclick="setQuickBudgetAmount(350000)">350k</button>
-              <button type="button" class="frequent-chip touch-target" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000" style="padding: 4px 10px; font-size: 0.74rem;"
                 onclick="setQuickBudgetAmount(500000)">500k</button>
             </div>
 
@@ -450,8 +450,8 @@
 
             <div class="tracker-header-right">
               <button type="button" class="tracker-budget-btn touch-target" onclick="switchTab('budget')"
-                title="Atur Batas Anggaran">
-                <span>Atur ⚙️</span>
+                title="Atur Batas Anggaran" aria-label="Atur Batas Anggaran">
+                <span aria-hidden="true">⚙️</span>
               </button>
               <button type="button" id="btnCloseStickySaldo" class="tracker-close-btn touch-target"
                 onclick="dismissStickySaldoCard(true)" title="Tutup / Sembunyikan Kartu Saldo Sticky"
@@ -1531,10 +1531,22 @@
             </select>
           </div>
 
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Pilihan Cepat Nominal:</label>
+            <div class="quick-budget-presets" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(50000)">50k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(100000)">100k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(150000)">150k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(200000)">200k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(350000)">350k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(500000)">500k</button>
+            </div>
+          </div>
+
           <div class="form-group" style="margin-bottom: 16px;">
             <label class="form-label">Nominal Batas Anggaran (Rp)</label>
             <input type="number" inputmode="numeric" id="modalBudgetAmount" class="form-control" min="10000"
-              max="999999999" step="5000" required>
+              max="999999999" step="5000" required oninput="updateBudgetPresetChips(parseInt(this.value, 10))">
           </div>
 
           <button type="submit" class="btn-primary">
@@ -2342,7 +2354,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=128"></script>
+  <script src="./js/app.js?v=129"></script>
 
   <!-- Service Worker Registration -->
   <script>

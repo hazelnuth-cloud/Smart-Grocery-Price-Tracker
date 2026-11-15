@@ -3411,6 +3411,10 @@ function renderBudget() {
   const configBudgetInput = document.getElementById('configBudgetAmount');
   const configBudgetPeriod = document.getElementById('configBudgetPeriod');
 
+  if (configBudgetInput) configBudgetInput.value = budget;
+  if (configBudgetPeriod) configBudgetPeriod.value = AppState.budgetPeriod || 'weekly';
+  updateBudgetPresetChips(budget);
+
   if (totalBudgetEl) totalBudgetEl.textContent = formatRupiah(budget);
   if (actualSpentEl) actualSpentEl.textContent = formatRupiah(totalBelanja);
 
@@ -6624,6 +6628,19 @@ function removeBlacklistItem(val) {
 // =========================================================================
 // 14. BUDGET CONTROLS & RECEIPTS
 // =========================================================================
+function updateBudgetPresetChips(currentBudget = AppState.budget) {
+  const targetAmt = parseInt(currentBudget, 10);
+  const chips = document.querySelectorAll('.budget-preset-chip');
+  chips.forEach(chip => {
+    const chipAmt = parseInt(chip.getAttribute('data-amount'), 10);
+    if (chipAmt === targetAmt) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+}
+
 function openBudgetModal() {
   const modal = document.getElementById('budgetModal');
   const amountInput = document.getElementById('modalBudgetAmount');
@@ -6631,6 +6648,7 @@ function openBudgetModal() {
 
   if (amountInput) amountInput.value = AppState.budget;
   if (cycleSelect) cycleSelect.value = AppState.budgetPeriod;
+  updateBudgetPresetChips(AppState.budget);
   if (modal) {
     modal.classList.add('active', 'show');
   }
@@ -6641,6 +6659,12 @@ function closeBudgetModal() {
   if (modal) {
     modal.classList.remove('active', 'show');
   }
+}
+
+function setModalQuickBudget(amt) {
+  const amountInput = document.getElementById('modalBudgetAmount');
+  if (amountInput) amountInput.value = amt;
+  updateBudgetPresetChips(amt);
 }
 
 function handleQuickBudgetSave(e) {
@@ -6665,7 +6689,10 @@ function setQuickBudgetAmount(amt) {
   if (display) display.textContent = formatRupiah(amt);
   const amtInput = document.getElementById('configBudgetAmount');
   if (amtInput) amtInput.value = amt;
+  const modalAmtInput = document.getElementById('modalBudgetAmount');
+  if (modalAmtInput) modalAmtInput.value = amt;
 
+  updateBudgetPresetChips(amt);
   pushStateToCloud();
   renderBudget();
   playSoftPop();
