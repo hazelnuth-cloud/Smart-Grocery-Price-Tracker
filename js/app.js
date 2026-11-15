@@ -458,12 +458,12 @@ function getRepurchaseAnalysis(currentPrice, prevRecord, isSameStore = true) {
       diff: 0,
       absDiff: 0,
       percent: 0,
-      badgeText: `💡 Terakhir: Rp ${formatNumber(baseline)}`,
-      text: `💡 Terakhir: Rp ${formatNumber(baseline)}`,
+      badgeText: `💡 Dulu: Rp ${formatNumber(baseline)}`,
+      text: `💡 Dulu: Rp ${formatNumber(baseline)}`,
       badgeClass: 'fluctuation-badge fluctuation-stable',
       diffClass: 'diff-stable',
       detailText: `Pernah dibeli seharga Rp ${formatNumber(baseline)}${prevRecord.store ? ' di ' + prevRecord.store : ''}`,
-      shortDetail: `Belanja lalu: Rp ${formatNumber(baseline)}`,
+      shortDetail: `Dulu: Rp ${formatNumber(baseline)}`,
       arrow: '💡'
     };
   }
@@ -485,12 +485,12 @@ function getRepurchaseAnalysis(currentPrice, prevRecord, isSameStore = true) {
       diff,
       absDiff,
       percent,
-      badgeText: `↑ Naik Rp ${formatNumber(diff)} (+${percentNum}%)`,
+      badgeText: `↑ +Rp ${formatNumber(diff)} (${percentNum}%)`,
       text: `↑ +Rp ${formatNumber(diff)} (+${percentNum}%)`,
       badgeClass: 'fluctuation-badge fluctuation-up',
       diffClass: 'diff-up',
       detailText: `Harga naik +Rp ${formatNumber(diff)} (+${percentNum}%) dibanding belanja sebelumnya (Rp ${formatNumber(baseline)}${storeContext})`,
-      shortDetail: `Dulu Rp ${formatNumber(baseline)} ➔ Naik Rp ${formatNumber(diff)}`,
+      shortDetail: `Dulu: Rp ${formatNumber(baseline)}`,
       arrow: '↑'
     };
   } else if (diff < 0) {
@@ -504,12 +504,12 @@ function getRepurchaseAnalysis(currentPrice, prevRecord, isSameStore = true) {
       diff,
       absDiff,
       percent,
-      badgeText: `↓ Turun Rp ${formatNumber(absDiff)} (-${percentNum}%)`,
+      badgeText: `↓ -Rp ${formatNumber(absDiff)} (${percentNum}%)`,
       text: `↓ -Rp ${formatNumber(absDiff)} (-${percentNum}%)`,
       badgeClass: 'fluctuation-badge fluctuation-down',
       diffClass: 'diff-down',
       detailText: `Harga turun -Rp ${formatNumber(absDiff)} (-${percentNum}%) lebih hemat dibanding belanja sebelumnya (Rp ${formatNumber(baseline)}${storeContext})`,
-      shortDetail: `Dulu Rp ${formatNumber(baseline)} ➔ Hemat Rp ${formatNumber(absDiff)}`,
+      shortDetail: `Dulu: Rp ${formatNumber(baseline)}`,
       arrow: '↓'
     };
   } else {
@@ -528,7 +528,7 @@ function getRepurchaseAnalysis(currentPrice, prevRecord, isSameStore = true) {
       badgeClass: 'fluctuation-badge fluctuation-stable',
       diffClass: 'diff-stable',
       detailText: `Harga sama persis dengan belanja sebelumnya (Rp ${formatNumber(baseline)}${storeContext})`,
-      shortDetail: `Stabil = Rp ${formatNumber(baseline)}`,
+      shortDetail: `Stabil: Rp ${formatNumber(baseline)}`,
       arrow: '='
     };
   }
@@ -3249,7 +3249,7 @@ function renderBudget() {
     if (safety.level === 'danger') {
       const overDiff = (activeSpend > budget) ? (activeSpend - budget) : (totalBelanja - budget);
       if (plannerAlertIcon) plannerAlertIcon.textContent = '🚨';
-      if (plannerAlertTitle) plannerAlertTitle.textContent = 'Peringatan: Melebihi Batas Saldo Dompet!';
+      if (plannerAlertTitle) plannerAlertTitle.textContent = 'Saldo Melebihi Limit!';
       if (plannerAlertDesc) plannerAlertDesc.textContent = `Total belanja ${formatRupiah(activeSpend)} melebihi limit ${formatRupiah(budget)} (Defisit: ${formatRupiah(overDiff)}). Kurangi kuantitas item atau batalkan barang sekunder agar pengeluaran tetap aman.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-danger';
@@ -3257,7 +3257,7 @@ function renderBudget() {
       }
     } else if (safety.level === 'warning') {
       if (plannerAlertIcon) plannerAlertIcon.textContent = '⚠️';
-      if (plannerAlertTitle) plannerAlertTitle.textContent = 'Eits, Dikit Lagi Tembus Limit! 💸';
+      if (plannerAlertTitle) plannerAlertTitle.textContent = 'Mendekati Batas Saldo!';
       if (plannerAlertDesc) plannerAlertDesc.textContent = `Pengeluaranmu sudah mencapai ${Math.round(safety.percentage)}% (${formatRupiah(activeSpend)} dari saldo ${formatRupiah(budget)}). Sortir lagi isi keranjang belanja agar tidak melebihi batas saldo.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-warning';
@@ -5502,9 +5502,9 @@ function renderPantry() {
     }
 
     html += `
-      <div class="pantry-card" style="background: var(--card-bg); border-radius: var(--radius-lg); padding: 12px 14px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <div style="font-weight: 800; font-size: 0.92rem; color: var(--text-main);">${escapeHtml(item.name)}</div>
+      <div class="pantry-card" style="background: var(--card-bg); border-radius: var(--radius-lg); padding: 12px 14px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft); display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+        <div style="min-width: 0; flex: 1; word-break: break-word;">
+          <div style="font-weight: 800; font-size: 0.92rem; color: var(--text-main); word-break: break-word; line-height: 1.3;">${escapeHtml(item.name)}</div>
           <div style="font-size: 0.74rem; color: var(--text-subtle); margin-top: 2px;">
             ${item.qty} ${escapeHtml(item.unit)} • ${escapeHtml(item.category || 'Pantry')}
           </div>
