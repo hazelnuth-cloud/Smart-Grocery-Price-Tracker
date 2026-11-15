@@ -10117,29 +10117,49 @@ body.dark-mode .btn-return-to-plan {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 8px !important;
+  gap: 12px !important;
   min-width: 280px !important;
-  max-width: 90vw !important;
-  padding: 10px 14px !important;
+  max-width: min(440px, 92vw) !important;
+  padding: 10px 12px 10px 14px !important;
+  box-sizing: border-box !important;
 }
 
 .btn-toast-undo {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
   color: #FFFFFF !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  padding: 4px 10px !important;
-  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer !important;
-  white-space: nowrap !important;
-  transition: all 0.15s ease !important;
+  padding: 0 !important;
   flex-shrink: 0 !important;
+  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
 }
 
 .btn-toast-undo:hover {
-  background: rgba(255, 255, 255, 0.45) !important;
-  transform: scale(1.05) !important;
+  background: rgba(255, 255, 255, 0.32) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: scale(1.08) !important;
+}
+
+.btn-toast-undo:active {
+  transform: scale(0.92) !important;
+  background: rgba(255, 255, 255, 0.42) !important;
+}
+
+.toast-undo-icon {
+  width: 18px !important;
+  height: 18px !important;
+  stroke: #FFFFFF !important;
+  stroke-width: 2.5 !important;
+  display: block !important;
 }
 
 /* Celebration card when all items in plan have been moved to cart */

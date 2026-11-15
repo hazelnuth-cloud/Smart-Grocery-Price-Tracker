@@ -3400,7 +3400,12 @@ function showToastWithUndo(message, onUndoAction) {
         <div class="toast-desc" style="white-space: normal; word-break: break-word; line-height: 1.3;">${escapeHtml(descText)}</div>
       </div>
     </div>
-    <button type="button" class="btn-toast-undo touch-target">Urungkan ↩️</button>
+    <button type="button" class="btn-toast-undo touch-target" title="Urungkan" aria-label="Urungkan">
+      <svg class="toast-undo-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 7v6h6"></path>
+        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+      </svg>
+    </button>
   `;
 
   const undoBtn = toast.querySelector('.btn-toast-undo');
