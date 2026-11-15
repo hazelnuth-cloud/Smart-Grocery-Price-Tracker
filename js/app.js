@@ -4146,6 +4146,163 @@ function undoClearCart() {
   showToast('Keranjang belanja berhasil dipulihkan kembali! ✨', 'success');
 }
 
+/**
+ * Buka Modal Pembatalan Sesi Belanja (Cancel Shopping)
+ */
+function openCancelShoppingModal() {
+  playSoftPop();
+  const modal = document.getElementById('cancelShoppingModal');
+  const bodyEl = document.getElementById('cancelModalBody');
+  const titleEl = document.getElementById('cancelModalTitle');
+  const subtitleEl = document.getElementById('cancelModalSubtitle');
+  if (!modal || !bodyEl) return;
+
+  const inCartItems = (AppState.cart || []).filter(i => i.checked);
+  const totalCartCount = inCartItems.length;
+
+  if (totalCartCount > 0) {
+    if (titleEl) titleEl.textContent = 'Batalkan Sesi Belanja?';
+    if (subtitleEl) subtitleEl.textContent = `Ada ${totalCartCount} barang di keranjang belanja. Pilih cara pembatalan:`;
+
+    bodyEl.innerHTML = `
+      <div class="cancel-options-list">
+        <!-- Opsi 1: Kembalikan semua ke Rencana Belanja -->
+        <button type="button" class="cancel-option-card touch-target" onclick="executeCancelShopping('return_to_plan')">
+          <div class="cancel-option-icon">↩️</div>
+          <div class="cancel-option-info">
+            <strong class="cancel-option-title">Kembalikan ke Rencana Belanja</strong>
+            <span class="cancel-option-desc">Simpan semua barang (${totalCartCount} item) di daftar Rencana agar bisa dibeli lain waktu.</span>
+          </div>
+          <span class="cancel-option-arrow" aria-hidden="true">➔</span>
+        </button>
+
+        <!-- Opsi 2: Hapus semua barang di keranjang & batalkan -->
+        <button type="button" class="cancel-option-card danger touch-target" onclick="executeCancelShopping('clear_all')">
+          <div class="cancel-option-icon">🗑️</div>
+          <div class="cancel-option-info">
+            <strong class="cancel-option-title">Hapus Semua & Kosongkan Keranjang</strong>
+            <span class="cancel-option-desc">Hapus seluruh isi keranjang belanjaan dan batalkan sesi belanja.</span>
+          </div>
+          <span class="cancel-option-arrow" aria-hidden="true">➔</span>
+        </button>
+      </div>
+    `;
+  } else {
+    // Keranjang sudah kosong (misal produk sudah dihapus pengguna sebelumnya)
+    if (titleEl) titleEl.textContent = 'Batalkan Sesi Belanja?';
+    if (subtitleEl) subtitleEl.textContent = 'Keranjang belanja saat ini sudah kosong.';
+
+    bodyEl.innerHTML = `
+      <div class="cancel-empty-prompt">
+        <div class="cancel-empty-icon">🛒</div>
+        <p class="cancel-empty-text">
+          Keranjang belanja Anda sudah kosong. Ingin membatalkan sesi belanja ini dan kembali ke menu Rencana Belanja?
+        </p>
+        <button type="button" class="btn-confirm-cancel-session touch-target" onclick="executeCancelShopping('direct_cancel')">
+          🚫 Ya, Batalkan Sesi Belanja
+        </button>
+      </div>
+    `;
+  }
+
+  modal.style.display = 'flex';
+  modal.classList.add('active', 'show');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+/**
+ * Tutup Modal Pembatalan Sesi Belanja
+ */
+function closeCancelShoppingModal() {
+  const modal = document.getElementById('cancelShoppingModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active', 'show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+/**
+ * Entry Point Membatalkan Sesi Belanja
+ */
+function cancelShoppingSession() {
+  openCancelShoppingModal();
+}
+
+/**
+ * Eksekusi Pembatalan Belanja sesuai pilihan user
+ * @param {'return_to_plan'|'clear_all'|'direct_cancel'} action
+ */
+function executeCancelShopping(action) {
+  closeCancelShoppingModal();
+
+  const inCartItems = (AppState.cart || []).filter(i => i.checked);
+  const count = inCartItems.length;
+
+  if (action === 'return_to_plan') {
+    // 1. Kembalikan semua barang keranjang ke rencana
+    (AppState.cart || []).forEach(item => {
+      if (item.checked) {
+        item.checked = false;
+      }
+    });
+
+    // 2. Nonaktifkan Mode Toko (In-Store Mode)
+    AppState.inStoreMode = false;
+    document.body.classList.remove('in-store-mode-active');
+    try {
+      localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(false));
+    } catch (e) { }
+
+    saveLocalState();
+    pushStateToCloud();
+    renderAll();
+    switchTab('planner');
+    playCalmChime();
+    showToast(`Belanja dibatalkan • ${count} barang dikembalikan ke Rencana ↩️`, 'info');
+
+  } else if (action === 'clear_all') {
+    // 1. Simpan backup cart untuk fitur Undo jika berubah pikiran
+    AppState._lastClearedCartBackup = JSON.parse(JSON.stringify(AppState.cart || []));
+
+    // 2. Hapus barang yang ada di keranjang
+    AppState.cart = (AppState.cart || []).filter(i => !i.checked);
+
+    if (AppState.cart.length === 0) {
+      AppState.previousSafetyLevel = null;
+    }
+
+    // 3. Nonaktifkan Mode Toko (In-Store Mode)
+    AppState.inStoreMode = false;
+    document.body.classList.remove('in-store-mode-active');
+    try {
+      localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(false));
+    } catch (e) { }
+
+    saveLocalState();
+    pushStateToCloud();
+    renderAll();
+    switchTab('planner');
+    playCalmChime();
+    showToastWithUndo(`Sesi belanja dibatalkan (${count} barang dihapus) ✨`, () => undoClearCart());
+
+  } else {
+    // 'direct_cancel' ketika keranjang sudah kosong
+    AppState.inStoreMode = false;
+    document.body.classList.remove('in-store-mode-active');
+    try {
+      localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(false));
+    } catch (e) { }
+
+    saveLocalState();
+    pushStateToCloud();
+    renderAll();
+    switchTab('planner');
+    playCalmChime();
+    showToast('Sesi belanja berhasil dibatalkan ↩️', 'info');
+  }
+}
+
 // =========================================================================
 // 8. SINGLE SMART NATURAL-LANGUAGE INPUT BAR & ANTI-LIST
 // =========================================================================
@@ -5319,7 +5476,17 @@ async function confirmFinishShopping() {
   if (isFinishingShopping) return;
 
   if (!AppState.cart || AppState.cart.length === 0) {
-    showToast('Keranjang masih kosong!', 'info');
+    playSoftPop();
+    const wantCancel = await showAppModalBubble({
+      title: 'Keranjang Masih Kosong',
+      message: 'Belum ada barang di daftar belanja Anda. Apakah Anda ingin membatalkan sesi belanja ini dan kembali ke menu utama?',
+      icon: '🛒',
+      confirmText: 'Ya, Batalkan Belanja',
+      cancelText: 'Lanjut Catat Barang'
+    });
+    if (wantCancel) {
+      executeCancelShopping('direct_cancel');
+    }
     return;
   }
 
@@ -5333,9 +5500,19 @@ async function confirmFinishShopping() {
   }
 
   const checkedItems = AppState.cart.filter(item => item.checked);
-  // Proteksi Jari Ceroboh: Jangan selesaikan belanja jika belum ada barang yang dicentang/masuk troli
+  // Proteksi Jari Ceroboh: Jika belum ada barang yang dicentang di keranjang, tawarkan batalkan belanja
   if (checkedItems.length === 0) {
-    showToast('Pilih / centang barang yang sudah masuk troli terlebih dahulu! 🛒', 'warning');
+    playSoftPop();
+    const wantCancel = await showAppModalBubble({
+      title: 'Keranjang Belanja Kosong',
+      message: 'Belum ada barang yang dimasukkan ke troli belanja. Apakah Anda ingin membatalkan sesi belanja ini dan kembali ke Rencana?',
+      icon: '🛒',
+      confirmText: 'Ya, Batalkan Belanja',
+      cancelText: 'Pilih Barang Dulu'
+    });
+    if (wantCancel) {
+      executeCancelShopping('direct_cancel');
+    }
     return;
   }
 
@@ -7558,6 +7735,8 @@ function renderCartSection() {
 
   const emptyCartBtn = document.getElementById('btnEmptyCart');
   const emptyCartBtnBottom = document.getElementById('btnEmptyCartBottom');
+  const cancelShoppingBtnToolbar = document.getElementById('btnCancelShoppingToolbar');
+  const cancelShoppingBtnBottom = document.getElementById('btnCancelShoppingBottom');
   const cartActionsToolbar = document.getElementById('cartActionsToolbar');
 
   if (emptyCartBtn) {
@@ -7565,6 +7744,12 @@ function renderCartSection() {
   }
   if (emptyCartBtnBottom) {
     emptyCartBtnBottom.style.display = hasInCart ? 'inline-flex' : 'none';
+  }
+  if (cancelShoppingBtnToolbar) {
+    cancelShoppingBtnToolbar.style.display = hasInCart ? 'inline-flex' : 'none';
+  }
+  if (cancelShoppingBtnBottom) {
+    cancelShoppingBtnBottom.style.display = 'inline-flex';
   }
   if (cartActionsToolbar) {
     cartActionsToolbar.style.display = hasInCart ? 'flex' : 'none';
@@ -7604,6 +7789,9 @@ function renderCartSection() {
           ` : ''}
           <button type="button" class="btn-demo-quick" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="switchTab('planner')">
             📋 Buka Rencana Belanja
+          </button>
+          <button type="button" class="btn-cancel-shopping-empty touch-target" onclick="cancelShoppingSession()">
+            🚫 Batalkan Sesi Belanja
           </button>
         </div>
       </div>
@@ -8173,4 +8361,8 @@ if (typeof window !== 'undefined') {
   window.dismissPwaInstallBanner = dismissPwaInstallBanner;
   window.acceptPwaInstallBanner = acceptPwaInstallBanner;
   window.dismissStickySaldoCard = dismissStickySaldoCard;
+  window.openCancelShoppingModal = openCancelShoppingModal;
+  window.closeCancelShoppingModal = closeCancelShoppingModal;
+  window.cancelShoppingSession = cancelShoppingSession;
+  window.executeCancelShopping = executeCancelShopping;
 }

@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=122">
+  <link rel="stylesheet" href="./css/app.css?v=123">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -718,10 +718,16 @@
           </label>
           <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
         </div>
-        <button type="button" id="btnEmptyCart" class="btn-clear-cart touch-target" onclick="clearCartAll()" title="Hapus semua barang dari keranjang belanja">
-          <span class="btn-clear-cart-icon" aria-hidden="true">🗑️</span>
-          <span class="btn-clear-cart-text">Hapus Semua</span>
-        </button>
+        <div class="cart-action-right" style="display: flex; align-items: center; gap: 6px;">
+          <button type="button" id="btnCancelShoppingToolbar" class="btn-cancel-shopping-action touch-target" onclick="cancelShoppingSession()" title="Batalkan Sesi Belanja">
+            <span class="btn-cancel-icon" aria-hidden="true">🚫</span>
+            <span class="btn-cancel-text">Batal Belanja</span>
+          </button>
+          <button type="button" id="btnEmptyCart" class="btn-clear-cart touch-target" onclick="clearCartAll()" title="Hapus semua barang dari keranjang belanja">
+            <span class="btn-clear-cart-icon" aria-hidden="true">🗑️</span>
+            <span class="btn-clear-cart-text">Hapus Semua</span>
+          </button>
+        </div>
       </div>
 
       <!-- SLIM 4PX BUDGET PROGRESS BAR FOR CART -->
@@ -748,12 +754,17 @@
           </div>
           <div class="shopee-bottom-sub" id="checkoutBudgetRemaining">Sisa Saldo: Rp 150.000</div>
         </div>
-        <div class="shopee-bottom-right-actions" style="display: flex; align-items: center; gap: 8px;">
+        <div class="shopee-bottom-right-actions" style="display: flex; align-items: center; gap: 6px;">
+          <button type="button" id="btnCancelShoppingBottom" class="btn-cancel-shopping-bottom touch-target" onclick="cancelShoppingSession()"
+            title="Batalkan Sesi Belanja" aria-label="Batalkan Sesi Belanja">
+            <span aria-hidden="true">🚫</span>
+            <span class="btn-cancel-bottom-text">Batal</span>
+          </button>
           <button type="button" id="btnEmptyCartBottom" class="btn-clear-cart-bottom touch-target" onclick="clearCartAll()"
             title="Hapus semua barang di keranjang belanja" aria-label="Hapus semua barang di keranjang belanja">
             <span aria-hidden="true">🗑️</span>
           </button>
-          <button type="button" class="btn-shopee-finish-action touch-target" onclick="confirmFinishShopping()"
+          <button type="button" id="btnFinishShoppingBottom" class="btn-shopee-finish-action touch-target" onclick="confirmFinishShopping()"
             title="Selesai Belanja & Simpan Struk">
             <span>Selesai 🛍️ <span id="checkoutBtnCount"></span></span>
           </button>
@@ -846,6 +857,10 @@
         </div>
 
         <div class="running-cart-actions">
+          <button type="button" class="btn-cancel-instore touch-target" onclick="cancelShoppingSession()"
+            title="Batalkan Sesi Belanja">
+            🚫 Batal
+          </button>
           <button type="button" class="btn-scan-instore touch-target" onclick="openProductScannerModal()"
             title="Scan Barcode Kemasan">
             📷 Scan Barcode
@@ -1102,6 +1117,37 @@
           ➕ Tambahkan Barang
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: BATALKAN SESI BELANJA (CANCEL SHOPPING MODAL)
+       ======================================================================== -->
+  <div id="cancelShoppingModal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true"
+    aria-labelledby="cancelModalTitle" onclick="if(event.target===this)closeCancelShoppingModal()">
+    <div class="modal-card cancel-shopping-card">
+      <div class="cancel-modal-header">
+        <div class="cancel-modal-header-left">
+          <div class="cancel-modal-icon-wrap">
+            <span class="cancel-modal-icon">🚫</span>
+          </div>
+          <div>
+            <h3 id="cancelModalTitle" class="serif-font cancel-modal-title">Batalkan Sesi Belanja</h3>
+            <p id="cancelModalSubtitle" class="cancel-modal-subtitle">Pilih tindakan pembatalan belanjaan Anda</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn touch-target" onclick="closeCancelShoppingModal()" aria-label="Tutup">✕</button>
+      </div>
+
+      <div class="cancel-modal-body" id="cancelModalBody">
+        <!-- Rendered dynamically via openCancelShoppingModal() -->
+      </div>
+
+      <div class="cancel-modal-footer">
+        <button type="button" class="btn-cancel-modal-dismiss touch-target" onclick="closeCancelShoppingModal()">
+          Lanjut Belanja
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2208,7 +2254,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=122"></script>
+  <script src="./js/app.js?v=123"></script>
 
   <!-- Service Worker Registration -->
   <script>
