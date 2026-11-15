@@ -2235,15 +2235,9 @@ async function handleAuthSubmit(e) {
         }
       } catch (fbErr) {
         console.info('Firebase Auth signin note:', fbErr.code || fbErr.message);
-        if (fbErr.code === 'auth/wrong-password' || fbErr.code === 'auth/invalid-credential') {
-          setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan coba lagi!', 'danger');
-          showToast('Kata sandi salah!', 'danger');
-          if (passInput) {
-            passInput.value = '';
-            passInput.focus();
-          }
-          return;
-        }
+        // Catatan: Jangan langsung return di sini jika auth/wrong-password,
+        // agar pengguna yang baru saja memulihkan kata sandi via kode verifikasi in-app
+        // tetap dapat divalidasi dan masuk menggunakan data akun terbarunya!
       }
     }
 
@@ -2384,13 +2378,25 @@ function switchForgotStep(step) {
   const step1 = document.getElementById('forgotStep1');
   const step2 = document.getElementById('forgotStep2');
   if (step === 2) {
-    if (step1) step1.style.display = 'none';
-    if (step2) step2.style.display = 'block';
+    if (step1) {
+      step1.style.setProperty('display', 'none', 'important');
+      step1.classList.add('hidden');
+    }
+    if (step2) {
+      step2.style.setProperty('display', 'flex', 'important');
+      step2.classList.remove('hidden');
+    }
     const codeInput = document.getElementById('forgotCodeInput');
     if (codeInput) setTimeout(() => codeInput.focus(), 150);
   } else {
-    if (step1) step1.style.display = 'block';
-    if (step2) step2.style.display = 'none';
+    if (step1) {
+      step1.style.setProperty('display', 'flex', 'important');
+      step1.classList.remove('hidden');
+    }
+    if (step2) {
+      step2.style.setProperty('display', 'none', 'important');
+      step2.classList.add('hidden');
+    }
     const emailInput = document.getElementById('forgotEmailInput');
     if (emailInput) setTimeout(() => emailInput.focus(), 150);
   }
@@ -2415,7 +2421,7 @@ async function handleSendResetCode(e) {
   }
 
   try {
-    // 1. Cek apakah email terdaftar di lokal atau Cloud Firestore
+    // 1. Cek apakah email terdaftar di lokal, Cloud Firestore, atau Firebase Auth
     const users = getRegisteredUsers();
     let isRegistered = users.some(u => u.email && u.email.toLowerCase() === email);
 
@@ -2426,6 +2432,25 @@ async function handleSendResetCode(e) {
       } catch (fsErr) {
         console.warn('Firestore user check notice:', fsErr);
       }
+    }
+
+    if (!isRegistered && typeof firebase !== 'undefined' && firebase.auth) {
+      try {
+        const methods = await firebase.auth().fetchSignInMethodsForEmail(email);
+        if (methods && methods.length > 0) isRegistered = true;
+      } catch (fbErr) {
+        console.warn('Firebase fetchSignInMethods notice:', fbErr);
+      }
+    }
+
+    if (!isRegistered) {
+      setForgotAlert(`Alamat email "<strong>${email}</strong>" belum terdaftar di sistem. Silakan periksa kembali email Anda atau pilih tab "Daftar" untuk membuat akun baru.`, 'warning');
+      showToast('Email belum terdaftar!', 'warning');
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<span>📧 Kirim Kode Verifikasi</span>';
+      }
+      return;
     }
 
     // 2. Generate 6-digit verification code
@@ -2509,7 +2534,7 @@ async function handleConfirmPasswordReset(e) {
   const newPassInput = document.getElementById('forgotNewPassInput');
   const confirmPassInput = document.getElementById('forgotConfirmPassInput');
 
-  const enteredCode = codeInput ? codeInput.value.trim() : '';
+  const enteredCode = codeInput ? codeInput.value.replace(/\s+/g, '') : '';
   const newPass = newPassInput ? newPassInput.value.trim() : '';
   const confirmPass = confirmPassInput ? confirmPassInput.value.trim() : '';
 

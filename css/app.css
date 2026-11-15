@@ -9090,7 +9090,7 @@ body.dark-mode #appContainer {
   margin: 10px 0 14px;
   line-height: 1.4;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   animation: fadeIn 0.25s ease;
   word-break: break-word;
@@ -11177,9 +11177,14 @@ body.theme-dark .pwa-protect-text code {
 }
 
 .forgot-step-pane {
-  display: flex !important;
-  flex-direction: column !important;
-  margin-top: 10px !important;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.forgot-step-pane.hidden,
+.forgot-step-pane[style*="display: none"] {
+  display: none !important;
 }
 
 .forgot-email-sent-badge {
