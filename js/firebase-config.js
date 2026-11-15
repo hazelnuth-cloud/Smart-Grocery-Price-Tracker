@@ -13,13 +13,16 @@ window.FIREBASE_CONFIG = {
 
 /**
  * Initialize Google Auth Provider with email and profile scopes
+ * @param {boolean} forcePrompt - If true, explicitly prompt user to select account (e.g. for switching accounts)
  */
-window.initGoogleAuthProvider = function() {
+window.initGoogleAuthProvider = function(forcePrompt = false) {
   if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth.GoogleAuthProvider) {
     const googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.addScope('email');
     googleProvider.addScope('profile');
-    googleProvider.setCustomParameters({ prompt: 'select_account' });
+    if (forcePrompt) {
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+    }
     return googleProvider;
   }
   return null;

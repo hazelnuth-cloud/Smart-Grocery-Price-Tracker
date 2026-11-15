@@ -1437,6 +1437,14 @@ function initFirestoreSync() {
       firebase.initializeApp(fbConfig);
     }
 
+    // Pastikan persistensi sesi lokal aktif sehingga tidak perlu login ulang saat kembali
+    if (firebase.auth) {
+      try {
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+          .catch(e => console.warn('Firebase setPersistence notice:', e));
+      } catch (e) { }
+    }
+
     firestoreDb = firebase.firestore();
     setupFirestoreListener();
     setupAuthListener();
@@ -1503,6 +1511,14 @@ function setupAuthListener() {
         // Only switch if no user or different user
         if (!AppState.user || AppState.user.uid !== user.uid) {
           handleSuccessfulAuth(user, cleanProv, false);
+        } else {
+          // Sinkronisasi sesi live & avatar jika ada pembaruan dari Google
+          AppState.user.isLiveFirebaseSession = true;
+          if (user.photoURL && user.photoURL !== AppState.user.photoURL) {
+            AppState.user.photoURL = user.photoURL;
+            updateHeaderAvatar(user.photoURL);
+            updateModalAvatar(user.photoURL);
+          }
         }
       } else {
         // DO NOT log out on initial null or pending Firebase state during page refresh!
@@ -1518,11 +1534,13 @@ async function handleRedirectResult() {
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       const result = await firebase.auth().getRedirectResult();
+      try { sessionStorage.removeItem('pending_google_redirect'); } catch (e) { }
       if (result && result.user) {
         result.user.isLiveFirebaseSession = true;
         handleSuccessfulAuth(result.user, 'google', true);
       }
     } catch (err) {
+      try { sessionStorage.removeItem('pending_google_redirect'); } catch (e) { }
       if (err.code && err.code !== 'auth/null-user') {
         console.warn('Redirect sign-in notice:', err.code, err.message);
         showToast(getAuthErrorMessage(err), 'error');
@@ -1841,41 +1859,71 @@ async function loginWithGoogle() {
     return;
   }
 
-  // 2. Cek kesiapan Firebase SDK
+  // 2. Deteksi In-App Browser (WhatsApp, Instagram, Facebook, Line, TikTok) yang diblokir oleh Google
+  const ua = (typeof navigator !== 'undefined' && (navigator.userAgent || navigator.vendor || window.opera)) || '';
+  const isInAppBrowser = /FBAN|FBAV|Instagram|Line|WhatsApp|MicroMessenger/i.test(ua);
+  if (isInAppBrowser) {
+    setAuthAlert(
+      '<strong>Google Sign-In diblokir di peramban internal WhatsApp/Instagram.</strong><br>' +
+      'Google melarang autentikasi di dalam in-app browser demi keamanan akun Anda.<br><br>' +
+      '💡 <strong>Solusi Mudah:</strong> Ketuk tombol titik tiga (⋮) atau bagikan di pojok atas, lalu pilih <strong>"Buka di Browser"</strong> (Chrome atau Safari) untuk masuk lancar.',
+      'warning'
+    );
+    showToast('Buka di Chrome/Safari untuk masuk dengan Google 🌐', 'warning');
+    return;
+  }
+
+  // 3. Cek kesiapan Firebase SDK
   if (typeof firebase === 'undefined' || !firebase.auth) {
     setAuthAlert('Layanan Firebase tidak dapat dijangkau. Periksa koneksi internet Anda atau muat ulang halaman.', 'danger');
     showToast('Layanan Firebase tidak terjangkau. Periksa internet Anda.', 'error');
     return;
   }
 
+  // 4. State UI: Kunci tombol & tampilkan status loading untuk mencegah tap ganda (anti-double tap)
+  const googleBtn = document.querySelector('.btn-google-auth');
+  const googleBtnText = document.getElementById('googleBtnText');
+  const originalText = googleBtnText ? googleBtnText.textContent : 'Lanjutkan dengan Google';
+
+  if (googleBtn) {
+    googleBtn.disabled = true;
+    googleBtn.style.opacity = '0.75';
+    googleBtn.style.pointerEvents = 'none';
+  }
+  if (googleBtnText) {
+    googleBtnText.textContent = 'Menghubungkan ke Google... ⏳';
+  }
+
+  const restoreBtn = () => {
+    if (googleBtn) {
+      googleBtn.disabled = false;
+      googleBtn.style.opacity = '';
+      googleBtn.style.pointerEvents = '';
+    }
+    if (googleBtnText) {
+      googleBtnText.textContent = originalText;
+    }
+  };
+
   const provider = (typeof window.initGoogleAuthProvider === 'function')
-    ? window.initGoogleAuthProvider()
+    ? window.initGoogleAuthProvider(false)
     : new firebase.auth.GoogleAuthProvider();
 
   if (!provider) {
+    restoreBtn();
     showToast('Inisialisasi Google Auth gagal.', 'error');
     return;
   }
 
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isStandalone = isAppStandalone();
-
-  // 3. Pada perangkat HP ATAU Desktop PWA (standalone window):
-  // Standar terbaik dan terandal adalah signInWithRedirect (menghindari pemblokiran pop-up & batasan third-party cookie)
-  if (isMobile || isStandalone) {
-    showToast('Membuka Google Sign-In di perangkat Anda...', 'info');
-    try {
-      await firebase.auth().signInWithRedirect(provider);
-    } catch (redirErr) {
-      console.error('Firebase signInWithRedirect error:', redirErr);
-      showToast(getAuthErrorMessage(redirErr), 'error');
-      setAuthAlert(getAuthErrorMessage(redirErr), 'danger');
-    }
-    return;
+  // 5. Pastikan persistensi sesi lokal aktif
+  try {
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  } catch (persErr) {
+    console.warn('Firebase setPersistence notice:', persErr);
   }
 
-  // 4. Pada browser Komputer / Laptop Desktop:
-  // Coba signInWithPopup terlebih dahulu, lalu otomatis fallback ke signInWithRedirect jika pop-up / environment dibatasi
+  // 6. POPUP-FIRST UNTUK SEMUA PERANGKAT (HP, Laptop & PWA)
+  // Popup di event tap langsung TIDAK DIBLOKIR browser HP & kebal dari masalah third-party cookie/Storage Partitioning
   showToast('Menghubungkan ke Google...', 'info');
   try {
     const result = await firebase.auth().signInWithPopup(provider);
@@ -1883,17 +1931,18 @@ async function loginWithGoogle() {
       result.user.isLiveFirebaseSession = true;
       handleSuccessfulAuth(result.user, 'google', true);
     }
+    restoreBtn();
   } catch (popupError) {
     console.warn('Firebase signInWithPopup notice:', popupError);
 
     // Pengguna membatalkan sendiri jendela pop-up
     if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
       showToast('Masuk dengan Google dibatalkan.', 'info');
+      restoreBtn();
       return;
     }
 
-    // Tangani auth/operation-not-supported-in-this-environment, popup-blocked, dan third-party storage restriction:
-    // Otomatis beralih ke signInWithRedirect agar sukses di semua komputer & peramban!
+    // 7. Fallback otomatis ke signInWithRedirect HANYA jika pop-up diblokir secara ketat
     if (
       popupError.code === 'auth/operation-not-supported-in-this-environment' ||
       popupError.code === 'auth/popup-blocked' ||
@@ -1903,8 +1952,11 @@ async function loginWithGoogle() {
     ) {
       showToast('Mengalihkan ke halaman masuk resmi Google...', 'info');
       try {
+        try { sessionStorage.setItem('pending_google_redirect', 'true'); } catch (e) { }
         await firebase.auth().signInWithRedirect(provider);
       } catch (redirErr) {
+        try { sessionStorage.removeItem('pending_google_redirect'); } catch (e) { }
+        restoreBtn();
         console.error('Firebase signInWithRedirect fallback error:', redirErr);
         showToast(getAuthErrorMessage(redirErr), 'error');
         setAuthAlert(getAuthErrorMessage(redirErr), 'danger');
@@ -1912,6 +1964,7 @@ async function loginWithGoogle() {
       return;
     }
 
+    restoreBtn();
     showToast(getAuthErrorMessage(popupError), 'error');
     setAuthAlert(getAuthErrorMessage(popupError), 'danger');
   }
