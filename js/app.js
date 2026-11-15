@@ -742,7 +742,7 @@ function checkOverbudgetBlock(actionName = 'menambah belanjaan', additionalCost 
     const deficit = (projectedTotal > budget) ? (projectedTotal - budget) : (currentTotal - budget);
     playWarningAlertTone();
     showToast(
-      `🚨 Tidak bisa ${actionName}! Total belanja melebihi batas saldo anggaran dompet (Defisit: ${formatRupiah(deficit)} dari limit ${formatRupiah(budget)}). Kurangi kuantitas atau batalkan barang lain terlebih dahulu!`,
+      `Tidak bisa ${actionName}! Melebihi anggaran dompet. Defisit: ${formatRupiah(deficit)} (Limit: ${formatRupiah(budget)}). Kurangi barang belanjaan terlebih dahulu!`,
       'danger'
     );
     highlightOverbudgetBanner();
@@ -5290,6 +5290,10 @@ function toggleShoppingMode() {
   const instoreCard = document.getElementById('inStoreCompanionCard');
 
   if (AppState.inStoreMode) {
+    if (fabStoreMode) {
+      fabStoreMode.style.display = 'none';
+      fabStoreMode.classList.add('d-none');
+    }
     if (fabIcon) fabIcon.textContent = '📋';
     if (fabText) fabText.textContent = 'Mode Rencana';
     if (runningBar) runningBar.classList.remove('d-none');
@@ -5324,7 +5328,7 @@ async function confirmFinishShopping() {
   if (metrics.totalBelanja > AppState.budget) {
     const deficit = metrics.totalBelanja - AppState.budget;
     playWarningAlertTone();
-    showToast(`🚨 Tidak bisa menyelesaikan belanja! Total belanja melebihi batas saldo anggaran dompet sebesar ${formatRupiah(deficit)}. Kurangi barang atau kuantitas terlebih dahulu!`, 'danger');
+    showToast(`Tidak bisa menyelesaikan belanja! Melebihi anggaran dompet. Defisit: ${formatRupiah(deficit)} (Limit: ${formatRupiah(AppState.budget)}). Kurangi barang atau kuantitas terlebih dahulu!`, 'danger');
     highlightOverbudgetBanner();
     return;
   }
@@ -6787,32 +6791,35 @@ function showToast(message, type = 'info') {
   else if (type === 'success') icon = '✅';
   else if (type === 'warning') icon = '⚠️';
 
-  // Pecah pesan menjadi 2 baris bertingkat sengaja jika memuat tanda titik dua (:), seru (!), atau teks panjang
+  // Bersihkan emoji di awal teks pesan agar tidak terjadi ikon ganda dengan ikon bawaan toast
+  const cleanMessage = (message || '').replace(/^([\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}]+\s*)+/u, '').trim();
+
+  // Pecah pesan menjadi 2 baris bertingkat sengaja jika memuat tanda seru (!), titik dua (:), atau teks panjang
   let contentHtml = '';
-  if (message.includes(':')) {
-    const colonIdx = message.indexOf(':');
-    const titlePart = message.substring(0, colonIdx).trim();
-    const descPart = message.substring(colonIdx + 1).trim();
+  if (cleanMessage.includes('!') && cleanMessage.length > 25) {
+    const exclIdx = cleanMessage.indexOf('!');
+    const titlePart = cleanMessage.substring(0, exclIdx + 1).trim();
+    const descPart = cleanMessage.substring(exclIdx + 1).trim();
     contentHtml = `
       <div class="toast-stacked-wrap">
         <div class="toast-title">${escapeHtml(titlePart)}</div>
-        <div class="toast-desc">${escapeHtml(descPart)}</div>
+        ${descPart ? `<div class="toast-desc">${escapeHtml(descPart)}</div>` : ''}
       </div>
     `;
-  } else if (message.includes('!') && message.length > 30) {
-    const exclIdx = message.indexOf('!');
-    const titlePart = message.substring(0, exclIdx + 1).trim();
-    const descPart = message.substring(exclIdx + 1).trim();
+  } else if (cleanMessage.includes(':')) {
+    const colonIdx = cleanMessage.indexOf(':');
+    const titlePart = cleanMessage.substring(0, colonIdx).trim();
+    const descPart = cleanMessage.substring(colonIdx + 1).trim();
     contentHtml = `
       <div class="toast-stacked-wrap">
         <div class="toast-title">${escapeHtml(titlePart)}</div>
-        <div class="toast-desc">${escapeHtml(descPart)}</div>
+        ${descPart ? `<div class="toast-desc">${escapeHtml(descPart)}</div>` : ''}
       </div>
     `;
   } else {
     contentHtml = `
       <div class="toast-stacked-wrap">
-        <div class="toast-desc single-flow">${escapeHtml(message)}</div>
+        <div class="toast-desc single-flow">${escapeHtml(cleanMessage)}</div>
       </div>
     `;
   }
@@ -7570,10 +7577,6 @@ function renderCartSection() {
               </div>
             </div>
             <div class="shopee-compact-actions">
-              <!-- Fat-finger safe return to plan button -->
-              <button type="button" class="btn-return-to-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja (belum dibeli)">
-                <span>↩️ Ke Rencana</span>
-              </button>
               <button type="button" class="btn-action-edit-icon touch-target" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
               <button type="button" class="btn-shopee-delete touch-target" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item">🗑️</button>
             </div>
@@ -7587,6 +7590,10 @@ function renderCartSection() {
             </div>
 
             <div class="shopee-compact-stepper-wrap">
+              <!-- Fat-finger safe return to plan button (Symmetrically mirrors "Ke Keranjang" in planner) -->
+              <button type="button" class="btn-return-to-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja (belum dibeli)">
+                <span>↩️ Ke Rencana</span>
+              </button>
               <div class="shopee-stepper">
                 <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas">&minus;</button>
                 <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
