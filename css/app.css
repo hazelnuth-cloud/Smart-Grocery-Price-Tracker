@@ -6760,6 +6760,56 @@ body.dark-mode .cloud-sync-text {
   letter-spacing: -0.2px !important;
 }
 
+/* Tombol Hapus Semua Keranjang & Rencana */
+.btn-clear-cart,
+.btn-clear-plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #FFF1F2;
+  color: #E11D48;
+  border: 1px solid #FECDD3;
+  border-radius: 9999px;
+  padding: 4px 11px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  min-height: 28px;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.btn-clear-cart:hover,
+.btn-clear-cart:active,
+.btn-clear-plan:hover,
+.btn-clear-plan:active {
+  background: #FFE4E6;
+  border-color: #FDA4AF;
+  color: #BE123C;
+  transform: translateY(-1px);
+}
+
+body.dark-mode .btn-clear-cart,
+body.theme-dark .btn-clear-cart,
+body.dark-mode .btn-clear-plan,
+body.theme-dark .btn-clear-plan {
+  background: #2D0C15 !important;
+  border-color: #5C1D2E !important;
+  color: #FB7185 !important;
+}
+
+body.dark-mode .btn-clear-cart:hover,
+body.theme-dark .btn-clear-cart:hover,
+body.dark-mode .btn-clear-plan:hover,
+body.theme-dark .btn-clear-plan:hover {
+  background: #3E101D !important;
+  border-color: #881337 !important;
+  color: #FDA4AF !important;
+}
+
 /* Dark Mode Overrides for Segmented Bar & Cart Store Header */
 body.dark-mode .planner-segmented-bar {
   background: #1E293B !important;

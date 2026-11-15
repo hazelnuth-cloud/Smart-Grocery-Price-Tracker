@@ -3642,6 +3642,11 @@ function renderItems() {
   const inCart = AppState.cart.filter(i => i.checked);
   if (unboughtCountEl) unboughtCountEl.textContent = unbought.length;
 
+  const clearPlanBtn = document.getElementById('btnClearPlan');
+  if (clearPlanBtn) {
+    clearPlanBtn.style.display = unbought.length > 0 ? 'inline-flex' : 'none';
+  }
+
   // Empty state handling
   if (AppState.cart.length === 0) {
     container.innerHTML = `
@@ -4010,6 +4015,136 @@ function undoDeleteItem() {
   renderAll();
   playCalmChime();
   showToast(`"${restored.namaBarang}" berhasil dipulihkan ke keranjang! ✨`, 'success');
+}
+
+/**
+ * Hapus Semua Barang di Keranjang Belanja (Trolley)
+ */
+async function clearCartAll() {
+  const inCartItems = AppState.cart.filter(i => i.checked);
+  if (!inCartItems || inCartItems.length === 0) {
+    showToast('Keranjang belanja Anda sudah kosong! 🛒', 'info');
+    return;
+  }
+
+  playSoftPop();
+  const count = inCartItems.length;
+  const confirmed = await showAppModalBubble({
+    title: 'Kosongkan Keranjang',
+    message: `Apakah Anda yakin ingin menghapus semua (${count}) barang dari keranjang belanja?`,
+    icon: '🗑️',
+    confirmText: 'Ya, Hapus Semua',
+    cancelText: 'Batal'
+  });
+
+  if (!confirmed) return;
+
+  // Simpan backup untuk fitur Undo
+  AppState._lastClearedCartBackup = JSON.parse(JSON.stringify(AppState.cart));
+
+  // Hapus semua barang yang dicentang (di keranjang)
+  AppState.cart = AppState.cart.filter(i => !i.checked);
+
+  if (AppState.cart.length === 0) {
+    AppState.previousSafetyLevel = null;
+  }
+
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  playCalmChime();
+  showToastWithUndo(`Keranjang berhasil dikosongkan (${count} barang dihapus) ✨`, () => undoClearCart());
+}
+
+/**
+ * Hapus Semua Barang di Rencana Belanja (Plan)
+ */
+async function clearPlanAll() {
+  const unbought = AppState.cart.filter(i => !i.checked);
+  if (!unbought || unbought.length === 0) {
+    showToast('Daftar rencana belanja Anda sudah kosong! 📋', 'info');
+    return;
+  }
+
+  playSoftPop();
+  const count = unbought.length;
+  const confirmed = await showAppModalBubble({
+    title: 'Kosongkan Rencana Belanja',
+    message: `Apakah Anda yakin ingin menghapus semua (${count}) barang dari daftar rencana belanja?`,
+    icon: '🗑️',
+    confirmText: 'Ya, Hapus Semua',
+    cancelText: 'Batal'
+  });
+
+  if (!confirmed) return;
+
+  // Simpan backup untuk fitur Undo
+  AppState._lastClearedCartBackup = JSON.parse(JSON.stringify(AppState.cart));
+
+  // Hapus semua barang rencana (belum dicentang)
+  AppState.cart = AppState.cart.filter(i => i.checked);
+
+  if (AppState.cart.length === 0) {
+    AppState.previousSafetyLevel = null;
+  }
+
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  playCalmChime();
+  showToastWithUndo(`Rencana belanja berhasil dikosongkan (${count} barang dihapus) ✨`, () => undoClearCart());
+}
+
+/**
+ * Kosongkan Seluruh Belanjaan (Keranjang + Rencana)
+ */
+async function clearEntireCart() {
+  if (!AppState.cart || AppState.cart.length === 0) {
+    showToast('Keranjang dan rencana belanja sudah kosong! 🛒', 'info');
+    return;
+  }
+
+  playSoftPop();
+  const count = AppState.cart.length;
+  const confirmed = await showAppModalBubble({
+    title: 'Kosongkan Seluruh Belanjaan',
+    message: `Apakah Anda yakin ingin menghapus seluruh ${count} barang dari keranjang dan rencana belanja?`,
+    icon: '🗑️',
+    confirmText: 'Ya, Kosongkan Semua',
+    cancelText: 'Batal'
+  });
+
+  if (!confirmed) return;
+
+  // Simpan backup untuk fitur Undo
+  AppState._lastClearedCartBackup = JSON.parse(JSON.stringify(AppState.cart));
+  AppState.cart = [];
+  AppState.previousSafetyLevel = null;
+
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  playCalmChime();
+  showToastWithUndo(`Seluruh belanjaan (${count} barang) berhasil dikosongkan ✨`, () => undoClearCart());
+}
+
+/**
+ * Urungkan (Undo) Pengosongan Keranjang / Rencana Belanja
+ */
+function undoClearCart() {
+  if (!AppState._lastClearedCartBackup || AppState._lastClearedCartBackup.length === 0) {
+    showToast('Tidak ada data keranjang yang dapat dipulihkan', 'info');
+    return;
+  }
+
+  AppState.cart = JSON.parse(JSON.stringify(AppState._lastClearedCartBackup));
+  AppState._lastClearedCartBackup = null;
+
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+  playCalmChime();
+  showToast('Keranjang belanja berhasil dipulihkan kembali! ✨', 'success');
 }
 
 // =========================================================================
@@ -7339,6 +7474,11 @@ function renderCartSection() {
   const inCartItems = AppState.cart.filter(i => i.checked);
   const unboughtItems = AppState.cart.filter(i => !i.checked);
 
+  const emptyCartBtn = document.getElementById('btnEmptyCart');
+  if (emptyCartBtn) {
+    emptyCartBtn.style.display = inCartItems.length > 0 ? 'inline-flex' : 'none';
+  }
+
   const metrics = getCartMetrics();
   if (grandTotalEl) grandTotalEl.textContent = formatRupiah(metrics.totalBelanja);
   if (selectedCountEl) selectedCountEl.textContent = `${inCartItems.length} item`;
@@ -7934,4 +8074,8 @@ if (typeof window !== 'undefined') {
   window.handleSendResetCode = handleSendResetCode;
   window.handleResendCode = handleResendCode;
   window.handleConfirmPasswordReset = handleConfirmPasswordReset;
+  window.clearCartAll = clearCartAll;
+  window.clearPlanAll = clearPlanAll;
+  window.clearEntireCart = clearEntireCart;
+  window.undoClearCart = undoClearCart;
 }

@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=110">
+  <link rel="stylesheet" href="./css/app.css?v=111">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -706,6 +706,10 @@
           Daftar Rencana (<span id="unboughtItemCount">0</span>)
         </span>
         <div class="planner-actions-right">
+          <button type="button" id="btnClearPlan" class="btn-clear-plan touch-target" onclick="clearPlanAll()"
+            title="Kosongkan seluruh daftar rencana belanja" style="display: none;">
+            <span>🗑️ Hapus Semua</span>
+          </button>
           <button type="button" class="btn-start-shopping-action touch-target" onclick="startShoppingFromPlan()"
             title="Mulai Belanja: Pindahkan semua rencana ke keranjang belanja">
             <span>🛍️ Mulai Belanja</span>
@@ -755,13 +759,19 @@
           <span class="cart-store-change-hint" title="Ganti Lokasi Supermarket" aria-label="Ganti Lokasi Supermarket">✏️</span>
         </div>
 
-        <!-- Baris 2: Kontrol Pilih Semua & Total Item Terpilih -->
+        <!-- Baris 2: Kontrol Pilih Semua, Total Item & Tombol Hapus Semua Keranjang -->
         <div class="cart-store-action-row">
-          <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
-            <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
-            <span>Pilih Semua</span>
-          </label>
-          <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
+          <div class="cart-action-left" style="display: flex; align-items: center; gap: 8px;">
+            <label class="cart-checkbox-label" id="selectAllLabel" title="Pilih Semua Item">
+              <input type="checkbox" id="cartSelectAllCheckbox" checked onchange="handleCartSelectAll(this.checked)">
+              <span>Pilih Semua</span>
+            </label>
+            <span class="cart-item-count-badge" id="cartSelectedCountBadge">3 item</span>
+          </div>
+          <button type="button" id="btnEmptyCart" class="btn-clear-cart touch-target" onclick="clearCartAll()" title="Hapus semua barang dari keranjang belanja">
+            <span class="btn-clear-cart-icon" aria-hidden="true">🗑️</span>
+            <span class="btn-clear-cart-text">Hapus Semua</span>
+          </button>
         </div>
       </div>
 
@@ -1881,6 +1891,17 @@
             </button>
           </div>
 
+          <!-- Clear Entire Cart & List -->
+          <div class="settings-item-row">
+            <div class="settings-item-info">
+              <div class="settings-item-label">Kosongkan Keranjang Belanja</div>
+              <div class="settings-item-desc">Hapus seluruh isi keranjang dan daftar rencana belanja sekaligus</div>
+            </div>
+            <button type="button" class="btn-settings-action btn-settings-danger" onclick="clearEntireCart()">
+              🗑️ Kosongkan
+            </button>
+          </div>
+
           <!-- Clear Cache & Local Reset -->
           <div class="settings-item-row">
             <div class="settings-item-info">
@@ -2207,7 +2228,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=110"></script>
+  <script src="./js/app.js?v=111"></script>
 
   <!-- Service Worker Registration -->
   <script>
