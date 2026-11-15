@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=115">
+  <link rel="stylesheet" href="./css/app.css?v=116">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -476,22 +476,21 @@
       </div>
 
       <!-- MINI STICKY SALDO BAR (MUNCUL SAAT KARTU UTAMA DITUTUP / DIMINIMALKAN) -->
-      <div id="stickySaldoMiniBar" class="sticky-saldo-mini-bar safe" style="display: none;"
+      <div id="stickySaldoMiniBar" class="sticky-saldo-mini-bar safe"
         title="Ketuk untuk membuka kartu saldo lengkap">
-        <div class="mini-bar-left" onclick="dismissStickySaldoCard(false)">
-          <span class="mini-bar-icon">💳</span>
-          <span class="mini-bar-label">Sisa Saldo:</span>
+        <div class="mini-bar-main" onclick="dismissStickySaldoCard(false)">
+          <span id="miniBarIcon" class="mini-bar-icon">💳</span>
+          <span id="miniSaldoLabel" class="mini-bar-label">Sisa:</span>
           <strong id="miniSaldoAmount" class="mini-bar-val safe">Rp 100.000</strong>
           <span id="miniSaldoBadge" class="planner-alert-badge badge-safe">Aman</span>
         </div>
-        <div class="mini-bar-right">
+        <div class="mini-bar-actions">
           <button type="button" class="mini-bar-expand-btn touch-target" onclick="dismissStickySaldoCard(false)"
             title="Tampilkan Kartu Saldo Lengkap">
-            <span>Buka Saldo</span>
-            <span aria-hidden="true">▾</span>
+            <span>Buka</span> <span aria-hidden="true">▾</span>
           </button>
           <button type="button" class="mini-bar-hide-btn touch-target" onclick="dismissStickySaldoCard('hide-all')"
-            title="Sembunyikan Sepenuhnya" aria-label="Sembunyikan Sepenuhnya">
+            title="Tutup Sepenuhnya" aria-label="Tutup Sepenuhnya">
             <span aria-hidden="true">✕</span>
           </button>
         </div>
@@ -519,8 +518,7 @@
           <div class="tracker-header-right">
             <button type="button" class="tracker-budget-btn touch-target" onclick="switchTab('budget')"
               title="Atur Batas Anggaran">
-              <span>Atur Saldo</span>
-              <span aria-hidden="true">⚙️</span>
+              <span>Atur ⚙️</span>
             </button>
             <button type="button" id="btnCloseStickySaldo" class="tracker-close-btn touch-target"
               onclick="dismissStickySaldoCard(true)" title="Tutup / Sembunyikan Kartu Saldo Sticky" aria-label="Tutup Kartu Saldo">
@@ -2284,7 +2282,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=115"></script>
+  <script src="./js/app.js?v=116"></script>
 
   <!-- Service Worker Registration -->
   <script>

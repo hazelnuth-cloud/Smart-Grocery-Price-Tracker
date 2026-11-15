@@ -3431,8 +3431,8 @@ function renderBudget() {
     plannerAlert.className = `sticky-dashboard-tracker planner-budget-alert budget-status-card ${safety.level}`;
     if (plannerAlertBadge) {
       plannerAlertBadge.textContent = (safety.level === 'danger') 
-        ? `Overbudget (${Math.round(safety.percentage)}%)` 
-        : (safety.level === 'warning' ? `Rem Dulu (${Math.round(safety.percentage)}%)` : 'Aman');
+        ? 'Overbudget' 
+        : (safety.level === 'warning' ? 'Rem Dulu' : 'Aman');
       plannerAlertBadge.className = `planner-alert-badge badge-${safety.level}`;
     }
     if (trackerAlertNotice) {
@@ -3446,7 +3446,7 @@ function renderBudget() {
       if (plannerAlertDesc) plannerAlertDesc.textContent = `Total belanja ${formatRupiah(activeSpend)} melebihi limit ${formatRupiah(budget)} (Defisit: ${formatRupiah(overDiff)}). Kurangi kuantitas item atau batalkan barang sekunder agar pengeluaran tetap aman.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-danger';
-        plannerAlertBadge.textContent = `Overbudget (${Math.round(safety.percentage)}%)`;
+        plannerAlertBadge.textContent = 'Overbudget';
       }
     } else if (safety.level === 'warning') {
       if (plannerAlertIcon) plannerAlertIcon.textContent = '⚠️';
@@ -3454,7 +3454,7 @@ function renderBudget() {
       if (plannerAlertDesc) plannerAlertDesc.textContent = `Pengeluaranmu sudah mencapai ${Math.round(safety.percentage)}% (${formatRupiah(activeSpend)} dari saldo ${formatRupiah(budget)}). Sortir lagi isi keranjang belanja agar tidak melebihi batas saldo.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-warning';
-        plannerAlertBadge.textContent = `Rem Dulu (${Math.round(safety.percentage)}%)`;
+        plannerAlertBadge.textContent = 'Rem Dulu';
       }
     } else {
       if (plannerAlertIcon) plannerAlertIcon.textContent = '💚';
@@ -3462,7 +3462,7 @@ function renderBudget() {
       if (plannerAlertDesc) plannerAlertDesc.textContent = `Total belanja ${formatRupiah(activeSpend)} dari batas saldo ${formatRupiah(budget)} • Sisa saldo aman: ${formatRupiah(safety.sisa)}.`;
       if (plannerAlertBadge) {
         plannerAlertBadge.className = 'planner-alert-badge badge-safe';
-        plannerAlertBadge.textContent = `Aman (${Math.round(safety.percentage)}%)`;
+        plannerAlertBadge.textContent = 'Aman';
       }
     }
   }
@@ -3470,23 +3470,31 @@ function renderBudget() {
   // Mini Sticky Saldo Bar & Dismissed States Updates
   const miniBar = document.getElementById('stickySaldoMiniBar');
   const miniSaldoAmount = document.getElementById('miniSaldoAmount');
+  const miniSaldoLabel = document.getElementById('miniSaldoLabel');
   const miniSaldoBadge = document.getElementById('miniSaldoBadge');
+  const miniBarIcon = document.getElementById('miniBarIcon');
   const btnReopenStickySaldo = document.getElementById('btnReopenStickySaldo');
 
   if (miniSaldoAmount) {
     if (safety.sisa >= 0) {
+      if (miniSaldoLabel) miniSaldoLabel.textContent = 'Sisa:';
       miniSaldoAmount.textContent = formatRupiah(safety.sisa);
       miniSaldoAmount.className = `mini-bar-val ${safety.level}`;
     } else {
+      if (miniSaldoLabel) miniSaldoLabel.textContent = 'Defisit:';
       miniSaldoAmount.textContent = `- ${formatRupiah(Math.abs(safety.sisa))}`;
       miniSaldoAmount.className = 'mini-bar-val danger';
     }
   }
 
+  if (miniBarIcon) {
+    miniBarIcon.textContent = (safety.level === 'danger') ? '🚨' : '💳';
+  }
+
   if (miniSaldoBadge) {
     miniSaldoBadge.textContent = (safety.level === 'danger') 
-      ? `Overbudget (${Math.round(safety.percentage)}%)` 
-      : (safety.level === 'warning' ? `Rem Dulu (${Math.round(safety.percentage)}%)` : 'Aman');
+      ? 'Overbudget' 
+      : (safety.level === 'warning' ? 'Rem Dulu' : 'Aman');
     miniSaldoBadge.className = `planner-alert-badge badge-${safety.level}`;
   }
 
@@ -3498,22 +3506,58 @@ function renderBudget() {
   const dismissedState = AppState.stickySaldoDismissed;
   if (safety.level === 'danger' && dismissedState === 'hidden') {
     // If overbudget occurred while completely hidden, wake up mini bar so user sees alert
-    if (plannerAlert) plannerAlert.style.display = 'none';
-    if (miniBar) miniBar.style.display = 'flex';
-    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'none';
+    if (plannerAlert) {
+      plannerAlert.classList.add('is-hidden');
+      plannerAlert.style.setProperty('display', 'none', 'important');
+    }
+    if (miniBar) {
+      miniBar.classList.add('is-visible');
+      miniBar.style.setProperty('display', 'flex', 'important');
+    }
+    if (btnReopenStickySaldo) {
+      btnReopenStickySaldo.classList.remove('is-visible');
+      btnReopenStickySaldo.style.setProperty('display', 'none', 'important');
+    }
   } else if (dismissedState === 'hidden') {
-    if (plannerAlert) plannerAlert.style.display = 'none';
-    if (miniBar) miniBar.style.display = 'none';
-    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'inline-flex';
+    if (plannerAlert) {
+      plannerAlert.classList.add('is-hidden');
+      plannerAlert.style.setProperty('display', 'none', 'important');
+    }
+    if (miniBar) {
+      miniBar.classList.remove('is-visible');
+      miniBar.style.setProperty('display', 'none', 'important');
+    }
+    if (btnReopenStickySaldo) {
+      btnReopenStickySaldo.classList.add('is-visible');
+      btnReopenStickySaldo.style.setProperty('display', 'inline-flex', 'important');
+    }
   } else if (dismissedState === 'mini' || dismissedState === true) {
-    if (plannerAlert) plannerAlert.style.display = 'none';
-    if (miniBar) miniBar.style.display = 'flex';
-    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'none';
+    if (plannerAlert) {
+      plannerAlert.classList.add('is-hidden');
+      plannerAlert.style.setProperty('display', 'none', 'important');
+    }
+    if (miniBar) {
+      miniBar.classList.add('is-visible');
+      miniBar.style.setProperty('display', 'flex', 'important');
+    }
+    if (btnReopenStickySaldo) {
+      btnReopenStickySaldo.classList.remove('is-visible');
+      btnReopenStickySaldo.style.setProperty('display', 'none', 'important');
+    }
   } else {
     // Fully open (default)
-    if (plannerAlert) plannerAlert.style.display = '';
-    if (miniBar) miniBar.style.display = 'none';
-    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'none';
+    if (plannerAlert) {
+      plannerAlert.classList.remove('is-hidden');
+      plannerAlert.style.removeProperty('display');
+    }
+    if (miniBar) {
+      miniBar.classList.remove('is-visible');
+      miniBar.style.setProperty('display', 'none', 'important');
+    }
+    if (btnReopenStickySaldo) {
+      btnReopenStickySaldo.classList.remove('is-visible');
+      btnReopenStickySaldo.style.setProperty('display', 'none', 'important');
+    }
   }
 
   // TAB 1 (BUDGET) STATUS CALLOUT BOX
@@ -3660,7 +3704,7 @@ function dismissStickySaldoCard(action) {
   renderBudget();
 
   if (newState === 'mini') {
-    showToast('Kartu saldo diminimalkan. Ketuk "Buka Saldo ▾" untuk membuka kembali.', 'info');
+    showToast('Kartu saldo diminimalkan. Ketuk "Buka ▾" untuk membuka kembali.', 'info');
   } else if (newState === 'hidden') {
     showToast('Kartu saldo disembunyikan. Ketuk tombol "💳 Saldo" untuk membuka.', 'info');
   } else {
