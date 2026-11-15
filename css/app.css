@@ -3221,6 +3221,10 @@ body.dark-mode .shopee-item-card {
   white-space: nowrap;
   letter-spacing: -0.1px;
   border: 1px solid transparent;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  box-sizing: border-box !important;
 }
 
 .fluctuation-up {
@@ -5168,20 +5172,20 @@ body.dark-mode .btn-store-edit:hover {
   box-shadow: 0 4px 10px rgba(233, 30, 99, 0.4) !important;
 }
 
-/* 5. Micro-Spacing & Tight Padding (6px - 8px Margin, 8px 10px Padding, 90px Bottom Pad) */
+/* 5. Micro-Spacing & Tight Padding (6px - 8px Margin, 8px 10px Padding, Full Bottom Pad for Sticky Bars) */
 .grocery-items-list,
 .shopee-cart-list {
   display: flex !important;
   flex-direction: column !important;
   gap: 6px !important;
   margin-top: 6px !important;
-  padding-bottom: 90px !important;
+  padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .content-tab,
 #tabCart,
 #tabPlanner {
-  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 
@@ -6135,6 +6139,10 @@ body.dark-mode .budget-status-card-bottom {
   cursor: pointer !important;
   transition: all 0.2s ease !important;
   white-space: nowrap !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  box-sizing: border-box !important;
   text-decoration: none !important;
 }
 
@@ -7481,12 +7489,26 @@ body.theme-dark .modern-date-hint {
   color: #222222 !important;
   text-align: left !important;
   line-height: 1.3 !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 3px !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
-  height: 34px !important;
+  min-height: 34px !important;
+  height: auto !important;
+}
+
+.catalog-card-meta-row {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 16px !important;
+  margin-bottom: 4px !important;
+  width: 100% !important;
+}
+
+.catalog-routine-spacer {
+  display: block !important;
+  height: 1px !important;
 }
 
 /* Footer: Harga di atas (100% lebar penuh, anti-kepotong), Tombol pink di bawah */
@@ -8552,7 +8574,7 @@ body.dark-mode .user-header-name {
   overflow: visible !important;
   height: auto !important;
   max-height: none !important;
-  padding-bottom: 120px !important;
+  padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 /* 2. Pembasmi Teks Bertingkat di Tab Anggaran */
@@ -8669,8 +8691,8 @@ body.dark-mode .user-header-name {
   background: #FFF1F2 !important;
   border: 1px solid #FFE4E6 !important;
   padding: 1px 5px !important;
-  border-radius: 8px !important;
-  margin-left: 4px !important;
+  border-radius: 6px !important;
+  margin-left: 0 !important;
 }
 
 /* =========================================================================
@@ -9121,6 +9143,12 @@ a,
 }
 
 .btn-receipt-undo {
+  grid-column: 1 / -1 !important;
+  height: auto !important;
+  min-height: 38px !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  text-align: center !important;
   background: #FFFBEB !important;
   color: #B45309 !important;
   border: 1.5px solid #FCD34D !important;
@@ -9145,6 +9173,10 @@ a,
   border-radius: 4px;
   line-height: 1.25;
   white-space: nowrap;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  box-sizing: border-box !important;
 }
 
 .repurchase-price-history-sub.diff-up {
@@ -10224,6 +10256,86 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
     line-height: 1.3 !important;
     max-width: 100% !important;
   }
+}
+
+/* ==========================================================================
+   MOBILE ERGONOMICS & COLLISION PREVENTION FOR ITEM CARDS & MODALS
+   Guarantees 0% overlapping of titles, badges, action buttons & steppers
+   ========================================================================== */
+@media (max-width: 480px) {
+  .shopee-compact-actions {
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .btn-return-to-plan {
+    padding: 3px 6px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .btn-action-edit-icon,
+  .btn-shopee-delete {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 12px !important;
+  }
+
+  .shopee-compact-title-wrap {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .shopee-compact-badges,
+  .shopee-compact-top .shopee-compact-meta-left {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .shopee-compact-bottom {
+    flex-wrap: wrap !important;
+    row-gap: 6px !important;
+  }
+
+  .shopee-compact-price-wrap {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .btn-move-to-cart {
+    padding: 3px 7px !important;
+    font-size: 10.5px !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .plan-item-card .shopee-compact-bottom {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .plan-item-card .shopee-compact-stepper-wrap {
+    width: 100% !important;
+    justify-content: flex-end !important;
+    margin-left: 0 !important;
+    margin-top: 4px !important;
+  }
+}
+
+/* Profile Text Bounds */
+.modal-profile-email {
+  word-break: break-all !important;
+  max-width: 100% !important;
+}
+
+.modal-profile-name {
+  word-break: break-word !important;
+  max-width: 100% !important;
 }
 
 

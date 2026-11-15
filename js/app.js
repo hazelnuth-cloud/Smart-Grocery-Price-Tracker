@@ -485,7 +485,7 @@ function getRepurchaseAnalysis(currentPrice, prevRecord, isSameStore = true) {
       diff,
       absDiff,
       percent,
-      badgeText: `↑ Naik Rp ${formatNumber(diff)} (+${percentNum}%)${storeContext}`,
+      badgeText: `↑ Naik Rp ${formatNumber(diff)} (+${percentNum}%)`,
       text: `↑ +Rp ${formatNumber(diff)} (+${percentNum}%)`,
       badgeClass: 'fluctuation-badge fluctuation-up',
       diffClass: 'diff-up',
@@ -504,7 +504,7 @@ function getRepurchaseAnalysis(currentPrice, prevRecord, isSameStore = true) {
       diff,
       absDiff,
       percent,
-      badgeText: `↓ Turun Rp ${formatNumber(absDiff)} (-${percentNum}%)${storeContext}`,
+      badgeText: `↓ Turun Rp ${formatNumber(absDiff)} (-${percentNum}%)`,
       text: `↓ -Rp ${formatNumber(absDiff)} (-${percentNum}%)`,
       badgeClass: 'fluctuation-badge fluctuation-down',
       diffClass: 'diff-down',
@@ -4182,7 +4182,9 @@ function renderProductCatalog() {
       </div>
       <div class="catalog-card-name" title="${escapeHtml(item.name)}">
         ${escapeHtml(item.name)}
-        ${item.isRoutine ? '<span class="catalog-routine-tag" title="Barang Rutin Harian">🔁 Rutin</span>' : ''}
+      </div>
+      <div class="catalog-card-meta-row">
+        ${item.isRoutine ? '<span class="catalog-routine-tag" title="Barang Rutin Harian">🔁 Rutin</span>' : '<span class="catalog-routine-spacer"></span>'}
       </div>
       <div class="catalog-card-footer">
         <span class="catalog-card-price">${formatRupiah(item.price)}</span>
