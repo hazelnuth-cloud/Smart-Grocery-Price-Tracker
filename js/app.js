@@ -3363,6 +3363,134 @@ function dismissStickySaldoCard(action) {
 // Render Checklist Items with Stepper Touch Targets
 // Render Checklist Items with Compact Horizontal Rows
 
+/**
+ * Gesture Swipe-to-Dismiss untuk Notifikasi Toast (Mobile & Desktop Drag)
+ * Memungkinkan pengguna menggeser/flick toast ke atas atau ke samping untuk menutup instan
+ */
+function attachSwipeToDismiss(toast, onDismiss) {
+  if (!toast) return;
+
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let isSwiping = false;
+  let isDragging = false;
+
+  const onStart = (clientX, clientY, target) => {
+    if (target && target.closest && target.closest('.btn-toast-undo')) return false;
+    startX = clientX;
+    startY = clientY;
+    currentX = startX;
+    currentY = startY;
+    isSwiping = true;
+    isDragging = false;
+    toast.style.setProperty('transition', 'none', 'important');
+    if (activeToastTimeout) {
+      clearTimeout(activeToastTimeout);
+      activeToastTimeout = null;
+    }
+    return true;
+  };
+
+  const onMove = (clientX, clientY) => {
+    if (!isSwiping) return;
+    currentX = clientX;
+    currentY = clientY;
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      isDragging = true;
+    }
+
+    if (isDragging) {
+      const dampedY = deltaY > 0 ? deltaY * 0.25 : deltaY;
+      const progress = Math.min(1, Math.max(0, Math.max(Math.abs(deltaX) / 140, Math.abs(dampedY) / 50)));
+      toast.style.setProperty('transform', `translate(${deltaX}px, ${dampedY}px)`, 'important');
+      toast.style.setProperty('opacity', `${Math.max(0.15, 1 - progress * 0.85)}`, 'important');
+    }
+  };
+
+  const onEnd = () => {
+    if (!isSwiping) return;
+    isSwiping = false;
+
+    if (!isDragging) {
+      toast.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease', 'important');
+      toast.style.setProperty('transform', 'translateY(0)', 'important');
+      toast.style.setProperty('opacity', '1', 'important');
+      activeToastTimeout = setTimeout(() => {
+        if (toast.parentNode) {
+          toast.classList.add('fade-out');
+          setTimeout(() => { if (toast.parentNode) toast.remove(); }, 250);
+        }
+      }, 3500);
+      return;
+    }
+
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+    const dismissedUp = deltaY < -20;
+    const dismissedRight = deltaX > 40;
+    const dismissedLeft = deltaX < -40;
+
+    if (dismissedUp || dismissedRight || dismissedLeft) {
+      toast.style.setProperty('transition', 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease', 'important');
+      if (dismissedUp) {
+        toast.style.setProperty('transform', `translate(${deltaX}px, -70px)`, 'important');
+      } else if (dismissedRight) {
+        toast.style.setProperty('transform', `translate(${deltaX + 160}px, ${deltaY}px)`, 'important');
+      } else {
+        toast.style.setProperty('transform', `translate(${deltaX - 160}px, ${deltaY}px)`, 'important');
+      }
+      toast.style.setProperty('opacity', '0', 'important');
+      if (typeof playSoftPop === 'function') playSoftPop();
+      setTimeout(() => {
+        if (typeof onDismiss === 'function') onDismiss();
+        if (toast.parentNode) toast.remove();
+      }, 200);
+    } else {
+      toast.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease', 'important');
+      toast.style.setProperty('transform', 'translateY(0)', 'important');
+      toast.style.setProperty('opacity', '1', 'important');
+      activeToastTimeout = setTimeout(() => {
+        if (toast.parentNode) {
+          toast.classList.add('fade-out');
+          setTimeout(() => { if (toast.parentNode) toast.remove(); }, 250);
+        }
+      }, 3500);
+    }
+  };
+
+  toast.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    onStart(t.clientX, t.clientY, e.target);
+  }, { passive: true });
+
+  toast.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    onMove(t.clientX, t.clientY);
+  }, { passive: true });
+
+  toast.addEventListener('touchend', onEnd, { passive: true });
+  toast.addEventListener('touchcancel', onEnd, { passive: true });
+
+  toast.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') return;
+    if (!onStart(e.clientX, e.clientY, e.target)) return;
+
+    const onPointerMove = (pe) => onMove(pe.clientX, pe.clientY);
+    const onPointerUp = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      onEnd();
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+  });
+}
 function showToastWithUndo(message, onUndoAction) {
   if (typeof document === 'undefined') return;
 
@@ -3419,11 +3547,12 @@ function showToastWithUndo(message, onUndoAction) {
   }
 
   container.appendChild(toast);
+  attachSwipeToDismiss(toast);
 
   activeToastTimeout = setTimeout(() => {
     toast.classList.add('fade-out');
     toast.style.opacity = '0';
-    toast.style.transform = 'translate(-50%, -10px)';
+    toast.style.transform = 'translateY(-12px)';
     toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
     setTimeout(() => { if (toast.parentNode) toast.remove(); }, 250);
   }, 4500);
@@ -6762,6 +6891,7 @@ function showToast(message, type = 'info') {
 
   toast.innerHTML = `<span class="toast-icon">${icon}</span>${contentHtml}`;
   container.appendChild(toast);
+  attachSwipeToDismiss(toast);
 
   const isUndoToast = message.includes('Urungkan');
   if (isUndoToast) {
@@ -6784,7 +6914,7 @@ function showToast(message, type = 'info') {
   activeToastTimeout = setTimeout(() => {
     toast.classList.add('fade-out');
     toast.style.opacity = '0';
-    toast.style.transform = 'translate(-50%, -10px)';
+    toast.style.transform = 'translateY(-12px)';
     toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
     setTimeout(() => {
       if (toast.parentNode) {

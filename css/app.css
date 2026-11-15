@@ -2209,7 +2209,7 @@ body.dark-mode .barcode-preset-chip {
   position: relative !important;
   top: auto !important;
   left: auto !important;
-  transform: none !important;
+  transform: translateY(0);
   width: auto !important;
   max-width: 100% !important;
   min-width: min(280px, 92vw) !important;
@@ -2223,7 +2223,7 @@ body.dark-mode .barcode-preset-chip {
   font-weight: 600 !important;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.12) !important;
   pointer-events: auto !important;
-  cursor: pointer !important;
+  cursor: grab !important;
   animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
   display: flex !important;
   align-items: flex-start !important;
@@ -2231,6 +2231,14 @@ body.dark-mode .barcode-preset-chip {
   box-sizing: border-box !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   transition: all 0.25s ease !important;
+  touch-action: pan-y !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.app-toast:active,
+.toast-message:active {
+  cursor: grabbing !important;
 }
 
 /* Stacked 2-line layout for intentional non-truncated display */
@@ -2308,19 +2316,19 @@ body.dark-mode .barcode-preset-chip {
 @keyframes toastSlideDown {
   0% {
     opacity: 0;
-    transform: translate(-50%, -16px);
+    transform: translateY(-16px);
   }
 
   100% {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 }
 
 .app-toast.fade-out,
 .toast-message.fade-out {
   opacity: 0 !important;
-  transform: translate(-50%, -12px) !important;
+  transform: translateY(-12px) !important;
   transition: opacity 0.25s ease, transform 0.25s ease !important;
 }
 
