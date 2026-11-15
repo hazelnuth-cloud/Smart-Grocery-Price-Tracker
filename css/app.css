@@ -10859,17 +10859,19 @@ body.theme-dark [style*="background: #FFF5F7"] {
    ========================================================================== */
 .auth-badge-icon.floating-bounce {
   animation: floatBounce 3s ease-in-out infinite !important;
+  will-change: transform !important;
+  transform: translateZ(0) !important;
 }
 
 @keyframes floatBounce {
 
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-5px) translateZ(0);
   }
 }
 
@@ -10879,30 +10881,32 @@ body.theme-dark [style*="background: #FFF5F7"] {
   justify-content: center !important;
   gap: 6px !important;
   background: linear-gradient(135deg, rgba(233, 30, 99, 0.08) 0%, rgba(147, 51, 234, 0.08) 100%) !important;
-  border: 1px solid rgba(233, 30, 99, 0.2) !important;
+  border: 1px solid rgba(233, 30, 99, 0.25) !important;
   padding: 4px 14px !important;
   border-radius: 999px !important;
   font-size: 0.82rem !important;
   font-weight: 700 !important;
   color: #E91E63 !important;
   margin: 0 auto 8px !important;
-  box-shadow: 0 2px 8px rgba(233, 30, 99, 0.08) !important;
-  animation: welcomeGlow 2.5s infinite ease-in-out !important;
+  box-shadow: 0 2px 10px rgba(233, 30, 99, 0.12) !important;
+  animation: welcomeGlow 2.8s infinite ease-in-out !important;
   cursor: default !important;
   user-select: none !important;
+  will-change: transform, opacity !important;
+  transform: translateZ(0) !important;
 }
 
 @keyframes welcomeGlow {
 
   0%,
   100% {
-    box-shadow: 0 2px 8px rgba(233, 30, 99, 0.08);
-    border-color: rgba(233, 30, 99, 0.2);
+    transform: scale(1) translateZ(0);
+    opacity: 0.95;
   }
 
   50% {
-    box-shadow: 0 4px 14px rgba(233, 30, 99, 0.2);
-    border-color: rgba(233, 30, 99, 0.4);
+    transform: scale(1.03) translateZ(0);
+    opacity: 1;
   }
 }
 
@@ -10910,42 +10914,44 @@ body.theme-dark [style*="background: #FFF5F7"] {
   display: inline-block !important;
   animation: waveHand 2s infinite ease-in-out !important;
   transform-origin: 70% 70% !important;
+  will-change: transform !important;
 }
 
 @keyframes waveHand {
 
   0%,
   100% {
-    transform: rotate(0deg);
+    transform: rotate(0deg) translateZ(0);
   }
 
   20%,
   60% {
-    transform: rotate(14deg);
+    transform: rotate(14deg) translateZ(0);
   }
 
   40%,
   80% {
-    transform: rotate(-10deg);
+    transform: rotate(-10deg) translateZ(0);
   }
 }
 
 .welcome-sparkle {
   animation: sparkleRotate 3s infinite linear !important;
   display: inline-block !important;
+  will-change: transform !important;
 }
 
 @keyframes sparkleRotate {
   0% {
-    transform: scale(0.9) rotate(0deg);
+    transform: scale(0.9) rotate(0deg) translateZ(0);
   }
 
   50% {
-    transform: scale(1.15) rotate(180deg);
+    transform: scale(1.15) rotate(180deg) translateZ(0);
   }
 
   100% {
-    transform: scale(0.9) rotate(360deg);
+    transform: scale(0.9) rotate(360deg) translateZ(0);
   }
 }
 

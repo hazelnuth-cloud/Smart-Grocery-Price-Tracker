@@ -889,9 +889,94 @@ function playCelebrationFanfare() {
 }
 
 // =========================================================================
-// 3B. CUTE CELEBRATION CONFETTI SHOWER (LOVE HEARTS, STARS & RIBBONS)
+// 3B. CUTE CELEBRATION CONFETTI SHOWER (OPTIMIZED 60 FPS SPRITE CACHE)
 // =========================================================================
 let activeConfettiAnimId = null;
+let confettiStartTimeout = null;
+
+// Reusable offscreen sprite cache to eliminate font parsing & bezier redraws every frame
+const _confettiSpriteCache = {
+  emojis: {},
+  hearts: {},
+  sparkles: {}
+};
+
+function _getEmojiSprite(emoji) {
+  if (typeof document === 'undefined') return null;
+  if (_confettiSpriteCache.emojis[emoji]) return _confettiSpriteCache.emojis[emoji];
+  try {
+    const off = document.createElement('canvas');
+    const sz = 44;
+    off.width = sz;
+    off.height = sz;
+    const ctx = off.getContext('2d');
+    if (!ctx) return null;
+    ctx.font = '28px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, sz / 2, sz / 2 + 1);
+    _confettiSpriteCache.emojis[emoji] = off;
+    return off;
+  } catch (e) {
+    return null;
+  }
+}
+
+function _getHeartSprite(color) {
+  if (typeof document === 'undefined') return null;
+  if (_confettiSpriteCache.hearts[color]) return _confettiSpriteCache.hearts[color];
+  try {
+    const off = document.createElement('canvas');
+    const sz = 44;
+    off.width = sz;
+    off.height = sz;
+    const ctx = off.getContext('2d');
+    if (!ctx) return null;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    const half = sz * 0.28;
+    ctx.translate(sz / 2, sz * 0.40);
+    ctx.moveTo(0, -half * 0.3);
+    ctx.bezierCurveTo(-half * 0.5, -half * 1.1, -half * 1.4, -half * 0.4, -half * 1.4, half * 0.2);
+    ctx.bezierCurveTo(-half * 1.4, half * 0.8, -half * 0.5, half * 1.3, 0, half * 1.7);
+    ctx.bezierCurveTo(half * 0.5, half * 1.3, half * 1.4, half * 0.8, half * 1.4, half * 0.2);
+    ctx.bezierCurveTo(half * 1.4, -half * 0.4, half * 0.5, -half * 1.1, 0, -half * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    _confettiSpriteCache.hearts[color] = off;
+    return off;
+  } catch (e) {
+    return null;
+  }
+}
+
+function _getSparkleSprite(color) {
+  if (typeof document === 'undefined') return null;
+  if (_confettiSpriteCache.sparkles[color]) return _confettiSpriteCache.sparkles[color];
+  try {
+    const off = document.createElement('canvas');
+    const sz = 36;
+    off.width = sz;
+    off.height = sz;
+    const ctx = off.getContext('2d');
+    if (!ctx) return null;
+    ctx.fillStyle = color;
+    const rad = sz * 0.42;
+    ctx.translate(sz / 2, sz / 2);
+    ctx.beginPath();
+    ctx.moveTo(0, -rad);
+    ctx.quadraticCurveTo(0, 0, rad, 0);
+    ctx.quadraticCurveTo(0, 0, 0, rad);
+    ctx.quadraticCurveTo(0, 0, -rad, 0);
+    ctx.quadraticCurveTo(0, 0, 0, -rad);
+    ctx.closePath();
+    ctx.fill();
+    _confettiSpriteCache.sparkles[color] = off;
+    return off;
+  } catch (e) {
+    return null;
+  }
+}
 
 function triggerCuteLoginConfetti() {
   if (typeof document === 'undefined' || typeof window === 'undefined') return;
@@ -906,11 +991,25 @@ function triggerCuteLoginConfetti() {
     cancelAnimationFrame(activeConfettiAnimId);
     activeConfettiAnimId = null;
   }
+  if (confettiStartTimeout) {
+    clearTimeout(confettiStartTimeout);
+    confettiStartTimeout = null;
+  }
   const oldCanvas = document.getElementById('celebrationConfettiCanvas');
   if (oldCanvas) {
     if (typeof oldCanvas.remove === 'function') oldCanvas.remove();
     else if (oldCanvas.parentNode) oldCanvas.parentNode.removeChild(oldCanvas);
   }
+
+  // Stagger execution slightly (50ms) so heavy synchronous auth DOM rendering settles first
+  confettiStartTimeout = setTimeout(() => {
+    confettiStartTimeout = null;
+    _runCuteConfettiAnimation();
+  }, 50);
+}
+
+function _runCuteConfettiAnimation() {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
 
   const canvas = document.createElement('canvas');
   canvas.id = 'celebrationConfettiCanvas';
@@ -922,14 +1021,15 @@ function triggerCuteLoginConfetti() {
   canvas.style.pointerEvents = 'none';
   canvas.style.zIndex = '999999';
   canvas.style.opacity = '1';
-  canvas.style.transition = 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
+  canvas.style.transition = 'opacity 0.45s ease-out';
   document.body.appendChild(canvas);
 
   if (typeof canvas.getContext !== 'function') return;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: true });
   if (!ctx) return;
 
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  // Cap DPR at 1.25 for massive GPU fillrate savings while keeping visuals crisp
+  const dpr = Math.min(1.25, window.devicePixelRatio || 1);
   const w = (canvas.width = Math.round(window.innerWidth * dpr));
   const h = (canvas.height = Math.round(window.innerHeight * dpr));
 
@@ -940,26 +1040,32 @@ function triggerCuteLoginConfetti() {
   ];
   const CUTE_EMOJIS = ['💖', '💕', '❤️', '🌸', '✨', '⭐', '🎀', '🍓', '🎉', '🥰'];
 
-  const count = Math.min(100, Math.max(55, Math.floor(window.innerWidth / 4.5)));
+  // Optimal particle count: 28-38 on mobile, up to 48 on desktop (prevents lag, remains festive)
+  const count = Math.min(48, Math.max(28, Math.floor(window.innerWidth / 11)));
   const particles = [];
 
   for (let i = 0; i < count; i++) {
     const typeRoll = Math.random();
     let type = 'heart';
-    if (typeRoll < 0.40) type = 'heart';
+    if (typeRoll < 0.38) type = 'heart';
     else if (typeRoll < 0.65) type = 'emoji';
     else if (typeRoll < 0.85) type = 'ribbon';
     else type = 'sparkle';
 
     const emoji = CUTE_EMOJIS[Math.floor(Math.random() * CUTE_EMOJIS.length)];
     const color = CUTE_PALETTE[Math.floor(Math.random() * CUTE_PALETTE.length)];
-    const size = (type === 'emoji') ? (18 + Math.random() * 12) * dpr :
-                 (type === 'heart') ? (12 + Math.random() * 12) * dpr :
-                 (type === 'ribbon') ? (8 + Math.random() * 8) * dpr :
-                 (6 + Math.random() * 6) * dpr;
+    const size = (type === 'emoji') ? (20 + Math.random() * 10) * dpr :
+                 (type === 'heart') ? (14 + Math.random() * 10) * dpr :
+                 (type === 'ribbon') ? (9 + Math.random() * 7) * dpr :
+                 (8 + Math.random() * 6) * dpr;
+
+    let sprite = null;
+    if (type === 'emoji') sprite = _getEmojiSprite(emoji);
+    else if (type === 'heart') sprite = _getHeartSprite(color);
+    else if (type === 'sparkle') sprite = _getSparkleSprite(color);
 
     let x, y, vx, vy;
-    const isBurst = (i < count * 0.6); // 60% twin bottom-corner cannons
+    const isBurst = (i < count * 0.65); // 65% twin bottom-corner cannons
     if (isBurst) {
       const fromLeft = (i % 2 === 0);
       x = fromLeft ? w * (0.05 + Math.random() * 0.12) : w * (0.83 + Math.random() * 0.12);
@@ -967,26 +1073,27 @@ function triggerCuteLoginConfetti() {
       const angle = fromLeft
         ? (-Math.PI * 0.48 + (Math.random() - 0.5) * 0.45)
         : (-Math.PI * 0.52 - (Math.random() - 0.5) * 0.45);
-      const speed = (9 + Math.random() * 12) * dpr;
+      const speed = (9 + Math.random() * 11) * dpr;
       vx = Math.cos(angle) * speed;
       vy = Math.sin(angle) * speed;
     } else {
       x = Math.random() * w;
-      y = -15 * dpr - Math.random() * 80 * dpr;
-      vx = (Math.random() - 0.5) * 3 * dpr;
-      vy = (2.0 + Math.random() * 3.8) * dpr;
+      y = -15 * dpr - Math.random() * 70 * dpr;
+      vx = (Math.random() - 0.5) * 2.5 * dpr;
+      vy = (2.0 + Math.random() * 3.2) * dpr;
     }
 
     particles.push({
       type,
       emoji,
       color,
+      sprite,
       size,
       x,
       y,
       vx,
       vy,
-      gravity: (0.18 + Math.random() * 0.10) * dpr,
+      gravity: (0.17 + Math.random() * 0.09) * dpr,
       drag: 0.985,
       wobble: Math.random() * Math.PI * 2,
       wobbleSpeed: 0.04 + Math.random() * 0.04,
@@ -995,53 +1102,20 @@ function triggerCuteLoginConfetti() {
       tilt: Math.random() * Math.PI * 2,
       tiltSpeed: 0.05 + Math.random() * 0.07,
       opacity: 1,
-      fadeSpeed: 0.0035 + Math.random() * 0.003
+      fadeSpeed: 0.005 + Math.random() * 0.004
     });
   }
 
-  const startTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-  const maxDuration = 3600;
-
-  function drawCuteHeart(c, x, y, s, col, rot, tilt, op) {
-    c.save();
-    c.translate(x, y);
-    c.rotate(rot);
-    c.scale(Math.cos(tilt), 1);
-    c.globalAlpha = Math.max(0, Math.min(1, op));
-    c.fillStyle = col;
-    c.beginPath();
-    const half = s * 0.5;
-    c.moveTo(0, -half * 0.3);
-    c.bezierCurveTo(-half * 0.5, -half * 1.1, -half * 1.4, -half * 0.4, -half * 1.4, half * 0.2);
-    c.bezierCurveTo(-half * 1.4, half * 0.8, -half * 0.5, half * 1.3, 0, half * 1.7);
-    c.bezierCurveTo(half * 0.5, half * 1.3, half * 1.4, half * 0.8, half * 1.4, half * 0.2);
-    c.bezierCurveTo(half * 1.4, -half * 0.4, half * 0.5, -half * 1.1, 0, -half * 0.3);
-    c.closePath();
-    c.fill();
-    c.restore();
-  }
-
-  function drawCuteSparkle(c, x, y, s, col, rot, op) {
-    c.save();
-    c.translate(x, y);
-    c.rotate(rot);
-    c.globalAlpha = Math.max(0, Math.min(1, op));
-    c.fillStyle = col;
-    const rad = s * 0.6;
-    c.beginPath();
-    c.moveTo(0, -rad * 1.5);
-    c.quadraticCurveTo(0, 0, rad * 1.5, 0);
-    c.quadraticCurveTo(0, 0, 0, rad * 1.5);
-    c.quadraticCurveTo(0, 0, -rad * 1.5, 0);
-    c.quadraticCurveTo(0, 0, 0, -rad * 1.5);
-    c.closePath();
-    c.fill();
-    c.restore();
-  }
+  let lastTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  const startTime = lastTime;
+  const maxDuration = 2400; // Snappy 2.4s celebration
 
   function renderFrame(now) {
     const currentTime = now || ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+    const dt = Math.min(2.5, Math.max(0.4, (currentTime - lastTime) / 16.67));
+    lastTime = currentTime;
     const elapsed = currentTime - startTime;
+
     ctx.clearRect(0, 0, w, h);
 
     let activeCount = 0;
@@ -1050,42 +1124,43 @@ function triggerCuteLoginConfetti() {
       if (p.opacity <= 0 || p.y > h + 50 * dpr) continue;
       activeCount++;
 
-      p.x += p.vx + Math.sin(p.wobble) * (1.4 * dpr);
-      p.y += p.vy;
-      p.vx *= p.drag;
-      p.vy += p.gravity;
-      p.wobble += p.wobbleSpeed;
-      p.rotation += p.rotSpeed;
-      p.tilt += p.tiltSpeed;
+      p.x += (p.vx + Math.sin(p.wobble) * (1.2 * dpr)) * dt;
+      p.y += p.vy * dt;
+      p.vx *= Math.pow(p.drag, dt);
+      p.vy += p.gravity * dt;
+      p.wobble += p.wobbleSpeed * dt;
+      p.rotation += p.rotSpeed * dt;
+      p.tilt += p.tiltSpeed * dt;
 
-      if (elapsed > 1800) {
-        p.opacity -= p.fadeSpeed * 1.8;
+      if (elapsed > 1300) {
+        p.opacity -= p.fadeSpeed * 1.6 * dt;
       }
 
-      if (p.type === 'heart') {
-        drawCuteHeart(ctx, p.x, p.y, p.size, p.color, p.rotation, p.tilt, p.opacity);
+      const currentAlpha = Math.max(0, Math.min(1, p.opacity));
+      if (currentAlpha <= 0.01) continue;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.globalAlpha = currentAlpha;
+
+      if (p.type === 'ribbon') {
+        ctx.scale(Math.cos(p.tilt), 1);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size * 0.5, -p.size * 0.25, p.size, p.size * 0.5);
+      } else if (p.sprite) {
+        if (p.type === 'heart') {
+          ctx.scale(Math.cos(p.tilt), 1);
+        }
+        ctx.drawImage(p.sprite, -p.size * 0.5, -p.size * 0.5, p.size, p.size);
       } else if (p.type === 'emoji') {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation * 0.4);
-        ctx.globalAlpha = Math.max(0, Math.min(1, p.opacity));
-        ctx.font = `${Math.round(p.size)}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+        // Fallback if sprite creation failed
+        ctx.font = `${Math.round(p.size)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(p.emoji, 0, 0);
-        ctx.restore();
-      } else if (p.type === 'ribbon') {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        ctx.scale(Math.cos(p.tilt), 1);
-        ctx.globalAlpha = Math.max(0, Math.min(1, p.opacity));
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size * 0.5, -p.size * 0.25, p.size, p.size * 0.5);
-        ctx.restore();
-      } else {
-        drawCuteSparkle(ctx, p.x, p.y, p.size, p.color, p.rotation, p.opacity);
       }
+      ctx.restore();
     }
 
     if (activeCount > 0 && elapsed < maxDuration) {
@@ -1098,7 +1173,7 @@ function triggerCuteLoginConfetti() {
           else canvas.parentNode.removeChild(canvas);
         }
         activeConfettiAnimId = null;
-      }, 650);
+      }, 450);
     }
   }
 
