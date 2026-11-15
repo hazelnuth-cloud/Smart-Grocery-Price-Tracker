@@ -166,6 +166,7 @@ const DEFAULT_RECEIPTS = [
     totalHemat: 16000,
     budgetSaatItu: 100000,
     statusBudget: 'warning',
+    kasir: 'Mr. Tio',
     items: [
       { namaBarang: 'Minyak Goreng', qty: 1, satuan: 'liter', hargaAkhirSatuan: 18000, totalHarga: 18000 },
       { namaBarang: 'Sabun Mandi', qty: 2, satuan: 'pcs', hargaAkhirSatuan: 8000, totalHarga: 16000 },
@@ -1315,6 +1316,13 @@ function loadUserIsolatedState(uid) {
       }
     } else {
       AppState.receipts = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_RECEIPTS)) : [];
+    }
+    if (Array.isArray(AppState.receipts)) {
+      AppState.receipts.forEach(r => {
+        if (!r.kasir || r.kasir.includes('Self-Checkout') || r.kasir.includes('Pengguna') || r.kasir.includes('Evelina')) {
+          r.kasir = 'Mr. Tio';
+        }
+      });
     }
 
     // 7. User-isolated pantry inventory
@@ -5827,7 +5835,7 @@ function generateReceiptData(customReceipt = null) {
       trxNo: 'TRX-' + (AppState.currentDate || new Date().toISOString().slice(0, 10)).replace(/-/g, '') + '-' + Math.floor(1000 + Math.random() * 9000),
       posNo: 'POS-0' + (Math.floor(Math.random() * 4) + 1),
       waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      kasir: (AppState.user && AppState.user.name) || (AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna',
+      kasir: 'Mr. Tio',
       subtotal: subtotalRaw,
       totalHemat: totalDiscount,
       totalBelanja: grandTotal,
@@ -5890,7 +5898,18 @@ function generateReceiptData(customReceipt = null) {
   const dateFormatted = receipt.tanggal || new Date().toISOString().slice(0, 10);
   const timeFormatted = receipt.waktu || '20:15:00';
   if (elDateTime) elDateTime.textContent = `${dateFormatted} ${timeFormatted}`;
-  if (elCashier) elCashier.textContent = receipt.kasir || ((AppState.user && AppState.user.name) || (AppState.currentUser && AppState.currentUser.displayName) || 'Self-Checkout / Pengguna');
+
+  // Kasir untuk seluruh transaksi struk belanja adalah Mr. Tio (guru pembimbing proyek)
+  const isOldUserKasir = !receipt.kasir || 
+    receipt.kasir.includes('Self-Checkout') || 
+    receipt.kasir.includes('Pengguna') ||
+    (AppState.user && receipt.kasir.includes(AppState.user.name)) || 
+    (AppState.currentUser && receipt.kasir.includes(AppState.currentUser.displayName)) ||
+    receipt.kasir.includes('Evelina');
+
+  const cashierDisplay = isOldUserKasir ? 'Mr. Tio' : receipt.kasir;
+  if (elCashier) elCashier.textContent = cashierDisplay;
+  receipt.kasir = cashierDisplay;
 
   // Populate Items List
   const itemsContainer = document.getElementById('receiptItemsContainer');
