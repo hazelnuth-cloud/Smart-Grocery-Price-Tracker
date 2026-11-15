@@ -2736,6 +2736,7 @@ function loginDemoAccount() {
 }
 
 function promptLogout(notify = true) {
+  hidePwaInstallBanner();
   // Requirement 3: Stop onSnapshot listener upon logout
   if (unsubscribeFirestore) {
     try { unsubscribeFirestore(); } catch (e) { }
@@ -6676,14 +6677,86 @@ if (typeof window !== 'undefined') {
     e.preventDefault();
     AppState.deferredInstallPrompt = e;
     updatePwaInstallUI();
+    setTimeout(checkAndShowPwaBanner, 2200);
   });
 
   window.addEventListener('appinstalled', () => {
     AppState.deferredInstallPrompt = null;
+    hidePwaInstallBanner();
     showToast('Aplikasi Smart Grocery berhasil dipasang! 🎉', 'success');
+    try {
+      localStorage.setItem('sgt_pwa_dismissed_until', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
+    } catch (e) {}
     updatePwaInstallUI();
     closePwaInstallGuideModal();
   });
+}
+
+/**
+ * PWA Install Bottom Prompt Banner (Inspirasi Mie Gacoan A2HS Popup)
+ */
+function checkAndShowPwaBanner() {
+  if (typeof window === 'undefined') return;
+  // Jangan tampilkan jika sudah dalam standalone mode (sudah terpasang)
+  if (isAppStandalone()) return;
+  // Jangan tampilkan jika user belum terautentikasi (hindari menutupi form login)
+  if (!AppState.user) return;
+  // Jangan tampilkan jika user menekan "NANTI SAJA" baru-baru ini (cooldown 3 hari)
+  const dismissedUntil = localStorage.getItem('sgt_pwa_dismissed_until');
+  if (dismissedUntil && Date.now() < parseInt(dismissedUntil, 10)) return;
+
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) {
+    banner.style.display = 'block';
+    // Trigger reflow untuk animasi slide-up mulus
+    void banner.offsetWidth;
+    banner.classList.add('show');
+  }
+}
+
+function hidePwaInstallBanner() {
+  if (typeof document === 'undefined') return;
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) {
+    banner.classList.remove('show');
+    setTimeout(() => {
+      if (banner && !banner.classList.contains('show')) {
+        banner.style.display = 'none';
+      }
+    }, 400);
+  }
+}
+
+function dismissPwaInstallBanner() {
+  hidePwaInstallBanner();
+  // Simpan cooldown 3 hari agar tidak mengganggu user secara berulang
+  try {
+    localStorage.setItem('sgt_pwa_dismissed_until', String(Date.now() + 3 * 24 * 60 * 60 * 1000));
+  } catch (e) {}
+}
+
+function acceptPwaInstallBanner() {
+  hidePwaInstallBanner();
+  if (AppState.deferredInstallPrompt) {
+    AppState.deferredInstallPrompt.prompt();
+    AppState.deferredInstallPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        showToast('Memasang Smart Grocery ke perangkat... 🚀', 'success');
+        try {
+          localStorage.setItem('sgt_pwa_dismissed_until', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
+        } catch (e) {}
+      } else {
+        dismissPwaInstallBanner();
+      }
+      AppState.deferredInstallPrompt = null;
+      updatePwaInstallUI();
+    }).catch(() => {
+      openPwaInstallGuideModal();
+    });
+  } else {
+    // Browser yang butuh petunjuk manual (seperti Safari iOS)
+    openPwaInstallGuideModal();
+  }
 }
 
 function installPwa() {
@@ -6941,6 +7014,9 @@ function initApp() {
   setTimeout(() => {
     isInitialAppLoad = false;
   }, 600);
+
+  // Periksa apakah prompt install PWA (ala Mie Gacoan) layak ditampilkan
+  setTimeout(checkAndShowPwaBanner, 2800);
 }
 
 if (typeof document !== 'undefined') {
@@ -8085,4 +8161,8 @@ if (typeof window !== 'undefined') {
   window.clearPlanAll = clearPlanAll;
   window.clearEntireCart = clearEntireCart;
   window.undoClearCart = undoClearCart;
+  window.checkAndShowPwaBanner = checkAndShowPwaBanner;
+  window.hidePwaInstallBanner = hidePwaInstallBanner;
+  window.dismissPwaInstallBanner = dismissPwaInstallBanner;
+  window.acceptPwaInstallBanner = acceptPwaInstallBanner;
 }

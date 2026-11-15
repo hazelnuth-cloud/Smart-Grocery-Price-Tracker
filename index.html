@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=112">
+  <link rel="stylesheet" href="./css/app.css?v=113">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -2224,11 +2224,36 @@
 
   </div> <!-- /#appContainer -->
 
+  <!-- ========================================================================
+       PWA INSTALL BOTTOM PROMPT BANNER (A2HS POPUP ALA MIE GACOAN)
+       ======================================================================== -->
+  <div id="pwaInstallBanner" class="pwa-install-banner-wrap" role="dialog" aria-modal="true" aria-labelledby="pwaBannerTitle" style="display: none;">
+    <div class="pwa-install-banner-card">
+      <div class="pwa-banner-header">
+        <div class="pwa-banner-icon-box">
+          <span class="pwa-banner-app-icon">🛍️</span>
+        </div>
+        <div class="pwa-banner-info">
+          <div id="pwaBannerTitle" class="pwa-banner-title">Smart Grocery App</div>
+          <div class="pwa-banner-subtitle">Pasang di layar utama untuk akses lebih cepat!</div>
+        </div>
+      </div>
+      <div class="pwa-banner-actions">
+        <button type="button" class="btn-pwa-dismiss touch-target" onclick="dismissPwaInstallBanner()">
+          NANTI SAJA
+        </button>
+        <button type="button" class="btn-pwa-install touch-target" onclick="acceptPwaInstallBanner()">
+          INSTALL SEKARANG
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=112"></script>
+  <script src="./js/app.js?v=113"></script>
 
   <!-- Service Worker Registration -->
   <script>
