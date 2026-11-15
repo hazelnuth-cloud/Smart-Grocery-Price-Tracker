@@ -67,7 +67,8 @@ const STORAGE_KEYS = {
   SOUND_ENABLED: 'smart_grocery_sound',
   DARK_MODE: 'smart_grocery_dark_mode',
   SESSION_ID: 'smart_grocery_session',
-  FIREBASE_CONFIG: 'smart_grocery_fb_config'
+  FIREBASE_CONFIG: 'smart_grocery_fb_config',
+  STICKY_SALDO_DISMISSED: 'smart_grocery_sticky_saldo_dismissed'
 };
 
 // Default Personal Blacklist ("Anti-List")
@@ -218,7 +219,8 @@ let AppState = {
   editingItemId: null,
   itemPendingDeleteId: null,
   pendingBlacklistItem: null,
-  deferredInstallPrompt: null
+  deferredInstallPrompt: null,
+  stickySaldoDismissed: false
 };
 
 // Realtime Sync Variables
@@ -1412,6 +1414,15 @@ function loadLocalState() {
 
     const storedSession = getStoredItem(STORAGE_KEYS.SESSION_ID);
     if (storedSession) AppState.sessionId = storedSession;
+
+    const storedDismissed = getStoredItem(STORAGE_KEYS.STICKY_SALDO_DISMISSED);
+    if (storedDismissed !== null) {
+      try {
+        AppState.stickySaldoDismissed = JSON.parse(storedDismissed);
+      } catch (e) {
+        AppState.stickySaldoDismissed = storedDismissed;
+      }
+    }
   } catch (err) {
     console.error('LocalStorage load error:', err);
     AppState.cart = [];
@@ -1438,6 +1449,7 @@ function saveLocalState() {
     localStorage.setItem('grocery_receipts_' + uid, JSON.stringify(AppState.receipts));
     localStorage.setItem('grocery_pantry_' + uid, JSON.stringify(AppState.pantry));
     localStorage.setItem('grocery_blacklist_' + uid, JSON.stringify(AppState.blacklist));
+    localStorage.setItem(STORAGE_KEYS.STICKY_SALDO_DISMISSED, JSON.stringify(AppState.stickySaldoDismissed));
     localStorage.setItem('grocery_routine_items_' + uid, JSON.stringify(AppState.routineItems || []));
     localStorage.setItem('grocery_history_' + uid, JSON.stringify(AppState.priceHistory));
     localStorage.setItem('grocery_instore_' + uid, JSON.stringify(AppState.inStoreMode));
@@ -3455,6 +3467,55 @@ function renderBudget() {
     }
   }
 
+  // Mini Sticky Saldo Bar & Dismissed States Updates
+  const miniBar = document.getElementById('stickySaldoMiniBar');
+  const miniSaldoAmount = document.getElementById('miniSaldoAmount');
+  const miniSaldoBadge = document.getElementById('miniSaldoBadge');
+  const btnReopenStickySaldo = document.getElementById('btnReopenStickySaldo');
+
+  if (miniSaldoAmount) {
+    if (safety.sisa >= 0) {
+      miniSaldoAmount.textContent = formatRupiah(safety.sisa);
+      miniSaldoAmount.className = `mini-bar-val ${safety.level}`;
+    } else {
+      miniSaldoAmount.textContent = `- ${formatRupiah(Math.abs(safety.sisa))}`;
+      miniSaldoAmount.className = 'mini-bar-val danger';
+    }
+  }
+
+  if (miniSaldoBadge) {
+    miniSaldoBadge.textContent = (safety.level === 'danger') 
+      ? `Overbudget (${Math.round(safety.percentage)}%)` 
+      : (safety.level === 'warning' ? `Rem Dulu (${Math.round(safety.percentage)}%)` : 'Aman');
+    miniSaldoBadge.className = `planner-alert-badge badge-${safety.level}`;
+  }
+
+  if (miniBar) {
+    miniBar.className = `sticky-saldo-mini-bar ${safety.level}`;
+  }
+
+  // Handle visibility according to AppState.stickySaldoDismissed ('open' / false, 'mini', 'hidden')
+  const dismissedState = AppState.stickySaldoDismissed;
+  if (safety.level === 'danger' && dismissedState === 'hidden') {
+    // If overbudget occurred while completely hidden, wake up mini bar so user sees alert
+    if (plannerAlert) plannerAlert.style.display = 'none';
+    if (miniBar) miniBar.style.display = 'flex';
+    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'none';
+  } else if (dismissedState === 'hidden') {
+    if (plannerAlert) plannerAlert.style.display = 'none';
+    if (miniBar) miniBar.style.display = 'none';
+    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'inline-flex';
+  } else if (dismissedState === 'mini' || dismissedState === true) {
+    if (plannerAlert) plannerAlert.style.display = 'none';
+    if (miniBar) miniBar.style.display = 'flex';
+    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'none';
+  } else {
+    // Fully open (default)
+    if (plannerAlert) plannerAlert.style.display = '';
+    if (miniBar) miniBar.style.display = 'none';
+    if (btnReopenStickySaldo) btnReopenStickySaldo.style.display = 'none';
+  }
+
   // TAB 1 (BUDGET) STATUS CALLOUT BOX
   const tabStatusBox = document.getElementById('budgetTabStatusBox');
   const tabStatusTitle = document.getElementById('budgetTabStatusTitle');
@@ -3574,6 +3635,36 @@ function renderBudget() {
         btn.title = 'Selesai Belanja & Simpan Struk';
       }
     });
+  }
+}
+
+/**
+ * Tutup / Minimalkan / Buka kembali Sticky Dashboard Tracker Saldo
+ * @param {boolean|string} action - true / 'mini': minimalkan, 'hide-all' / 'hidden': tutup total, false / 'open': buka kembali
+ */
+function dismissStickySaldoCard(action) {
+  let newState = 'open';
+  if (action === true || action === 'mini') {
+    newState = 'mini';
+  } else if (action === 'hide-all' || action === 'hidden') {
+    newState = 'hidden';
+  } else {
+    newState = 'open';
+  }
+
+  AppState.stickySaldoDismissed = (newState === 'open') ? false : newState;
+  try {
+    localStorage.setItem(STORAGE_KEYS.STICKY_SALDO_DISMISSED, JSON.stringify(AppState.stickySaldoDismissed));
+  } catch (e) { }
+
+  renderBudget();
+
+  if (newState === 'mini') {
+    showToast('Kartu saldo diminimalkan. Ketuk "Buka Saldo ▾" untuk membuka kembali.', 'info');
+  } else if (newState === 'hidden') {
+    showToast('Kartu saldo disembunyikan. Ketuk tombol "💳 Saldo" untuk membuka.', 'info');
+  } else {
+    showToast('Kartu saldo ditampilkan kembali 💳', 'success');
   }
 }
 
@@ -8240,4 +8331,5 @@ if (typeof window !== 'undefined') {
   window.hidePwaInstallBanner = hidePwaInstallBanner;
   window.dismissPwaInstallBanner = dismissPwaInstallBanner;
   window.acceptPwaInstallBanner = acceptPwaInstallBanner;
+  window.dismissStickySaldoCard = dismissStickySaldoCard;
 }

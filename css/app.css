@@ -9422,6 +9422,253 @@ body.dark-mode .sticky-dashboard-tracker.danger {
   flex-shrink: 0 !important;
 }
 
+/* Close / Dismiss Button on Sticky Tracker Card */
+.tracker-close-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #64748B !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.tracker-close-btn:hover,
+.tracker-close-btn:active {
+  background: #FFE4E6 !important;
+  color: #E11D48 !important;
+  border-color: #FECDD3 !important;
+  transform: scale(1.08) !important;
+}
+
+body.dark-mode .tracker-close-btn {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode .tracker-close-btn:hover,
+body.dark-mode .tracker-close-btn:active {
+  background: #881337 !important;
+  color: #FDA4AF !important;
+  border-color: #9F1239 !important;
+}
+
+/* ==========================================================================
+   MINI STICKY SALDO BAR (SLIMLINE VIEW WHEN CARD IS MINIMIZED)
+   ========================================================================== */
+.sticky-saldo-mini-bar {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: calc(var(--app-header-height, calc(64px + env(safe-area-inset-top, 0px))) + 4px) !important;
+  z-index: 45 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  border-radius: 999px !important;
+  padding: 5px 12px !important;
+  margin-top: 4px !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06) !important;
+  box-sizing: border-box !important;
+  transition: all 0.25s ease !important;
+}
+
+.sticky-saldo-mini-bar.safe {
+  border-left: 4px solid #10B981 !important;
+}
+
+.sticky-saldo-mini-bar.warning {
+  border-left: 4px solid #F59E0B !important;
+  background: rgba(255, 251, 235, 0.96) !important;
+}
+
+.sticky-saldo-mini-bar.danger {
+  border-left: 4px solid #EF4444 !important;
+  background: rgba(254, 242, 242, 0.96) !important;
+  box-shadow: 0 3px 12px rgba(239, 68, 68, 0.15) !important;
+}
+
+body.dark-mode .sticky-saldo-mini-bar {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(51, 65, 85, 0.9) !important;
+}
+
+body.dark-mode .sticky-saldo-mini-bar.safe {
+  border-left-color: #10B981 !important;
+}
+
+body.dark-mode .sticky-saldo-mini-bar.warning {
+  border-left-color: #F59E0B !important;
+  background: rgba(69, 26, 3, 0.95) !important;
+}
+
+body.dark-mode .sticky-saldo-mini-bar.danger {
+  border-left-color: #EF4444 !important;
+  background: rgba(76, 5, 25, 0.95) !important;
+}
+
+.mini-bar-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  cursor: pointer !important;
+  flex: 1 !important;
+}
+
+.mini-bar-icon {
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+.mini-bar-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #64748B !important;
+  white-space: nowrap !important;
+}
+
+body.dark-mode .mini-bar-label {
+  color: #94A3B8 !important;
+}
+
+.mini-bar-val {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #0F172A !important;
+  white-space: nowrap !important;
+}
+
+.mini-bar-val.safe {
+  color: #059669 !important;
+}
+
+.mini-bar-val.warning {
+  color: #D97706 !important;
+}
+
+.mini-bar-val.danger {
+  color: #DC2626 !important;
+}
+
+body.dark-mode .mini-bar-val {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .mini-bar-val.safe {
+  color: #34D399 !important;
+}
+
+body.dark-mode .mini-bar-val.warning {
+  color: #FBBF24 !important;
+}
+
+body.dark-mode .mini-bar-val.danger {
+  color: #F87171 !important;
+}
+
+.mini-bar-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+}
+
+.mini-bar-expand-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  background: #FFF1F2 !important;
+  border: 1px solid #FECDD3 !important;
+  color: #E11D48 !important;
+  padding: 3px 9px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  line-height: 1.2 !important;
+}
+
+.mini-bar-expand-btn:hover,
+.mini-bar-expand-btn:active {
+  background: #FFE4E6 !important;
+  transform: scale(1.04) !important;
+}
+
+body.dark-mode .mini-bar-expand-btn {
+  background: rgba(225, 29, 72, 0.2) !important;
+  border-color: rgba(225, 29, 72, 0.4) !important;
+  color: #FDA4AF !important;
+}
+
+.mini-bar-hide-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: none !important;
+  color: #94A3B8 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.mini-bar-hide-btn:hover,
+.mini-bar-hide-btn:active {
+  color: #E11D48 !important;
+  background: #F1F5F9 !important;
+}
+
+body.dark-mode .mini-bar-hide-btn:hover,
+body.dark-mode .mini-bar-hide-btn:active {
+  background: #334155 !important;
+}
+
+/* Reopen pill button inside segmented bar */
+.planner-seg-btn.seg-saldo-btn {
+  flex: 0 0 auto !important;
+  padding: 7px 11px !important;
+  background: #FFF1F2 !important;
+  color: #E11D48 !important;
+  border: 1px solid #FECDD3 !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  border-radius: var(--radius-pill) !important;
+}
+
+.planner-seg-btn.seg-saldo-btn:hover,
+.planner-seg-btn.seg-saldo-btn:active {
+  background: #FFE4E6 !important;
+  color: #BE123C !important;
+}
+
+body.dark-mode .planner-seg-btn.seg-saldo-btn {
+  background: rgba(225, 29, 72, 0.2) !important;
+  border-color: rgba(225, 29, 72, 0.4) !important;
+  color: #FDA4AF !important;
+}
+
 /* Glowing Pulsing Active Status Dot */
 .cloud-sync-dot {
   width: 7px !important;
