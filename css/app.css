@@ -2454,6 +2454,8 @@ body.dark-mode .barcode-preset-chip {
   font-size: 10.5px;
   font-weight: 700;
   border: 1px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .fluctuation-up {
@@ -3253,6 +3255,7 @@ body.dark-mode .shopee-item-card {
   letter-spacing: -0.1px;
   border: 1px solid transparent;
   max-width: 100% !important;
+  flex-shrink: 0;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   box-sizing: border-box !important;
@@ -8903,13 +8906,14 @@ body.dark-mode .user-header-name {
   left: auto !important;
   right: auto !important;
   transform: scale(0.96) translateY(8px) !important;
-  width: 92% !important;
-  max-width: 360px !important;
+  width: calc(100% - 24px) !important;
+  max-width: 440px !important;
   border-radius: 18px !important;
-  padding: 16px 18px 14px 18px !important;
+  padding: 16px 16px 14px 16px !important;
   background: #FFFFFF !important;
-  max-height: 85vh !important;
+  max-height: 88vh !important;
   overflow-y: auto !important;
+  overscroll-behavior: contain !important;
   -webkit-overflow-scrolling: touch !important;
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   box-sizing: border-box !important;
