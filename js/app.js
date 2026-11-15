@@ -1192,7 +1192,9 @@ function purgeLegacyAudreyData() {
 function loadUserIsolatedState(uid) {
   if (!uid) uid = 'guest';
   try {
-    // 1. User-isolated cart with robust fallback
+    // 1. User-isolated cart
+    // Brand new accounts and clean guest sessions start strictly with an empty cart ([]).
+    // NEVER inherit guest or legacy items into a new or authenticated account!
     const userCart = localStorage.getItem('grocery_cart_' + uid);
     if (userCart) {
       try {
@@ -1201,41 +1203,32 @@ function loadUserIsolatedState(uid) {
         AppState.cart = [];
       }
     } else {
-      // Fallback: check global STORAGE_KEYS.CART
-      const fallbackCart = getStoredItem(STORAGE_KEYS.CART);
-      if (fallbackCart) {
-        try {
-          AppState.cart = JSON.parse(fallbackCart);
-        } catch (e) {
-          AppState.cart = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS)) : [];
-        }
-      } else {
-        AppState.cart = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS)) : [];
-      }
+      // Only demo_user_101 loads mock cart items
+      AppState.cart = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS)) : [];
     }
 
     // 2. User-isolated store
-    const userStore = localStorage.getItem('grocery_store_' + uid) || getStoredItem(STORAGE_KEYS.STORE);
+    const userStore = localStorage.getItem('grocery_store_' + uid);
     AppState.currentStore = userStore || 'Lotte Mart Grocery - Puri Indah';
 
     // 3. User-isolated date
-    const userDate = localStorage.getItem('grocery_date_' + uid) || getStoredItem(STORAGE_KEYS.DATE);
+    const userDate = localStorage.getItem('grocery_date_' + uid);
     AppState.currentDate = userDate || new Date().toISOString().split('T')[0];
 
     // 4. User-isolated budget
-    const userBudget = localStorage.getItem('grocery_budget_' + uid) || getStoredItem(STORAGE_KEYS.BUDGET);
-    if (userBudget !== null && !isNaN(parseInt(userBudget, 10))) {
+    const userBudget = localStorage.getItem('grocery_budget_' + uid);
+    if (userBudget !== null && !isNaN(parseInt(userBudget, 10)) && parseInt(userBudget, 10) > 0) {
       AppState.budget = parseInt(userBudget, 10);
     } else {
       AppState.budget = 100000;
     }
 
     // 5. User-isolated budget period
-    const userPeriod = localStorage.getItem('grocery_period_' + uid) || getStoredItem(STORAGE_KEYS.BUDGET_PERIOD);
+    const userPeriod = localStorage.getItem('grocery_period_' + uid);
     AppState.budgetPeriod = userPeriod || 'weekly';
 
     // 6. User-isolated receipts history
-    const userReceipts = localStorage.getItem('grocery_receipts_' + uid) || getStoredItem(STORAGE_KEYS.RECEIPTS);
+    const userReceipts = localStorage.getItem('grocery_receipts_' + uid);
     if (userReceipts) {
       try {
         AppState.receipts = JSON.parse(userReceipts);
@@ -1247,7 +1240,7 @@ function loadUserIsolatedState(uid) {
     }
 
     // 7. User-isolated pantry inventory
-    const userPantry = localStorage.getItem('grocery_pantry_' + uid) || getStoredItem(STORAGE_KEYS.PANTRY);
+    const userPantry = localStorage.getItem('grocery_pantry_' + uid);
     if (userPantry) {
       try {
         AppState.pantry = JSON.parse(userPantry);
@@ -1259,7 +1252,7 @@ function loadUserIsolatedState(uid) {
     }
 
     // 8. User-isolated anti-list / blacklist
-    const userBlacklist = localStorage.getItem('grocery_blacklist_' + uid) || getStoredItem(STORAGE_KEYS.BLACKLIST);
+    const userBlacklist = localStorage.getItem('grocery_blacklist_' + uid);
     if (userBlacklist) {
       try {
         AppState.blacklist = JSON.parse(userBlacklist);
@@ -1271,7 +1264,7 @@ function loadUserIsolatedState(uid) {
     }
 
     // 9. User-isolated routine items (Auto-refresh)
-    const userRoutine = localStorage.getItem('grocery_routine_items_' + uid) || getStoredItem('grocery_routine_items');
+    const userRoutine = localStorage.getItem('grocery_routine_items_' + uid);
     if (userRoutine) {
       try {
         AppState.routineItems = JSON.parse(userRoutine);
@@ -1283,7 +1276,7 @@ function loadUserIsolatedState(uid) {
     }
 
     // 10. User-isolated price history
-    const userHistory = localStorage.getItem('grocery_history_' + uid) || getStoredItem(STORAGE_KEYS.PRICE_HISTORY);
+    const userHistory = localStorage.getItem('grocery_history_' + uid);
     if (userHistory) {
       try {
         AppState.priceHistory = JSON.parse(userHistory);
@@ -1296,18 +1289,16 @@ function loadUserIsolatedState(uid) {
 
     // 11. User-isolated in-store mode
     const userInStore = localStorage.getItem('grocery_instore_' + uid);
-    if (userInStore !== null) {
-      AppState.inStoreMode = (userInStore === 'true');
-    } else {
-      const fallbackInStore = getStoredItem(STORAGE_KEYS.IN_STORE_MODE);
-      AppState.inStoreMode = (fallbackInStore === 'true');
-    }
+    AppState.inStoreMode = (userInStore === 'true');
 
     // 12. User-isolated active tab
-    const userTab = localStorage.getItem('grocery_tab_' + uid) || localStorage.getItem('smart_grocery_current_tab');
+    const userTab = localStorage.getItem('grocery_tab_' + uid);
     if (userTab && ['planner', 'cart', 'budget', 'pantry'].includes(userTab)) {
       AppState.currentTab = userTab;
     }
+
+    // Reset safety level tracking so no phantom warnings fire
+    AppState.previousSafetyLevel = null;
 
     renderAll();
     checkDailyPlannerReset(uid);
@@ -1350,7 +1341,7 @@ function loadLocalState() {
     console.error('LocalStorage load error:', err);
     AppState.cart = [];
     AppState.priceHistory = { ...DEFAULT_PRICE_HISTORY };
-    AppState.pantry = [...DEFAULT_PANTRY];
+    AppState.pantry = [];
     AppState.blacklist = [...DEFAULT_BLACKLIST];
   }
 }
@@ -1475,13 +1466,34 @@ function setupFirestoreListener() {
   if (!userDocRef) return;
 
   unsubscribeFirestore = userDocRef.onSnapshot((docSnapshot) => {
+    const uid = (AppState.user && AppState.user.uid) ? AppState.user.uid : null;
     if (docSnapshot.exists) {
       const data = docSnapshot.data();
-      if (data && data.lastUpdated && data.lastUpdated > AppState.lastLocalUpdate) {
+      const hasLocalCart = uid ? !!localStorage.getItem('grocery_cart_' + uid) : true;
+
+      // Apply remote data if:
+      // 1. Device has no local data yet for this user (e.g. login on new device/browser), OR
+      // 2. Cloud data has a newer timestamp than local
+      if (data && (!hasLocalCart || (data.lastUpdated && data.lastUpdated > AppState.lastLocalUpdate))) {
         isReceivingRemoteUpdate = true;
         applyRemoteState(data);
         showToast('Data diperbarui dari Cloud Firestore (onSnapshot) 🔄', 'info');
         isReceivingRemoteUpdate = false;
+      }
+    } else {
+      // Document does not exist in Firestore -> Brand new account
+      if (uid && uid !== 'demo_user_101') {
+        const hasLocalCart = !!localStorage.getItem('grocery_cart_' + uid);
+        if (!hasLocalCart) {
+          AppState.cart = [];
+          AppState.budget = 100000;
+          AppState.receipts = [];
+          AppState.pantry = [];
+          AppState.routineItems = [];
+          AppState.previousSafetyLevel = null;
+          saveLocalState();
+          renderAll();
+        }
       }
     }
   }, (error) => {
@@ -1583,8 +1595,35 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
     }, { merge: true }).catch(err => console.info('Firestore profile sync notice:', err));
   }
 
+  // Check if this is a first-time local login for this user UID
+  const isExistingLocalUser = !!localStorage.getItem('grocery_cart_' + uid);
+  const isInitialized = localStorage.getItem('grocery_user_initialized_' + uid) === 'true';
+
+  if (!isExistingLocalUser && !isInitialized && uid !== 'demo_user_101') {
+    // Brand new account: start completely clean with empty cart and default budget
+    AppState.cart = [];
+    AppState.receipts = [];
+    AppState.pantry = [];
+    AppState.budget = 100000;
+    AppState.budgetPeriod = 'weekly';
+    AppState.routineItems = [];
+    AppState.previousSafetyLevel = null;
+    localStorage.setItem('grocery_user_initialized_' + uid, 'true');
+    const todayStr = new Date().toISOString().split('T')[0];
+    localStorage.setItem('last_planner_reset_date_' + uid, todayStr);
+    localStorage.setItem('last_planner_reset_date', todayStr);
+  }
+
   // Load isolated local storage for this specific user UID
   loadUserIsolatedState(uid);
+  AppState.previousSafetyLevel = null; // Always reset so no phantom warnings fire on auth
+
+  // Ensure any lingering overbudget banner in DOM is hidden
+  const overbudgetBanner = document.getElementById('overbudget-firm-banner');
+  if (overbudgetBanner) overbudgetBanner.classList.add('hidden');
+  const overbudgetSlimBadge = document.getElementById('overbudget-slim-badge');
+  if (overbudgetSlimBadge) overbudgetSlimBadge.style.display = 'none';
+
   saveLocalState();
   playCalmChime();
   checkAuth();
@@ -2152,7 +2191,27 @@ async function handleAuthSubmit(e) {
       loggedAt: new Date().toISOString()
     };
 
+    // Clean slate for brand-new registered account: empty cart, fresh 100k budget, zero warnings
+    AppState.cart = [];
+    AppState.receipts = [];
+    AppState.pantry = [];
+    AppState.budget = 100000;
+    AppState.budgetPeriod = 'weekly';
+    AppState.routineItems = [];
+    AppState.previousSafetyLevel = null;
+    localStorage.setItem('grocery_user_initialized_' + uid, 'true');
+    const todayStr = new Date().toISOString().split('T')[0];
+    localStorage.setItem('last_planner_reset_date_' + uid, todayStr);
+    localStorage.setItem('last_planner_reset_date', todayStr);
+
     loadUserIsolatedState(uid);
+    AppState.previousSafetyLevel = null;
+
+    const overbudgetBanner = document.getElementById('overbudget-firm-banner');
+    if (overbudgetBanner) overbudgetBanner.classList.add('hidden');
+    const overbudgetSlimBadge = document.getElementById('overbudget-slim-badge');
+    if (overbudgetSlimBadge) overbudgetSlimBadge.style.display = 'none';
+
     saveLocalState();
     playCelebrationFanfare();
     triggerCuteLoginConfetti();
@@ -2673,12 +2732,33 @@ function promptLogout(notify = true) {
     }
   } catch (e) { }
 
+  // Purge global cart, receipts, pantry, and budget so no residual items linger
+  try {
+    localStorage.removeItem(STORAGE_KEYS.CART);
+    localStorage.removeItem(STORAGE_KEYS.RECEIPTS);
+    localStorage.removeItem(STORAGE_KEYS.PANTRY);
+    localStorage.removeItem(STORAGE_KEYS.BUDGET);
+    localStorage.removeItem(STORAGE_KEYS.BUDGET_PERIOD);
+    localStorage.removeItem('grocery_cart_guest');
+    localStorage.removeItem('grocery_receipts_guest');
+    localStorage.removeItem('grocery_pantry_guest');
+    localStorage.removeItem('grocery_budget_guest');
+  } catch (e) { }
+
   // Reset active UI state cleanly
   AppState.cart = [];
   AppState.receipts = [];
   AppState.pantry = [];
   AppState.budget = 100000;
+  AppState.budgetPeriod = 'weekly';
   AppState.inStoreMode = false;
+  AppState.previousSafetyLevel = null;
+
+  // Immediately hide any overbudget alert banners
+  const overbudgetBanner = document.getElementById('overbudget-firm-banner');
+  if (overbudgetBanner) overbudgetBanner.classList.add('hidden');
+  const overbudgetSlimBadge = document.getElementById('overbudget-slim-badge');
+  if (overbudgetSlimBadge) overbudgetSlimBadge.style.display = 'none';
 
   renderAll();
   checkAuth();
@@ -4403,6 +4483,15 @@ function checkDailyPlannerReset(uid) {
     return false;
   }
 
+  // Akun baru atau pengguna reguler harus mulai dari awal dengan keranjang kosong (tanpa inject paksa rutin)
+  const hasUserCustomRoutine = AppState.routineItems && AppState.routineItems.length > 0;
+  if (!hasUserCustomRoutine || uid !== 'demo_user_101') {
+    localStorage.setItem(storageKey, todayStr);
+    localStorage.setItem('last_planner_reset_date', todayStr);
+    shuffleDailyCatalog(todayStr);
+    return false;
+  }
+
   // Jika user sudah memiliki keranjang belanja aktif (sedang dipakai/dicentang),
   // jangan suntikkan barang baru atau ubah status barang yang sedang dikerjakan user!
   if (AppState.cart && AppState.cart.length > 0) {
@@ -4411,7 +4500,7 @@ function checkDailyPlannerReset(uid) {
     return false;
   }
 
-  // Jika keranjang benar-benar kosong di hari baru, siapkan barang rutin belanja
+  // Hanya jalankan untuk demo_user_101
   executeDailyPlannerReset(todayStr, uid);
   return true;
 }
