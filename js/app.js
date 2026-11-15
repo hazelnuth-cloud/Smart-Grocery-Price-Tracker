@@ -7634,6 +7634,10 @@ if (typeof document !== 'undefined') {
         closeCloudSyncModal();
       } else if (modalId === 'storePickerModal') {
         closeStorePickerModal();
+      } else if (modalId === 'itemPickerModal') {
+        closeItemPickerModal();
+      } else if (modalId === 'cancelShoppingModal') {
+        closeCancelShoppingModal();
       } else {
         e.target.classList.remove('active', 'show');
         if (e.target.style) e.target.style.display = 'none';
