@@ -9783,7 +9783,7 @@ body.theme-dark .sticky-dashboard-tracker.danger {
 .tracker-header-right {
   display: flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 10px !important;
   flex-shrink: 0 !important;
 }
 
@@ -9793,14 +9793,14 @@ body.theme-dark .sticky-dashboard-tracker.danger {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
   border-radius: 50% !important;
   padding: 0 !important;
   margin: 0 !important;
-  font-size: 11.5px !important;
+  font-size: 13.5px !important;
   line-height: 1 !important;
   cursor: pointer !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -10386,15 +10386,25 @@ body.dark-mode .tracker-overbudget-note {
 }
 
 /* =========================================================================
-   BUDGET PRESET CHIPS (MATCHING DISCOUNT CHIP ACTIVE STYLE)
+   BUDGET PRESET CHIPS (MATCHING DISCOUNT CHIP ACTIVE STYLE & 3-COL GRID)
    ========================================================================= */
+.quick-budget-presets {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 .budget-preset-chip {
   background: #F8FAFC !important;
   color: #475569 !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 14px !important;
-  padding: 4px 10px !important;
-  font-size: 0.74rem !important;
+  border-radius: 10px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 6px !important;
+  font-size: 12.5px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -10402,7 +10412,9 @@ body.dark-mode .tracker-overbudget-note {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  line-height: 1.3 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
 }
 
 .budget-preset-chip:hover {
@@ -10418,7 +10430,7 @@ body.dark-mode .tracker-overbudget-note {
   border-color: #E91E63 !important;
   font-weight: 800 !important;
   box-shadow: 0 3px 10px rgba(233, 30, 99, 0.32) !important;
-  transform: scale(1.04) !important;
+  transform: scale(1.02) !important;
 }
 
 body.dark-mode .budget-preset-chip,
@@ -10440,6 +10452,58 @@ body.theme-dark .budget-preset-chip.active {
   color: #FFFFFF !important;
   border-color: #E91E63 !important;
   box-shadow: 0 3px 10px rgba(233, 30, 99, 0.45) !important;
+}
+
+/* Receipt & Price Tag Non-Breaking Single-Line Protection */
+.price-tag,
+.receipt-total-val {
+  white-space: nowrap !important;
+}
+
+/* Dedicated Reset / Hapus Button for Custom Discount */
+.btn-reset-discount {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 14px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  background: #FFF1F2 !important;
+  border: 1px solid #FECDD3 !important;
+  color: #E11D48 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.btn-reset-discount:hover,
+.btn-reset-discount:active {
+  background: #FFE4E6 !important;
+  border-color: #FDA4AF !important;
+  color: #BE123C !important;
+  transform: translateY(-1px) !important;
+}
+
+body.dark-mode .btn-reset-discount,
+body.theme-dark .btn-reset-discount {
+  background: #2D0C15 !important;
+  border-color: #5C1D2E !important;
+  color: #FB7185 !important;
+}
+
+body.dark-mode .btn-reset-discount:hover,
+body.dark-mode .btn-reset-discount:active,
+body.theme-dark .btn-reset-discount:hover,
+body.theme-dark .btn-reset-discount:active {
+  background: #3E101D !important;
+  border-color: #881337 !important;
+  color: #FDA4AF !important;
 }
 
 
@@ -10908,11 +10972,11 @@ body.dark-mode .tracker-alert-notice.danger .tracker-alert-desc {
 
   .tracker-budget-btn,
   .tracker-close-btn {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
-    font-size: 11px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    font-size: 13px !important;
     border-radius: 50% !important;
     padding: 0 !important;
     margin: 0 !important;

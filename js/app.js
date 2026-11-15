@@ -3291,7 +3291,7 @@ function showCustomItemSuggestions(query = '') {
 
     html += `
       <div class="custom-suggestion-more" onclick="openItemPickerModal()">
-        <span>📋 Lihat Semua ${allItems.length} Pilihan Barang (Seperti Lokasi) ➔</span>
+        <span>📋 Buka Katalog Rekomendasi Lengkap (${allItems.length} barang) ➔</span>
       </div>
     `;
   }
@@ -6796,19 +6796,19 @@ function renderHistory() {
 
   container.innerHTML = AppState.receipts.map(r => `
     <div style="background: var(--surface-soft); border-radius: var(--radius-md); padding: 10px 12px; border: 1px solid var(--border-soft);">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-        <div>
-          <span style="font-size: 0.68rem; color: var(--text-faint); font-weight: 700;">${r.tanggal} • ${escapeHtml(r.toko || 'Lotte Mart')}</span>
-          <div style="font-weight: 800; font-size: 0.86rem; color: var(--text-main);">${escapeHtml(r.judul)}</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; gap: 8px;">
+        <div style="flex: 1; min-width: 0;">
+          <span style="display: block; font-size: 0.68rem; color: var(--text-faint); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${r.tanggal} • ${escapeHtml(r.toko || 'Lotte Mart')}</span>
+          <div style="font-weight: 800; font-size: 0.86rem; color: var(--text-main); white-space: normal; word-break: break-word;">${escapeHtml(r.judul)}</div>
         </div>
-        <span style="font-weight: 900; font-size: 0.88rem; color: var(--rose-contrast);">${formatRupiah(r.totalBelanja)}</span>
+        <span class="price-tag receipt-total-val" style="font-weight: 900; font-size: 0.88rem; color: var(--rose-contrast); white-space: nowrap !important; flex-shrink: 0 !important; text-align: right;">${formatRupiah(r.totalBelanja)}</span>
       </div>
-      <div style="font-size: 0.7rem; color: var(--text-subtle);">
+      <div style="font-size: 0.7rem; color: var(--text-subtle); margin-top: 2px;">
         ${(r.items || []).map(i => `${escapeHtml(i.namaBarang)} (${i.qty} ${i.satuan})`).join(', ')}
       </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--pastel-light-1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--pastel-light-1);">
         <span style="font-size: 0.68rem; color: var(--text-faint); font-weight: 600;">${(r.items || []).length} jenis barang</span>
-        <button type="button" class="btn-demo-quick" style="margin: 0; padding: 3px 8px; font-size: 0.68rem; font-weight: 700; color: #E91E63;" onclick="viewHistoricalReceipt('${r.id}')">🧾 Lihat Struk Asli</button>
+        <button type="button" class="btn-demo-quick" style="margin: 0; padding: 4px 10px; font-size: 0.68rem; font-weight: 700; color: #E91E63;" onclick="viewHistoricalReceipt('${r.id}')">🧾 Lihat Struk Asli</button>
       </div>
     </div>
   `).join('');

@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=126">
+  <link rel="stylesheet" href="./css/app.css?v=127">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -303,19 +303,19 @@
                 oninput="handleBudgetSliderChange(this.value)" style="display: none;">
             </div>
 
-            <!-- Preset Chips -->
-            <div id="quickBudgetPresetsContainer" class="quick-budget-presets" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000" style="padding: 4px 10px; font-size: 0.74rem;"
+            <!-- Preset Chips (Grid 3 Kolom Simetris) -->
+            <div id="quickBudgetPresetsContainer" class="quick-budget-presets" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000"
                 onclick="setQuickBudgetAmount(50000)">50k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000"
                 onclick="setQuickBudgetAmount(100000)">100k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000"
                 onclick="setQuickBudgetAmount(150000)">150k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000"
                 onclick="setQuickBudgetAmount(200000)">200k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000"
                 onclick="setQuickBudgetAmount(350000)">350k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000" style="padding: 4px 10px; font-size: 0.74rem;"
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000"
                 onclick="setQuickBudgetAmount(500000)">500k</button>
             </div>
 
@@ -990,26 +990,18 @@
         </div>
 
         <form id="detailedItemForm" novalidate onsubmit="handleDetailedItemFormSubmit(event)">
-          <!-- Baris 1: Nama Barang (Dengan Fitur Pemilihan Opsi In-App Identik Lokasi) -->
+          <!-- Baris 1: Nama Barang (Input Interaktif Langsung & Buka Katalog Cepat) -->
           <div class="form-group" style="margin-bottom: 10px; position: relative;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
-              <label class="form-label"
-                style="font-size: 12px; font-weight: 700; color: #1E293B; margin: 0; white-space: nowrap;">Nama Barang *</label>
-              <button type="button" class="btn-demo-quick touch-target"
-                style="margin: 0; padding: 2px 10px; font-size: 11px; font-weight: 700; color: #E91E63; background: #FFF1F5; border: 1px solid #FBCFE8; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; height: 26px; cursor: pointer;"
-                onclick="openItemPickerModal()" title="Pilih opsi barang dari katalog rekomendasi seperti memilih lokasi">
-                <span>📋</span>
-                <span>Pilih Opsi</span>
-              </button>
-            </div>
+            <label class="form-label"
+              style="font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px; display: block;">Nama Barang *</label>
             <div style="position: relative; display: flex; align-items: center;">
               <input type="text" id="detailInputName" class="form-control" placeholder="Ketik atau pilih nama barang..." required
                 oninput="handleDetailNameInput(this.value)" onfocus="handleDetailNameFocus()" maxlength="80"
-                autocomplete="off" style="font-size: 13px; font-weight: 700; height: 38px; padding-right: 38px; flex: 1;">
-              <button type="button" class="touch-target"
-                style="position: absolute; right: 4px; width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #E91E63; border-radius: 8px;"
-                onclick="openItemPickerModal()" title="Buka menu pemilihan barang">
-                ▼
+                autocomplete="off" style="font-size: 13px; font-weight: 700; height: 38px; padding-right: 40px; flex: 1;">
+              <button type="button" class="touch-target btn-item-catalog-trigger"
+                style="position: absolute; right: 4px; width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #E91E63; border-radius: 8px;"
+                onclick="openItemPickerModal()" title="Buka menu katalog rekomendasi barang">
+                📋
               </button>
             </div>
             <!-- Custom In-App Suggestion Dropdown (100% In-App, Anti-Browser Popup) -->
@@ -1053,10 +1045,10 @@
               ⚙️ Detail &amp; Diskon (Opsional)</summary>
             <div style="margin-top: 10px;">
               <!-- Kategori & Satuan Unit -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+              <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-bottom: 8px;">
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" style="font-size: 11px; white-space: nowrap;">Kategori</label>
-                  <select id="detailInputCategory" class="form-control" style="font-size: 11.5px; height: 34px; text-overflow: ellipsis; white-space: nowrap; padding-right: 18px;">
+                  <label class="form-label" style="font-size: 11px; white-space: nowrap; font-weight: 700;">Kategori</label>
+                  <select id="detailInputCategory" class="form-control" style="font-size: 12px; height: 36px; padding: 0 22px 0 8px; width: 100%;">
                     <option value="Bahan Pokok">Bahan Pokok</option>
                     <option value="Kebutuhan Pokok">Kebutuhan Pokok</option>
                     <option value="Peralatan">Peralatan</option>
@@ -1069,8 +1061,8 @@
                   </select>
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" style="font-size: 11px; white-space: nowrap;">Satuan Unit *</label>
-                  <select id="detailInputUnit" class="form-control" style="font-size: 11.5px; height: 34px; padding-right: 18px;">
+                  <label class="form-label" style="font-size: 11px; white-space: nowrap; font-weight: 700;">Satuan Unit *</label>
+                  <select id="detailInputUnit" class="form-control" style="font-size: 12px; height: 36px; padding: 0 22px 0 8px; width: 100%;">
                     <option value="pcs">pcs</option>
                     <option value="liter">liter</option>
                     <option value="karung/5kg">karung/5kg</option>
@@ -1107,14 +1099,17 @@
                   <button type="button" class="discount-chip frequent-chip promo-highlight" data-type="tiered"
                     data-val="30+20" onclick="setDetailDiscountPreset('tiered', '30+20', this)">30%+20%</button>
                 </div>
-                <div style="display: flex; gap: 6px; align-items: center;">
+                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
                   <input type="text" id="detailInputDiscountValue" class="form-control"
-                    placeholder="Contoh: 25% atau 50+20"
-                    style="font-weight: 700; font-size: 12px; height: 34px; flex: 1; min-width: 0;"
+                    placeholder="Ketik diskon persen / bertingkat..."
+                    style="font-weight: 700; font-size: 12px; height: 36px; flex: 1; min-width: 0;"
                     oninput="handleDetailDiscountInput(this.value)">
-                  <button type="button" class="btn-demo-quick"
-                    style="margin: 0; padding: 6px 12px; font-size: 0.72rem; white-space: nowrap; flex-shrink: 0;"
-                    onclick="setDetailDiscountPreset('none', '')">Hapus</button>
+                  <button type="button" class="btn-reset-discount touch-target"
+                    onclick="setDetailDiscountPreset('none', '')"
+                    title="Hapus / Reset Diskon">
+                    <span>🗑️</span>
+                    <span>Hapus</span>
+                  </button>
                 </div>
               </div>
 
@@ -1523,13 +1518,13 @@
 
           <div class="form-group" style="margin-bottom: 12px;">
             <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Pilihan Cepat Nominal:</label>
-            <div class="quick-budget-presets" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(50000)">50k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(100000)">100k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(150000)">150k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(200000)">200k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(350000)">350k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000" style="padding: 4px 10px; font-size: 0.74rem;" onclick="setModalQuickBudget(500000)">500k</button>
+            <div class="quick-budget-presets" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000" onclick="setModalQuickBudget(50000)">50k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000" onclick="setModalQuickBudget(100000)">100k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000" onclick="setModalQuickBudget(150000)">150k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000" onclick="setModalQuickBudget(200000)">200k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000" onclick="setModalQuickBudget(350000)">350k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000" onclick="setModalQuickBudget(500000)">500k</button>
             </div>
           </div>
 
@@ -2344,7 +2339,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=130"></script>
+  <script src="./js/app.js?v=131"></script>
 
   <!-- Service Worker Registration -->
   <script>
