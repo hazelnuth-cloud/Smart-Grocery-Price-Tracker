@@ -2588,6 +2588,24 @@ body.theme-dark .fluctuation-stable {
   transform: scale(0.98);
 }
 
+/* Pulsing highlight for Google button when manual password is tried on Google accounts */
+.btn-google-auth.pulse-highlight {
+  animation: googlePulseGlow 1.5s ease-in-out infinite !important;
+  border-color: #4285F4 !important;
+  box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.45) !important;
+}
+
+@keyframes googlePulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.35);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 7px rgba(66, 133, 244, 0.65);
+  }
+}
+
 .auth-segmented-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3698,6 +3716,7 @@ body.layout-mode-mobile .app-viewport {
     border-left: 1px solid rgba(251, 207, 232, 0.5);
     border-right: 1px solid rgba(251, 207, 232, 0.5);
   }
+
   body.layout-mode-mobile {
     background: #FDF2F8;
     background-image: radial-gradient(#FBCFE8 1.2px, transparent 1.2px);
@@ -9708,17 +9727,7 @@ body.theme-dark .sticky-saldo-mini-bar.danger {
 }
 
 #miniSaldoBadge {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  flex-shrink: 1 !important;
-  max-width: 90px !important;
-}
-
-@media (max-width: 480px) {
-  #miniSaldoBadge {
-    display: none !important;
-  }
+  display: none !important;
 }
 
 .mini-bar-icon {
@@ -10170,7 +10179,8 @@ body.dark-mode .tracker-overbudget-note {
   transform: translateY(-0.5px) !important;
 }
 
-body.dark-mode .tracker-budget-btn {
+body.dark-mode .tracker-budget-btn,
+body.theme-dark .tracker-budget-btn {
   color: #F472B6 !important;
   background: rgba(233, 30, 99, 0.18) !important;
   border-color: rgba(233, 30, 99, 0.35) !important;
@@ -11152,9 +11162,9 @@ body.theme-dark .shopee-stepper input {
 /* Modals (Clean, Deep Dark Backdrop & Card) */
 body.dark-mode .modal-backdrop,
 body.theme-dark .modal-backdrop {
-background: rgba(10, 3, 8, 0.82) !important;
-backdrop-filter: blur(8px) !important;
--webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(10, 3, 8, 0.82) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 body.dark-mode .modal-card,
@@ -12010,6 +12020,7 @@ body.theme-dark .btn-pwa-dismiss:hover {
 
 /* Full-width canvas on mobile devices - zero white strips on right/left edges */
 @media (max-width: 639px) {
+
   html,
   body,
   #appContainer,

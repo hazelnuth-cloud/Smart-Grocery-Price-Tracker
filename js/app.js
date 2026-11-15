@@ -1683,6 +1683,31 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
     }, { merge: true }).catch(err => console.info('Firestore profile sync notice:', err));
   }
 
+  // Backup profile to Local Registry registered_users
+  if (u.email) {
+    try {
+      const regUsers = getRegisteredUsers();
+      const cleanMail = u.email.toLowerCase().trim();
+      const existingIdx = regUsers.findIndex(usr => usr.email && usr.email.toLowerCase() === cleanMail);
+      const userProfileEntry = {
+        name: displayName,
+        email: cleanMail,
+        uid: uid,
+        photoURL: photoURL,
+        authProvider: cleanProvider,
+        lastLogin: new Date().toISOString()
+      };
+      if (existingIdx >= 0) {
+        regUsers[existingIdx] = { ...regUsers[existingIdx], ...userProfileEntry };
+      } else {
+        regUsers.push(userProfileEntry);
+      }
+      saveRegisteredUsers(regUsers);
+    } catch (regErr) {
+      console.warn('Local registered_users save notice:', regErr);
+    }
+  }
+
   // Check if this is a first-time local login for this user UID
   const isExistingLocalUser = !!localStorage.getItem('grocery_cart_' + uid);
   const isInitialized = localStorage.getItem('grocery_user_initialized_' + uid) === 'true';
@@ -2157,6 +2182,64 @@ async function syncLocalAccountsToCloud() {
   }
 }
 
+/**
+ * Validasi Format Alamat Email Standar RFC 5322 dengan Cek Domain & TLD Aktif
+ * Mencegah email asal-asalan / tidak valid digunakan untuk pendaftaran dan login.
+ * @param {string} email
+ * @returns {boolean}
+ */
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const trimmed = email.trim().toLowerCase();
+  if (trimmed.length < 6 || trimmed.length > 254) return false;
+
+  // Cek struktur dasar: local-part @ domain-part
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  if (!emailRegex.test(trimmed)) return false;
+
+  // Tolak titik berturutan atau di samping @
+  if (trimmed.includes('..') || trimmed.includes('@.') || trimmed.includes('.@')) return false;
+
+  const parts = trimmed.split('@');
+  if (parts.length !== 2) return false;
+
+  const [localPart, domain] = parts;
+  if (!localPart || !domain || localPart.length > 64) return false;
+
+  const domainParts = domain.split('.');
+  if (domainParts.length < 2) return false;
+
+  // Pastikan Top-Level Domain (TLD) minimal 2 karakter alfabet murni (misal: .com, .id, .sch.id, .org, .net, dll.)
+  const tld = domainParts[domainParts.length - 1];
+  if (tld.length < 2 || !/^[a-z]+$/.test(tld)) return false;
+
+  // Setiap segmen domain tidak boleh kosong, tidak boleh diawali atau diakhiri strip '-'
+  for (const seg of domainParts) {
+    if (!seg || seg.startsWith('-') || seg.endsWith('-')) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Soroti tombol Google Sign In dengan animasi berdenyut agar pengguna langsung tahu
+ * akun mereka harus masuk via Google, bukan ketik manual kata sandi.
+ */
+function highlightGoogleButton() {
+  const googleBtn = document.getElementById('btnGoogleAuth') || document.querySelector('.btn-google-auth');
+  if (googleBtn) {
+    googleBtn.classList.remove('pulse-highlight');
+    void googleBtn.offsetWidth;
+    googleBtn.classList.add('pulse-highlight');
+    try {
+      googleBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) { }
+    setTimeout(() => {
+      if (googleBtn) googleBtn.classList.remove('pulse-highlight');
+    }, 4500);
+  }
+}
+
 async function handleAuthSubmit(e) {
   e.preventDefault();
   clearAuthAlert();
@@ -2172,6 +2255,16 @@ async function handleAuthSubmit(e) {
   if (!email || !pass) {
     setAuthAlert('Harap isi alamat email dan kata sandi!', 'warning');
     showToast('Harap isi email dan kata sandi!', 'warning');
+    return;
+  }
+
+  // Validasi format email secara ketat (mencegah email ngasal)
+  if (!isValidEmail(email)) {
+    setAuthAlert('Format email tidak valid! Harap gunakan alamat email aktif yang benar (contoh: nama@gmail.com).', 'warning');
+    showToast('Format email tidak valid!', 'warning');
+    if (emailInput) {
+      emailInput.focus();
+    }
     return;
   }
 
@@ -2195,15 +2288,21 @@ async function handleAuthSubmit(e) {
 
     // 1. Cek duplikasi lokal
     const users = getRegisteredUsers();
-    const existingLocal = users.find(u => u.email.toLowerCase() === email);
+    const existingLocal = users.find(u => u.email && u.email.toLowerCase() === email);
     if (existingLocal) {
-      setAuthAlert(`Email "${email}" sudah terdaftar! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
-      showToast('Email sudah terdaftar, silakan Masuk', 'warning');
-      switchAuthMode('signin');
-      if (emailInput) emailInput.value = email;
-      if (passInput) {
-        passInput.value = '';
-        passInput.focus();
+      if (existingLocal.authProvider === 'google' || !existingLocal.password) {
+        setAuthAlert(`Email "${email}" sudah terdaftar menggunakan Akun Google. Harap masuk menggunakan tombol "Lanjutkan dengan Google" di atas!`, 'warning');
+        showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
+        highlightGoogleButton();
+      } else {
+        setAuthAlert(`Email "${email}" sudah terdaftar! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
+        showToast('Email sudah terdaftar, silakan Masuk', 'warning');
+        switchAuthMode('signin');
+        if (emailInput) emailInput.value = email;
+        if (passInput) {
+          passInput.value = '';
+          passInput.focus();
+        }
       }
       return;
     }
@@ -2213,13 +2312,20 @@ async function handleAuthSubmit(e) {
       try {
         const docSnap = await firestoreDb.collection('registered_accounts').doc(cleanEmail).get();
         if (docSnap.exists) {
-          setAuthAlert(`Email "${email}" sudah terdaftar di Cloud! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
-          showToast('Email sudah terdaftar, silakan Masuk', 'warning');
-          switchAuthMode('signin');
-          if (emailInput) emailInput.value = email;
-          if (passInput) {
-            passInput.value = '';
-            passInput.focus();
+          const remoteUser = docSnap.data();
+          if (remoteUser && (remoteUser.authProvider === 'google' || !remoteUser.password)) {
+            setAuthAlert(`Email "${email}" sudah terdaftar di Cloud menggunakan Akun Google. Harap masuk menggunakan tombol "Lanjutkan dengan Google" di atas!`, 'warning');
+            showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
+            highlightGoogleButton();
+          } else {
+            setAuthAlert(`Email "${email}" sudah terdaftar di Cloud! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
+            showToast('Email sudah terdaftar, silakan Masuk', 'warning');
+            switchAuthMode('signin');
+            if (emailInput) emailInput.value = email;
+            if (passInput) {
+              passInput.value = '';
+              passInput.focus();
+            }
           }
           return;
         }
@@ -2323,6 +2429,7 @@ async function handleAuthSubmit(e) {
     // ---------------------------------------------------------------------
     let isLive = false;
     let fbUser = null;
+    let fbErrorCode = null;
 
     // 1. Coba login via Firebase Authentication (Server Resmi)
     if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -2333,16 +2440,14 @@ async function handleAuthSubmit(e) {
           fbUser = cred.user;
         }
       } catch (fbErr) {
+        fbErrorCode = fbErr.code;
         console.info('Firebase Auth signin note:', fbErr.code || fbErr.message);
-        // Catatan: Jangan langsung return di sini jika auth/wrong-password,
-        // agar pengguna yang baru saja memulihkan kata sandi via kode verifikasi in-app
-        // tetap dapat divalidasi dan masuk menggunakan data akun terbarunya!
       }
     }
 
     // 2. Cek di registri lokal (localStorage)
     const users = getRegisteredUsers();
-    let foundUser = users.find(u => u.email.toLowerCase() === email);
+    let foundUser = users.find(u => u.email && u.email.toLowerCase() === email);
 
     // 3. Jika belum ada di lokal (misal baru buka di laptop), ambil dari Cloud Firestore!
     if (!foundUser && firestoreDb) {
@@ -2363,10 +2468,20 @@ async function handleAuthSubmit(e) {
       }
     }
 
+    // 4. Validasi Akun Google vs Akun Email/Password Manual
     if (foundUser) {
-      // Validasi kata sandi
-      if (foundUser.password && foundUser.password !== pass) {
-        setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan coba lagi!', 'danger');
+      // PERLINDUNGAN UTAMA: Jika akun terdaftar via Google (tidak memiliki password manual lokal/server)
+      if (foundUser.authProvider === 'google' || !foundUser.password) {
+        setAuthAlert(`Email "${email}" terdaftar menggunakan Akun Google. Harap masuk dengan mengetuk tombol "Lanjutkan dengan Google" di atas!`, 'warning');
+        showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
+        highlightGoogleButton();
+        if (passInput) passInput.value = '';
+        return;
+      }
+
+      // Validasi kata sandi untuk akun email/password biasa
+      if (foundUser.password !== pass) {
+        setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan periksa kembali kata sandi Anda!', 'danger');
         showToast('Kata sandi salah!', 'danger');
         if (passInput) {
           passInput.value = '';
@@ -2375,7 +2490,7 @@ async function handleAuthSubmit(e) {
         return;
       }
 
-      // Jika belum aktif di Firebase Auth, daftarkan secara seamless
+      // Jika belum aktif di Firebase Auth, sinkronkan secara seamless
       if (!isLive && typeof firebase !== 'undefined' && firebase.auth && pass && pass.length >= 6) {
         try {
           const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
@@ -2407,6 +2522,17 @@ async function handleAuthSubmit(e) {
       checkAuth();
       setupFirestoreListener();
       showToast(`Selamat datang kembali, ${foundUser.name}! ✨`, 'success');
+      return;
+    }
+
+    // Jika kata sandi salah dari Firebase Auth
+    if (fbErrorCode === 'auth/wrong-password' || fbErrorCode === 'auth/invalid-credential') {
+      setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan periksa kembali kata sandi Anda!', 'danger');
+      showToast('Kata sandi salah!', 'danger');
+      if (passInput) {
+        passInput.value = '';
+        passInput.focus();
+      }
       return;
     }
 
@@ -3116,7 +3242,7 @@ function renderBudget() {
     }
   }
 
-  // Mini Sticky Saldo Bar & Dismissed States Updates
+  // Mini Sticky Saldo Bar & Dismissed States Updates (Strictly Mutually Exclusive)
   const miniBar = document.getElementById('stickySaldoMiniBar');
   const miniSaldoAmount = document.getElementById('miniSaldoAmount');
   const miniSaldoLabel = document.getElementById('miniSaldoLabel');
@@ -3152,6 +3278,7 @@ function renderBudget() {
   }
 
   // Handle visibility according to AppState.stickySaldoDismissed ('open' / false, 'mini', 'hidden')
+  // Guaranteed: Mini bar and Full card are NEVER visible at the same time
   const dismissedState = AppState.stickySaldoDismissed;
   if (safety.level === 'danger' && dismissedState === 'hidden') {
     // If overbudget occurred while completely hidden, wake up mini bar so user sees alert
@@ -3197,7 +3324,7 @@ function renderBudget() {
     // Fully open (default)
     if (plannerAlert) {
       plannerAlert.classList.remove('is-hidden');
-      plannerAlert.style.removeProperty('display');
+      plannerAlert.style.setProperty('display', 'flex', 'important');
     }
     if (miniBar) {
       miniBar.classList.remove('is-visible');
