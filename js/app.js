@@ -2998,6 +2998,326 @@ function selectStoreFromPicker(storeName) {
   closeStorePickerModal();
 }
 
+// =========================================================================
+// CUSTOM IN-APP ITEM PICKER MODAL & AUTOCOMPLETE (IDENTIK DENGAN STORE PICKER)
+// =========================================================================
+function getAllItemOptions() {
+  const itemMap = new Map();
+
+  // 1. Dari PRODUCT_CATALOG
+  if (typeof PRODUCT_CATALOG !== 'undefined' && Array.isArray(PRODUCT_CATALOG)) {
+    PRODUCT_CATALOG.forEach(p => {
+      if (p.name) {
+        itemMap.set(p.name.toLowerCase(), {
+          name: p.name,
+          icon: p.icon || '🛒',
+          category: p.aisle || p.category || 'Bahan Pokok',
+          unit: p.unit || 'pcs',
+          price: p.price || 0,
+          tag: 'Katalog Pilihan'
+        });
+      }
+    });
+  }
+
+  // 2. Dari DEFAULT_ROUTINE_ITEMS
+  if (typeof DEFAULT_ROUTINE_ITEMS !== 'undefined' && Array.isArray(DEFAULT_ROUTINE_ITEMS)) {
+    DEFAULT_ROUTINE_ITEMS.forEach(r => {
+      const key = (r.namaBarang || r.name || '').toLowerCase();
+      if (key && !itemMap.has(key)) {
+        itemMap.set(key, {
+          name: r.namaBarang || r.name,
+          icon: '🔁',
+          category: r.kategori || 'Bahan Pokok',
+          unit: r.satuan || 'pcs',
+          price: r.hargaSatuan || 0,
+          tag: 'Rutin Harian'
+        });
+      }
+    });
+  }
+
+  // 3. Dari AppState.priceHistory (Riwayat Belanja Pengguna)
+  if (AppState && AppState.priceHistory && typeof AppState.priceHistory === 'object') {
+    Object.keys(AppState.priceHistory).forEach(name => {
+      const hist = AppState.priceHistory[name];
+      const key = name.toLowerCase();
+      if (key && !itemMap.has(key)) {
+        itemMap.set(key, {
+          name: name,
+          icon: '🧾',
+          category: (hist && hist.kategori) || 'Bahan Pokok',
+          unit: (hist && hist.satuan) || 'pcs',
+          price: (hist && hist.harga) || 0,
+          tag: 'Riwayat Toko'
+        });
+      }
+    });
+  }
+
+  // 4. Preset tambahan bawaan yang populer
+  const defaultPresets = [
+    { name: 'Beras Rojolele', icon: '🌾', category: 'Bahan Pokok', unit: 'karung/5kg', price: 74000, tag: 'Bahan Pokok' },
+    { name: 'Minyak Goreng 2L', icon: '🍳', category: 'Bahan Pokok', unit: 'pouch/2L', price: 38000, tag: 'Bahan Pokok' },
+    { name: 'Telur 1kg', icon: '🥚', category: 'Bahan Pokok', unit: 'kg', price: 28000, tag: 'Bahan Pokok' },
+    { name: 'Garam 500g', icon: '🧂', category: 'Pantry', unit: 'pcs', price: 5000, tag: 'Bumbu Dapur' },
+    { name: 'Wajan', icon: '🍳', category: 'Peralatan', unit: 'pcs', price: 65000, tag: 'Peralatan Dapur' },
+    { name: 'Sabun Cuci', icon: '🧼', category: 'Kebersihan & Rumah', unit: 'pcs', price: 15000, tag: 'Kebersihan' },
+    { name: 'Minyak Goreng', icon: '🍳', category: 'Bahan Pokok', unit: 'liter', price: 18000, tag: 'Bahan Pokok' },
+    { name: 'Beras 5kg', icon: '🌾', category: 'Bahan Pokok', unit: 'karung/5kg', price: 60000, tag: 'Bahan Pokok' },
+    { name: 'Sabun Mandi', icon: '🧼', category: 'Perlengkapan Mandi', unit: 'pcs', price: 8000, tag: 'Mandi' },
+    { name: 'Telur Ayam 1kg', icon: '🥚', category: 'Bahan Pokok', unit: 'kg', price: 28000, tag: 'Bahan Pokok' },
+    { name: 'Susu UHT 1L', icon: '🥛', category: 'Dairy', unit: 'karton', price: 19500, tag: 'Minuman' },
+    { name: 'Mi Instan Dus', icon: '🍜', category: 'Makanan', unit: 'dus', price: 115000, tag: 'Sembako' },
+    { name: 'Tepung Terigu', icon: '🍞', category: 'Pantry', unit: 'kg', price: 13000, tag: 'Bahan Pokok' }
+  ];
+
+  defaultPresets.forEach(dp => {
+    const key = dp.name.toLowerCase();
+    if (!itemMap.has(key)) {
+      itemMap.set(key, dp);
+    }
+  });
+
+  return Array.from(itemMap.values());
+}
+
+function openItemPickerModal() {
+  const modal = document.getElementById('itemPickerModal');
+  const searchInput = document.getElementById('itemPickerSearchInput');
+  const customInput = document.getElementById('itemPickerCustomInput');
+  if (searchInput) searchInput.value = '';
+  if (customInput) customInput.value = '';
+
+  renderItemPickerList('');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('active', 'show');
+  }
+  if (searchInput) {
+    setTimeout(() => searchInput.focus(), 150);
+  }
+}
+
+function closeItemPickerModal() {
+  const modal = document.getElementById('itemPickerModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active', 'show');
+  }
+}
+
+function renderItemPickerList(query = '') {
+  const container = document.getElementById('itemPickerList');
+  const countBadge = document.getElementById('itemPickerCountBadge');
+  if (!container) return;
+
+  const q = (query || '').trim().toLowerCase();
+  const allItems = getAllItemOptions();
+
+  let filtered = allItems;
+  if (q) {
+    filtered = allItems.filter(item =>
+      item.name.toLowerCase().includes(q) ||
+      (item.category && item.category.toLowerCase().includes(q)) ||
+      (item.tag && item.tag.toLowerCase().includes(q))
+    );
+  }
+
+  if (countBadge) {
+    countBadge.textContent = `${filtered.length} opsi`;
+  }
+
+  let html = '';
+
+  // Jika pencarian tidak ada di daftar, tampilkan opsi 1-tap "Gunakan [Nama Baru]"
+  if (q && !filtered.some(i => i.name.toLowerCase() === q)) {
+    const rawVal = query.trim();
+    html += `
+      <div class="store-picker-item store-picker-item-new" onclick="selectItemFromPicker('${escapeHtml(rawVal)}')">
+        <div class="store-picker-item-left">
+          <div class="store-picker-item-icon">➕</div>
+          <div class="store-picker-item-info">
+            <span class="store-picker-item-name">Gunakan "${escapeHtml(rawVal)}"</span>
+            <span class="store-picker-item-desc">Pilih sebagai nama barang baru</span>
+          </div>
+        </div>
+        <span class="store-picker-item-badge" style="background: #E8F5E9; color: #2E7D32; border-color: #C8E6C9;">Pilih ➔</span>
+      </div>
+    `;
+  }
+
+  if (filtered.length === 0 && !q) {
+    html = '<div style="text-align: center; padding: 20px; font-size: 0.8rem; color: #757575;">Belum ada opsi barang.</div>';
+  } else {
+    html += filtered.map(item => {
+      const currentVal = (document.getElementById('detailInputName') ? document.getElementById('detailInputName').value : '').trim().toLowerCase();
+      const isSelected = currentVal === item.name.toLowerCase();
+      const priceText = item.price > 0 ? formatRupiah(item.price) : '';
+
+      return `
+        <div class="store-picker-item ${isSelected ? 'active' : ''}" onclick="selectItemFromPicker('${escapeHtml(item.name)}')">
+          <div class="store-picker-item-left">
+            <div class="store-picker-item-icon">${item.icon || '🛒'}</div>
+            <div class="store-picker-item-info">
+              <span class="store-picker-item-name">${escapeHtml(item.name)}</span>
+              <span class="store-picker-item-desc">${escapeHtml(item.category || 'Bahan Pokok')}${item.unit ? ' • ' + escapeHtml(item.unit) : ''}</span>
+            </div>
+          </div>
+          ${priceText ? `<span class="store-picker-item-badge">${priceText}</span>` : `<span style="font-size: 14px; color: #94A3B8; margin-left: 8px;">➔</span>`}
+        </div>
+      `;
+    }).join('');
+  }
+
+  container.innerHTML = html;
+}
+
+function handleItemPickerSearch(val) {
+  renderItemPickerList(val);
+}
+
+function submitCustomItemPicker() {
+  const searchInput = document.getElementById('itemPickerSearchInput');
+  if (searchInput && searchInput.value.trim()) {
+    selectItemFromPicker(searchInput.value.trim());
+  }
+}
+
+function handleCustomItemPickerSubmit(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('itemPickerCustomInput');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) {
+    showToast('Ketik nama barang terlebih dahulu!', 'warning');
+    input.focus();
+    return;
+  }
+  selectItemFromPicker(val);
+}
+
+function selectItemFromPicker(itemName) {
+  if (!itemName) return;
+  const nameInput = document.getElementById('detailInputName');
+  if (nameInput) {
+    nameInput.value = itemName;
+  }
+
+  // Auto-populate kategori, satuan unit, dan harga jika tersedia di opsi/katalog
+  const allItems = getAllItemOptions();
+  const matched = allItems.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+  if (matched) {
+    const categoryEl = document.getElementById('detailInputCategory');
+    const unitEl = document.getElementById('detailInputUnit');
+    const priceEl = document.getElementById('detailInputPrice');
+
+    if (matched.category && categoryEl) {
+      for (let opt of categoryEl.options) {
+        if (opt.value.toLowerCase() === matched.category.toLowerCase() || matched.category.toLowerCase().includes(opt.value.toLowerCase())) {
+          categoryEl.value = opt.value;
+          break;
+        }
+      }
+    }
+    if (matched.unit && unitEl) {
+      for (let opt of unitEl.options) {
+        if (opt.value.toLowerCase() === matched.unit.toLowerCase()) {
+          unitEl.value = opt.value;
+          break;
+        }
+      }
+    }
+    if (matched.price > 0 && priceEl && (!priceEl.value || parseFloat(priceEl.value) === 0)) {
+      priceEl.value = matched.price;
+    }
+  }
+
+  handleDetailNameInput(itemName);
+  closeItemPickerModal();
+  hideCustomItemSuggestions();
+}
+
+function handleDetailNameFocus() {
+  const input = document.getElementById('detailInputName');
+  if (input && input.value.trim().length > 0) {
+    showCustomItemSuggestions(input.value);
+  }
+}
+
+function showCustomItemSuggestions(query = '') {
+  const dropdown = document.getElementById('customItemSuggestionsDropdown');
+  if (!dropdown) return;
+
+  const q = (query || '').trim().toLowerCase();
+  const allItems = getAllItemOptions();
+
+  let filtered = allItems;
+  if (q) {
+    filtered = allItems.filter(i => i.name.toLowerCase().includes(q) || (i.category && i.category.toLowerCase().includes(q)));
+  }
+
+  // Tampilkan maksimal 5 saran cepat
+  const topSuggestions = filtered.slice(0, 5);
+
+  if (topSuggestions.length === 0 && !q) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  let html = '';
+  if (topSuggestions.length === 0) {
+    html = `
+      <div style="padding: 10px; text-align: center; font-size: 11.5px; color: var(--text-subtle);">
+        Tidak ada rekomendasi yang persis.
+      </div>
+      <div class="custom-suggestion-more" onclick="openItemPickerModal()">
+        <span>🔍 Buka Menu Pemilihan Lengkap (Katalog) ➔</span>
+      </div>
+    `;
+  } else {
+    html = topSuggestions.map(item => `
+      <div class="custom-suggestion-item" onclick="selectItemFromPicker('${escapeHtml(item.name)}')">
+        <div class="custom-suggestion-item-left">
+          <div class="custom-suggestion-icon">${item.icon || '🛒'}</div>
+          <div class="custom-suggestion-info">
+            <span class="custom-suggestion-name">${escapeHtml(item.name)}</span>
+            <span class="custom-suggestion-desc">${escapeHtml(item.category || 'Bahan Pokok')}</span>
+          </div>
+        </div>
+        ${item.price > 0 ? `<span class="custom-suggestion-badge">${formatRupiah(item.price)}</span>` : '<span style="font-size: 11px; color: #94A3B8;">➔</span>'}
+      </div>
+    `).join('');
+
+    html += `
+      <div class="custom-suggestion-more" onclick="openItemPickerModal()">
+        <span>📋 Lihat Semua ${allItems.length} Pilihan Barang (Seperti Lokasi) ➔</span>
+      </div>
+    `;
+  }
+
+  dropdown.innerHTML = html;
+  dropdown.style.display = 'block';
+}
+
+function hideCustomItemSuggestions() {
+  const dropdown = document.getElementById('customItemSuggestionsDropdown');
+  if (dropdown) {
+    dropdown.style.display = 'none';
+  }
+}
+
+// Tutup dropdown in-app saat klik di luar
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('customItemSuggestionsDropdown');
+  const input = document.getElementById('detailInputName');
+  if (dropdown && dropdown.style.display !== 'none') {
+    if (!dropdown.contains(e.target) && e.target !== input) {
+      dropdown.style.display = 'none';
+    }
+  }
+});
+
 function renderSessionControls() {
   const storeSelect = document.getElementById('session-store-select');
   const storeDisplay = document.getElementById('session-store-display');
@@ -5113,6 +5433,8 @@ function closeDetailedItemModal() {
   if (modal) {
     modal.classList.remove('active', 'show');
   }
+  hideCustomItemSuggestions();
+  closeItemPickerModal();
   AppState.editingItemId = null;
 }
 
@@ -5280,8 +5602,12 @@ function adjustDetailModalQty(delta) {
 }
 
 function handleDetailNameInput(name) {
-  const trimmed = name.trim();
-  if (!trimmed) return;
+  const trimmed = (name || '').trim();
+  showCustomItemSuggestions(trimmed);
+  if (!trimmed) {
+    updateDetailModalPreview();
+    return;
+  }
   const history = AppState.priceHistory[trimmed];
   if (history) {
     if (history.harga && !document.getElementById('detailInputHistoryPrice').value) {

@@ -7289,6 +7289,159 @@ body.theme-dark .cart-store-change-hint {
 }
 
 /* ==========================================================================
+   CUSTOM IN-APP ITEM PICKER & SUGGESTIONS DROPDOWN (IDENTIK DENGAN STORE PICKER)
+   ========================================================================== */
+#itemPickerModal {
+  z-index: 10005 !important;
+}
+
+#itemPickerModal .store-picker-card {
+  z-index: 10006 !important;
+}
+
+.custom-suggestions-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  border: 1.5px solid #FCE7F3;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(233, 30, 99, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-height: 220px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 10002;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.custom-suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  gap: 8px;
+}
+
+.custom-suggestion-item:hover,
+.custom-suggestion-item.active {
+  background: #FDF2F8;
+  color: #BE185D;
+}
+
+.custom-suggestion-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.custom-suggestion-icon {
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFF1F5;
+  border-radius: 8px;
+  flex-shrink: 0;
+  border: 1px solid #FCE7F3;
+}
+
+.custom-suggestion-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.custom-suggestion-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1E293B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-suggestion-desc {
+  font-size: 10.5px;
+  color: #64748B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-suggestion-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #E91E63;
+  flex-shrink: 0;
+}
+
+.custom-suggestion-more {
+  border-top: 1px dashed #FCE7F3;
+  margin-top: 4px;
+  padding: 8px 6px 4px 6px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #E91E63;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.custom-suggestion-more:hover {
+  text-decoration: underline;
+}
+
+body.dark-mode .custom-suggestions-dropdown,
+body.theme-dark .custom-suggestions-dropdown {
+  background: #240F1B !important;
+  border-color: #4A1D36 !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode .custom-suggestion-item:hover,
+body.dark-mode .custom-suggestion-item.active,
+body.theme-dark .custom-suggestion-item:hover,
+body.theme-dark .custom-suggestion-item.active {
+  background: #3B162B !important;
+}
+
+body.dark-mode .custom-suggestion-name,
+body.theme-dark .custom-suggestion-name {
+  color: #FFF1F5 !important;
+}
+
+body.dark-mode .custom-suggestion-desc,
+body.theme-dark .custom-suggestion-desc {
+  color: #F472B6 !important;
+}
+
+body.dark-mode .custom-suggestion-icon,
+body.theme-dark .custom-suggestion-icon {
+  background: #1A0B14 !important;
+  border-color: #4A1D36 !important;
+}
+
+body.dark-mode .custom-suggestion-more,
+body.theme-dark .custom-suggestion-more {
+  border-top-color: #4A1D36 !important;
+  color: #F472B6 !important;
+}
+
+/* ==========================================================================
    MODERN STORE & DATE CARD (IN-APP STORE PICKER TRIGGER & SCHEDULE TILE)
    ========================================================================== */
 .modern-store-card {

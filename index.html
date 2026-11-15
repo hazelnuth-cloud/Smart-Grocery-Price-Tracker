@@ -1000,28 +1000,30 @@
         </div>
 
         <form id="detailedItemForm" novalidate onsubmit="handleDetailedItemFormSubmit(event)">
-          <!-- Baris 1: Nama Barang -->
-          <div class="form-group" style="margin-bottom: 10px;">
-            <label class="form-label"
-              style="font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Nama Barang *</label>
-            <input type="text" id="detailInputName" class="form-control" placeholder="Contoh: Minyak Goreng 2L" required
-              list="detail-item-suggestions" oninput="handleDetailNameInput(this.value)" maxlength="80"
-              autocomplete="off" style="font-size: 13px; font-weight: 700; height: 38px;">
-            <datalist id="detail-item-suggestions">
-              <option value="Beras Rojolele"></option>
-              <option value="Minyak Goreng 2L"></option>
-              <option value="Telur 1kg"></option>
-              <option value="Garam 500g"></option>
-              <option value="Wajan"></option>
-              <option value="Sabun Cuci"></option>
-              <option value="Minyak Goreng"></option>
-              <option value="Beras 5kg"></option>
-              <option value="Sabun Mandi"></option>
-              <option value="Telur Ayam 1kg"></option>
-              <option value="Susu UHT 1L"></option>
-              <option value="Mi Instan Dus"></option>
-              <option value="Tepung Terigu"></option>
-            </datalist>
+          <!-- Baris 1: Nama Barang (Dengan Fitur Pemilihan Opsi In-App Identik Lokasi) -->
+          <div class="form-group" style="margin-bottom: 10px; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
+              <label class="form-label"
+                style="font-size: 12px; font-weight: 700; color: #1E293B; margin: 0; white-space: nowrap;">Nama Barang *</label>
+              <button type="button" class="btn-demo-quick touch-target"
+                style="margin: 0; padding: 2px 10px; font-size: 11px; font-weight: 700; color: #E91E63; background: #FFF1F5; border: 1px solid #FBCFE8; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; height: 26px; cursor: pointer;"
+                onclick="openItemPickerModal()" title="Pilih opsi barang dari katalog rekomendasi seperti memilih lokasi">
+                <span>📋</span>
+                <span>Pilih Opsi</span>
+              </button>
+            </div>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="text" id="detailInputName" class="form-control" placeholder="Ketik atau pilih nama barang..." required
+                oninput="handleDetailNameInput(this.value)" onfocus="handleDetailNameFocus()" maxlength="80"
+                autocomplete="off" style="font-size: 13px; font-weight: 700; height: 38px; padding-right: 38px; flex: 1;">
+              <button type="button" class="touch-target"
+                style="position: absolute; right: 4px; width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #E91E63; border-radius: 8px;"
+                onclick="openItemPickerModal()" title="Buka menu pemilihan barang">
+                ▼
+              </button>
+            </div>
+            <!-- Custom In-App Suggestion Dropdown (100% In-App, Anti-Browser Popup) -->
+            <div id="customItemSuggestionsDropdown" class="custom-suggestions-dropdown" style="display: none;"></div>
           </div>
 
           <!-- Baris 2: Gaya Horizontal 1 Baris (Kiri Stepper Qty, Kanan Harga Satuan) -->
@@ -1324,6 +1326,59 @@
               placeholder="Contoh: Pasar Mayestik, Hero Pondok Indah" style="flex: 1;" maxlength="60">
             <button type="submit" class="btn-primary touch-target"
               style="width: auto; margin-top: 0; padding: 0 16px; font-size: 0.82rem; font-weight: 800;">
+              Gunakan
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================
+       MODAL: ITEM PICKER / KATALOG OPSI BARANG (IDENTIK DENGAN STORE PICKER)
+       ======================================================================== -->
+    <div id="itemPickerModal" class="modal-backdrop" style="display: none; z-index: 10005;" onclick="if(event.target===this)closeItemPickerModal()">
+      <div class="modal-card store-picker-card">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px; flex-shrink: 0;">🛒</span>
+            <div style="min-width: 0;">
+              <h3 class="serif-font" style="font-size: 1.1rem; color: #222222; margin: 0; line-height: 1.2; white-space: nowrap;">Pilih Opsi Barang</h3>
+              <p style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0; white-space: nowrap;">Pilih dari rekomendasi katalog atau riwayat belanja</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn touch-target" onclick="closeItemPickerModal()">&times;</button>
+        </div>
+
+        <!-- Quick Search / Filter Input -->
+        <div class="store-picker-search-wrap">
+          <span class="store-picker-search-icon">🔍</span>
+          <input type="text" id="itemPickerSearchInput" class="store-picker-search-input"
+            placeholder="Cari nama barang (misal: Minyak, Beras, Telur)..." oninput="handleItemPickerSearch(this.value)"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomItemPicker();}" autocomplete="off">
+        </div>
+
+        <!-- Section Title -->
+        <div class="store-picker-section-title"
+          style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
+          <span>Rekomendasi &amp; Riwayat Barang</span>
+          <span id="itemPickerCountBadge" style="font-size: 10px; color: #94A3B8; font-weight: 600;">Opsi Tersedia</span>
+        </div>
+        <div id="itemPickerList" class="store-picker-list">
+          <!-- Rendered dynamically via JS -->
+        </div>
+
+        <!-- Custom Item Input Section -->
+        <div class="store-picker-custom-section"
+          style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--pastel-light-2);">
+          <div
+            style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+            ➕ Ketik Nama Barang Baru
+          </div>
+          <form onsubmit="handleCustomItemPickerSubmit(event)" style="display: flex; gap: 8px;">
+            <input type="text" id="itemPickerCustomInput" class="form-control"
+              placeholder="Contoh: Saus Tiram 270ml, Sabun Cuci..." style="flex: 1;" maxlength="80">
+            <button type="submit" class="btn-primary touch-target"
+              style="width: auto; margin-top: 0; padding: 0 16px; font-size: 0.82rem; font-weight: 800; white-space: nowrap;">
               Gunakan
             </button>
           </form>
@@ -2287,7 +2342,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=127"></script>
+  <script src="./js/app.js?v=128"></script>
 
   <!-- Service Worker Registration -->
   <script>
