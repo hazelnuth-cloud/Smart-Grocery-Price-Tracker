@@ -3110,6 +3110,9 @@ function closeItemPickerModal() {
 function renderItemPickerList(query = '') {
   const container = document.getElementById('itemPickerList');
   const countBadge = document.getElementById('itemPickerCountBadge');
+  if (countBadge) {
+    countBadge.remove(); // Hapus badge count agar tidak memotong teks dan tidak memenuhi baris
+  }
   if (!container) return;
 
   const q = (query || '').trim().toLowerCase();
@@ -3124,31 +3127,24 @@ function renderItemPickerList(query = '') {
     );
   }
 
-  if (countBadge) {
-    countBadge.textContent = `${filtered.length} opsi`;
-  }
-
   let html = '';
 
   // Jika pencarian tidak ada di daftar, tampilkan opsi 1-tap "Gunakan [Nama Baru]"
   if (q && !filtered.some(i => i.name.toLowerCase() === q)) {
     const rawVal = query.trim();
     html += `
-      <div class="store-picker-item store-picker-item-new" onclick="selectItemFromPicker('${escapeHtml(rawVal)}')">
-        <div class="store-picker-item-left">
-          <div class="store-picker-item-icon">➕</div>
-          <div class="store-picker-item-info">
-            <span class="store-picker-item-name">Gunakan "${escapeHtml(rawVal)}"</span>
-            <span class="store-picker-item-desc">Pilih sebagai nama barang baru</span>
-          </div>
+      <div class="store-picker-item store-picker-item-new item-picker-clean-row" onclick="selectItemFromPicker('${escapeHtml(rawVal)}')">
+        <div class="store-picker-item-info" style="flex: 1; min-width: 0; text-align: left;">
+          <div class="store-picker-item-name" style="font-size: 13.5px; font-weight: 700; line-height: 1.3; margin-bottom: 2px;">Gunakan "${escapeHtml(rawVal)}"</div>
+          <div class="store-picker-item-desc" style="font-size: 11.5px; line-height: 1.25;">Pilih sebagai nama barang baru</div>
         </div>
-        <span class="store-picker-item-badge" style="background: #E8F5E9; color: #2E7D32; border-color: #C8E6C9;">Pilih ➔</span>
+        <span class="store-picker-item-badge" style="background: #E8F5E9; color: #2E7D32; border-color: #C8E6C9; flex-shrink: 0; margin-left: 10px;">Pilih ➔</span>
       </div>
     `;
   }
 
   if (filtered.length === 0 && !q) {
-    html = '<div style="text-align: center; padding: 20px; font-size: 0.8rem; color: #757575;">Belum ada opsi barang.</div>';
+    html = '<div style="text-align: center; padding: 20px; font-size: 0.8rem; color: var(--text-subtle);">Belum ada opsi barang.</div>';
   } else {
     html += filtered.map(item => {
       const currentVal = (document.getElementById('detailInputName') ? document.getElementById('detailInputName').value : '').trim().toLowerCase();
@@ -3156,15 +3152,12 @@ function renderItemPickerList(query = '') {
       const priceText = item.price > 0 ? formatRupiah(item.price) : '';
 
       return `
-        <div class="store-picker-item ${isSelected ? 'active' : ''}" onclick="selectItemFromPicker('${escapeHtml(item.name)}')">
-          <div class="store-picker-item-left">
-            <div class="store-picker-item-icon">${item.icon || '🛒'}</div>
-            <div class="store-picker-item-info">
-              <span class="store-picker-item-name">${escapeHtml(item.name)}</span>
-              <span class="store-picker-item-desc">${escapeHtml(item.category || 'Bahan Pokok')}${item.unit ? ' • ' + escapeHtml(item.unit) : ''}</span>
-            </div>
+        <div class="store-picker-item item-picker-clean-row ${isSelected ? 'active' : ''}" onclick="selectItemFromPicker('${escapeHtml(item.name)}')">
+          <div class="store-picker-item-info" style="flex: 1; min-width: 0; text-align: left;">
+            <div class="store-picker-item-name" style="font-size: 13.5px; font-weight: 700; line-height: 1.3; margin-bottom: 2px;">${escapeHtml(item.name)}</div>
+            <div class="store-picker-item-desc" style="font-size: 11.5px; line-height: 1.25;">${escapeHtml(item.category || 'Bahan Pokok')}${item.unit ? ' • ' + escapeHtml(item.unit) : ''}</div>
           </div>
-          ${priceText ? `<span class="store-picker-item-badge">${priceText}</span>` : `<span style="font-size: 14px; color: #94A3B8; margin-left: 8px;">➔</span>`}
+          ${priceText ? `<span class="store-picker-item-badge" style="flex-shrink: 0; margin-left: 10px;">${priceText}</span>` : `<span class="store-picker-item-arrow" style="font-size: 14px; color: #94A3B8; margin-left: 8px; flex-shrink: 0;">➔</span>`}
         </div>
       `;
     }).join('');
@@ -3278,8 +3271,7 @@ function showCustomItemSuggestions(query = '') {
   } else {
     html = topSuggestions.map(item => `
       <div class="custom-suggestion-item" onclick="selectItemFromPicker('${escapeHtml(item.name)}')">
-        <div class="custom-suggestion-item-left">
-          <div class="custom-suggestion-icon">${item.icon || '🛒'}</div>
+        <div class="custom-suggestion-item-left" style="flex: 1; min-width: 0;">
           <div class="custom-suggestion-info">
             <span class="custom-suggestion-name">${escapeHtml(item.name)}</span>
             <span class="custom-suggestion-desc">${escapeHtml(item.category || 'Bahan Pokok')}</span>
@@ -7541,32 +7533,45 @@ function showToast(message, type = 'info') {
   // Bersihkan emoji di awal teks pesan agar tidak terjadi ikon ganda dengan ikon bawaan toast
   const cleanMessage = (message || '').replace(/^([\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}]+\s*)+/u, '').trim();
 
-  // Pecah pesan menjadi 2 baris bertingkat sengaja jika memuat tanda seru (!), titik dua (:), atau teks panjang
+  // Pecah pesan menjadi 2 baris bertingkat hanya jika memuat titik dua (:) atau kalimat kedua nyata
+  // (BUKAN sekadar emoji seperti ✨ atau tanda baca pendek)
+  const isMeaningfulText = (t) => {
+    if (!t) return false;
+    const stripped = t.replace(/[\p{Emoji}\p{P}\s]/gu, '');
+    return stripped.length >= 4;
+  };
+
   let contentHtml = '';
-  if (cleanMessage.includes('!') && cleanMessage.length > 25) {
-    const exclIdx = cleanMessage.indexOf('!');
-    const titlePart = cleanMessage.substring(0, exclIdx + 1).trim();
-    const descPart = cleanMessage.substring(exclIdx + 1).trim();
-    contentHtml = `
-      <div class="toast-stacked-wrap">
-        <div class="toast-title">${escapeHtml(titlePart)}</div>
-        ${descPart ? `<div class="toast-desc">${escapeHtml(descPart)}</div>` : ''}
-      </div>
-    `;
-  } else if (cleanMessage.includes(':')) {
+  if (cleanMessage.includes(':')) {
     const colonIdx = cleanMessage.indexOf(':');
     const titlePart = cleanMessage.substring(0, colonIdx).trim();
     const descPart = cleanMessage.substring(colonIdx + 1).trim();
+    if (isMeaningfulText(descPart)) {
+      contentHtml = `
+        <div class="toast-stacked-wrap">
+          <div class="toast-title">${escapeHtml(titlePart)}</div>
+          <div class="toast-desc">${escapeHtml(descPart)}</div>
+        </div>
+      `;
+    }
+  } else if (cleanMessage.includes('!') && cleanMessage.length > 40) {
+    const exclIdx = cleanMessage.indexOf('!');
+    const titlePart = cleanMessage.substring(0, exclIdx + 1).trim();
+    const descPart = cleanMessage.substring(exclIdx + 1).trim();
+    if (isMeaningfulText(descPart)) {
+      contentHtml = `
+        <div class="toast-stacked-wrap">
+          <div class="toast-title">${escapeHtml(titlePart)}</div>
+          <div class="toast-desc">${escapeHtml(descPart)}</div>
+        </div>
+      `;
+    }
+  }
+
+  if (!contentHtml) {
     contentHtml = `
       <div class="toast-stacked-wrap">
-        <div class="toast-title">${escapeHtml(titlePart)}</div>
-        ${descPart ? `<div class="toast-desc">${escapeHtml(descPart)}</div>` : ''}
-      </div>
-    `;
-  } else {
-    contentHtml = `
-      <div class="toast-stacked-wrap">
-        <div class="toast-desc single-flow">${escapeHtml(cleanMessage)}</div>
+        <div class="toast-desc single-flow" style="margin: 0; line-height: 1.35; font-size: 13px; font-weight: 600; color: #FFFFFF;">${escapeHtml(cleanMessage)}</div>
       </div>
     `;
   }

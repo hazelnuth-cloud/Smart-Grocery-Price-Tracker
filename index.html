@@ -68,8 +68,10 @@
 
         <!-- Segmented Tab: Masuk (Sign In) vs Daftar (Sign Up) -->
         <div class="auth-segmented-tabs">
-          <button type="button" id="tabAuthSignIn" class="auth-tab-btn active" onclick="switchAuthMode('signin')">Masuk (Sign In)</button>
-          <button type="button" id="tabAuthSignUp" class="auth-tab-btn" onclick="switchAuthMode('signup')">Daftar (Sign Up)</button>
+          <button type="button" id="tabAuthSignIn" class="auth-tab-btn active" onclick="switchAuthMode('signin')">Masuk
+            (Sign In)</button>
+          <button type="button" id="tabAuthSignUp" class="auth-tab-btn" onclick="switchAuthMode('signup')">Daftar (Sign
+            Up)</button>
         </div>
 
         <!-- Google Sign In Button -->
@@ -223,8 +225,10 @@
             </div>
             <div style="text-align: right; flex-shrink: 0;">
               <span id="budgetLiveValueDisplay" class="price-tag"
-                style="font-size: clamp(0.95rem, 3.5vw, 1.15rem); font-weight: 900; color: #E91E63; white-space: nowrap;">Rp 100.000</span>
-              <div style="font-size: 0.65rem; color: var(--text-faint); font-weight: 700; white-space: nowrap;">Batas Anggaran</div>
+                style="font-size: clamp(0.95rem, 3.5vw, 1.15rem); font-weight: 900; color: #E91E63; white-space: nowrap;">Rp
+                100.000</span>
+              <div style="font-size: 0.65rem; color: var(--text-faint); font-weight: 700; white-space: nowrap;">Batas
+                Anggaran</div>
             </div>
           </div>
 
@@ -263,13 +267,17 @@
             <div class="metric-box">
               <span class="metric-label" id="labelRemainingBudget">Sisa Saldo</span>
               <span class="metric-val balance" id="metricRemainingBudget">Rp 100.000</span>
-              <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px; white-space: nowrap;" id="sublabelRemaining">Saldo Tersisa</span>
+              <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px; white-space: nowrap;"
+                id="sublabelRemaining">Saldo Tersisa</span>
             </div>
             <div class="metric-box">
               <span class="metric-label metric-label-bokek"
-                style="font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.2px;">Zona Siap Bokek (90%)</span>
-              <span class="metric-val" id="metricWarningThreshold" style="color: #D97706; white-space: nowrap;">Rp 90.000</span>
-              <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px; white-space: nowrap;">Batas 90% Limit</span>
+                style="font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.2px;">Zona
+                Siap Bokek (90%)</span>
+              <span class="metric-val" id="metricWarningThreshold" style="color: #D97706; white-space: nowrap;">Rp
+                90.000</span>
+              <span style="font-size: 0.65rem; color: var(--text-faint); margin-top: 2px; white-space: nowrap;">Batas
+                90% Limit</span>
             </div>
           </div>
 
@@ -304,7 +312,8 @@
             </div>
 
             <!-- Preset Chips (Grid 3 Kolom Simetris) -->
-            <div id="quickBudgetPresetsContainer" class="quick-budget-presets" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
+            <div id="quickBudgetPresetsContainer" class="quick-budget-presets"
+              style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
               <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000"
                 onclick="setQuickBudgetAmount(50000)">50k</button>
               <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000"
@@ -742,7 +751,8 @@
             </label>
             <span class="cart-item-count-badge" id="cartSelectedCountBadge">0 item</span>
           </div>
-          <div class="cart-action-right" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0; white-space: nowrap;">
+          <div class="cart-action-right"
+            style="display: flex; align-items: center; gap: 6px; flex-shrink: 0; white-space: nowrap;">
             <button type="button" id="btnEmptyCart" class="btn-clear-cart touch-target" onclick="clearCartAll()"
               title="Kosongkan seluruh isi keranjang belanja">
               <span class="btn-clear-cart-icon" aria-hidden="true">🗑️</span>
@@ -776,7 +786,8 @@
             </div>
             <div class="shopee-bottom-sub" id="checkoutBudgetRemaining">Sisa Saldo: Rp 0</div>
           </div>
-          <div class="shopee-bottom-right-actions" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+          <div class="shopee-bottom-right-actions"
+            style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
             <button type="button" id="btnCancelShoppingBottom" class="btn-cancel-shopping-bottom touch-target"
               onclick="cancelShoppingSession()" title="Batalkan Sesi Belanja" aria-label="Batalkan Sesi Belanja">
               <span aria-hidden="true">🚫</span>
@@ -797,8 +808,11 @@
         <div class="smart-input-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div>
-              <h3 class="serif-font" style="font-size: 1.1rem; color: #222222; margin: 0; white-space: nowrap;">🧺 My Pantry Stock</h3>
-              <p style="font-size: 0.76rem; color: var(--text-subtle); margin: 2px 0 0; white-space: nowrap;">Pantau ketersediaan bahan di rumah dan estimasi masa simpan</p>
+              <h3 class="serif-font"
+                style="font-size: 1.1rem; color: var(--text-headline); margin: 0; line-height: 1.25;">🧺 My Pantry Stock
+              </h3>
+              <p style="font-size: 0.76rem; color: var(--text-subtle); margin: 2px 0 0; line-height: 1.35;">Pantau
+                ketersediaan bahan di rumah dan estimasi masa simpan</p>
             </div>
             <button class="btn-edit-budget touch-target" onclick="openAddPantryModal()">+ Tambah Manual</button>
           </div>
@@ -993,11 +1007,13 @@
           <!-- Baris 1: Nama Barang (Input Interaktif Langsung & Buka Katalog Cepat) -->
           <div class="form-group" style="margin-bottom: 10px; position: relative;">
             <label class="form-label"
-              style="font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px; display: block;">Nama Barang *</label>
+              style="font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px; display: block;">Nama Barang
+              *</label>
             <div style="position: relative; display: flex; align-items: center;">
-              <input type="text" id="detailInputName" class="form-control" placeholder="Ketik atau pilih nama barang..." required
-                oninput="handleDetailNameInput(this.value)" onfocus="handleDetailNameFocus()" maxlength="80"
-                autocomplete="off" style="font-size: 13px; font-weight: 700; height: 38px; padding-right: 40px; flex: 1;">
+              <input type="text" id="detailInputName" class="form-control" placeholder="Ketik atau pilih nama barang..."
+                required oninput="handleDetailNameInput(this.value)" onfocus="handleDetailNameFocus()" maxlength="80"
+                autocomplete="off"
+                style="font-size: 13px; font-weight: 700; height: 38px; padding-right: 40px; flex: 1;">
               <button type="button" class="touch-target btn-item-catalog-trigger"
                 style="position: absolute; right: 4px; width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #E91E63; border-radius: 8px;"
                 onclick="openItemPickerModal()" title="Buka menu katalog rekomendasi barang">
@@ -1047,8 +1063,10 @@
               <!-- Kategori & Satuan Unit -->
               <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; margin-bottom: 8px;">
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" style="font-size: 11px; white-space: nowrap; font-weight: 700;">Kategori</label>
-                  <select id="detailInputCategory" class="form-control" style="font-size: 12px; height: 36px; padding: 0 22px 0 8px; width: 100%;">
+                  <label class="form-label"
+                    style="font-size: 11px; white-space: nowrap; font-weight: 700;">Kategori</label>
+                  <select id="detailInputCategory" class="form-control"
+                    style="font-size: 12px; height: 36px; padding: 0 22px 0 8px; width: 100%;">
                     <option value="Bahan Pokok">Bahan Pokok</option>
                     <option value="Kebutuhan Pokok">Kebutuhan Pokok</option>
                     <option value="Peralatan">Peralatan</option>
@@ -1061,8 +1079,10 @@
                   </select>
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" style="font-size: 11px; white-space: nowrap; font-weight: 700;">Satuan Unit *</label>
-                  <select id="detailInputUnit" class="form-control" style="font-size: 12px; height: 36px; padding: 0 22px 0 8px; width: 100%;">
+                  <label class="form-label" style="font-size: 11px; white-space: nowrap; font-weight: 700;">Satuan Unit
+                    *</label>
+                  <select id="detailInputUnit" class="form-control"
+                    style="font-size: 12px; height: 36px; padding: 0 22px 0 8px; width: 100%;">
                     <option value="pcs">pcs</option>
                     <option value="liter">liter</option>
                     <option value="karung/5kg">karung/5kg</option>
@@ -1077,10 +1097,13 @@
 
               <!-- Diskon Promosi Cepat -->
               <div class="form-group" style="margin-bottom: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
-                  <label class="form-label" style="margin: 0; font-size: 11px; white-space: nowrap; flex-shrink: 0;">🏷️ Diskon / Promo</label>
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
+                  <label class="form-label" style="margin: 0; font-size: 11px; white-space: nowrap; flex-shrink: 0;">🏷️
+                    Diskon / Promo</label>
                   <span id="detailEffectivePercentBadge" class="frequent-chip"
-                    style="display: none; font-size: 0.68rem; padding: 2px 7px; font-weight: 800; background: #FCE7F3; color: #E91E63; border-color: #FBCFE8; white-space: nowrap; flex-shrink: 0;">Hemat 0%</span>
+                    style="display: none; font-size: 0.68rem; padding: 2px 7px; font-weight: 800; background: #FCE7F3; color: #E91E63; border-color: #FBCFE8; white-space: nowrap; flex-shrink: 0;">Hemat
+                    0%</span>
                 </div>
                 <div class="quick-disc-presets" id="quickDiscPresets"
                   style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px;">
@@ -1105,8 +1128,7 @@
                     style="font-weight: 700; font-size: 12px; height: 36px; flex: 1; min-width: 0;"
                     oninput="handleDetailDiscountInput(this.value)">
                   <button type="button" class="btn-reset-discount touch-target"
-                    onclick="setDetailDiscountPreset('none', '')"
-                    title="Hapus / Reset Diskon">
+                    onclick="setDetailDiscountPreset('none', '')" title="Hapus / Reset Diskon">
                     <span>🗑️</span>
                     <span>Hapus</span>
                   </button>
@@ -1115,7 +1137,8 @@
 
               <!-- Harga Acuan Bulan Lalu -->
               <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label" style="font-size: 11px; white-space: nowrap;">Harga Riwayat Toko Bulan Lalu (Rp)</label>
+                <label class="form-label" style="font-size: 11px; white-space: nowrap;">Harga Riwayat Toko Bulan Lalu
+                  (Rp)</label>
                 <input type="number" inputmode="numeric" id="detailInputHistoryPrice" class="form-control"
                   placeholder="Contoh: 18000" oninput="updateDetailModalPreview()"
                   style="font-size: 12px; height: 34px;">
@@ -1138,28 +1161,35 @@
               <!-- Live Preview Perhitungan Realtime -->
               <div
                 style="background: var(--surface-soft); border-radius: var(--radius-md); padding: 8px 10px; margin-bottom: 6px; border: 1px solid var(--pastel-light-1); font-size: 0.74rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; gap: 6px;">
-                  <span style="color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Harga Akhir Satuan:</span>
-                  <span id="previewFinalPriceText" style="font-weight: 800; color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp 0</span>
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; gap: 6px;">
+                  <span style="color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Harga Akhir
+                    Satuan:</span>
+                  <span id="previewFinalPriceText"
+                    style="font-weight: 800; color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp 0</span>
                 </div>
                 <div id="previewSavingsText"
-                  style="color: #059669; font-weight: 700; margin-bottom: 3px; display: none; white-space: nowrap;"></div>
+                  style="color: #059669; font-weight: 700; margin-bottom: 3px; display: none; white-space: nowrap;">
+                </div>
                 <div
                   style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--pastel-light-1); padding-top: 4px; margin-top: 4px; gap: 6px;">
                   <span style="color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">vs Histori:</span>
-                  <span id="previewFluctBadge" class="fluctuation-badge fluctuation-stable" style="white-space: nowrap; flex-shrink: 0; font-size: 11px; padding: 2px 7px;">= Rp 0</span>
+                  <span id="previewFluctBadge" class="fluctuation-badge fluctuation-stable"
+                    style="white-space: nowrap; flex-shrink: 0; font-size: 11px; padding: 2px 7px;">= Rp 0</span>
                 </div>
                 <div
                   style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 4px; margin-top: 4px; font-weight: 800; font-size: 0.85rem; gap: 6px;">
                   <span style="white-space: nowrap; flex-shrink: 0;">Subtotal Baris:</span>
-                  <span id="previewSubtotalText" style="color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp 0</span>
+                  <span id="previewSubtotalText" style="color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp
+                    0</span>
                 </div>
               </div>
             </div>
           </details>
 
           <!-- Tombol Simpan (Pink, Height 44px, 100% Width) -->
-          <button type="submit" id="btnSubmitDetailedItem" class="btn-shopee-submit touch-target" style="white-space: nowrap;">➕ Tambahkan Barang</button>
+          <button type="submit" id="btnSubmitDetailedItem" class="btn-shopee-submit touch-target"
+            style="white-space: nowrap;">➕ Tambahkan Barang</button>
         </form>
       </div>
     </div>
@@ -1189,7 +1219,8 @@
         </div>
 
         <div class="cancel-modal-footer">
-          <button type="button" class="btn-cancel-modal-dismiss touch-target" onclick="closeCancelShoppingModal()">Lanjut Belanja</button>
+          <button type="button" class="btn-cancel-modal-dismiss touch-target"
+            onclick="closeCancelShoppingModal()">Lanjut Belanja</button>
         </div>
       </div>
     </div>
@@ -1197,17 +1228,24 @@
     <!-- ========================================================================
        MODAL: KONFIRMASI HAPUS ITEM
        ======================================================================== -->
-    <div id="deleteConfirmModal" class="modal-backdrop">
+    <div id="deleteConfirmModal" class="modal-backdrop" onclick="if(event.target===this)closeDeleteConfirmModal()">
       <div class="modal-card" style="text-align: center;">
         <div style="font-size: 36px; margin-bottom: 8px;">🗑️</div>
-        <h3 class="serif-font" style="font-size: 1.1rem; color: #222222; margin-bottom: 6px; white-space: nowrap;">Hapus Item Belanja?</h3>
+        <h3 class="serif-font"
+          style="font-size: 1.1rem; color: var(--text-headline); margin-bottom: 6px; line-height: 1.3;">Hapus Item
+          Belanja?</h3>
         <p style="font-size: 0.8rem; color: var(--text-subtle); margin-bottom: 16px;">
-          Apakah Anda yakin ingin menghapus <strong id="deleteConfirmItemName" style="color: #222222;"></strong> dari daftar belanja? Tindakan ini otomatis memperbarui total bayar.
+          Apakah Anda yakin ingin menghapus <strong id="deleteConfirmItemName"
+            style="color: var(--text-headline);"></strong> dari daftar belanja? Tindakan ini otomatis memperbarui total
+          bayar.
         </p>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" class="btn-demo-quick" style="margin-top: 0; white-space: nowrap;" onclick="closeDeleteConfirmModal()">Batal</button>
-          <button type="button" class="btn-primary" style="margin-top: 0; background: var(--status-danger); white-space: nowrap;" onclick="executeDeleteItem()">Ya, Hapus</button>
+          <button type="button" class="btn-demo-quick" style="margin-top: 0; white-space: nowrap;"
+            onclick="closeDeleteConfirmModal()">Batal</button>
+          <button type="button" class="btn-primary"
+            style="margin-top: 0; background: var(--status-danger); white-space: nowrap;"
+            onclick="executeDeleteItem()">Ya, Hapus</button>
         </div>
       </div>
     </div>
@@ -1215,24 +1253,31 @@
     <!-- ========================================================================
        MODAL: ANTI-LIST / BLACKLIST WARNING MODAL
        ======================================================================== -->
-    <div id="blacklistWarningModal" class="modal-backdrop">
+    <div id="blacklistWarningModal" class="modal-backdrop" onclick="if(event.target===this)cancelBlacklistAdd()">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 class="serif-font" style="font-size: 1.05rem; color: var(--status-danger); white-space: nowrap; line-height: 1.3;">⚠️ Peringatan Anti-List</h3>
-          <button class="modal-close-btn touch-target" onclick="cancelBlacklistAdd()">&times;</button>
+          <h3 class="serif-font" style="font-size: 1.05rem; color: var(--status-danger); line-height: 1.3;">⚠️
+            Peringatan Anti-List</h3>
+          <button class="modal-close-btn touch-target" style="flex-shrink: 0;"
+            onclick="cancelBlacklistAdd()">&times;</button>
         </div>
 
         <div style="text-align: center; padding: 12px 0 16px;">
           <div style="font-size: 32px; margin-bottom: 8px;">🛑</div>
-          <p style="font-size: 0.96rem; font-weight: 700; color: var(--text-headline); margin-bottom: 6px;">Are you sure? You usually avoid this item.</p>
+          <p style="font-size: 0.96rem; font-weight: 700; color: var(--text-headline); margin-bottom: 6px;">Are you
+            sure? You usually avoid this item.</p>
           <p style="font-size: 0.8rem; color: var(--text-subtle);">
-            Bahan <strong id="blacklistWarningItemName" style="color: #222222;">"Item"</strong> terdaftar di daftar pantangan atau bahan yang biasanya kamu hindari.
+            Bahan <strong id="blacklistWarningItemName" style="color: var(--text-headline);">"Item"</strong> terdaftar
+            di daftar pantangan atau bahan yang biasanya kamu hindari.
           </p>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" class="btn-demo-quick" style="margin-top: 0; white-space: nowrap;" onclick="cancelBlacklistAdd()">Batal Beli</button>
-          <button type="button" class="btn-primary" style="margin-top: 0; background: var(--rose-contrast); white-space: nowrap;" onclick="proceedBlacklistAdd()">Tetap Tambahkan</button>
+          <button type="button" class="btn-demo-quick" style="margin-top: 0; white-space: nowrap;"
+            onclick="cancelBlacklistAdd()">Batal Beli</button>
+          <button type="button" class="btn-primary"
+            style="margin-top: 0; background: var(--rose-contrast); white-space: nowrap;"
+            onclick="proceedBlacklistAdd()">Tetap Tambahkan</button>
         </div>
       </div>
     </div>
@@ -1240,12 +1285,15 @@
     <!-- ========================================================================
        MODAL: KELOLA DAFTAR ANTI-LIST (BLACKLIST MANAGER)
        ======================================================================== -->
-    <div id="blacklistManagerModal" class="modal-backdrop">
+    <div id="blacklistManagerModal" class="modal-backdrop"
+      onclick="if(event.target===this)closeBlacklistManagerModal()">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 class="serif-font" style="font-size: 1.05rem; color: #222222; white-space: normal; line-height: 1.3;">🛑
+          <h3 class="serif-font"
+            style="font-size: 1.05rem; color: var(--text-headline); white-space: normal; line-height: 1.3;">🛑
             Kelola Daftar Anti&#8209;List</h3>
-          <button class="modal-close-btn touch-target" onclick="closeBlacklistManagerModal()">&times;</button>
+          <button class="modal-close-btn touch-target" style="flex-shrink: 0;"
+            onclick="closeBlacklistManagerModal()">&times;</button>
         </div>
 
         <p style="font-size: 0.78rem; color: var(--text-subtle); margin-bottom: 12px;">
@@ -1269,17 +1317,22 @@
     <!-- ========================================================================
        MODAL: PILIH LOKASI SUPERMARKET (IN-APP STORE PICKER POPUP)
        ======================================================================== -->
-    <div id="storePickerModal" class="modal-backdrop">
+    <div id="storePickerModal" class="modal-backdrop" onclick="if(event.target===this)closeStorePickerModal()">
       <div class="modal-card store-picker-card">
         <div class="modal-header">
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
             <span style="font-size: 24px; flex-shrink: 0;">🏬</span>
-            <div style="min-width: 0;">
-              <h3 class="serif-font" style="font-size: 1.1rem; color: #222222; margin: 0; line-height: 1.2; white-space: nowrap;">Pilih Lokasi Supermarket</h3>
-              <p style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0; white-space: nowrap;">Sesuaikan toko untuk riwayat harga akurat</p>
+            <div style="min-width: 0; flex: 1;">
+              <h3 class="serif-font"
+                style="font-size: 1.05rem; color: var(--text-headline); margin: 0; line-height: 1.25; word-break: break-word;">
+                Pilih Lokasi Supermarket</h3>
+              <p
+                style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0; line-height: 1.25; word-break: break-word;">
+                Sesuaikan toko untuk riwayat harga akurat</p>
             </div>
           </div>
-          <button type="button" class="modal-close-btn touch-target" onclick="closeStorePickerModal()">&times;</button>
+          <button type="button" class="modal-close-btn touch-target" onclick="closeStorePickerModal()"
+            aria-label="Tutup Popup" style="flex-shrink: 0;">&times;</button>
         </div>
 
         <!-- Quick Search / Filter Input -->
@@ -1292,7 +1345,7 @@
 
         <!-- Popular Preset Stores List -->
         <div class="store-picker-section-title"
-          style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+          style="font-size: 0.74rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
           Daftar Supermarket Pilihan
         </div>
         <div id="storePickerList" class="store-picker-list">
@@ -1303,14 +1356,14 @@
         <div class="store-picker-custom-section"
           style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--pastel-light-2);">
           <div
-            style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+            style="font-size: 0.74rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
             ➕ Ketik Toko / Pasar Baru
           </div>
           <form onsubmit="handleCustomStoreSubmit(event)" style="display: flex; gap: 8px;">
-            <input type="text" id="storePickerCustomInput" class="form-control"
-              placeholder="Contoh: Pasar Mayestik, Hero Pondok Indah" style="flex: 1;" maxlength="60">
+            <input type="text" id="storePickerCustomInput" class="form-control" placeholder="Ketik nama toko baru..."
+              style="flex: 1; min-width: 0;" maxlength="60">
             <button type="submit" class="btn-primary touch-target"
-              style="width: auto; margin-top: 0; padding: 0 16px; font-size: 0.82rem; font-weight: 800;">
+              style="width: auto; margin-top: 0; padding: 0 16px; font-size: 0.82rem; font-weight: 800; flex-shrink: 0;">
               Gunakan
             </button>
           </form>
@@ -1321,17 +1374,23 @@
     <!-- ========================================================================
        MODAL: ITEM PICKER / KATALOG OPSI BARANG (IDENTIK DENGAN STORE PICKER)
        ======================================================================== -->
-    <div id="itemPickerModal" class="modal-backdrop" style="display: none; z-index: 10005;" onclick="if(event.target===this)closeItemPickerModal()">
+    <div id="itemPickerModal" class="modal-backdrop" style="display: none; z-index: 10005;"
+      onclick="if(event.target===this)closeItemPickerModal()">
       <div class="modal-card store-picker-card">
         <div class="modal-header">
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
             <span style="font-size: 24px; flex-shrink: 0;">🛒</span>
-            <div style="min-width: 0;">
-              <h3 class="serif-font" style="font-size: 1.1rem; color: #222222; margin: 0; line-height: 1.2; white-space: nowrap;">Pilih Opsi Barang</h3>
-              <p style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0; white-space: nowrap;">Pilih dari rekomendasi katalog atau riwayat belanja</p>
+            <div style="min-width: 0; flex: 1;">
+              <h3 class="serif-font"
+                style="font-size: 1.05rem; color: var(--text-headline); margin: 0; line-height: 1.25; word-break: break-word;">
+                Pilih Opsi Barang</h3>
+              <p
+                style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0; line-height: 1.25; word-break: break-word;">
+                Pilih dari rekomendasi katalog atau riwayat belanja</p>
             </div>
           </div>
-          <button type="button" class="modal-close-btn touch-target" onclick="closeItemPickerModal()">&times;</button>
+          <button type="button" class="modal-close-btn touch-target" onclick="closeItemPickerModal()"
+            aria-label="Tutup Popup" style="flex-shrink: 0;">&times;</button>
         </div>
 
         <!-- Quick Search / Filter Input -->
@@ -1344,9 +1403,8 @@
 
         <!-- Section Title -->
         <div class="store-picker-section-title"
-          style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
-          <span>Rekomendasi &amp; Riwayat Barang</span>
-          <span id="itemPickerCountBadge" style="font-size: 10px; color: #94A3B8; font-weight: 600;">Opsi Tersedia</span>
+          style="font-size: 0.74rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+          Rekomendasi &amp; Riwayat Barang
         </div>
         <div id="itemPickerList" class="store-picker-list">
           <!-- Rendered dynamically via JS -->
@@ -1356,14 +1414,14 @@
         <div class="store-picker-custom-section"
           style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--pastel-light-2);">
           <div
-            style="font-size: 0.74rem; font-weight: 700; color: #64748B; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+            style="font-size: 0.74rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
             ➕ Ketik Nama Barang Baru
           </div>
           <form onsubmit="handleCustomItemPickerSubmit(event)" style="display: flex; gap: 8px;">
-            <input type="text" id="itemPickerCustomInput" class="form-control"
-              placeholder="Contoh: Saus Tiram 270ml, Sabun Cuci..." style="flex: 1;" maxlength="80">
+            <input type="text" id="itemPickerCustomInput" class="form-control" placeholder="Ketik nama barang baru..."
+              style="flex: 1; min-width: 0;" maxlength="80">
             <button type="submit" class="btn-primary touch-target"
-              style="width: auto; margin-top: 0; padding: 0 16px; font-size: 0.82rem; font-weight: 800; white-space: nowrap;">
+              style="width: auto; margin-top: 0; padding: 0 16px; font-size: 0.82rem; font-weight: 800; white-space: nowrap; flex-shrink: 0;">
               Gunakan
             </button>
           </form>
@@ -1374,15 +1432,19 @@
     <!-- ========================================================================
        MODAL: CLOUD BACKUP & SINKRONISASI AKUN PRIBADI
        ======================================================================== -->
-    <div id="cloudSyncModal" class="modal-backdrop">
+    <div id="cloudSyncModal" class="modal-backdrop" onclick="if(event.target===this)closeCloudSyncModal()">
       <div class="modal-card">
         <div class="modal-header">
-          <div>
-            <h3 class="serif-font" style="font-size: 1.1rem; color: #222222;">☁️ Cloud Backup &amp; Sinkronisasi Pribadi
+          <div style="flex: 1; min-width: 0;">
+            <h3 class="serif-font"
+              style="font-size: 1.1rem; color: var(--text-headline); margin: 0; line-height: 1.25;">☁️ Cloud Backup
+              &amp; Sinkronisasi Pribadi
             </h3>
-            <p style="font-size: 0.74rem; color: var(--text-subtle);">Pencadangan Akun Cloud Realtime</p>
+            <p style="font-size: 0.74rem; color: var(--text-subtle); margin: 2px 0 0; line-height: 1.35;">Pencadangan
+              Akun Cloud Realtime</p>
           </div>
-          <button class="modal-close-btn touch-target" onclick="closeCloudSyncModal()">&times;</button>
+          <button class="modal-close-btn touch-target" style="flex-shrink: 0;"
+            onclick="closeCloudSyncModal()">&times;</button>
         </div>
 
         <!-- Single User Info Card -->
@@ -1458,11 +1520,13 @@
     <!-- ========================================================================
        MODAL: TAMBAH PANTRY MANUAL
        ======================================================================== -->
-    <div id="addPantryModal" class="modal-backdrop">
+    <div id="addPantryModal" class="modal-backdrop" onclick="if(event.target===this)closeAddPantryModal()">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 class="serif-font" style="font-size: 1.1rem; color: #222222;">🧺 Tambah Bahan ke Pantry</h3>
-          <button class="modal-close-btn touch-target" onclick="closeAddPantryModal()">&times;</button>
+          <h3 class="serif-font" style="font-size: 1.1rem; color: var(--text-headline); margin: 0; line-height: 1.25;">
+            🧺 Tambah Bahan ke Pantry</h3>
+          <button class="modal-close-btn touch-target" style="flex-shrink: 0;"
+            onclick="closeAddPantryModal()">&times;</button>
         </div>
 
         <form onsubmit="handleManualPantrySubmit(event)">
@@ -1500,11 +1564,13 @@
     <!-- ========================================================================
        MODAL: EDIT BUDGET
        ======================================================================== -->
-    <div id="budgetModal" class="modal-backdrop">
+    <div id="budgetModal" class="modal-backdrop" onclick="if(event.target===this)closeBudgetModal()">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 class="serif-font" style="font-size: 1.05rem; color: #222222;">💰 Atur Batas Saldo Dompet</h3>
-          <button class="modal-close-btn touch-target" onclick="closeBudgetModal()">&times;</button>
+          <h3 class="serif-font" style="font-size: 1.05rem; color: var(--text-headline); margin: 0; line-height: 1.25;">
+            💰 Atur Batas Saldo Dompet</h3>
+          <button class="modal-close-btn touch-target" style="flex-shrink: 0;"
+            onclick="closeBudgetModal()">&times;</button>
         </div>
 
         <form onsubmit="handleQuickBudgetSave(event)">
@@ -1517,14 +1583,22 @@
           </div>
 
           <div class="form-group" style="margin-bottom: 12px;">
-            <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Pilihan Cepat Nominal:</label>
-            <div class="quick-budget-presets" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000" onclick="setModalQuickBudget(50000)">50k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000" onclick="setModalQuickBudget(100000)">100k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000" onclick="setModalQuickBudget(150000)">150k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000" onclick="setModalQuickBudget(200000)">200k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000" onclick="setModalQuickBudget(350000)">350k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000" onclick="setModalQuickBudget(500000)">500k</button>
+            <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Pilihan Cepat
+              Nominal:</label>
+            <div class="quick-budget-presets"
+              style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000"
+                onclick="setModalQuickBudget(50000)">50k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000"
+                onclick="setModalQuickBudget(100000)">100k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000"
+                onclick="setModalQuickBudget(150000)">150k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000"
+                onclick="setModalQuickBudget(200000)">200k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000"
+                onclick="setModalQuickBudget(350000)">350k</button>
+              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000"
+                onclick="setModalQuickBudget(500000)">500k</button>
             </div>
           </div>
 
@@ -1727,22 +1801,27 @@
     <!-- ========================================================================
        MODAL: POPOVER DISKON CEPAT (EFFICIENT QUICK DISCOUNT MODEL)
        ======================================================================== -->
-    <div id="quickDiscountPopover" class="modal-backdrop">
+    <div id="quickDiscountPopover" class="modal-backdrop" onclick="if(event.target===this)closeQuickDiscountPopover()">
       <div class="modal-card compact-popover-card">
         <div class="modal-header" style="margin-bottom: 8px; padding-bottom: 8px;">
-          <div>
-            <h4 class="serif-font" style="font-size: 1.05rem; color: #222222; margin: 0;">🏷️ Atur Diskon Cepat</h4>
+          <div style="flex: 1; min-width: 0;">
+            <h4 class="serif-font"
+              style="font-size: 1.05rem; color: var(--text-headline); margin: 0; line-height: 1.25;">🏷️ Atur Diskon
+              Cepat</h4>
             <div id="popoverItemSubtitle" style="font-size: 0.72rem; color: var(--text-subtle); margin-top: 2px;">Minyak
               Goreng • Rp 20.000</div>
           </div>
-          <button type="button" class="modal-close-btn touch-target"
+          <button type="button" class="modal-close-btn touch-target" style="flex-shrink: 0;"
             onclick="closeQuickDiscountPopover()">&times;</button>
         </div>
 
         <!-- Quick Preset Chips -->
-        <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 6px; white-space: nowrap;">Pilih Cepat Preset:</div>
+        <div
+          style="font-size: 0.72rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 6px; white-space: nowrap;">
+          Pilih Cepat Preset:</div>
         <div class="quick-disc-presets" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
-          <button type="button" class="frequent-chip" onclick="applyQuickDiscountPreset('none', '')">Tanpa Diskon</button>
+          <button type="button" class="frequent-chip" onclick="applyQuickDiscountPreset('none', '')">Tanpa
+            Diskon</button>
           <button type="button" class="frequent-chip" onclick="applyQuickDiscountPreset('single', '10')">10%</button>
           <button type="button" class="frequent-chip" onclick="applyQuickDiscountPreset('single', '25')">25%</button>
           <button type="button" class="frequent-chip" onclick="applyQuickDiscountPreset('single', '50')">50%</button>
@@ -1756,7 +1835,8 @@
 
         <!-- Custom Input (Tiered or Single) -->
         <div style="margin-bottom: 12px;">
-          <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Ketik Diskon / Promo Bertingkat:</label>
+          <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Ketik Diskon /
+            Promo Bertingkat:</label>
           <div style="display: flex; gap: 6px; align-items: center;">
             <input type="text" id="quickDiscountCustomInput" class="form-control" placeholder="Contoh: 50+20 atau 20"
               style="font-size: 0.88rem; font-weight: 700;" oninput="updateQuickDiscountPreview()">
@@ -1770,7 +1850,8 @@
         <div class="quick-disc-result"
           style="background: var(--surface-soft); border-radius: 12px; padding: 10px 12px; border: 1px solid var(--pastel-light-1); margin-bottom: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: baseline;">
-            <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap;">Harga Bersih Satuan:</span>
+            <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap;">Harga Bersih
+              Satuan:</span>
             <span id="quickNetPriceText" class="price-tag"
               style="font-size: 1.05rem; font-weight: 900; color: #E91E63; white-space: nowrap;">Rp 20.000</span>
           </div>
@@ -1783,7 +1864,8 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <button type="button" class="btn-demo-quick" style="margin: 0; white-space: nowrap;"
             onclick="closeQuickDiscountPopover()">Batal</button>
-          <button type="button" class="btn-primary" style="margin: 0; white-space: nowrap;" onclick="saveQuickDiscount()">Terapkan Diskon</button>
+          <button type="button" class="btn-primary" style="margin: 0; white-space: nowrap;"
+            onclick="saveQuickDiscount()">Terapkan Diskon</button>
         </div>
       </div>
     </div>
@@ -1791,68 +1873,103 @@
     <!-- ========================================================================
        MODAL: POPOVER INPUT HARGA SAAT BELANJA (IN-STORE PRICE ENTRY)
        ======================================================================== -->
-    <div id="quickPriceModal" class="modal-backdrop">
+    <div id="quickPriceModal" class="modal-backdrop" onclick="if(event.target===this)closeQuickPriceModal()">
       <div class="modal-card compact-popover-card">
         <div class="modal-header" style="margin-bottom: 8px; padding-bottom: 8px;">
-          <div>
-            <h4 class="serif-font" style="font-size: 1.05rem; color: #222222; margin: 0; white-space: nowrap;">🛒 Input Harga Saat Belanja</h4>
-            <div id="quickPriceItemSubtitle" style="font-size: 0.72rem; color: var(--text-subtle); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <div style="flex: 1; min-width: 0;">
+            <h4 class="serif-font"
+              style="font-size: 1.05rem; color: var(--text-headline); margin: 0; line-height: 1.25;">🛒 Input Harga Saat
+              Belanja</h4>
+            <div id="quickPriceItemSubtitle"
+              style="font-size: 0.72rem; color: var(--text-subtle); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
               Minyak Goreng • Lotte Mart Grocery
             </div>
           </div>
-          <button type="button" class="modal-close-btn touch-target" onclick="closeQuickPriceModal()">&times;</button>
+          <button type="button" class="modal-close-btn touch-target" style="flex-shrink: 0;"
+            onclick="closeQuickPriceModal()">&times;</button>
         </div>
 
         <!-- Quick Item Info & Stepper -->
-        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-soft); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; border: 1px solid var(--pastel-light-1); gap: 8px;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-soft); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; border: 1px solid var(--pastel-light-1); gap: 8px;">
           <div style="flex: 1; min-width: 0;">
-            <div id="quickPriceItemName" style="font-size: 0.88rem; font-weight: 800; color: var(--text-headline); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">Nama Barang</div>
-            <div id="quickPriceItemUnit" style="font-size: 0.72rem; color: var(--text-subtle); margin-top: 2px; white-space: nowrap;">Satuan: pcs</div>
+            <div id="quickPriceItemName"
+              style="font-size: 0.88rem; font-weight: 800; color: var(--text-headline); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">
+              Nama Barang</div>
+            <div id="quickPriceItemUnit"
+              style="font-size: 0.72rem; color: var(--text-subtle); margin-top: 2px; white-space: nowrap;">Satuan: pcs
+            </div>
           </div>
-          <div class="shopee-stepper" style="border: 1px solid var(--pastel-light-1); background: #FFFFFF; flex-shrink: 0;">
-            <button type="button" class="shopee-step-btn" onclick="adjustQuickPriceQty(-1)" title="Kurang">&minus;</button>
-            <input type="number" inputmode="numeric" id="quickPriceQtyInput" min="1" max="9999" value="1" oninput="handleQuickPriceQtyChange(this.value)" style="width: 42px; text-align: center; font-weight: 800;">
+          <div class="shopee-stepper"
+            style="border: 1px solid var(--pastel-light-1); background: #FFFFFF; flex-shrink: 0;">
+            <button type="button" class="shopee-step-btn" onclick="adjustQuickPriceQty(-1)"
+              title="Kurang">&minus;</button>
+            <input type="number" inputmode="numeric" id="quickPriceQtyInput" min="1" max="9999" value="1"
+              oninput="handleQuickPriceQtyChange(this.value)"
+              style="width: 42px; text-align: center; font-weight: 800;">
             <button type="button" class="shopee-step-btn" onclick="adjustQuickPriceQty(1)" title="Tambah">+</button>
           </div>
         </div>
 
         <!-- Real Unit Price Input -->
         <div style="margin-bottom: 10px;">
-          <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Harga Satuan Riil di Toko (Rp) *</label>
+          <label class="form-label" style="font-size: 0.72rem; margin-bottom: 4px; white-space: nowrap;">Harga Satuan
+            Riil di Toko (Rp) *</label>
           <div style="display: flex; gap: 6px; align-items: center;">
-            <input type="number" inputmode="numeric" id="quickPriceInput" class="form-control" placeholder="Contoh: 25000" min="100" max="999999999" step="500" style="font-size: 0.95rem; font-weight: 800; color: #E91E63;" oninput="updateQuickPricePreview()" onkeydown="if(event.key==='Enter'){event.preventDefault();saveQuickPrice();}">
-            <button type="button" class="btn-demo-quick" style="margin: 0; padding: 8px 12px; font-size: 0.75rem; white-space: nowrap;" onclick="clearQuickPriceInput()">Reset</button>
+            <input type="number" inputmode="numeric" id="quickPriceInput" class="form-control"
+              placeholder="Contoh: 25000" min="100" max="999999999" step="500"
+              style="font-size: 0.95rem; font-weight: 800; color: #E91E63;" oninput="updateQuickPricePreview()"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();saveQuickPrice();}">
+            <button type="button" class="btn-demo-quick"
+              style="margin: 0; padding: 8px 12px; font-size: 0.75rem; white-space: nowrap;"
+              onclick="clearQuickPriceInput()">Reset</button>
           </div>
         </div>
 
         <!-- Suggested Price Chips (History Baseline & Quick Rounds) -->
         <div id="quickPricePresetsWrap" style="margin-bottom: 12px;">
-          <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 5px; white-space: nowrap;">Rekomendasi / Riwayat Toko:</div>
-          <div id="quickPriceChipsContainer" class="quick-disc-presets" style="display: flex; flex-wrap: wrap; gap: 5px;">
+          <div
+            style="font-size: 0.7rem; font-weight: 700; color: var(--text-subtle); margin-bottom: 5px; white-space: nowrap;">
+            Rekomendasi / Riwayat Toko:</div>
+          <div id="quickPriceChipsContainer" class="quick-disc-presets"
+            style="display: flex; flex-wrap: wrap; gap: 5px;">
             <!-- Dynamically populated via JS -->
           </div>
         </div>
 
         <!-- Live Calculation & Fluctuation Preview -->
-        <div class="quick-disc-result" style="background: var(--surface-soft); border-radius: 12px; padding: 10px 12px; border: 1px solid var(--pastel-light-1); margin-bottom: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; gap: 6px;">
-            <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Subtotal Baris:</span>
-            <span id="quickPriceSubtotalPreview" class="price-tag" style="font-size: 1.05rem; font-weight: 900; color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp 0</span>
+        <div class="quick-disc-result"
+          style="background: var(--surface-soft); border-radius: 12px; padding: 10px 12px; border: 1px solid var(--pastel-light-1); margin-bottom: 14px;">
+          <div
+            style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; gap: 6px;">
+            <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Subtotal
+              Baris:</span>
+            <span id="quickPriceSubtotalPreview" class="price-tag"
+              style="font-size: 1.05rem; font-weight: 900; color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp
+              0</span>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--pastel-light-1); padding-top: 4px; margin-top: 4px; gap: 6px;">
-            <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Fluktuasi vs Histori:</span>
-            <span id="quickPriceFluctBadge" class="fluctuation-badge fluctuation-stable" style="white-space: nowrap; flex-shrink: 0;">= Stabil</span>
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--pastel-light-1); padding-top: 4px; margin-top: 4px; gap: 6px;">
+            <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Fluktuasi
+              vs Histori:</span>
+            <span id="quickPriceFluctBadge" class="fluctuation-badge fluctuation-stable"
+              style="white-space: nowrap; flex-shrink: 0;">= Stabil</span>
           </div>
           <div id="quickPriceRepurchaseDetail" class="quick-price-repurchase-detail" style="display: none;"></div>
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 4px; margin-top: 4px; font-size: 0.72rem; gap: 6px;">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 4px; margin-top: 4px; font-size: 0.72rem; gap: 6px;">
             <span style="color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Estimasi Saldo:</span>
-            <span id="quickPriceRemainingPreview" style="font-weight: 800; color: var(--status-safe-text); white-space: nowrap; flex-shrink: 0;">Sisa: Rp 100.000</span>
+            <span id="quickPriceRemainingPreview"
+              style="font-weight: 800; color: var(--status-safe-text); white-space: nowrap; flex-shrink: 0;">Sisa: Rp
+              100.000</span>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <button type="button" class="btn-demo-quick touch-target" style="margin: 0; white-space: nowrap;" onclick="closeQuickPriceModal()">Batal</button>
-          <button type="button" class="btn-primary touch-target" style="margin: 0; white-space: nowrap;" onclick="saveQuickPrice()">✅ Masuk Keranjang</button>
+          <button type="button" class="btn-demo-quick touch-target" style="margin: 0; white-space: nowrap;"
+            onclick="closeQuickPriceModal()">Batal</button>
+          <button type="button" class="btn-primary touch-target" style="margin: 0; white-space: nowrap;"
+            onclick="saveQuickPrice()">✅ Masuk Keranjang</button>
         </div>
       </div>
     </div>
@@ -1942,9 +2059,10 @@
                 <div class="settings-item-desc">Akses cepat tanpa browser di Komputer &amp; HP</div>
               </div>
               <div>
-                <button type="button" id="modalBtnInstallPwa" class="btn-settings-action btn-settings-primary" style="white-space: nowrap;"
-                  onclick="installPwa()">📲 Pasang App</button>
-                <span id="modalPwaInstalledBadge" class="settings-status-pill installed hidden" style="display: none; white-space: nowrap;">✓ Terpasang</span>
+                <button type="button" id="modalBtnInstallPwa" class="btn-settings-action btn-settings-primary"
+                  style="white-space: nowrap;" onclick="installPwa()">📲 Pasang App</button>
+                <span id="modalPwaInstalledBadge" class="settings-status-pill installed hidden"
+                  style="display: none; white-space: nowrap;">✓ Terpasang</span>
               </div>
             </div>
 
@@ -1955,7 +2073,8 @@
                 <div class="settings-item-desc">Pencadangan data otomatis realtime ke Google Firestore</div>
               </div>
               <div>
-                <span id="modalCloudSyncStatus" class="settings-status-pill online" style="white-space: nowrap;">🟢 Tersambung ke Google Cloud</span>
+                <span id="modalCloudSyncStatus" class="settings-status-pill online" style="white-space: nowrap;">🟢
+                  Tersambung ke Google Cloud</span>
               </div>
             </div>
           </div>
@@ -1982,7 +2101,8 @@
                 <div class="settings-item-label">Kosongkan Keranjang Belanja</div>
                 <div class="settings-item-desc">Hapus seluruh isi keranjang dan daftar rencana belanja sekaligus</div>
               </div>
-              <button type="button" class="btn-settings-action btn-settings-danger" style="white-space: nowrap;" onclick="clearEntireCart()">🗑️ Kosongkan</button>
+              <button type="button" class="btn-settings-action btn-settings-danger" style="white-space: nowrap;"
+                onclick="clearEntireCart()">🗑️ Kosongkan</button>
             </div>
 
             <!-- Clear Cache & Local Reset -->
@@ -2171,10 +2291,14 @@
 
         <!-- Tombol Aksi (No Print) -->
         <div class="receipt-modal-actions no-print">
-          <button type="button" class="btn-receipt-action btn-receipt-new-shop touch-target" style="white-space: nowrap;" onclick="startNewShoppingSession()">🛍️ Belanja Lagi Sekarang</button>
-          <button type="button" class="btn-receipt-action btn-receipt-undo touch-target" style="white-space: nowrap;" onclick="undoFinishShopping()">↩️ Batal Selesai (Kembalikan Keranjang)</button>
-          <button type="button" class="btn-receipt-action btn-receipt-print touch-target" style="white-space: nowrap;" onclick="printReceipt()">🖨️ Cetak / Simpan Struk</button>
-          <button type="button" class="btn-receipt-action btn-receipt-close touch-target" style="white-space: nowrap;" onclick="closeReceiptModal()">❌ Tutup</button>
+          <button type="button" class="btn-receipt-action btn-receipt-new-shop touch-target"
+            style="white-space: nowrap;" onclick="startNewShoppingSession()">🛍️ Belanja Lagi Sekarang</button>
+          <button type="button" class="btn-receipt-action btn-receipt-undo touch-target" style="white-space: nowrap;"
+            onclick="undoFinishShopping()">↩️ Batal Selesai (Kembalikan Keranjang)</button>
+          <button type="button" class="btn-receipt-action btn-receipt-print touch-target" style="white-space: nowrap;"
+            onclick="printReceipt()">🖨️ Cetak / Simpan Struk</button>
+          <button type="button" class="btn-receipt-action btn-receipt-close touch-target" style="white-space: nowrap;"
+            onclick="closeReceiptModal()">❌ Tutup</button>
         </div>
 
       </div>
@@ -2329,8 +2453,10 @@
         </div>
       </div>
       <div class="pwa-banner-actions">
-        <button type="button" class="btn-pwa-dismiss touch-target" style="white-space: nowrap;" onclick="dismissPwaInstallBanner()">NANTI SAJA</button>
-        <button type="button" class="btn-pwa-install touch-target" style="white-space: nowrap;" onclick="acceptPwaInstallBanner()">INSTALL SEKARANG</button>
+        <button type="button" class="btn-pwa-dismiss touch-target" style="white-space: nowrap;"
+          onclick="dismissPwaInstallBanner()">NANTI SAJA</button>
+        <button type="button" class="btn-pwa-install touch-target" style="white-space: nowrap;"
+          onclick="acceptPwaInstallBanner()">INSTALL SEKARANG</button>
       </div>
     </div>
   </div>
