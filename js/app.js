@@ -663,7 +663,7 @@ function getCartMetrics() {
   });
 
   const isPlanner = (AppState.currentTab === 'planner');
-  const evaluatedTotal = isPlanner ? (totalBelanja > 0 ? totalBelanja : totalAll) : totalBelanja;
+  const evaluatedTotal = (isPlanner && !AppState.inStoreMode) ? totalAll : totalBelanja;
   const safety = evaluateBudgetSafety(evaluatedTotal, AppState.budget);
 
   return {
@@ -3473,7 +3473,8 @@ function renderBudget() {
   }
 
     // OVERBUDGET FIRM RED BANNER (>100% Limit) - With Strict Safety Guards
-  const activeSpend = AppState.inStoreMode ? totalBelanja : (totalBelanja > 0 ? totalBelanja : (metrics.totalAll || 0));
+  const isPlanner = (AppState.currentTab === 'planner');
+  const activeSpend = AppState.inStoreMode ? totalBelanja : (isPlanner ? (metrics.totalAll || 0) : totalBelanja);
   const overDiff = Math.max(0, activeSpend - budget);
   if (overbudgetBanner) {
     if (safety.showOverbudgetBanner && overDiff > 0) {
@@ -3492,9 +3493,6 @@ function renderBudget() {
   const trackerSpentVal = document.getElementById('trackerSpentVal');
   const trackerPercentVal = document.getElementById('trackerPercentVal');
 
-  // Reuse activeSpend computed earlier
-  const isPlanner = (AppState.currentTab === 'planner');
-
   if (trackerSaldoLabel && trackerSaldoValue) {
     if (safety.sisa >= 0) {
       trackerSaldoLabel.textContent = 'Sisa Saldo';
@@ -3505,6 +3503,11 @@ function renderBudget() {
       trackerSaldoValue.textContent = `- ${formatRupiah(Math.abs(safety.sisa))}`;
       trackerSaldoValue.className = 'tracker-saldo-value danger';
     }
+  }
+
+  const trackerSpentLabel = document.getElementById('trackerSpentLabel');
+  if (trackerSpentLabel) {
+    trackerSpentLabel.textContent = isPlanner ? 'Total Rencana' : 'Total Belanja';
   }
 
   if (trackerSpentVal) {
@@ -4167,7 +4170,7 @@ function renderItems() {
                 ${escapeHtml(item.namaBarang)}
               </span>
               <div class="shopee-compact-meta-left">
-                <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                <span class="planner-unit-badge" id="plan-unit-badge-${item.id}">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
                 ${analysis.isRepurchase ? `<span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
                 <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
                   🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
@@ -4183,9 +4186,9 @@ function renderItems() {
           <div class="shopee-compact-bottom">
             <div class="shopee-compact-price-wrap">
               ${item.hargaSatuan > 0 ? `
-                <span class="subtotal-amount price-tag" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga perkiraan">${formatRupiah(subtotal)}</span>
+                <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga perkiraan">${formatRupiah(subtotal)}</span>
               ` : `
-                <button type="button" class="badge-no-price touch-target" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga perkiraan">
+                <button type="button" class="badge-no-price touch-target" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga perkiraan">
                   ${analysis.previousPrice ? `💡 Dulu: ${formatRupiah(analysis.previousPrice)}` : '🏷️ Belum Ada Harga'}
                 </button>
               `}
@@ -4269,7 +4272,19 @@ function updateItemQty(itemId, delta) {
   const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
   const subtotal = disc.finalPrice * newQty;
   const subtotalEl = document.getElementById(`subtotal-${item.id}`);
-  if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
+  if (subtotalEl && item.hargaSatuan > 0) {
+    subtotalEl.textContent = formatRupiah(subtotal);
+  }
+
+  // Update unit badges instantly in Planner and Cart
+  const planUnitBadge = document.getElementById(`plan-unit-badge-${item.id}`);
+  if (planUnitBadge) {
+    planUnitBadge.textContent = `📦 ${newQty} ${item.satuan || 'pcs'}`;
+  }
+  const cartUnitBadge = document.getElementById(`cart-unit-badge-${item.id}`);
+  if (cartUnitBadge) {
+    cartUnitBadge.textContent = `📦 ${newQty} ${item.satuan || 'pcs'}`;
+  }
 
   saveLocalState();
   renderBudget();
@@ -4302,7 +4317,19 @@ function handleQtyDirectInput(itemId, rawVal) {
   const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
   const subtotal = disc.finalPrice * item.qty;
   const subtotalEl = document.getElementById(`subtotal-${item.id}`);
-  if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
+  if (subtotalEl && item.hargaSatuan > 0) {
+    subtotalEl.textContent = formatRupiah(subtotal);
+  }
+
+  // Update unit badges instantly in Planner and Cart
+  const planUnitBadge = document.getElementById(`plan-unit-badge-${item.id}`);
+  if (planUnitBadge) {
+    planUnitBadge.textContent = `📦 ${item.qty} ${item.satuan || 'pcs'}`;
+  }
+  const cartUnitBadge = document.getElementById(`cart-unit-badge-${item.id}`);
+  if (cartUnitBadge) {
+    cartUnitBadge.textContent = `📦 ${item.qty} ${item.satuan || 'pcs'}`;
+  }
 
   saveLocalState();
   renderBudget();
@@ -4346,7 +4373,19 @@ function handleQtyBlur(itemId, rawVal) {
   const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
   const subtotal = disc.finalPrice * item.qty;
   const subtotalEl = document.getElementById(`subtotal-${item.id}`);
-  if (subtotalEl) subtotalEl.textContent = formatRupiah(subtotal);
+  if (subtotalEl && item.hargaSatuan > 0) {
+    subtotalEl.textContent = formatRupiah(subtotal);
+  }
+
+  // Update unit badges instantly in Planner and Cart
+  const planUnitBadge = document.getElementById(`plan-unit-badge-${item.id}`);
+  if (planUnitBadge) {
+    planUnitBadge.textContent = `📦 ${item.qty} ${item.satuan || 'pcs'}`;
+  }
+  const cartUnitBadge = document.getElementById(`cart-unit-badge-${item.id}`);
+  if (cartUnitBadge) {
+    cartUnitBadge.textContent = `📦 ${item.qty} ${item.satuan || 'pcs'}`;
+  }
 
   saveLocalState();
   renderBudget();
@@ -7256,6 +7295,8 @@ function switchTab(tab, force = false) {
   const btnCart = document.getElementById('btnViewCart');
   if (btnPlanner) btnPlanner.classList.toggle('active', tab === 'planner');
   if (btnCart) btnCart.classList.toggle('active', tab === 'cart');
+
+  renderBudget();
 }
 
 // =========================================================================
@@ -8322,15 +8363,15 @@ function renderCartSection() {
   if (unboughtItems.length > 0) {
     html += `
       <div class="cart-unbought-notice" onclick="switchTab('planner')" style="cursor: pointer;" title="Lihat barang yang masih di Rencana">
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span>📋</span>
-          <span style="font-size: 11.5px; font-weight: 700;">Masih ada <strong>${unboughtItems.length} barang</strong> di Rencana Belanja</span>
+        <div class="cart-unbought-left">
+          <span class="cart-unbought-icon">📋</span>
+          <span class="cart-unbought-text">Ada <strong>${unboughtItems.length} barang</strong> di Rencana Belanja</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <button type="button" class="btn-quick-take-all touch-target" onclick="startShoppingFromPlan(); event.stopPropagation();" title="Ambil semua barang rencana ke keranjang">
+        <div class="cart-unbought-right">
+          <button type="button" class="btn-quick-take-all" onclick="startShoppingFromPlan(); event.stopPropagation();" title="Ambil semua barang rencana ke keranjang">
             + Ambil Semua
           </button>
-          <span style="font-size: 11px; font-weight: 800; color: #E91E63;">Lihat ➔</span>
+          <span class="cart-unbought-link">Lihat ➔</span>
         </div>
       </div>
     `;
@@ -8370,7 +8411,7 @@ function renderCartSection() {
           <div class="shopee-compact-bottom">
             <div class="shopee-compact-price-wrap">
               <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga">${formatRupiah(subtotal)}</span>
-              <span class="planner-unit-badge">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+              <span class="planner-unit-badge" id="cart-unit-badge-${item.id}">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
               ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
             </div>
 

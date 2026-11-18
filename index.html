@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=128">
+  <link rel="stylesheet" href="./css/app.css?v=129">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -479,7 +479,7 @@
             </div>
 
             <div class="tracker-spent-wrap">
-              <span class="tracker-spent-label">Total Belanja</span>
+              <span class="tracker-spent-label" id="trackerSpentLabel">Total Belanja</span>
               <div class="tracker-spent-figures">
                 <span class="tracker-spent-val" id="trackerSpentVal">Rp 0</span>
               </div>
@@ -2465,7 +2465,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=132"></script>
+  <script src="./js/app.js?v=133"></script>
 
   <!-- Service Worker Registration -->
   <script>
