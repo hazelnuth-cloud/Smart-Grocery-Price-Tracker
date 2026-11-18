@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=129">
+  <link rel="stylesheet" href="./css/app.css?v=137">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -173,6 +173,104 @@
               Kurangi kuantitas atau batalkan barang sekunder.
             </div>
           </div>
+        </div>
+
+        <!-- 3D Flowing Flower Wave Stage (Layered 3D Ribbons & Animated Tumbling Petals) -->
+        <div class="header-wave-3d-stage" aria-hidden="true">
+          <div class="wave-3d-viewport">
+            <div class="wave-3d-layer wave-layer-deep"></div>
+            <div class="wave-3d-layer wave-layer-mid"></div>
+            <div class="wave-3d-layer wave-layer-front"></div>
+          </div>
+          <div class="flower-petals-3d-field">
+            <span class="petal-3d petal-1">
+              <svg viewBox="0 0 24 24" class="petal-svg">
+                <path d="M12 2 C17 3 21 8 20 14 C19 19 15 22 12 22 C9 22 5 19 4 14 C3 8 7 3 12 2 Z"
+                  fill="url(#petalGradRose)" />
+              </svg>
+            </span>
+            <span class="petal-3d petal-2">
+              <svg viewBox="0 0 24 24" class="petal-svg">
+                <path d="M12 3 C16 4 20 9 18 15 C16 20 12 21 11 20 C6 18 5 11 8 5 C9 3 10 3 12 3 Z"
+                  fill="url(#petalGradSoft)" />
+              </svg>
+            </span>
+            <span class="petal-3d petal-3">
+              <svg viewBox="0 0 24 24" class="petal-svg">
+                <circle cx="12" cy="12" r="2.8" fill="#FFF275" />
+                <path
+                  d="M12 4 C13.2 4 14.2 5.5 13.5 7 C12.8 8.2 12 8.5 12 8.5 C12 8.5 11.2 8.2 10.5 7 C9.8 5.5 10.8 4 12 4 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M19 10 C19.8 11.2 19 12.5 17.5 12.5 C16.2 12.5 15.5 12 15.5 12 C15.5 12 15.8 11.2 16.5 10 C17.5 8.8 18.5 9 19 10 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M16 18 C15.5 19.2 14.2 19.5 13 18.5 C12 17.8 12 17 12 17 C12 17 12.8 16.8 14 16.2 C15.5 15.5 16.5 16.5 16 18 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M8 18 C7.5 16.8 8.5 15.5 10 16.2 C11.2 16.8 12 17 12 17 C12 17 12 17.8 11 18.5 C9.8 19.5 8.5 19.2 8 18 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M5 10 C5.5 9 6.5 8.8 7.5 10 C8.2 11.2 8.5 12 8.5 12 C8.5 12 7.8 12.5 6.5 12.5 C5 12.5 4.2 11.2 5 10 Z"
+                  fill="url(#petalGradRose)" />
+              </svg>
+            </span>
+            <span class="petal-3d petal-4">
+              <svg viewBox="0 0 24 24" class="petal-svg">
+                <path d="M6 18 C6 18 8 10 14 6 C17 4 19 5 19 5 C19 5 18 7 16 10 C12 16 6 18 6 18 Z"
+                  fill="url(#petalGradStem)" />
+              </svg>
+            </span>
+            <span class="petal-3d petal-5">
+              <svg viewBox="0 0 24 24" class="petal-svg">
+                <path d="M12 2 C18 3 21 8 20 14 C19 19 15 22 12 22 C9 22 5 19 4 14 C3 8 7 3 12 2 Z"
+                  fill="url(#petalGradRose)" />
+              </svg>
+            </span>
+            <span class="petal-3d petal-6">
+              <svg viewBox="0 0 24 24" class="petal-svg">
+                <path d="M12 3 C16 4 20 9 18 15 C16 20 12 21 11 20 C6 18 5 11 8 5 C9 3 10 3 12 3 Z"
+                  fill="url(#petalGradSoft)" />
+              </svg>
+            </span>
+            <span class="petal-3d petal-7">
+              <svg viewBox="0 0 24 24" class="petal-svg">
+                <circle cx="12" cy="12" r="2.8" fill="#FFF275" />
+                <path
+                  d="M12 4 C13.2 4 14.2 5.5 13.5 7 C12.8 8.2 12 8.5 12 8.5 C12 8.5 11.2 8.2 10.5 7 C9.8 5.5 10.8 4 12 4 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M19 10 C19.8 11.2 19 12.5 17.5 12.5 C16.2 12.5 15.5 12 15.5 12 C15.5 12 15.8 11.2 16.5 10 C17.5 8.8 18.5 9 19 10 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M16 18 C15.5 19.2 14.2 19.5 13 18.5 C12 17.8 12 17 12 17 C12 17 12.8 16.8 14 16.2 C15.5 15.5 16.5 16.5 16 18 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M8 18 C7.5 16.8 8.5 15.5 10 16.2 C11.2 16.8 12 17 12 17 C12 17 12 17.8 11 18.5 C9.8 19.5 8.5 19.2 8 18 Z"
+                  fill="url(#petalGradRose)" />
+                <path
+                  d="M5 10 C5.5 9 6.5 8.8 7.5 10 C8.2 11.2 8.5 12 8.5 12 C8.5 12 7.8 12.5 6.5 12.5 C5 12.5 4.2 11.2 5 10 Z"
+                  fill="url(#petalGradRose)" />
+              </svg>
+            </span>
+          </div>
+          <svg width="0" height="0" class="header-wave-defs" aria-hidden="true">
+            <defs>
+              <linearGradient id="petalGradRose" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#EA9CAF" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#D56989" stop-opacity="0.95" />
+              </linearGradient>
+              <linearGradient id="petalGradSoft" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+                <stop offset="60%" stop-color="#EA9CAF" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#D56989" stop-opacity="0.85" />
+              </linearGradient>
+              <linearGradient id="petalGradStem" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#D4EAA0" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#C2DC80" stop-opacity="0.9" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
 
         <div class="header-content">
@@ -587,6 +685,26 @@
             </select>
             <button type="button" id="btnToggleCustomStore" style="display: none;"
               onclick="openStorePickerModal()"></button>
+          </div>
+
+          <!-- Divider Garis Halus -->
+          <div class="modern-store-divider"></div>
+
+          <!-- Quick 1-Click Store Switcher Bar (User Favorite Stores) -->
+          <div class="quick-store-wrapper" style="padding: 2px 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span
+                style="font-size: 10px; font-weight: 700; color: var(--text-subtle); letter-spacing: 0.3px; text-transform: uppercase;">
+                ⭐ Toko Favorit Anda (1-Klik):
+              </span>
+              <button type="button" class="touch-target" onclick="openStorePickerModal()"
+                style="border: none; background: transparent; color: #E91E63; font-size: 10.5px; font-weight: 700; cursor: pointer; padding: 0;">
+                + Tambah / Cari 🔍
+              </button>
+            </div>
+            <div id="quickUserStoreBar" class="quick-user-store-bar" aria-label="Preferensi Toko Tersimpan">
+              <!-- Dinamis di-render via renderQuickUserStoreBar() -->
+            </div>
           </div>
 
           <!-- Divider Garis Halus -->
@@ -1341,6 +1459,20 @@
           <input type="text" id="storePickerSearchInput" class="store-picker-search-input"
             placeholder="Cari atau ketik nama toko..." oninput="handleStorePickerSearch(this.value)"
             onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomStorePicker();}" autocomplete="off">
+        </div>
+
+        <!-- Saved / Favorite Stores 1-Click Chips (Khusus Akun User Ini) -->
+        <div id="userSavedStoresSection" style="margin-bottom: 12px; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span
+              style="font-size: 0.74rem; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.5px;">
+              ⭐ Toko Favorit Anda (1-Klik)
+            </span>
+            <span id="userSavedStoresCount" style="font-size: 0.68rem; color: #64748B;"></span>
+          </div>
+          <div id="userSavedStoresChips" class="saved-stores-chips-scroll">
+            <!-- Rendered dynamically via renderUserSavedStoresChips() -->
+          </div>
         </div>
 
         <!-- Popular Preset Stores List -->
@@ -2166,17 +2298,39 @@
       aria-labelledby="receiptStoreName" aria-hidden="true" onclick="if(event.target===this)closeReceiptModal()">
       <div class="receipt-modal-container">
 
+        <!-- Header Banner: Pembayaran Berhasil! -->
+        <div class="receipt-success-banner no-print">
+          <div class="receipt-success-title">
+            <span class="receipt-success-badge-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#F59E0B" stroke="#D97706" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                </path>
+              </svg>
+            </span>
+            <span>Pembayaran Berhasil!</span>
+          </div>
+          <button type="button" class="receipt-close-circle-btn" onclick="closeReceiptModal()" aria-label="Tutup Struk">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
         <!-- Thermal Paper -->
         <div class="thermal-receipt-paper" id="thermalReceiptPaper">
 
           <!-- Header Toko -->
           <div class="receipt-header-wrap">
-            <div class="receipt-store-logo">🛒</div>
-            <h2 id="receiptStoreName" class="receipt-store-name">SUPERINDO SUPERMARKET</h2>
-            <div id="receiptStoreBranch" class="receipt-store-branch">Cabang Mall Puri Indah, Lt. GF</div>
-            <div id="receiptStoreAddress" class="receipt-store-address">Jl. Puri Agung No. 1, Jakarta Barat • Telp:
-              (021)
-              5835-8899</div>
+            <h2 id="receiptStoreName" class="receipt-store-name">LOTTE MART GROCERY - PURI INDAH</h2>
+            <div id="receiptStoreBranch" class="receipt-store-branch">Puri Indah Mall Lt. LG • Kembangan, Jakarta Barat
+            </div>
+            <div id="receiptStoreAddress" class="receipt-store-address" style="display: none;">Jl. Puri Agung No. 1,
+              Jakarta Barat • Telp: (021) 5835-8899</div>
+            <div id="receiptDateTime" class="receipt-date-time-line">Senin, 16 Nov 2026, 17.07 WIB</div>
+            <div class="receipt-trx-line">TRX: <strong id="receiptTrxNo">LOTTE-20261026-22511</strong></div>
           </div>
 
           <div class="receipt-divider-dashed"></div>
@@ -2184,21 +2338,24 @@
           <!-- Meta Info Transaksi & Kasir -->
           <div class="receipt-meta-box">
             <div class="receipt-meta-row">
-              <span>NO TRX : <strong id="receiptTrxNo">TRX-20261029-8821</strong></span>
-              <span>POS : <strong id="receiptPosNo">POS-02</strong></span>
+              <span class="receipt-meta-lbl">Pelanggan:</span>
+              <strong id="receiptCustomerName" class="receipt-meta-val">Evelina Metta Putri MB2</strong>
             </div>
             <div class="receipt-meta-row">
-              <span>WAKTU : <strong id="receiptDateTime">29/10/2026 21:45:00</strong></span>
-              <span>KASIR: <strong id="receiptCashierName">Mr. Tio</strong></span>
+              <span class="receipt-meta-lbl">Kasir:</span>
+              <strong id="receiptCashierName" class="receipt-meta-val">Sistem Mandiri Lotte Mart</strong>
             </div>
-          </div>
-
-          <div class="receipt-divider-dashed"></div>
-
-          <!-- Table Items Header -->
-          <div class="receipt-table-header">
-            <span>DESKRIPSI BARANG</span>
-            <span style="text-align: right;">SUBTOTAL</span>
+            <div class="receipt-meta-row receipt-meta-payment-row">
+              <div class="receipt-meta-split-lbl">
+                <span>Metode</span>
+                <span>Bayar:</span>
+              </div>
+              <div class="receipt-meta-split-val">
+                <span id="receiptPaymentMethod" class="receipt-payment-name">QRIS Lotte Mart Instant</span>
+                <span class="receipt-green-text receipt-lunas-badge">(LUNAS)</span>
+              </div>
+            </div>
+            <span id="receiptPosNo" style="display: none;">POS-02</span>
           </div>
 
           <div class="receipt-divider-dashed"></div>
@@ -2213,77 +2370,50 @@
           <!-- Ringkasan Total & Pembayaran -->
           <div class="receipt-summary-box">
             <div class="receipt-summary-row">
-              <span>SUBTOTAL</span>
+              <span>Subtotal Belanja:</span>
               <span id="receiptSubtotal">Rp 0</span>
             </div>
             <div class="receipt-summary-row discount-row" id="receiptDiscountRow">
-              <span>TOTAL DISKON / HEMAT</span>
-              <span id="receiptDiscount">-Rp 0</span>
+              <span class="receipt-green-text">Hemat Voucher:</span>
+              <span id="receiptDiscount" class="receipt-green-text">Rp 0</span>
             </div>
-            <div class="receipt-summary-row">
-              <span>PPN (11%)</span>
-              <span id="receiptTax">Rp 0</span>
+            <div class="receipt-summary-row" id="receiptTaxRow">
+              <span>Biaya Layanan:</span>
+              <span id="receiptTax">Rp 1.000</span>
             </div>
             <div class="receipt-divider-dashed" style="margin: 6px 0;"></div>
             <div class="receipt-summary-row grand-total-row">
-              <span>GRAND TOTAL</span>
-              <span id="receiptGrandTotal">Rp 0</span>
+              <span class="receipt-grand-total-label">TOTAL AKHIR:</span>
+              <span id="receiptGrandTotal" class="receipt-grand-total-val">Rp 0</span>
             </div>
-            <div class="receipt-summary-row">
-              <span>SALDO DIGUNAKAN</span>
-              <span id="receiptPaymentUsed">Rp 0</span>
+            <div class="receipt-summary-row" id="receiptRemainingRow" style="display: none;">
+              <span class="receipt-green-text">Sisa Saldo:</span>
+              <span id="receiptRemainingBudget" class="receipt-green-text">Rp 0</span>
             </div>
-            <div class="receipt-summary-row">
-              <span>SISA SALDO</span>
-              <span id="receiptRemainingBudget">Rp 0</span>
+            <span id="receiptPaymentUsed" style="display: none;">Rp 0</span>
+            <div id="receiptStatusBadge" class="receipt-status-badge" style="display: none;">LUNAS / BERHASIL</div>
+            <div id="receiptSavingsBanner" class="receipt-savings-banner" style="display: none;">
+              🎉 Selamat! Anda Hemat <span id="receiptSavingsHighlight">Rp 0</span> pada belanjaan ini
             </div>
           </div>
 
           <div class="receipt-divider-dashed"></div>
 
-          <!-- Status Lunas Stamp -->
-          <div class="receipt-status-wrap">
-            <div id="receiptStatusBadge" class="receipt-status-badge">LUNAS / BERHASIL</div>
+          <!-- Barcode Ticks Supermarket -->
+          <div class="receipt-barcode-box">
+            <div class="receipt-barcode-ticks" aria-label="Barcode Transaksi">
+              | | | &nbsp; | | | | &nbsp; | | &nbsp; | | | | | &nbsp; | | | |<br>
+              | | &nbsp; | | |
+            </div>
+            <div id="receiptBarcodeNumber" class="receipt-barcode-number" style="display: none;">9823 8812 0019 4521
+            </div>
           </div>
-
-          <!-- Highlight Kehematan Banner -->
-          <div id="receiptSavingsBanner" class="receipt-savings-banner">
-            🎉 Selamat! Anda Hemat <span id="receiptSavingsHighlight">Rp 0</span> pada belanjaan ini
-          </div>
-
-          <div class="receipt-divider-dashed"></div>
 
           <!-- Footer Kasir -->
           <div class="receipt-footer-section">
-            <div class="receipt-footer-thanks">TERIMA KASIH TELAH BERBELANJA!</div>
             <div class="receipt-footer-policy">
-              Barang yang sudah dibeli tidak dapat ditukar atau dikembalikan kecuali ada kesepakatan tertulis.
-            </div>
-
-            <!-- Barcode Supermarket SVG/CSS -->
-            <div class="receipt-barcode-box">
-              <div class="receipt-barcode-bars" aria-label="Barcode Transaksi"></div>
-              <div id="receiptBarcodeNumber" class="receipt-barcode-number">9823 8812 0019 4521</div>
-            </div>
-
-            <!-- QR Code Verifikasi -->
-            <div class="receipt-qr-box">
-              <svg class="receipt-qr-svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-                <rect x="7" y="7" width="1" height="1"></rect>
-                <rect x="16" y="7" width="1" height="1"></rect>
-                <rect x="7" y="16" width="1" height="1"></rect>
-                <rect x="10" y="10" width="4" height="4"></rect>
-                <path d="M10 3v4"></path>
-                <path d="M10 17v4"></path>
-                <path d="M3 10h4"></path>
-                <path d="M17 10h4"></path>
-              </svg>
-              <div class="receipt-qr-caption">Scan QR untuk verifikasi e-struk resmi</div>
+              Terima kasih telah berbelanja cerdas di <span id="receiptFooterStore">Lotte Mart Puri Indah</span>! Simpan
+              struk ini sebagai bukti pembayaran sah.
             </div>
           </div>
 
@@ -2291,14 +2421,33 @@
 
         <!-- Tombol Aksi (No Print) -->
         <div class="receipt-modal-actions no-print">
-          <button type="button" class="btn-receipt-action btn-receipt-new-shop touch-target"
-            style="white-space: nowrap;" onclick="startNewShoppingSession()">🛍️ Belanja Lagi Sekarang</button>
-          <button type="button" class="btn-receipt-action btn-receipt-undo touch-target" style="white-space: nowrap;"
-            onclick="undoFinishShopping()">↩️ Batal Selesai (Kembalikan Keranjang)</button>
-          <button type="button" class="btn-receipt-action btn-receipt-print touch-target" style="white-space: nowrap;"
-            onclick="printReceipt()">🖨️ Cetak / Simpan Struk</button>
-          <button type="button" class="btn-receipt-action btn-receipt-close touch-target" style="white-space: nowrap;"
-            onclick="closeReceiptModal()">❌ Tutup</button>
+          <button type="button" class="btn-receipt-pill touch-target" onclick="copyReceiptText()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Salin Teks Struk
+          </button>
+          <button type="button" class="btn-receipt-pill touch-target" onclick="openReceiptHistory()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Buka Riwayat
+          </button>
+        </div>
+
+        <div class="receipt-modal-subactions no-print">
+          <button type="button" class="btn-receipt-sub touch-target" onclick="startNewShoppingSession()">🛍️ Belanja
+            Baru</button>
+          <button type="button" class="btn-receipt-sub touch-target" onclick="printReceipt()">🖨️ Cetak</button>
+          <button type="button" class="btn-receipt-sub touch-target" onclick="undoFinishShopping()">↩️ Batal</button>
+          <button type="button" class="btn-receipt-sub touch-target" onclick="closeReceiptModal()">✕ Tutup</button>
         </div>
 
       </div>
@@ -2465,7 +2614,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=133"></script>
+  <script src="./js/app.js?v=137"></script>
 
   <!-- Service Worker Registration -->
   <script>
