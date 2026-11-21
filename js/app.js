@@ -5001,17 +5001,29 @@ function updateHeroBudgetMascot(safetyLevel) {
 
   // Synchronize Sticky Mascot Companion (reacts dynamically while scrolled down)
   const stickyCompanion = document.getElementById('stickyMascotCompanion');
-  const stickyFace = document.getElementById('stickyMascotFace');
+  const stickyEyeLeft = document.getElementById('stickyEyeLeft');
+  const stickyEyeRight = document.getElementById('stickyEyeRight');
+  const stickyMouth = document.getElementById('stickyMouth');
   const stickyText = document.getElementById('stickyMascotText');
   if (stickyCompanion) {
     stickyCompanion.classList.remove('state-safe', 'state-warning', 'state-danger');
     stickyCompanion.classList.add('state-' + level);
   }
-  if (stickyFace) {
-    stickyFace.textContent = level === 'danger' ? '🥺' : (level === 'warning' ? '⚠️' : '🌸');
-  }
-  if (stickyText) {
-    stickyText.textContent = level === 'danger' ? 'Overbudget! 🚨' : (level === 'warning' ? 'Rem Dulu! ⚠️' : 'Aman ♡');
+  if (level === 'danger') {
+    if (stickyEyeLeft) stickyEyeLeft.setAttribute('d', 'M27 34L32 30M27 30L32 34'); // > < crying/overwhelmed eyes
+    if (stickyEyeRight) stickyEyeRight.setAttribute('d', 'M38 30L43 34M38 34L43 30');
+    if (stickyMouth) stickyMouth.setAttribute('d', 'M32.5 39C34 37.5 36 37.5 37.5 39'); // worried mouth
+    if (stickyText) stickyText.textContent = 'Overbudget! 🚨';
+  } else if (level === 'warning') {
+    if (stickyEyeLeft) stickyEyeLeft.setAttribute('d', 'M27 33A2 2 0 1 1 31 33'); // round nervous eyes
+    if (stickyEyeRight) stickyEyeRight.setAttribute('d', 'M39 33A2 2 0 1 1 43 33');
+    if (stickyMouth) stickyMouth.setAttribute('d', 'M33 37.5H37'); // straight mouth
+    if (stickyText) stickyText.textContent = 'Rem Dulu! ⚠️';
+  } else {
+    if (stickyEyeLeft) stickyEyeLeft.setAttribute('d', 'M26.5 33.5C28 31 31 31 32.5 33.5'); // curved happy eyes
+    if (stickyEyeRight) stickyEyeRight.setAttribute('d', 'M37.5 33.5C39 31 42 31 43.5 33.5');
+    if (stickyMouth) stickyMouth.setAttribute('d', 'M32.5 37.5C34 39 36 39 37.5 37.5'); // smile
+    if (stickyText) stickyText.textContent = 'Aman ♡';
   }
 }
 
@@ -5508,7 +5520,7 @@ function renderItems() {
             <!-- Dedicated Primary Add to Cart Button -->
             <button type="button" class="btn-ios-add-cart touch-target" onclick="moveItemToCartWithFeedback('${item.id}', this); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja" aria-label="Pindahkan ke Keranjang Belanja">
               <span>🛒</span>
-              <span>Ke Keranjang</span>
+              <span>Keranjang</span>
             </button>
           </div>
         </div>
@@ -9395,9 +9407,14 @@ if (typeof document !== 'undefined') {
 // Synchronize dynamic app header height for sticky tracker and subheaders
 function syncAppHeaderHeight() {
   const header = document.querySelector('.app-header');
+  const overbudgetBanner = document.getElementById('overbudget-firm-banner');
+  const isOverbudgetBannerVisible = overbudgetBanner && !overbudgetBanner.classList.contains('hidden') && overbudgetBanner.offsetHeight > 0;
   if (header) {
     const rect = header.getBoundingClientRect();
-    const h = Math.ceil(rect.height);
+    let h = Math.ceil(rect.height);
+    if (!isOverbudgetBannerVisible) {
+      h = Math.min(Math.max(h, 52), 56);
+    }
     if (h > 0) {
       document.documentElement.style.setProperty('--app-header-height', `${h}px`);
     }
@@ -10116,7 +10133,7 @@ function renderCartSection() {
           <div class="ios-card-controls-col">
             <!-- Return to Plan Button -->
             <button type="button" class="btn-ios-return-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja">
-              <span>↩️ Ke Rencana</span>
+              <span>↩️ Rencana</span>
             </button>
 
             <!-- Custom iOS Quantity Stepper -->
@@ -11127,7 +11144,7 @@ function renderAvatarPresets() {
   grid.innerHTML = KAWAII_AVATAR_PRESETS.map(p => {
     const svg = KawaiiArt[p.svgKey] || '🌸';
     return `
-      <button type="button" class="btn-avatar-preset touch-target"
+      <button type="button" class="btn-avatar-preset"
               onclick="selectKawaiiAvatarPreset('${p.id}')"
               title="${escapeHtml(p.title || p.name)}"
               aria-label="${escapeHtml(p.name)}">

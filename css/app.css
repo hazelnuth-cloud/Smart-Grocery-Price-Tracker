@@ -805,21 +805,28 @@ body.theme-dark .app-header {
 }
 
 .brand-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  flex-shrink: 0 !important;
+  min-width: 0 !important;
 }
 
 .brand-logo-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #FFF6F1 0%, #F8DCE5 100%);
-  border: 1px solid var(--border-glass);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm);
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, #FFF6F1 0%, #F8DCE5 100%) !important;
+  border: 1px solid var(--border-glass) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: var(--shadow-sm) !important;
+  flex-shrink: 0 !important;
 }
 
 .brand-logo-badge svg path {
@@ -827,57 +834,69 @@ body.theme-dark .app-header {
 }
 
 .brand-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--text-headline);
-  letter-spacing: -0.02em;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  color: var(--text-headline) !important;
+  letter-spacing: -0.02em !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
 }
 
 /* Profile Badge Trigger */
 .user-profile-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--border-delicate);
-  border-radius: var(--radius-pill);
-  padding: 4px 12px 4px 4px;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid var(--border-delicate) !important;
+  border-radius: var(--radius-pill) !important;
+  padding: 3px 9px 3px 3px !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all var(--transition-normal) !important;
+  max-width: 140px !important;
+  flex-shrink: 0 !important;
 }
 
 .user-profile-badge:hover {
-  background: #FFFFFF;
-  border-color: var(--soft-pink);
-  transform: translateY(-1px);
+  background: #FFFFFF !important;
+  border-color: var(--soft-pink) !important;
+  transform: translateY(-1px) !important;
 }
 
 .user-header-avatar,
 .user-header-avatar-fallback {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  background: linear-gradient(135deg, var(--soft-pink), var(--dusty-rose));
-  color: #FFFFFF;
-  object-fit: cover;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  background: linear-gradient(135deg, var(--soft-pink), var(--dusty-rose)) !important;
+  color: #FFFFFF !important;
+  object-fit: cover !important;
+  flex-shrink: 0 !important;
 }
 
+.user-profile-name,
 .user-header-name {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-headline);
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 11.5px !important;
+  font-weight: 750 !important;
+  color: var(--text-headline) !important;
+  max-width: 80px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  display: inline-block !important;
 }
 
+.user-profile-gear,
 .user-header-gear {
-  font-size: 12px;
+  font-size: 11px !important;
+  opacity: 0.8 !important;
+  flex-shrink: 0 !important;
+}
   opacity: 0.65;
 }
 
@@ -5340,10 +5359,11 @@ body.theme-dark .shopee-bottom-sheet-card::before {
   backdrop-filter: blur(24px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
   display: none;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: center !important;
-  padding: 16px !important;
+  padding: max(20px, env(safe-area-inset-top, 20px)) 16px max(32px, env(safe-area-inset-bottom, 32px)) !important;
   overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
   box-sizing: border-box !important;
 }
 
@@ -5356,11 +5376,12 @@ body.theme-dark .shopee-bottom-sheet-card::before {
   width: 100% !important;
   max-width: 410px !important;
   position: relative !important;
-  margin: auto !important;
+  margin: 0 auto !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
   animation: modalPopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  box-sizing: border-box !important;
 }
 
 /* Floating Top Close Button */
@@ -5402,8 +5423,8 @@ body.theme-dark .shopee-bottom-sheet-card::before {
   color: #2D272E !important;
   font-family: var(--font-sans) !important;
   position: relative !important;
-  max-height: 64vh !important;
-  overflow-y: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
   border: 1.2px solid rgba(244, 191, 208, 0.5) !important;
   box-sizing: border-box !important;
   scrollbar-width: thin;
@@ -6001,8 +6022,7 @@ body.is-scrolled .app-header {
   }
 
   .modal-backdrop:not(.modal-dialog-centered) .modal-card,
-  .profile-settings-backdrop .profile-settings-card,
-  .receipt-modal-backdrop .receipt-modal-container {
+  .profile-settings-backdrop .profile-settings-card {
     width: 100% !important;
     max-width: 100% !important;
     border-radius: 28px 28px 0 0 !important;
@@ -6234,60 +6254,74 @@ button:not(:disabled):active,
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 12px !important;
+  gap: 8px !important;
+  width: 100% !important;
 }
 
 .plan-header-title-wrap {
   display: flex !important;
   flex-direction: column !important;
   gap: 2px !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
 }
 
 .plan-header-title-line {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  min-width: 0 !important;
 }
 
 .plan-page-title {
   font-family: var(--font-serif) !important;
-  font-size: 1.15rem !important;
+  font-size: 1.05rem !important;
   font-weight: 850 !important;
   color: var(--text-headline, #2D272E) !important;
   margin: 0 !important;
-  line-height: 1.25 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  letter-spacing: -0.2px !important;
+  flex-shrink: 0 !important;
 }
 
 .plan-count-badge {
   background: rgba(244, 191, 208, 0.35) !important;
   color: #B95679 !important;
-  padding: 2px 8px !important;
+  padding: 2px 7px !important;
   border-radius: var(--radius-pill) !important;
-  font-size: 11px !important;
+  font-size: 10.5px !important;
   font-weight: 800 !important;
   border: 1px solid rgba(217, 130, 162, 0.35) !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  line-height: 1.2 !important;
 }
 
 .plan-header-subtitle {
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   color: #8A6B79 !important;
   margin: 0 !important;
   font-weight: 600 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* Primary Action CTA in Plan Header */
 .btn-start-shopping-action {
   background: linear-gradient(135deg, #E27396 0%, #B95679 100%) !important;
   color: #FFFFFF !important;
-  padding: 9px 16px !important;
+  padding: 7px 12px !important;
   border-radius: var(--radius-pill) !important;
   border: 1.2px solid rgba(255, 255, 255, 0.9) !important;
-  font-size: 12.5px !important;
+  font-size: 11.5px !important;
   font-weight: 800 !important;
   box-shadow: 0 4px 14px rgba(185, 86, 121, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.85) !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 5px !important;
   cursor: pointer !important;
   flex-shrink: 0 !important;
   white-space: nowrap !important;
@@ -6699,7 +6733,7 @@ button:not(:disabled):active,
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 8px !important;
+  gap: 6px !important;
   width: 100% !important;
   margin-top: 4px !important;
 }
@@ -6707,35 +6741,43 @@ button:not(:disabled):active,
 .ios-card-price-col {
   display: flex !important;
   flex-direction: column !important;
+  justify-content: center !important;
   gap: 1px !important;
   min-width: 0 !important;
+  flex: 1 1 auto !important;
 }
 
 .ios-price-wrap {
   display: flex !important;
-  align-items: baseline !important;
-  gap: 4px !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0 !important;
 }
 
 .ios-price-label {
-  font-size: 10px !important;
+  font-size: 9px !important;
   font-weight: 750 !important;
   color: #8A6B79 !important;
   text-transform: uppercase !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  letter-spacing: 0.2px !important;
 }
 
 .ios-price-value {
-  font-size: 15px !important;
+  font-size: 14.5px !important;
   font-weight: 850 !important;
   color: #B95679 !important;
-  letter-spacing: -0.2px !important;
+  letter-spacing: -0.3px !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
 }
 
 .ios-card-controls-col {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 8px !important;
+  gap: 6px !important;
   flex-shrink: 0 !important;
   margin-left: auto !important;
 }
@@ -6749,7 +6791,7 @@ button:not(:disabled):active,
   border: 1.2px solid rgba(244, 191, 208, 0.75) !important;
   border-radius: var(--radius-pill) !important;
   padding: 2px !important;
-  height: 32px !important;
+  height: 30px !important;
   box-sizing: border-box !important;
   box-shadow: inset 0 1px 2px rgba(185, 86, 121, 0.06) !important;
   flex-shrink: 0 !important;
@@ -6757,18 +6799,18 @@ button:not(:disabled):active,
 
 .ios-stepper-capsule .ios-step-btn,
 .ios-step-btn {
-  width: 26px !important;
-  height: 26px !important;
-  min-width: 26px !important;
-  min-height: 26px !important;
-  max-width: 26px !important;
-  max-height: 26px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
   border-radius: 50% !important;
   background: #FFFFFF !important;
   border: 1px solid rgba(244, 191, 208, 0.6) !important;
   color: #B95679 !important;
   font-weight: 850 !important;
-  font-size: 15px !important;
+  font-size: 13.5px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -6803,18 +6845,18 @@ button:not(:disabled):active,
 }
 
 .ios-step-input {
-  width: 28px !important;
-  height: 26px !important;
-  min-width: 28px !important;
-  max-width: 32px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  max-width: 28px !important;
   text-align: center !important;
   border: none !important;
   background: transparent !important;
-  font-size: 13.5px !important;
+  font-size: 13px !important;
   font-weight: 850 !important;
   color: #2D272E !important;
   outline: none !important;
-  padding: 0 2px !important;
+  padding: 0 1px !important;
   margin: 0 !important;
   -moz-appearance: textfield !important;
   appearance: textfield !important;
@@ -6828,17 +6870,17 @@ button:not(:disabled):active,
 
 /* Add to Cart Button (Shopping Plan) */
 .btn-ios-add-cart {
-  height: 32px !important;
-  padding: 0 12px !important;
+  height: 30px !important;
+  padding: 0 10px !important;
   border-radius: var(--radius-pill) !important;
   background: rgba(255, 255, 255, 0.95) !important;
   border: 1.2px solid rgba(217, 130, 162, 0.6) !important;
   color: #B95679 !important;
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   font-weight: 800 !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 5px !important;
+  gap: 4px !important;
   cursor: pointer !important;
   transition: all 0.18s ease !important;
   box-shadow: 0 2px 8px rgba(185, 86, 121, 0.12) !important;
@@ -6865,13 +6907,13 @@ button:not(:disabled):active,
 
 /* Return to Plan Button (Shopping Cart) */
 .btn-ios-return-plan {
-  height: 32px !important;
-  padding: 0 10px !important;
+  height: 30px !important;
+  padding: 0 8px !important;
   border-radius: var(--radius-pill) !important;
   background: rgba(255, 255, 255, 0.9) !important;
   border: 1px solid rgba(244, 191, 208, 0.5) !important;
   color: #7A6872 !important;
-  font-size: 11px !important;
+  font-size: 10.5px !important;
   font-weight: 750 !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -6879,6 +6921,7 @@ button:not(:disabled):active,
   cursor: pointer !important;
   transition: all 0.15s ease !important;
   white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .btn-ios-return-plan:hover {
@@ -7098,28 +7141,34 @@ button:not(:disabled):active,
    ========================================================================== */
 .btn-avatar-camera {
   position: absolute !important;
-  bottom: -3px !important;
-  right: -3px !important;
-  width: 28px !important;
-  height: 28px !important;
+  bottom: 0px !important;
+  right: 0px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
   border-radius: 50% !important;
   background: linear-gradient(135deg, #FF6584, #B95679) !important;
   color: #FFFFFF !important;
-  border: 2px solid #FFFFFF !important;
+  border: 1.5px solid #FFFFFF !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 13px !important;
+  font-size: 11px !important;
   cursor: pointer !important;
-  box-shadow: 0 3px 10px rgba(185, 86, 121, 0.38) !important;
+  box-shadow: 0 2px 6px rgba(185, 86, 121, 0.35) !important;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
   z-index: 3 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
   touch-action: manipulation !important;
 }
 
 .btn-avatar-camera:hover {
   transform: scale(1.12) !important;
-  box-shadow: 0 5px 14px rgba(185, 86, 121, 0.48) !important;
+  box-shadow: 0 4px 10px rgba(185, 86, 121, 0.45) !important;
 }
 
 .btn-avatar-camera:active {
@@ -7129,7 +7178,8 @@ button:not(:disabled):active,
 .avatar-presets-section {
   width: 100% !important;
   box-sizing: border-box !important;
-  margin-top: 14px !important;
+  margin-top: 10px !important;
+  margin-bottom: 14px !important;
   padding: 12px 14px !important;
   background: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(14px) !important;
@@ -7143,7 +7193,7 @@ button:not(:disabled):active,
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  margin-bottom: 9px !important;
+  margin-bottom: 10px !important;
 }
 
 .avatar-presets-title {
@@ -7179,16 +7229,15 @@ button:not(:disabled):active,
 .avatar-presets-grid {
   display: grid !important;
   grid-template-columns: repeat(6, 1fr) !important;
-  gap: 8px !important;
-  max-height: 145px !important;
-  overflow-y: auto !important;
-  padding: 4px 2px !important;
-  scrollbar-width: thin !important;
+  gap: 6px !important;
+  padding: 2px !important;
 }
 
 .btn-avatar-preset {
-  height: 48px !important;
-  border-radius: 14px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 44px !important;
+  border-radius: 12px !important;
   border: 1.2px solid rgba(244, 191, 208, 0.5) !important;
   background: rgba(255, 255, 255, 0.95) !important;
   display: flex !important;
@@ -7197,7 +7246,7 @@ button:not(:disabled):active,
   cursor: pointer !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   touch-action: manipulation !important;
-  padding: 3px !important;
+  padding: 2px !important;
   box-shadow: 0 2px 6px rgba(185, 86, 121, 0.06), inset 0 1px 1px #FFFFFF !important;
 }
 
@@ -7539,26 +7588,27 @@ button:not(:disabled):active,
 }
 
 /* ==========================================================================
-   4. STICKY KAWAII MASCOT COMPANION (FLOATS ON SCROLL DOWN)
+   4. STICKY KAWAII MASCOT COMPANION (FLOATS ON SCROLL DOWN - BOTTOM RIGHT)
    ========================================================================== */
 .sticky-mascot-companion {
   position: fixed !important;
-  top: 72px !important;
+  bottom: calc(var(--bottom-nav-height, 64px) + 16px + env(safe-area-inset-bottom, 0px)) !important;
   right: 14px !important;
-  z-index: 995 !important;
+  top: auto !important;
+  z-index: 990 !important;
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  padding: 6px 10px 6px 12px !important;
+  gap: 7px !important;
+  padding: 4px 10px 4px 6px !important;
   border-radius: var(--radius-pill) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1.2px solid rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 8px 24px rgba(185, 86, 121, 0.18), inset 0 1px 1px #FFFFFF !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.8) !important;
+  box-shadow: 0 8px 24px rgba(185, 86, 121, 0.2), inset 0 1px 1px #FFFFFF !important;
   cursor: pointer !important;
   opacity: 0 !important;
-  transform: translateY(-16px) scale(0.92) !important;
+  transform: translateY(16px) scale(0.92) !important;
   pointer-events: none !important;
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
   user-select: none !important;
@@ -7573,18 +7623,18 @@ button:not(:disabled):active,
 
 .sticky-mascot-companion:hover {
   transform: translateY(-2px) scale(1.05) !important;
-  box-shadow: 0 12px 28px rgba(185, 86, 121, 0.25), inset 0 1px 1px #FFFFFF !important;
+  box-shadow: 0 12px 28px rgba(185, 86, 121, 0.28), inset 0 1px 1px #FFFFFF !important;
 }
 
 .sticky-mascot-companion:active {
-  transform: scale(0.96) !important;
+  transform: scale(0.94) !important;
 }
 
 .sticky-mascot-bubble {
   background: rgba(255, 240, 246, 0.95) !important;
   border: 1px solid rgba(244, 191, 208, 0.6) !important;
   border-radius: var(--radius-pill) !important;
-  padding: 3px 9px !important;
+  padding: 3px 8px !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   color: #B95679 !important;
@@ -7596,22 +7646,18 @@ button:not(:disabled):active,
 .sticky-mascot-avatar-wrap {
   position: relative !important;
   width: 32px !important;
-  height: 32px !important;
+  height: 28px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  flex-shrink: 0 !important;
 }
 
-.sticky-mascot-cloud {
+.sticky-mascot-svg {
+  display: block !important;
   width: 32px !important;
-  height: 32px !important;
-  border-radius: 50% !important;
-  background: linear-gradient(135deg, #FFE8F0, #FFD2E2) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 18px !important;
-  box-shadow: 0 2px 8px rgba(185, 86, 121, 0.16) !important;
+  height: 24px !important;
+  filter: drop-shadow(0 2px 4px rgba(185, 86, 121, 0.16)) !important;
   animation: kawaiiFloat 3s ease-in-out infinite !important;
 }
 
@@ -7619,10 +7665,10 @@ button:not(:disabled):active,
   position: absolute !important;
   bottom: -1px !important;
   right: -1px !important;
-  width: 10px !important;
-  height: 10px !important;
+  width: 9px !important;
+  height: 9px !important;
   border-radius: 50% !important;
-  border: 2px solid #FFFFFF !important;
+  border: 1.8px solid #FFFFFF !important;
   background: #22C55E !important;
   box-shadow: 0 0 6px rgba(34, 197, 94, 0.6) !important;
   transition: background 0.3s ease, box-shadow 0.3s ease !important;
@@ -7675,13 +7721,14 @@ button:not(:disabled):active,
 
 @media (max-width: 480px) {
   .sticky-mascot-companion {
-    top: 66px !important;
+    bottom: calc(var(--bottom-nav-height, 64px) + 12px + env(safe-area-inset-bottom, 0px)) !important;
     right: 10px !important;
-    padding: 5px 8px 5px 10px !important;
+    top: auto !important;
+    padding: 3px 8px 3px 5px !important;
   }
   .sticky-mascot-bubble {
-    font-size: 10.5px !important;
-    padding: 2px 7px !important;
+    font-size: 10px !important;
+    padding: 2px 6px !important;
   }
 }
 
@@ -7889,4 +7936,293 @@ button:not(:disabled):active,
 
 .chip-tapped {
   animation: chipTapPulse 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ==========================================================================
+   6. COMPREHENSIVE iOS DARK LIQUID GLASS SYSTEM (No Patchy / Belang-Belang UI)
+   ========================================================================== */
+body.dark-mode,
+body.theme-dark {
+  background-color: #120A10 !important;
+  color: #F8E7EE !important;
+}
+
+/* 1. Header & Brand in Dark Mode */
+body.dark-mode .app-header,
+body.theme-dark .app-header {
+  background: rgba(22, 12, 18, 0.88) !important;
+  border-bottom: 1px solid rgba(255, 182, 193, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.dark-mode .brand-title,
+body.theme-dark .brand-title {
+  color: #FFF0F5 !important;
+}
+
+body.dark-mode .user-profile-badge,
+body.theme-dark .user-profile-badge {
+  background: rgba(45, 25, 36, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.22) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .user-profile-name,
+body.theme-dark .user-profile-name {
+  color: #F8E7EE !important;
+}
+
+/* 2. Cards & Containers in Dark Mode */
+body.dark-mode .dashboard-summary-card,
+body.theme-dark .dashboard-summary-card,
+body.dark-mode .plan-header-card,
+body.theme-dark .plan-header-card,
+body.dark-mode .store-location-card,
+body.theme-dark .store-location-card,
+body.dark-mode .budget-status-card,
+body.theme-dark .budget-status-card,
+body.dark-mode .sticky-dashboard-tracker,
+body.theme-dark .sticky-dashboard-tracker,
+body.dark-mode .ios-product-card,
+body.theme-dark .ios-product-card,
+body.dark-mode .category-summary-card,
+body.theme-dark .category-summary-card,
+body.dark-mode .pantry-item-card,
+body.theme-dark .pantry-item-card,
+body.dark-mode .empty-kawaii-card,
+body.theme-dark .empty-kawaii-card,
+body.dark-mode .cancel-shopping-card,
+body.theme-dark .cancel-shopping-card,
+body.dark-mode .cart-unbought-notice,
+body.theme-dark .cart-unbought-notice {
+  background: rgba(28, 16, 24, 0.88) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.14) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+  color: #F8E7EE !important;
+}
+
+/* 3. Card Typography & Text in Dark Mode */
+body.dark-mode .plan-page-title,
+body.theme-dark .plan-page-title,
+body.dark-mode .ios-card-name,
+body.theme-dark .ios-card-name,
+body.dark-mode .dashboard-hero-title,
+body.theme-dark .dashboard-hero-title,
+body.dark-mode .empty-kawaii-title,
+body.theme-dark .empty-kawaii-title,
+body.dark-mode .cancel-shopping-title,
+body.theme-dark .cancel-shopping-title,
+body.dark-mode .store-title,
+body.theme-dark .store-title {
+  color: #FFF2F6 !important;
+}
+
+body.dark-mode .plan-header-subtitle,
+body.theme-dark .plan-header-subtitle,
+body.dark-mode .ios-price-label,
+body.theme-dark .ios-price-label,
+body.dark-mode .empty-kawaii-desc,
+body.theme-dark .empty-kawaii-desc,
+body.dark-mode .cancel-shopping-desc,
+body.theme-dark .cancel-shopping-desc,
+body.dark-mode .dashboard-hero-sub,
+body.theme-dark .dashboard-hero-sub,
+body.dark-mode .store-subtitle,
+body.theme-dark .store-subtitle {
+  color: #CDB4C0 !important;
+}
+
+/* 4. Badges, Chips & Pills in Dark Mode */
+body.dark-mode .plan-count-badge,
+body.theme-dark .plan-count-badge,
+body.dark-mode .ios-unit-pill,
+body.theme-dark .ios-unit-pill,
+body.dark-mode .ios-stability-pill,
+body.theme-dark .ios-stability-pill,
+body.dark-mode .plan-action-chip,
+body.theme-dark .plan-action-chip {
+  background: rgba(55, 30, 44, 0.8) !important;
+  border-color: rgba(255, 182, 193, 0.2) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .ios-price-value,
+body.theme-dark .ios-price-value {
+  color: #FF8DA9 !important;
+}
+
+/* 5. Steppers & Controls in Dark Mode */
+body.dark-mode .ios-stepper-capsule,
+body.theme-dark .ios-stepper-capsule {
+  background: rgba(45, 24, 35, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.25) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .ios-step-btn,
+body.theme-dark .ios-step-btn,
+body.dark-mode .ios-stepper-capsule .ios-step-btn,
+body.theme-dark .ios-stepper-capsule .ios-step-btn {
+  background: #3D2232 !important;
+  border-color: rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .ios-step-btn:hover,
+body.theme-dark .ios-step-btn:hover {
+  background: #502A41 !important;
+}
+
+body.dark-mode .ios-step-input,
+body.theme-dark .ios-step-input {
+  color: #FFF0F5 !important;
+}
+
+body.dark-mode .btn-ios-add-cart,
+body.theme-dark .btn-ios-add-cart,
+body.dark-mode .btn-ios-return-plan,
+body.theme-dark .btn-ios-return-plan {
+  background: rgba(50, 26, 39, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.3) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .btn-ios-add-cart:hover,
+body.theme-dark .btn-ios-add-cart:hover,
+body.dark-mode .btn-ios-return-plan:hover,
+body.theme-dark .btn-ios-return-plan:hover {
+  background: linear-gradient(135deg, #E27396 0%, #B95679 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* 6. Budget Preset Chips in Dark Mode */
+body.dark-mode .budget-preset-chip,
+body.theme-dark .budget-preset-chip {
+  background: rgba(45, 25, 36, 0.9) !important;
+  border-color: rgba(255, 182, 193, 0.18) !important;
+  color: #F8E7EE !important;
+}
+
+body.dark-mode .budget-cycle-segmented-bar,
+body.theme-dark .budget-cycle-segmented-bar {
+  background: rgba(35, 18, 28, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.2) !important;
+}
+
+body.dark-mode .budget-cycle-seg-btn,
+body.theme-dark .budget-cycle-seg-btn {
+  color: #CDB4C0 !important;
+}
+
+body.dark-mode .budget-cycle-seg-btn.active,
+body.theme-dark .budget-cycle-seg-btn.active {
+  background: linear-gradient(135deg, #B95679, #8C3B57) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* 7. Profile Settings Sheet in Dark Mode */
+body.dark-mode .profile-settings-sheet,
+body.theme-dark .profile-settings-sheet {
+  background: rgba(24, 13, 20, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.18) !important;
+  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.dark-mode .modal-profile-name,
+body.theme-dark .modal-profile-name {
+  color: #FFF2F6 !important;
+}
+
+body.dark-mode .modal-profile-email,
+body.theme-dark .modal-profile-email {
+  color: #CDB4C0 !important;
+}
+
+body.dark-mode .avatar-presets-section,
+body.theme-dark .avatar-presets-section {
+  background: rgba(38, 20, 31, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.15) !important;
+}
+
+body.dark-mode .avatar-presets-title,
+body.theme-dark .avatar-presets-title {
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .btn-avatar-preset,
+body.theme-dark .btn-avatar-preset {
+  background: rgba(50, 26, 40, 0.9) !important;
+  border-color: rgba(255, 182, 193, 0.18) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .btn-avatar-preset:hover,
+body.theme-dark .btn-avatar-preset:hover {
+  background: rgba(75, 38, 60, 0.95) !important;
+  border-color: #FF8DA9 !important;
+}
+
+body.dark-mode .btn-avatar-preset.active,
+body.theme-dark .btn-avatar-preset.active {
+  background: rgba(85, 40, 68, 1) !important;
+  border-color: #FF6584 !important;
+  box-shadow: 0 0 0 2px rgba(255, 101, 132, 0.4) !important;
+}
+
+body.dark-mode .settings-group,
+body.theme-dark .settings-group {
+  background: rgba(38, 20, 31, 0.75) !important;
+  border-color: rgba(255, 182, 193, 0.12) !important;
+}
+
+body.dark-mode .settings-item-label,
+body.theme-dark .settings-item-label {
+  color: #FFF0F5 !important;
+}
+
+body.dark-mode .settings-item-desc,
+body.theme-dark .settings-item-desc {
+  color: #CDB4C0 !important;
+}
+
+/* 8. Floating Elements in Dark Mode */
+body.dark-mode .sticky-mascot-companion,
+body.theme-dark .sticky-mascot-companion {
+  background: rgba(35, 18, 28, 0.94) !important;
+  border-color: rgba(255, 182, 193, 0.22) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .sticky-mascot-bubble,
+body.theme-dark .sticky-mascot-bubble {
+  background: rgba(50, 26, 39, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .ios-floating-checkout-dock,
+body.theme-dark .ios-floating-checkout-dock {
+  background: rgba(28, 14, 22, 0.92) !important;
+  border-color: rgba(255, 182, 193, 0.2) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .checkout-dock-label,
+body.theme-dark .checkout-dock-label {
+  color: #CDB4C0 !important;
+}
+
+body.dark-mode .checkout-dock-total,
+body.theme-dark .checkout-dock-total {
+  color: #FFF2F6 !important;
+}
+
+body.dark-mode .bottom-nav-bar,
+body.theme-dark .bottom-nav-bar {
+  background: rgba(22, 12, 18, 0.92) !important;
+  border-top-color: rgba(255, 182, 193, 0.12) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.45) !important;
 }

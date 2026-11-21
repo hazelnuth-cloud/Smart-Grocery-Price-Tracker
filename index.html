@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=160">
+  <link rel="stylesheet" href="./css/app.css?v=162">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -303,17 +303,34 @@
       <div id="pullToRefreshIndicator" class="pull-to-refresh-indicator" aria-hidden="true"><span class="ptr-icon">🌸</span><span class="ptr-label">Tarik untuk memuat ulang...</span></div>
 
       <!-- ========================================================================
-         STICKY KAWAII MASCOT COMPANION (FLOATS ON SCROLL DOWN)
+         STICKY KAWAII MASCOT COMPANION (FLOATS AT BOTTOM RIGHT ON SCROLL DOWN)
          ======================================================================== -->
       <div id="stickyMascotCompanion" class="sticky-mascot-companion state-safe" onclick="handleStickyMascotClick()" title="Sahabat Belanja Cerdas (Ketuk untuk ke atas)">
+        <div class="sticky-mascot-cloud-wrap">
+          <svg width="34" height="30" viewBox="0 0 72 64" fill="none" class="sticky-mascot-svg" aria-hidden="true">
+            <g class="mascot-body-group">
+              <path d="M54 44C58.4 44 62 40.4 62 36C62 31.9 58.9 28.5 54.9 28.1C54.1 21.6 48.6 16.5 41.9 16.5C36.6 16.5 32 19.8 30.1 24.5C28.8 23.6 27.2 23 25.5 23C21.4 23 18 26.4 18 30.5C18 31.2 18.1 31.8 18.3 32.4C14.7 33.3 12 36.6 12 40.5C12 45.2 15.8 49 20.5 49H54C58.4 49 62 45.4 62 41C62 40.6 61.9 40.3 61.8 40" fill="url(#cloudGrad)" />
+              <path d="M54 44C58.4 44 62 40.4 62 36C62 31.9 58.9 28.5 54.9 28.1C54.1 21.6 48.6 16.5 41.9 16.5C36.6 16.5 32 19.8 30.1 24.5C28.8 23.6 27.2 23 25.5 23C21.4 23 18 26.4 18 30.5C18 31.2 18.1 31.8 18.3 32.4C14.7 33.3 12 36.6 12 40.5C12 45.2 15.8 49 20.5 49H54" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" />
+              <!-- Cheeks -->
+              <ellipse cx="23" cy="38" rx="3.5" ry="2.2" fill="url(#blushGrad)" opacity="0.85" />
+              <ellipse cx="45" cy="38" rx="3.5" ry="2.2" fill="url(#blushGrad)" opacity="0.85" />
+              <!-- Eyes & Smile -->
+              <g id="stickyMascotFaceSvgGroup" class="mascot-face-safe">
+                <path id="stickyEyeLeft" d="M26.5 33.5C28 31 31 31 32.5 33.5" stroke="#4A3B43" stroke-width="2.4" stroke-linecap="round" />
+                <path id="stickyEyeRight" d="M37.5 33.5C39 31 42 31 43.5 33.5" stroke="#4A3B43" stroke-width="2.4" stroke-linecap="round" />
+                <path id="stickyMouth" d="M32.5 37.5C34 39 36 39 37.5 37.5" stroke="#4A3B43" stroke-width="2.4" stroke-linecap="round" />
+              </g>
+              <!-- Sakura Petal Hairpin -->
+              <g transform="translate(48, 17) scale(0.7)">
+                <path d="M8 2C10 0 13 2 12 5C11 8 8 10 8 10C8 10 5 8 4 5C3 2 6 0 8 2Z" fill="#F4BFD0" />
+                <circle cx="8" cy="5" r="1.5" fill="#B95679" />
+              </g>
+            </g>
+          </svg>
+          <span class="sticky-mascot-mood-dot" id="stickyMascotMoodDot"></span>
+        </div>
         <div class="sticky-mascot-bubble" id="stickyMascotBubble">
           <span class="sticky-mascot-text" id="stickyMascotText">Aman ♡</span>
-        </div>
-        <div class="sticky-mascot-avatar-wrap">
-          <div class="sticky-mascot-cloud">
-            <span class="sticky-mascot-face" id="stickyMascotFace">🌸</span>
-          </div>
-          <span class="sticky-mascot-mood-dot" id="stickyMascotMoodDot"></span>
         </div>
       </div>
       <!-- ========================================================================
@@ -2245,7 +2262,7 @@
               style="display: none;" onerror="handleModalAvatarError()">
             <div id="modalUserAvatarFallback" class="modal-profile-avatar-fallback">👤</div>
             <span class="profile-online-badge" title="Akun Aktif Online"></span>
-            <button type="button" class="btn-avatar-camera touch-target" onclick="triggerProfileAvatarUpload()" title="Ganti Foto Profil">📷</button>
+            <button type="button" class="btn-avatar-camera" onclick="triggerProfileAvatarUpload()" title="Ganti Foto Profil">📷</button>
             <input type="file" id="profileAvatarFileInput" accept="image/*" style="display: none;" onchange="handleProfileAvatarUpload(event)">
           </div>
           <h3 id="modalUserName" class="modal-profile-name">Pengguna</h3>
@@ -2267,35 +2284,35 @@
             </svg>
             <span id="modalAuthChipText">✓ Terhubung Akun Google</span>
           </div>
+        </div>
 
-          <!-- Avatar Kawaii Preset Selector (Canva Vector Art Collection) -->
+        <!-- Settings Body (Scrollable) -->
+        <div class="profile-modal-body">
+
+          <!-- Avatar Preset Selector -->
           <div class="avatar-presets-section">
             <div class="avatar-presets-header">
-              <span class="avatar-presets-title">✨ Koleksi Avatar Desain Kawaii (Canva Art)</span>
+              <span class="avatar-presets-title">✨ Pilihan Avatar Profil</span>
               <button type="button" class="btn-avatar-upload-text" onclick="triggerProfileAvatarUpload()">
                 <span>📷</span> Upload Foto
               </button>
             </div>
             <div class="avatar-presets-grid" id="avatarPresetsGrid" role="group" aria-label="Pilihan Avatar Kawaii">
               <!-- Dynamically populated via renderAvatarPresets() with fallback -->
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('girl_bun')" title="Chonnie Bun Girl 👧">👧</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('strawberry_cake')" title="Strawberry Shortcake 🍰">🍰</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('rose_teacup')" title="English Rose Teacup ☕">☕</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('english_tea_tin')" title="English Tea Canister 🫖">🫖</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('porcelain_teapot')" title="Floral Teapot 🫖">🫖</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('ribbon_croissant')" title="Ribbon Croissant 🥐">🥐</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('strawberry_cupcake')" title="Strawberry Cupcake 🧁">🧁</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('macaron_tier')" title="Afternoon Tea Tier 🧁">🧁</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('heart_cookie')" title="Heart Jam Cookie 🍪">🍪</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('straw_sunhat')" title="Straw Sunhat 👒">👒</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('tea_bag_heart')" title="Heart Teabag Pouch 🫖">🫖</button>
-              <button type="button" class="btn-avatar-preset touch-target" onclick="selectKawaiiAvatarPreset('rose_bouquet')" title="Pink Rose Bouquet 💐">💐</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('girl_bun')" title="Chonnie Bun Girl 👧">👧</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('strawberry_cake')" title="Strawberry Shortcake 🍰">🍰</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('rose_teacup')" title="English Rose Teacup ☕">☕</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('english_tea_tin')" title="English Tea Canister 🫖">🫖</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('porcelain_teapot')" title="Floral Teapot 🫖">🫖</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('ribbon_croissant')" title="Ribbon Croissant 🥐">🥐</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('strawberry_cupcake')" title="Strawberry Cupcake 🧁">🧁</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('macaron_tier')" title="Afternoon Tea Tier 🧁">🧁</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('heart_cookie')" title="Heart Jam Cookie 🍪">🍪</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('straw_sunhat')" title="Straw Sunhat 👒">👒</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('tea_bag_heart')" title="Heart Teabag Pouch 🫖">🫖</button>
+              <button type="button" class="btn-avatar-preset" onclick="selectKawaiiAvatarPreset('rose_bouquet')" title="Pink Rose Bouquet 💐">💐</button>
             </div>
           </div>
-        </div>
-
-        <!-- Settings Body (Scrollable) -->
-        <div class="profile-modal-body">
 
           <!-- Kelompok 1 - Tampilan -->
           <div class="settings-group">
@@ -2807,8 +2824,8 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/kawaii-art.js?v=160"></script>
-  <script src="./js/app.js?v=160"></script>
+  <script src="./js/kawaii-art.js?v=162"></script>
+  <script src="./js/app.js?v=162"></script>
 
   <!-- Service Worker Registration -->
   <script>

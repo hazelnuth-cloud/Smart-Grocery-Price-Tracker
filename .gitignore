@@ -12,3 +12,5 @@ scratch/
 node_modules/
 .vscode/
 .idea/
+
+.chrome-qa*
