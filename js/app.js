@@ -1,5 +1,40 @@
 
 // =========================================================================
+// HAPTIC FEEDBACK ENGINE (NATIVE iOS / ANDROID VIBRATION API)
+// =========================================================================
+const HapticEngine = {
+  light() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    } catch (_) {}
+  },
+  medium() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(18);
+      }
+    } catch (_) {}
+  },
+  success() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([15, 50, 15]);
+      }
+    } catch (_) {}
+  },
+  warning() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([25, 40, 25]);
+      }
+    } catch (_) {}
+  }
+};
+
+
+// =========================================================================
 // ZERO NATIVE BROWSER DIALOGS (NO "THIS PAGE SAYS" EVER)
 // 100% In-App Aesthetic Modals & Non-Blocking Toast Notifications
 // =========================================================================
@@ -65,6 +100,8 @@ const STORAGE_KEYS = {
   BLACKLIST: 'smart_grocery_blacklist',
   IN_STORE_MODE: 'smart_grocery_instore',
   SOUND_ENABLED: 'smart_grocery_sound',
+  SOUND_VOLUME: 'smart_grocery_sound_volume',
+  SOUND_THEME: 'smart_grocery_sound_theme',
   DARK_MODE: 'smart_grocery_dark_mode',
   SESSION_ID: 'smart_grocery_session',
   FIREBASE_CONFIG: 'smart_grocery_fb_config',
@@ -232,6 +269,8 @@ let AppState = {
   currentTab: 'planner',
   inStoreMode: false,
   soundEnabled: true,
+  soundVolume: 0.75,
+  soundTheme: 'kawaii', // 'kawaii' (Default) | 'musicbox' | 'zen'
   audioCtx: null,
   editingItemId: null,
   itemPendingDeleteId: null,
@@ -946,139 +985,537 @@ function checkOverbudgetBlock(actionName = 'menambah belanjaan', additionalCost 
 }
 
 // =========================================================================
-// 3. AUDIO SYNTHESIS & MICRO-INTERACTIONS (WEB AUDIO API)
+// 3. JAPANESE-INSPIRED SOUND DESIGN SYSTEM (WEB AUDIO API SYNTHESIS)
+// Soft Kawaii, Delicate Music-Box, Marimba, Windchime, & Zen Bell Sounds
 // =========================================================================
-function initAudioContext() {
-  if (!AppState.audioCtx && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) {
-    AppState.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+const SoundEngine = {
+  ctx: null,
+  masterGain: null,
+  hasPlayedWelcome: false,
+  lastPlayed: {},
+
+  init() {
+    if (!this.ctx && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) {
+      try {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioCtxClass();
+        this.masterGain = this.ctx.createGain();
+        const vol = (typeof AppState !== 'undefined' && typeof AppState.soundVolume === 'number') ? AppState.soundVolume : 0.75;
+        this.masterGain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        this.masterGain.connect(this.ctx.destination);
+        if (AppState) AppState.audioCtx = this.ctx;
+      } catch (e) {
+        console.warn('AudioContext init note:', e);
+      }
+    }
+  },
+
+  unlock() {
+    this.init();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().then(() => {
+        if (!this.hasPlayedWelcome && AppState && AppState.soundEnabled) {
+          this.hasPlayedWelcome = true;
+          setTimeout(() => this.play('welcome'), 120);
+        }
+      }).catch(() => {});
+    } else if (!this.hasPlayedWelcome && AppState && AppState.soundEnabled) {
+      this.hasPlayedWelcome = true;
+      setTimeout(() => this.play('welcome'), 120);
+    }
+  },
+
+  setVolume(vol) {
+    if (!this.ctx) this.init();
+    const clamped = Math.max(0, Math.min(1, vol));
+    if (AppState) AppState.soundVolume = clamped;
+    try {
+      localStorage.setItem('smart_grocery_sound_volume', clamped.toString());
+    } catch (e) {}
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setValueAtTime(clamped, this.ctx.currentTime);
+    }
+  },
+
+  setTheme(theme) {
+    if (AppState) AppState.soundTheme = theme;
+    try {
+      localStorage.setItem('smart_grocery_sound_theme', theme);
+    } catch (e) {}
+  },
+
+  play(type) {
+    if (!AppState || !AppState.soundEnabled) return;
+    this.init();
+    if (!this.ctx) return;
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+
+    const now = Date.now();
+    const last = this.lastPlayed[type] || 0;
+    // Throttling to prevent overlapping sounds from becoming annoying
+    const throttles = {
+      click: 45,
+      qty_up: 50,
+      qty_down: 50,
+      nav_switch: 80,
+      add_item: 70,
+      remove_item: 80,
+      add_to_cart: 70,
+      modal_open: 120,
+      modal_close: 120,
+      pantry_update: 100,
+      sync_success: 150,
+      budget_warn: 200,
+      budget_exceed: 250,
+      checkout: 300,
+      welcome: 500,
+      error: 150
+    };
+    if (now - last < (throttles[type] || 60)) return;
+    this.lastPlayed[type] = now;
+
+    const ctx = this.ctx;
+    const dest = this.masterGain || ctx.destination;
+    const theme = (AppState && AppState.soundTheme) ? AppState.soundTheme : 'kawaii';
+    const t0 = ctx.currentTime;
+
+    try {
+      switch (type) {
+        // 1. Website welcome: soft Japanese-inspired opening chime
+        case 'welcome': {
+          if (theme === 'zen') {
+            this._synthBell(t0, 392, 0.14, 0.8, 'sine', dest);
+            this._synthBell(t0 + 0.18, 1318.5, 0.08, 0.5, 'sine', dest);
+            this._synthBell(t0 + 0.32, 1760, 0.06, 0.6, 'sine', dest);
+          } else if (theme === 'musicbox') {
+            const notes = [523.25, 659.25, 783.99, 1046.5];
+            notes.forEach((freq, i) => {
+              this._synthTine(t0 + (i * 0.09), freq, 0.1, 0.45, dest);
+            });
+          } else {
+            // Japanese Soft Kawaii Yo-scale pentatonic bloom (D5, E5, G5, A5, D6)
+            const notes = [587.33, 659.25, 783.99, 880.00, 1174.66];
+            notes.forEach((freq, i) => {
+              this._synthKawaiiTone(t0 + (i * 0.075), freq, 0.09, 0.45, dest);
+            });
+          }
+          break;
+        }
+
+        // 2. Button click: tiny soft pop
+        case 'click': {
+          if (theme === 'zen') {
+            this._synthWoodTap(t0, 620, 0.08, 0.035, dest);
+          } else if (theme === 'musicbox') {
+            this._synthTine(t0, 1174.66, 0.07, 0.03, dest);
+          } else {
+            this._synthWaterDrop(t0, 720, 860, 0.08, 0.035, dest);
+          }
+          break;
+        }
+
+        // 3. Add grocery item: cute "pon" confirmation
+        case 'add_item': {
+          if (theme === 'zen') {
+            this._synthMokugyo(t0, 520, 360, 0.12, 0.08, dest);
+          } else if (theme === 'musicbox') {
+            this._synthTine(t0, 880, 0.11, 0.14, dest);
+            this._synthTine(t0 + 0.05, 1318.5, 0.09, 0.18, dest);
+          } else {
+            // Iconic Kawaii "Pon!" pitch drop
+            this._synthPon(t0, 580, 320, 0.13, 0.09, dest);
+          }
+          break;
+        }
+
+        // 4. Remove grocery item: gentle descending chime
+        case 'remove_item': {
+          if (theme === 'zen') {
+            this._synthBell(t0, 987.77, 0.08, 0.15, 'sine', dest);
+            this._synthBell(t0 + 0.07, 783.99, 0.06, 0.22, 'sine', dest);
+          } else if (theme === 'musicbox') {
+            this._synthTine(t0, 1046.5, 0.09, 0.14, dest);
+            this._synthTine(t0 + 0.07, 659.25, 0.08, 0.2, dest);
+          } else {
+            this._synthMarimba(t0, 880, 0.09, 0.13, dest);
+            this._synthMarimba(t0 + 0.065, 659.25, 0.08, 0.18, dest);
+          }
+          break;
+        }
+
+        // 5. Add to cart: delicate sparkle sound
+        case 'add_to_cart': {
+          if (theme === 'zen') {
+            this._synthBell(t0, 1318.5, 0.09, 0.25, 'sine', dest);
+            this._synthBell(t0 + 0.05, 1760, 0.08, 0.3, 'sine', dest);
+            this._synthBell(t0 + 0.10, 2637, 0.06, 0.35, 'sine', dest);
+          } else if (theme === 'musicbox') {
+            this._synthTine(t0, 1046.5, 0.09, 0.2, dest);
+            this._synthTine(t0 + 0.04, 1318.5, 0.09, 0.22, dest);
+            this._synthTine(t0 + 0.08, 1567.98, 0.08, 0.25, dest);
+            this._synthTine(t0 + 0.12, 2093.0, 0.07, 0.32, dest);
+          } else {
+            const sparkleNotes = [987.77, 1318.51, 1661.22];
+            sparkleNotes.forEach((freq, idx) => {
+              this._synthSparkle(t0 + (idx * 0.045), freq, 0.09, 0.22, dest);
+            });
+          }
+          break;
+        }
+
+        // 6. Increase quantity: subtle soft click
+        case 'qty_up': {
+          this._synthPitchStep(t0, 520, 680, 0.07, 0.028, dest);
+          break;
+        }
+
+        // 7. Decrease quantity: subtle lower-pitched click
+        case 'qty_down': {
+          this._synthPitchStep(t0, 480, 360, 0.07, 0.028, dest);
+          break;
+        }
+
+        // 8. Successful checkout: happy celebratory Japanese-inspired chime
+        case 'checkout': {
+          if (theme === 'zen') {
+            const zenNotes = [392, 523.25, 659.25, 783.99, 1046.5];
+            zenNotes.forEach((freq, i) => {
+              this._synthBell(t0 + (i * 0.08), freq, 0.12, 0.5, 'sine', dest);
+            });
+          } else if (theme === 'musicbox') {
+            const mbNotes = [523.25, 659.25, 783.99, 987.77, 1046.5, 1318.5];
+            mbNotes.forEach((freq, i) => {
+              this._synthTine(t0 + (i * 0.07), freq, 0.11, 0.38, dest);
+            });
+          } else {
+            const celebration = [
+              { freq: 523.25, t: 0.00, d: 0.25 },
+              { freq: 659.25, t: 0.07, d: 0.25 },
+              { freq: 783.99, t: 0.14, d: 0.28 },
+              { freq: 880.00, t: 0.21, d: 0.30 },
+              { freq: 1046.50, t: 0.29, d: 0.55 },
+              { freq: 1318.51, t: 0.37, d: 0.65 }
+            ];
+            celebration.forEach(n => {
+              this._synthKawaiiTone(t0 + n.t, n.freq, 0.12, n.d, dest);
+            });
+          }
+          break;
+        }
+
+        // 9. Budget warning: gentle notification bell
+        case 'budget_warn': {
+          this._synthBell(t0, 440, 0.11, 0.65, 'sine', dest);
+          this._synthBell(t0 + 0.01, 884, 0.05, 0.55, 'sine', dest);
+          break;
+        }
+
+        // 10. Budget exceeded: distinct but soft warning tone
+        case 'budget_exceed': {
+          this._synthMarimba(t0, 293.66, 0.13, 0.16, dest);
+          this._synthMarimba(t0 + 0.12, 277.18, 0.12, 0.20, dest);
+          break;
+        }
+
+        // 11. Navigation switch: delicate UI click
+        case 'nav_switch': {
+          this._synthDelicateTick(t0, 920, 0.05, 0.018, dest);
+          break;
+        }
+
+        // 12. Open modal: soft airy chime
+        case 'modal_open': {
+          this._synthAiryChime(t0, 698.46, 1046.5, 0.08, 0.22, dest);
+          break;
+        }
+
+        // 13. Close modal: gentle fading tone
+        case 'modal_close': {
+          this._synthAiryChime(t0, 1046.5, 783.99, 0.06, 0.18, dest);
+          break;
+        }
+
+        // 14. Pantry update: cute confirmation sound
+        case 'pantry_update': {
+          this._synthMarimba(t0, 698.46, 0.1, 0.12, dest);
+          this._synthMarimba(t0 + 0.07, 880.00, 0.11, 0.18, dest);
+          break;
+        }
+
+        // 15. Successful data synchronization: short positive chime
+        case 'sync_success': {
+          const syncNotes = [659.25, 830.61, 987.77];
+          syncNotes.forEach((freq, idx) => {
+            this._synthKawaiiTone(t0 + (idx * 0.055), freq, 0.08, 0.22, dest);
+          });
+          break;
+        }
+
+        // 16. Error: gentle low-pitched notification
+        case 'error': {
+          this._synthSoftThud(t0, 310, 240, 0.11, 0.09, dest);
+          break;
+        }
+
+        default:
+          this._synthWaterDrop(t0, 650, 750, 0.07, 0.03, dest);
+      }
+    } catch (e) {
+      console.warn('Sound play error:', e);
+    }
+  },
+
+  _synthPon(t, startFreq, endFreq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2200, t);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(startFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
+  },
+
+  _synthMarimba(t, freq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const overtone = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    overtone.type = 'sine';
+    overtone.frequency.setValueAtTime(freq * 3, t);
+    const overGain = this.ctx.createGain();
+    overGain.gain.setValueAtTime(vol * 0.15, t);
+    overGain.gain.exponentialRampToValueAtTime(0.0001, t + (dur * 0.4));
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(gain);
+    overtone.connect(overGain);
+    overGain.connect(dest);
+    gain.connect(dest);
+    osc.start(t);
+    overtone.start(t);
+    osc.stop(t + dur + 0.01);
+    overtone.stop(t + dur + 0.01);
+  },
+
+  _synthKawaiiTone(t, freq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
+  },
+
+  _synthTine(t, freq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const harmonic = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const harmGain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    harmonic.type = 'sine';
+    harmonic.frequency.setValueAtTime(freq * 2.76, t);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    harmGain.gain.setValueAtTime(vol * 0.18, t);
+    harmGain.gain.exponentialRampToValueAtTime(0.0001, t + (dur * 0.35));
+    osc.connect(gain);
+    harmonic.connect(harmGain);
+    gain.connect(dest);
+    harmGain.connect(dest);
+    osc.start(t);
+    harmonic.start(t);
+    osc.stop(t + dur + 0.02);
+    harmonic.stop(t + dur + 0.02);
+  },
+
+  _synthSparkle(t, freq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.linearRampToValueAtTime(freq * 1.02, t + dur);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
+  },
+
+  _synthBell(t, freq, vol, dur, type, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
+  },
+
+  _synthWoodTap(t, freq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(freq, t);
+    filter.Q.setValueAtTime(3, t);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq * 1.2, t);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.7, t + dur);
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
+  },
+
+  _synthMokugyo(t, startFreq, endFreq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(startFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
+  },
+
+  _synthWaterDrop(t, startFreq, endFreq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(startFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
+  },
+
+  _synthPitchStep(t, startFreq, endFreq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(startFreq, t);
+    osc.frequency.linearRampToValueAtTime(endFreq, t + dur);
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
+  },
+
+  _synthDelicateTick(t, freq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.005);
+  },
+
+  _synthAiryChime(t, f1, f2, vol, dur, dest) {
+    const half = dur * 0.45;
+    this._synthBell(t, f1, vol * 0.8, half, 'sine', dest);
+    this._synthBell(t + half * 0.6, f2, vol, dur - half * 0.6, 'sine', dest);
+  },
+
+  _synthSoftThud(t, startFreq, endFreq, vol, dur, dest) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(600, t);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(startFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.01);
   }
+};
+
+// Global User Interaction Listener to Unlock Audio on iOS Safari & Android
+if (typeof window !== 'undefined') {
+  const unlockAudioOnGesture = () => {
+    SoundEngine.unlock();
+  };
+  window.addEventListener('pointerdown', unlockAudioOnGesture, { once: true, passive: true });
+  window.addEventListener('touchstart', unlockAudioOnGesture, { once: true, passive: true });
+  window.addEventListener('click', unlockAudioOnGesture, { once: true, passive: true });
+}
+
+// Backward-Compatible Bridge Functions
+function initAudioContext() {
+  SoundEngine.init();
+}
+
+function playSound(type) {
+  SoundEngine.play(type);
 }
 
 function playCalmChime() {
-  if (!AppState.soundEnabled) return;
-  try {
-    initAudioContext();
-    if (!AppState.audioCtx) return;
-    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
-
-    const ctx = AppState.audioCtx;
-    const now = ctx.currentTime;
-    [523.25, 659.25, 783.99].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now + (idx * 0.06));
-      gain.gain.setValueAtTime(0.08, now + (idx * 0.06));
-      gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.06) + 0.35);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now + (idx * 0.06));
-      osc.stop(now + (idx * 0.06) + 0.38);
-    });
-  } catch (e) { }
+  SoundEngine.play('sync_success');
 }
 
 function playSoftPop() {
-  if (!AppState.soundEnabled) return;
-  try {
-    initAudioContext();
-    if (!AppState.audioCtx) return;
-    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
-
-    const ctx = AppState.audioCtx;
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(440, now);
-    osc.frequency.exponentialRampToValueAtTime(720, now + 0.08);
-    gain.gain.setValueAtTime(0.1, now);
-    gain.gain.linearRampToValueAtTime(0.001, now + 0.08);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.09);
-  } catch (e) { }
+  SoundEngine.play('click');
 }
 
 function playWarningAlertTone() {
-  if (!AppState.soundEnabled) return;
-  try {
-    initAudioContext();
-    if (!AppState.audioCtx) return;
-    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
-
-    const ctx = AppState.audioCtx;
-    const now = ctx.currentTime;
-    [392, 330].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, now + (idx * 0.12));
-      gain.gain.setValueAtTime(0.0001, now + (idx * 0.12));
-      gain.gain.exponentialRampToValueAtTime(0.12, now + (idx * 0.12) + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + (idx * 0.12) + 0.1);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now + (idx * 0.12));
-      osc.stop(now + (idx * 0.12) + 0.11);
-    });
-  } catch (e) { }
+  SoundEngine.play('budget_warn');
 }
 
 function playScannerBeep() {
-  if (!AppState.soundEnabled) return;
-  try {
-    initAudioContext();
-    if (!AppState.audioCtx) return;
-    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
-
-    const ctx = AppState.audioCtx;
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, now);
-    gain.gain.setValueAtTime(0.12, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.13);
-  } catch (e) { }
+  SoundEngine.play('add_item');
 }
 
 function playCelebrationFanfare() {
-  if (!AppState.soundEnabled) return;
-  try {
-    initAudioContext();
-    if (!AppState.audioCtx) return;
-    if (AppState.audioCtx.state === 'suspended') AppState.audioCtx.resume();
-
-    const ctx = AppState.audioCtx;
-    const now = ctx.currentTime;
-    // Cheerful arpeggio melody: C5, E5, G5, C6 (Do-Mi-Sol-Do)
-    const notes = [
-      { freq: 523.25, time: 0.00, dur: 0.12 },
-      { freq: 659.25, time: 0.07, dur: 0.12 },
-      { freq: 783.99, time: 0.14, dur: 0.14 },
-      { freq: 1046.50, time: 0.22, dur: 0.35 }
-    ];
-
-    notes.forEach(n => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(n.freq, now + n.time);
-      gain.gain.setValueAtTime(0.001, now + n.time);
-      gain.gain.exponentialRampToValueAtTime(0.12, now + n.time + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.dur);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now + n.time);
-      osc.stop(now + n.time + n.dur + 0.02);
-    });
-  } catch (e) { }
+  SoundEngine.play('checkout');
 }
 
 // =========================================================================
@@ -1228,7 +1665,7 @@ function _runCuteConfettiAnimation() {
 
   // Vibrant, cheerful pastel-candy palette
   const CUTE_PALETTE = [
-    '#FF4B72', '#E91E63', '#F472B6', '#FDA4AF', '#FB7185',
+    '#FF4B72', '#B95679', '#F472B6', '#FDA4AF', '#FB7185',
     '#C084FC', '#A855F7', '#FBBF24', '#FDE047', '#34D399', '#38BDF8'
   ];
   const CUTE_EMOJIS = ['💖', '💕', '❤️', '🌸', '✨', '⭐', '🎀', '🍓', '🎉', '🥰'];
@@ -1596,7 +2033,7 @@ function loadUserIsolatedState(uid) {
       AppState.userCustomItems = [];
     }
 
-    // 15. User-isolated saved store preferences (preferensi lokasi 1-klik akun user ini)
+    // 15. User-isolated saved store history (riwayat lokasi tersimpan akun user ini)
     const userStores = localStorage.getItem('grocery_user_stores_' + uid);
     if (userStores) {
       try {
@@ -1612,8 +2049,6 @@ function loadUserIsolatedState(uid) {
     }
 
     syncCategoryDropdownOptions();
-    renderQuickUserStoreBar();
-    renderUserSavedStoresChips();
 
     // Reset safety level tracking so no phantom warnings fire
     AppState.previousSafetyLevel = null;
@@ -1652,6 +2087,14 @@ function loadLocalState() {
 
     const storedSound = getStoredItem(STORAGE_KEYS.SOUND_ENABLED);
     if (storedSound !== null) AppState.soundEnabled = JSON.parse(storedSound);
+
+    const storedVol = getStoredItem(STORAGE_KEYS.SOUND_VOLUME);
+    if (storedVol !== null) AppState.soundVolume = parseFloat(storedVol);
+    else AppState.soundVolume = 0.75;
+
+    const storedTheme = getStoredItem(STORAGE_KEYS.SOUND_THEME);
+    if (storedTheme) AppState.soundTheme = storedTheme;
+    else AppState.soundTheme = 'kawaii';
 
     const storedSession = getStoredItem(STORAGE_KEYS.SESSION_ID);
     if (storedSession) AppState.sessionId = storedSession;
@@ -1718,6 +2161,8 @@ function saveLocalState() {
     localStorage.setItem('grocery_routine_items', JSON.stringify(AppState.routineItems || []));
     localStorage.setItem(STORAGE_KEYS.SESSION_ID, AppState.sessionId);
     localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(AppState.soundEnabled));
+    localStorage.setItem(STORAGE_KEYS.SOUND_VOLUME, (AppState.soundVolume !== undefined ? AppState.soundVolume : 0.75).toString());
+    localStorage.setItem(STORAGE_KEYS.SOUND_THEME, AppState.soundTheme || 'kawaii');
     localStorage.setItem(STORAGE_KEYS.IN_STORE_MODE, JSON.stringify(AppState.inStoreMode));
   } catch (err) {
     console.error('LocalStorage save error:', err);
@@ -2003,6 +2448,15 @@ function applyRemoteState(data) {
   if (data.budgetPeriod) AppState.budgetPeriod = data.budgetPeriod;
   if (Array.isArray(data.receipts)) AppState.receipts = data.receipts;
   if (Array.isArray(data.pantry)) AppState.pantry = data.pantry;
+  if (Array.isArray(data.userStores) && data.userStores.length > 0) {
+    const combined = [...data.userStores];
+    (AppState.userStores || []).forEach(s => {
+      if (!combined.some(c => c.toLowerCase() === s.toLowerCase())) {
+        combined.push(s);
+      }
+    });
+    AppState.userStores = combined;
+  }
   if (data.lastUpdated) AppState.lastLocalUpdate = data.lastUpdated;
 
   saveLocalState();
@@ -2024,6 +2478,7 @@ function pushStateToCloud(immediate = false) {
     budgetPeriod: AppState.budgetPeriod || 'weekly',
     receipts: AppState.receipts || [],
     pantry: AppState.pantry || [],
+    userStores: AppState.userStores || [],
     lastUpdated: AppState.lastLocalUpdate
   };
 
@@ -2999,6 +3454,11 @@ function checkAuth() {
     if (syncName) syncName.textContent = AppState.user.name;
     if (syncEmail) syncEmail.textContent = AppState.user.email || 'user@email.com';
 
+    // Update personalized greeting based on user name
+    if (typeof updateDashboardGreeting === 'function') {
+      updateDashboardGreeting();
+    }
+
     // Refresh active tab and components so all buttons are 100% interactive
     if (typeof switchTab === 'function') {
       switchTab(AppState.currentTab || 'planner', true);
@@ -3089,12 +3549,11 @@ function saveUserStorePreference(storeName) {
     AppState.userStores.splice(existingIdx, 1);
   }
   AppState.userStores.unshift(cleanName);
-  if (AppState.userStores.length > 8) {
-    AppState.userStores = AppState.userStores.slice(0, 8);
+  if (AppState.userStores.length > 30) {
+    AppState.userStores = AppState.userStores.slice(0, 30);
   }
   saveLocalState();
-  renderQuickUserStoreBar();
-  renderUserSavedStoresChips();
+  pushStateToCloud();
 }
 
 function deleteUserStore(storeName, event) {
@@ -3117,66 +3576,18 @@ function deleteUserStore(storeName, event) {
   }
 
   saveLocalState();
-  renderQuickUserStoreBar();
-  renderUserSavedStoresChips();
-  showToast(`Lokasi "${storeName}" dihapus dari preferensi Anda.`, 'info');
+  pushStateToCloud();
+  const searchVal = document.getElementById('storePickerSearchInput')?.value || '';
+  renderStorePickerList(searchVal);
+  showToast(`Lokasi "${storeName}" dihapus dari riwayat akun Anda.`, 'info');
 }
 
 function renderQuickUserStoreBar() {
-  const container = document.getElementById('quickUserStoreBar');
-  if (!container) return;
-
-  if (!Array.isArray(AppState.userStores) || AppState.userStores.length === 0) {
-    AppState.userStores = ['Lotte Mart Grocery - Puri Indah', 'Superindo - Kebon Jeruk', 'Grand Lucky - SCBD'];
-  }
-
-  const currentLower = (AppState.currentStore || '').trim().toLowerCase();
-
-  const chipsHtml = AppState.userStores.map(store => {
-    const isActive = store.trim().toLowerCase() === currentLower;
-    return `
-      <button type="button" class="quick-store-chip ${isActive ? 'active' : ''} touch-target"
-        onclick="selectStoreFromPicker('${escapeHtml(store)}')"
-        title="${isActive ? 'Lokasi aktif saat ini' : 'Klik 1x untuk beralih ke ' + escapeHtml(store)}">
-        <span class="quick-store-icon">${getStoreIcon(store)}</span>
-        <span class="quick-store-name">${escapeHtml(store)}</span>
-        <span class="quick-store-del" onclick="deleteUserStore('${escapeHtml(store)}', event)" title="Hapus dari preferensi">&times;</span>
-      </button>
-    `;
-  }).join('');
-
-  container.innerHTML = chipsHtml;
+  // Sistem 1-klik di header ditiadakan sesuai preferensi tampilan bersih
 }
 
 function renderUserSavedStoresChips() {
-  const container = document.getElementById('userSavedStoresChips');
-  const countEl = document.getElementById('userSavedStoresCount');
-  if (!container) return;
-
-  if (!Array.isArray(AppState.userStores) || AppState.userStores.length === 0) {
-    AppState.userStores = ['Lotte Mart Grocery - Puri Indah', 'Superindo - Kebon Jeruk', 'Grand Lucky - SCBD'];
-  }
-
-  if (countEl) {
-    countEl.textContent = `${AppState.userStores.length} lokasi tersimpan`;
-  }
-
-  const currentLower = (AppState.currentStore || '').trim().toLowerCase();
-
-  const chipsHtml = AppState.userStores.map(store => {
-    const isActive = store.trim().toLowerCase() === currentLower;
-    return `
-      <button type="button" class="quick-store-chip ${isActive ? 'active' : ''} touch-target"
-        onclick="selectStoreFromPicker('${escapeHtml(store)}')"
-        title="${isActive ? 'Lokasi aktif saat ini' : 'Klik 1x untuk beralih ke ' + escapeHtml(store)}">
-        <span class="quick-store-icon">${getStoreIcon(store)}</span>
-        <span class="quick-store-name">${escapeHtml(store)}</span>
-        <span class="quick-store-del" onclick="deleteUserStore('${escapeHtml(store)}', event)" title="Hapus dari preferensi">&times;</span>
-      </button>
-    `;
-  }).join('');
-
-  container.innerHTML = chipsHtml;
+  // Sistem 1-klik di modal ditiadakan sesuai preferensi tampilan bersih
 }
 
 function openStorePickerModal() {
@@ -3187,9 +3598,9 @@ function openStorePickerModal() {
   if (customInput) customInput.value = '';
 
   renderStorePickerList('');
-  renderUserSavedStoresChips();
   if (modal) {
     modal.classList.add('active', 'show');
+    SoundEngine.play('modal_open');
   }
   if (searchInput) {
     setTimeout(() => searchInput.focus(), 150);
@@ -3200,6 +3611,7 @@ function closeStorePickerModal() {
   const modal = document.getElementById('storePickerModal');
   if (modal) {
     modal.classList.remove('active', 'show');
+    SoundEngine.play('modal_close');
   }
 }
 
@@ -3214,11 +3626,14 @@ function renderStorePickerList(query = '') {
 
   if (Array.isArray(AppState.userStores)) {
     AppState.userStores.forEach(s => {
-      if (s) {
-        knownStoresMap.set(s.toLowerCase(), {
-          name: s,
-          icon: getStoreIcon(s),
-          tag: 'Toko Favorit Anda ⭐'
+      if (s && s.trim()) {
+        const clean = s.trim();
+        const isPreset = PRESET_SUPERMARKETS.some(p => p.name.toLowerCase() === clean.toLowerCase());
+        knownStoresMap.set(clean.toLowerCase(), {
+          name: clean,
+          icon: getStoreIcon(clean),
+          tag: isPreset ? (PRESET_SUPERMARKETS.find(p => p.name.toLowerCase() === clean.toLowerCase())?.tag || 'Supermarket') : 'Lokasi Riwayat Tersimpan 📍',
+          isUserSaved: !isPreset
         });
       }
     });
@@ -3226,7 +3641,7 @@ function renderStorePickerList(query = '') {
 
   PRESET_SUPERMARKETS.forEach(s => {
     if (!knownStoresMap.has(s.name.toLowerCase())) {
-      knownStoresMap.set(s.name.toLowerCase(), s);
+      knownStoresMap.set(s.name.toLowerCase(), { ...s, isUserSaved: false });
     }
   });
 
@@ -3234,7 +3649,8 @@ function renderStorePickerList(query = '') {
     knownStoresMap.set(AppState.currentStore.toLowerCase(), {
       name: AppState.currentStore,
       icon: getStoreIcon(AppState.currentStore),
-      tag: 'Toko Pilihan Anda'
+      tag: 'Toko Pilihan Anda',
+      isUserSaved: true
     });
   }
 
@@ -3244,7 +3660,8 @@ function renderStorePickerList(query = '') {
         knownStoresMap.set(r.store.toLowerCase(), {
           name: r.store,
           icon: '🧾',
-          tag: 'Dari Riwayat Struk'
+          tag: 'Dari Riwayat Struk',
+          isUserSaved: false
         });
       }
     });
@@ -3266,7 +3683,7 @@ function renderStorePickerList(query = '') {
           <div class="store-picker-item-icon">➕</div>
           <div class="store-picker-item-info">
             <span class="store-picker-item-name">Gunakan "${escapeHtml(rawVal)}"</span>
-            <span class="store-picker-item-desc">Simpan sebagai lokasi favorit baru Anda</span>
+            <span class="store-picker-item-desc">Simpan sebagai lokasi baru akun Anda</span>
           </div>
         </div>
         <span class="store-picker-item-badge" style="background: #E8F5E9; color: #2E7D32; border-color: #C8E6C9;">Pilih ➔</span>
@@ -3288,14 +3705,21 @@ function renderStorePickerList(query = '') {
               <span class="store-picker-item-desc">${escapeHtml(s.tag || 'Supermarket')}</span>
             </div>
           </div>
-          ${isSelected ? `
-            <span class="store-picker-item-badge">
-              <span>✓</span>
-              <span>Terpilih</span>
-            </span>
-          ` : `
-            <span style="font-size: 14px; color: #94A3B8; margin-left: 8px;">➔</span>
-          `}
+          <div style="display: flex; align-items: center; gap: 6px;">
+            ${s.isUserSaved ? `
+              <button type="button" class="btn-store-del touch-target" onclick="deleteUserStore('${escapeHtml(s.name)}', event)" title="Hapus dari riwayat lokasi Anda">
+                ✕
+              </button>
+            ` : ''}
+            ${isSelected ? `
+              <span class="store-picker-item-badge">
+                <span>✓</span>
+                <span>Terpilih</span>
+              </span>
+            ` : `
+              <span style="font-size: 14px; color: #94A3B8; margin-left: 4px;">➔</span>
+            `}
+          </div>
         </div>
       `;
     }).join('');
@@ -3364,14 +3788,12 @@ function selectStoreFromPicker(storeName) {
 
   saveLocalState();
   pushStateToCloud();
-  renderQuickUserStoreBar();
-  renderUserSavedStoresChips();
   renderItems();
   renderCartSection();
 
   playCalmChime();
   if (!isAlreadyActive) {
-    showToast(`Lokasi belanja diubah ke "${val}" 🏬`, 'success');
+    showToast(`Lokasi belanja diatur ke "${val}" 🏬`, 'success');
   }
   closeStorePickerModal();
 }
@@ -3728,9 +4150,6 @@ function renderSessionControls() {
     }
     storeSelect.value = AppState.currentStore;
   }
-
-  // Sync quick favorite store chips bar
-  renderQuickUserStoreBar();
 }
 
 function handleStoreChange(val) {
@@ -4047,6 +4466,7 @@ function renderBudget() {
     if (plannerAlert) {
       plannerAlert.classList.remove('is-hidden');
       plannerAlert.style.setProperty('display', 'flex', 'important');
+      plannerAlert.style.setProperty('flex-direction', 'column', 'important');
     }
     if (miniBar) {
       miniBar.classList.remove('is-visible');
@@ -4178,6 +4598,11 @@ function renderBudget() {
       }
     });
   }
+
+  // Update Personalized Dashboard Greeting & Shopping Insights
+  updateDashboardGreeting();
+  updateDashboardInsights();
+  updateHeroBudgetMascot(safety.level);
 }
 
 /**
@@ -4210,6 +4635,386 @@ function dismissStickySaldoCard(action) {
   }
 }
 
+// =========================================================================
+// PERSONALIZED DASHBOARD GREETING & SHOPPING INSIGHTS (STREAK, HEMAT, KATEGORI)
+// =========================================================================
+
+/**
+ * Dapatkan nama panggilan pengguna untuk sambutan personal
+ */
+function getGreetingDisplayName() {
+  if (AppState.user && AppState.user.name) {
+    const rawName = AppState.user.name.trim();
+    if (rawName) {
+      const firstPart = rawName.split(/\s+/)[0];
+      return firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+    }
+  }
+  const headerNameEl = document.getElementById('headerUserName');
+  if (headerNameEl && headerNameEl.textContent && headerNameEl.textContent.trim()) {
+    const raw = headerNameEl.textContent.trim();
+    if (raw !== 'Masuk Akun' && raw !== 'Pengguna Tamu' && raw !== 'Akun') {
+      const firstPart = raw.split(/\s+/)[0];
+      return firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+    }
+  }
+  return 'Kakak';
+}
+
+/**
+ * Tentukan periode waktu dan ucapan motivasi ramah
+ */
+function getDashboardTimeGreeting() {
+  const hour = new Date().getHours();
+  if (hour >= 4 && hour < 11) {
+    return {
+      period: 'Pagi',
+      badge: 'Pagi yang cerah ☀️',
+      titleSuffix: 'Pagi',
+      emoji: '☀️',
+      sub: 'Yuk, atur rencana belanja hemat hari ini! ✨'
+    };
+  } else if (hour >= 11 && hour < 15) {
+    return {
+      period: 'Siang',
+      badge: 'Siang produktif 🌸',
+      titleSuffix: 'Siang',
+      emoji: '🌸',
+      sub: 'Cek kebutuhan belanja & pantau sisa saldomu 🧺'
+    };
+  } else if (hour >= 15 && hour < 18) {
+    return {
+      period: 'Sore',
+      badge: 'Sore santai ⛅',
+      titleSuffix: 'Sore',
+      emoji: '⛅',
+      sub: 'Waktunya sortir kebutuhan belanja sore ini 🍓'
+    };
+  } else {
+    return {
+      period: 'Malam',
+      badge: 'Malam tenang 🌙',
+      titleSuffix: 'Malam',
+      emoji: '🌙',
+      sub: 'Yuk, evaluasi catatan belanja & hematmu hari ini 💫'
+    };
+  }
+}
+
+/**
+ * Render ucapan selamat personal di bagian atas tab Planner
+ */
+function updateDashboardGreeting() {
+  const greetingSection = document.getElementById('dashboardGreetingSection');
+  if (!greetingSection) return;
+
+  const name = getGreetingDisplayName();
+  const timeInfo = getDashboardTimeGreeting();
+
+  const nameEl = document.getElementById('dashboardGreetingUserName');
+  const badgeEl = document.getElementById('greetingTimePill');
+  const subEl = document.getElementById('dashboardGreetingSubtitle');
+  const titleEl = document.getElementById('dashboardGreetingTitle');
+
+  if (badgeEl) badgeEl.textContent = timeInfo.badge;
+  if (nameEl) nameEl.textContent = name;
+  if (subEl) subEl.textContent = timeInfo.sub;
+  if (titleEl) {
+    titleEl.innerHTML = `Selamat ${timeInfo.titleSuffix}, <span id="dashboardGreetingUserName" class="greeting-name-highlight">${name}</span>! ${timeInfo.emoji}`;
+  }
+}
+
+/**
+ * Hitung streak hari berturut-turut mencatat/menyelesaikan belanja dari AppState.receipts
+ */
+function calculateShoppingStreak() {
+  if (!AppState.receipts || !Array.isArray(AppState.receipts) || AppState.receipts.length === 0) {
+    return 0;
+  }
+  const dates = AppState.receipts
+    .map(r => r.tanggal ? r.tanggal.slice(0, 10) : '')
+    .filter(Boolean);
+  const uniqueDates = Array.from(new Set(dates)).sort().reverse();
+  if (uniqueDates.length === 0) return 0;
+
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+  const latestDate = uniqueDates[0];
+  if (latestDate !== todayStr && latestDate !== yesterdayStr) {
+    return 0;
+  }
+
+  let streak = 0;
+  let checkDate = new Date(latestDate);
+  for (const dateStr of uniqueDates) {
+    const d = new Date(dateStr);
+    const diffDays = Math.round((checkDate - d) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+/**
+ * Hitung total penghematan dari diskon transaksi struk
+ */
+function calculateTotalSavings() {
+  if (!AppState.receipts || !Array.isArray(AppState.receipts) || AppState.receipts.length === 0) {
+    return 0;
+  }
+  return AppState.receipts.reduce((sum, r) => sum + (Number(r.totalHemat) || 0), 0);
+}
+
+/**
+ * Render ringkasan pengeluaran per kategori belanja di dalam kartu dashboard
+ */
+function renderDashboardCategorySummary() {
+  const listEl = document.getElementById('categorySpendingList');
+  const countPill = document.getElementById('categoryActiveCountPill');
+  if (!listEl) return;
+
+  // Sumber data: AppState.cart (atau AppState.items jika di planner belum masuk keranjang)
+  const items = (AppState.cart && AppState.cart.length > 0)
+    ? AppState.cart
+    : (AppState.items && AppState.items.length > 0 ? AppState.items : []);
+
+  if (!items || items.length === 0) {
+    if (countPill) countPill.textContent = '0 Kategori';
+    listEl.innerHTML = `
+      <div class="category-summary-empty">
+        <span class="cat-empty-mascot" aria-hidden="true">🌸</span>
+        <div class="cat-empty-text">
+          <p class="cat-empty-title">Belum ada alokasi belanja</p>
+          <p class="cat-empty-sub">Tambahkan kebutuhan belanja untuk melihat ringkasan kategori</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const totals = {};
+  let grandTotal = 0;
+
+  items.forEach(item => {
+    const rawPrice = item.hargaSatuan || item.hargaAkhirSatuan || 0;
+    const disc = (typeof calculateDiscount === 'function')
+      ? calculateDiscount(rawPrice, item.diskonTipe, item.diskonValue)
+      : { finalPrice: rawPrice };
+    const price = disc.finalPrice || rawPrice;
+    const qty = Number(item.qty) || 1;
+    const sub = price * qty;
+    const cat = item.kategori || 'Bahan Pokok';
+    totals[cat] = (totals[cat] || 0) + sub;
+    grandTotal += sub;
+  });
+
+  if (grandTotal === 0) {
+    if (countPill) countPill.textContent = '0 Kategori';
+    listEl.innerHTML = `
+      <div class="category-summary-empty">
+        <span class="cat-empty-mascot" aria-hidden="true">🌸</span>
+        <div class="cat-empty-text">
+          <p class="cat-empty-title">Belum ada alokasi harga</p>
+          <p class="cat-empty-sub">Isi perkiraan harga barang untuk melihat proporsi belanja</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const catEntries = Object.entries(totals)
+    .map(([cat, amt]) => ({
+      name: cat,
+      amount: amt,
+      percent: Math.round((amt / grandTotal) * 100)
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
+  if (countPill) countPill.textContent = `${catEntries.length} Kategori`;
+
+  // Perbandingan tren dari struk transaksi sebelumnya
+  let prevCatMap = null;
+  if (AppState.receipts && AppState.receipts.length > 0) {
+    prevCatMap = {};
+    const latestRec = AppState.receipts[0];
+    if (latestRec && Array.isArray(latestRec.items)) {
+      latestRec.items.forEach(it => {
+        const c = it.kategori || 'Bahan Pokok';
+        prevCatMap[c] = (prevCatMap[c] || 0) + (it.subtotal || it.totalHarga || (it.hargaAkhirSatuan ? it.hargaAkhirSatuan * it.qty : 0));
+      });
+    }
+  }
+
+  // Tampilkan maksimal 4 kategori teratas agar hemat ruang & tidak memakan setengah layar
+  const visibleEntries = catEntries.slice(0, 4);
+
+  const html = visibleEntries.map(entry => {
+    const icon = (typeof getCategoryIcon === 'function') ? getCategoryIcon(entry.name) : '🏷️';
+    let trendBadge = '';
+    if (prevCatMap && prevCatMap[entry.name] !== undefined) {
+      const prevAmt = prevCatMap[entry.name];
+      if (prevAmt > 0) {
+        const diffPercent = Math.round(((entry.amount - prevAmt) / prevAmt) * 100);
+        if (diffPercent > 5) {
+          trendBadge = `<span class="cat-trend-pill up" title="Pengeluaran kategori naik ${diffPercent}% dibanding belanja sebelumnya">+${diffPercent}% ↗</span>`;
+        } else if (diffPercent < -5) {
+          trendBadge = `<span class="cat-trend-pill down" title="Pengeluaran kategori hemat ${Math.abs(diffPercent)}% dibanding belanja sebelumnya">${diffPercent}% ↘</span>`;
+        } else {
+          trendBadge = `<span class="cat-trend-pill neutral" title="Pengeluaran kategori stabil">Stabil</span>`;
+        }
+      } else {
+        trendBadge = `<span class="cat-trend-pill new">Rencana</span>`;
+      }
+    } else {
+      trendBadge = `<span class="cat-trend-pill new">Rencana</span>`;
+    }
+
+    return `
+      <div class="category-summary-row">
+        <div class="cat-row-top">
+          <div class="cat-row-name-wrap">
+            <span class="cat-row-icon" aria-hidden="true">${icon}</span>
+            <span class="cat-row-name">${entry.name}</span>
+            ${trendBadge}
+          </div>
+          <div class="cat-row-amounts">
+            <span class="cat-row-val">${formatRupiah(entry.amount)}</span>
+            <span class="cat-row-pct">${entry.percent}%</span>
+          </div>
+        </div>
+        <div class="cat-progress-track">
+          <div class="cat-progress-bar" style="width: ${Math.min(100, Math.max(3, entry.percent))}%;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  listEl.innerHTML = html;
+}
+
+/**
+ * Perbarui seluruh indikator insight di dashboard saldo
+ */
+function updateDashboardInsights() {
+  // 1. Shopping Streak
+  const streakValEl = document.getElementById('shoppingStreakValue');
+  const streakSubEl = document.getElementById('shoppingStreakSub');
+  const streak = calculateShoppingStreak();
+  if (streakValEl) {
+    streakValEl.textContent = `${streak} Hari`;
+  }
+  if (streakSubEl) {
+    if (streak === 0) {
+      streakSubEl.textContent = 'Yuk catat belanja pertamamu! ✨';
+    } else if (streak >= 7) {
+      streakSubEl.textContent = 'Hebat! Streak mingguan aktif 🔥';
+    } else if (streak >= 3) {
+      streakSubEl.textContent = 'Konsisten belanja bijak! 🌸';
+    } else {
+      streakSubEl.textContent = 'Catatan belanja tersambung ✨';
+    }
+  }
+
+  // 2. Total Hemat dari Diskon
+  const hematValEl = document.getElementById('totalHematValue');
+  const hematSubEl = document.getElementById('totalHematSub');
+  const totalHemat = calculateTotalSavings();
+  if (hematValEl) {
+    hematValEl.textContent = formatRupiah(totalHemat);
+  }
+  if (hematSubEl) {
+    if (totalHemat > 0) {
+      hematSubEl.textContent = 'Terselamatkan dari diskon! 💖';
+    } else {
+      hematSubEl.textContent = 'Belum ada diskon tercatat 🌸';
+    }
+  }
+
+  // 3. Category Spending Summary
+  renderDashboardCategorySummary();
+}
+
+// =========================================================================
+// DYNAMIC HERO KAWAII MASCOT EMOTIONAL EXPRESSIONS
+// =========================================================================
+
+/**
+ * Update Dynamic Kawaii Mascot Expression & Emotional Speech Message
+ * States: 'safe' (Aman), 'warning' (Rem Dulu), 'danger' (Overbudget)
+ * @param {string} safetyLevel - 'safe' | 'warning' | 'danger'
+ */
+let _mascotBubbleTimeout = null;
+
+function updateHeroBudgetMascot(safetyLevel) {
+  const greetingMascot = document.getElementById('greetingMascot');
+  const bubbleText = document.getElementById('greetingMascotSpeechText');
+  const bubbleEl = document.getElementById('greetingMascotSpeechBubble');
+
+  const level = (safetyLevel === 'danger' || safetyLevel === 'overbudget')
+    ? 'danger'
+    : (safetyLevel === 'warning' ? 'warning' : 'safe');
+
+  if (greetingMascot) {
+    greetingMascot.classList.remove('state-safe', 'state-warning', 'state-danger');
+    greetingMascot.classList.add('state-' + level);
+  }
+
+  let msg = 'Yeay! Belanjamu masih aman! ♡';
+  if (level === 'danger') {
+    msg = 'Oops! Budget kamu terlewati. Yuk evaluasi belanja! 🥺';
+  } else if (level === 'warning') {
+    msg = 'Eits, pelan-pelan ya! Cek sisa saldo 🌸';
+  }
+
+  if (bubbleText) bubbleText.textContent = msg;
+  if (bubbleEl) {
+    bubbleEl.classList.remove('state-safe', 'state-warning', 'state-danger');
+    bubbleEl.classList.add('state-' + level);
+  }
+}
+
+function triggerGreetingMascotReaction() {
+  const greetingMascot = document.getElementById('greetingMascot');
+  const bubbleEl = document.getElementById('greetingMascotSpeechBubble');
+  const bubbleText = document.getElementById('greetingMascotSpeechText');
+
+  if (greetingMascot) {
+    greetingMascot.classList.remove('reacting');
+    void greetingMascot.offsetWidth;
+    greetingMascot.classList.add('reacting');
+  }
+
+  if (typeof SoundEngine !== 'undefined' && SoundEngine.play) {
+    SoundEngine.play('add_item');
+  } else if (typeof playSoftPop === 'function') {
+    playSoftPop();
+  }
+
+  if (bubbleEl) {
+    bubbleEl.style.display = 'flex';
+    bubbleEl.classList.add('show');
+
+    if (_mascotBubbleTimeout) clearTimeout(_mascotBubbleTimeout);
+    _mascotBubbleTimeout = setTimeout(() => {
+      if (bubbleEl) {
+        bubbleEl.classList.remove('show');
+        setTimeout(() => { if (bubbleEl) bubbleEl.style.display = 'none'; }, 250);
+      }
+    }, 3800);
+  }
+}
+
+function triggerMascotReaction() {
+  triggerGreetingMascotReaction();
+}
 // Render Checklist Items with Stepper Touch Targets
 // Render Checklist Items with Compact Horizontal Rows
 
@@ -4226,6 +5031,7 @@ function attachSwipeToDismiss(toast, onDismiss) {
   let currentY = 0;
   let isSwiping = false;
   let isDragging = false;
+  let hasMoved = false;
 
   const onStart = (clientX, clientY, target) => {
     if (target && target.closest && target.closest('.btn-toast-undo')) return false;
@@ -4235,6 +5041,7 @@ function attachSwipeToDismiss(toast, onDismiss) {
     currentY = startY;
     isSwiping = true;
     isDragging = false;
+    hasMoved = false;
     toast.style.setProperty('transition', 'none', 'important');
     if (activeToastTimeout) {
       clearTimeout(activeToastTimeout);
@@ -4252,94 +5059,132 @@ function attachSwipeToDismiss(toast, onDismiss) {
 
     if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
       isDragging = true;
+      hasMoved = true;
     }
 
     if (isDragging) {
-      const dampedY = deltaY > 0 ? deltaY * 0.25 : deltaY;
-      const progress = Math.min(1, Math.max(0, Math.max(Math.abs(deltaX) / 140, Math.abs(dampedY) / 50)));
+      toast.classList.add('is-dragging');
+      const dampedY = deltaY > 0 ? deltaY * 0.4 : deltaY;
+      const progress = Math.min(1, Math.max(0, Math.max(Math.abs(deltaX) / 120, Math.abs(dampedY) / 45)));
       toast.style.setProperty('transform', `translate(${deltaX}px, ${dampedY}px)`, 'important');
-      toast.style.setProperty('opacity', `${Math.max(0.15, 1 - progress * 0.85)}`, 'important');
+      toast.style.setProperty('opacity', `${Math.max(0.12, 1 - progress * 0.88)}`, 'important');
     }
   };
 
   const onEnd = () => {
     if (!isSwiping) return;
     isSwiping = false;
+    toast.classList.remove('is-dragging');
 
     if (!isDragging) {
-      toast.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease', 'important');
-      toast.style.setProperty('transform', 'translateY(0)', 'important');
-      toast.style.setProperty('opacity', '1', 'important');
-      activeToastTimeout = setTimeout(() => {
-        if (toast.parentNode) {
-          toast.classList.add('fade-out');
-          setTimeout(() => { if (toast.parentNode) toast.remove(); }, 250);
-        }
-      }, 3500);
+      // Ketukan singkat tanpa drag -> langsung tutup instan
+      dismissToastWithAnimation('tap');
       return;
     }
 
     const deltaX = currentX - startX;
     const deltaY = currentY - startY;
-    const dismissedUp = deltaY < -20;
-    const dismissedRight = deltaX > 40;
-    const dismissedLeft = deltaX < -40;
+    const dismissedUp = deltaY < -15;
+    const dismissedDown = deltaY > 35;
+    const dismissedRight = deltaX > 30;
+    const dismissedLeft = deltaX < -30;
 
-    if (dismissedUp || dismissedRight || dismissedLeft) {
-      toast.style.setProperty('transition', 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease', 'important');
-      if (dismissedUp) {
-        toast.style.setProperty('transform', `translate(${deltaX}px, -70px)`, 'important');
-      } else if (dismissedRight) {
-        toast.style.setProperty('transform', `translate(${deltaX + 160}px, ${deltaY}px)`, 'important');
-      } else {
-        toast.style.setProperty('transform', `translate(${deltaX - 160}px, ${deltaY}px)`, 'important');
-      }
-      toast.style.setProperty('opacity', '0', 'important');
-      if (typeof playSoftPop === 'function') playSoftPop();
-      setTimeout(() => {
-        if (typeof onDismiss === 'function') onDismiss();
-        if (toast.parentNode) toast.remove();
-      }, 200);
+    if (dismissedUp || dismissedDown || dismissedRight || dismissedLeft) {
+      let direction = 'up';
+      if (dismissedDown) direction = 'down';
+      else if (dismissedRight) direction = 'right';
+      else if (dismissedLeft) direction = 'left';
+      dismissToastWithAnimation(direction, deltaX, deltaY);
     } else {
+      // Kembali ke posisi semula jika tarikan belum mencapai batas
       toast.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease', 'important');
-      toast.style.setProperty('transform', 'translateY(0)', 'important');
+      toast.style.setProperty('transform', 'translate(0, 0)', 'important');
       toast.style.setProperty('opacity', '1', 'important');
       activeToastTimeout = setTimeout(() => {
-        if (toast.parentNode) {
-          toast.classList.add('fade-out');
-          setTimeout(() => { if (toast.parentNode) toast.remove(); }, 250);
-        }
-      }, 3500);
+        dismissToastWithAnimation('up');
+      }, 2500);
     }
   };
 
+  function dismissToastWithAnimation(direction, dx = 0, dy = 0) {
+    toast.style.setProperty('transition', 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease', 'important');
+    if (direction === 'up' || direction === 'tap') {
+      toast.style.setProperty('transform', `translate(${dx}px, -70px) scale(0.92)`, 'important');
+    } else if (direction === 'down') {
+      toast.style.setProperty('transform', `translate(${dx}px, 60px) scale(0.92)`, 'important');
+    } else if (direction === 'right') {
+      toast.style.setProperty('transform', `translate(${dx + 200}px, ${dy}px) scale(0.92)`, 'important');
+    } else if (direction === 'left') {
+      toast.style.setProperty('transform', `translate(${dx - 200}px, ${dy}px) scale(0.92)`, 'important');
+    }
+    toast.style.setProperty('opacity', '0', 'important');
+
+    if (typeof SoundEngine !== 'undefined' && SoundEngine.play) {
+      SoundEngine.play('button_click');
+    }
+
+    setTimeout(() => {
+      if (typeof onDismiss === 'function') onDismiss();
+      if (toast.parentNode) toast.remove();
+    }, 200);
+  }
+
+  // Pointer Events API (Mendukung Mouse, Touch, dan Stylus dengan Pointer Capture)
+  toast.addEventListener('pointerdown', (e) => {
+    if (!onStart(e.clientX, e.clientY, e.target)) return;
+    try {
+      toast.setPointerCapture(e.pointerId);
+    } catch (_) { }
+
+    const onPointerMove = (pe) => {
+      if (pe.pointerId === e.pointerId) {
+        onMove(pe.clientX, pe.clientY);
+      }
+    };
+
+    const onPointerUp = (pe) => {
+      if (pe.pointerId === e.pointerId) {
+        try {
+          toast.releasePointerCapture(e.pointerId);
+        } catch (_) { }
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+        onEnd();
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp, { passive: true });
+    window.addEventListener('pointercancel', onPointerUp, { passive: true });
+  });
+
+  // Touch Events Fallback
   toast.addEventListener('touchstart', (e) => {
-    const t = e.touches[0];
-    onStart(t.clientX, t.clientY, e.target);
+    if (e.touches && e.touches[0]) {
+      const t = e.touches[0];
+      onStart(t.clientX, t.clientY, e.target);
+    }
   }, { passive: true });
 
   toast.addEventListener('touchmove', (e) => {
-    const t = e.touches[0];
-    onMove(t.clientX, t.clientY);
+    if (e.touches && e.touches[0]) {
+      const t = e.touches[0];
+      onMove(t.clientX, t.clientY);
+    }
   }, { passive: true });
 
   toast.addEventListener('touchend', onEnd, { passive: true });
   toast.addEventListener('touchcancel', onEnd, { passive: true });
 
-  toast.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'touch') return;
-    if (!onStart(e.clientX, e.clientY, e.target)) return;
-
-    const onPointerMove = (pe) => onMove(pe.clientX, pe.clientY);
-    const onPointerUp = () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      onEnd();
-    };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-  });
+  // Cegah trigger klik setelah selesai dragging
+  toast.addEventListener('click', (e) => {
+    if (hasMoved) {
+      e.stopPropagation();
+      e.preventDefault();
+      hasMoved = false;
+    }
+  }, true);
 }
 function showToastWithUndo(message, onUndoAction) {
   if (typeof document === 'undefined') return;
@@ -4498,11 +5343,8 @@ function renderItems() {
         <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Daftar rencana belanja masih kosong</p>
         <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Ketik kebutuhan belanja di atas atau pilih dari katalog populer di bawah!</p>
         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 16px; font-size: 0.82rem; font-weight: 800;" onclick="startNewShoppingSession()">
+          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 20px; font-size: 0.82rem; font-weight: 800;" onclick="startNewShoppingSession()">
             🛍️ Muat Barang Rutin
-          </button>
-          <button type="button" class="btn-demo-quick" style="width: auto; padding: 8px 16px; font-size: 0.82rem;" onclick="resetToInitialMockData()">
-            Muat Contoh Data
           </button>
         </div>
       </div>
@@ -4623,7 +5465,7 @@ function renderItems() {
           <span style="font-size: 16px;">🛒</span>
           <span style="font-size: 0.8rem; font-weight: 700; color: #1E293B;">${inCart.length} barang sudah di Keranjang</span>
         </div>
-        <span style="font-size: 0.74rem; font-weight: 800; color: #E91E63;">Buka Keranjang ➔</span>
+        <span style="font-size: 0.74rem; font-weight: 800; color: #B95679;">Buka Keranjang ➔</span>
       </div>
     `;
   }
@@ -4656,13 +5498,24 @@ function updateItemQty(itemId, delta) {
   }
 
   item.qty = newQty;
-  playSoftPop();
+  SoundEngine.play(delta > 0 ? 'qty_up' : 'qty_down');
 
   // Instant DOM update without list re-render (maintains focus & avoids glitch)
   const inputEl = document.getElementById(`qty-input-${item.id}`);
-  if (inputEl) inputEl.value = newQty;
+  if (inputEl) {
+    inputEl.value = newQty;
+    inputEl.classList.remove('qty-bump');
+    void inputEl.offsetWidth;
+    inputEl.classList.add('qty-bump');
+  }
   const cartInputEl = document.getElementById(`cart-qty-${item.id}`);
-  if (cartInputEl) cartInputEl.value = newQty;
+  if (cartInputEl) {
+    cartInputEl.value = newQty;
+    cartInputEl.classList.remove('qty-bump');
+    void cartInputEl.offsetWidth;
+    cartInputEl.classList.add('qty-bump');
+  }
+  if (typeof HapticEngine !== 'undefined') HapticEngine.light();
 
   const disc = calculateDiscount(item.hargaSatuan, item.diskonTipe, item.diskonValue);
   const subtotal = disc.finalPrice * newQty;
@@ -4791,8 +5644,8 @@ function toggleItemCheck(itemId) {
   const item = AppState.cart.find(i => i.id === itemId);
   if (!item) return;
   item.checked = !item.checked;
-  if (item.checked) playCalmChime();
-  else playSoftPop();
+  if (item.checked) SoundEngine.play('add_to_cart');
+  else SoundEngine.play('remove_item');
   saveLocalState();
   pushStateToCloud();
   renderItems();
@@ -4876,7 +5729,7 @@ function executeDeleteItem() {
   AppState.cart.splice(idx, 1);
 
   closeDeleteConfirmModal();
-  playSoftPop();
+  SoundEngine.play('remove_item');
   saveLocalState();
   pushStateToCloud();
   renderAll();
@@ -5364,7 +6217,7 @@ function insertParsedItem(parsed) {
     const addedCost = (existing.hargaSatuan || 0) * (parsed.qty || 1);
     if (addedCost > 0 && checkOverbudgetBlock('menambah kuantitas barang', addedCost)) return;
     existing.qty = Math.min(9999, (existing.qty || 1) + (parsed.qty || 1));
-    playSoftPop();
+    SoundEngine.play('qty_up');
     pushStateToCloud();
     renderAll();
     showToast(`"${parsed.name}" kuantitas ditambah jadi ${existing.qty} ✨`, 'success');
@@ -5396,7 +6249,7 @@ function insertParsedItem(parsed) {
   });
 
   AppState.cart.unshift(newItem);
-  playCalmChime();
+  SoundEngine.play('add_item');
   pushStateToCloud();
   renderAll();
   const priceNotice = initialPrice > 0 ? ` @ ${formatRupiah(initialPrice)}` : '';
@@ -5570,7 +6423,7 @@ function addCatalogItemToPlan(catalogId) {
   const existing = AppState.cart.find(i => (i.namaBarang || '').toLowerCase() === product.name.toLowerCase() && !i.checked);
   if (existing) {
     existing.qty = Math.min(9999, (parseInt(existing.qty, 10) || 1) + 1);
-    playSoftPop();
+    SoundEngine.play('qty_up');
     pushStateToCloud();
     renderAll();
     showToast(`"${product.name}" kuantitas ditambah jadi ${existing.qty} ✨`, 'success');
@@ -5597,7 +6450,7 @@ function addCatalogItemToPlan(catalogId) {
   };
 
   AppState.cart.unshift(newItem);
-  playSoftPop();
+  SoundEngine.play('add_item');
   pushStateToCloud();
   renderAll();
   showToast(`"${product.name}" dicatat di rencana belanja! 🛒`, 'success');
@@ -5642,7 +6495,7 @@ function quickAddFavorite(name, qty, unit, category, price, promoType = 'none', 
   };
 
   AppState.cart.unshift(newItem);
-  playSoftPop();
+  SoundEngine.play('add_item');
   pushStateToCloud();
   renderAll();
   showToast(`"${name}" ditambahkan dari Frequently Bought ✨`, 'success');
@@ -5898,6 +6751,7 @@ function openDetailedItemModal(itemId = null) {
   updateDetailModalPreview();
   if (modal) {
     modal.classList.add('active', 'show');
+    SoundEngine.play('modal_open');
   }
   setTimeout(() => {
     const input = document.getElementById('detailInputName');
@@ -5909,6 +6763,7 @@ function closeDetailedItemModal() {
   const modal = document.getElementById('addItemModal') || document.getElementById('itemDetailModal');
   if (modal) {
     modal.classList.remove('active', 'show');
+    SoundEngine.play('modal_close');
   }
   hideCustomItemSuggestions();
   closeItemPickerModal();
@@ -6446,7 +7301,7 @@ function toggleShoppingMode() {
     }
     if (fabIcon) fabIcon.textContent = '📋';
     if (fabText) fabText.textContent = 'Mode Rencana';
-    if (runningBar) runningBar.classList.remove('d-none');
+    if (runningBar) runningBar.classList.add('d-none'); runningBar.style.display = 'none';
     if (instoreCard) instoreCard.style.display = 'none';
     showToast('Mode Toko aktif • Checklist lorong & pantau sisa saldo', 'info');
   } else {
@@ -6487,7 +7342,7 @@ async function confirmFinishShopping() {
   const metrics = getCartMetrics();
   if (metrics.totalBelanja > AppState.budget) {
     const deficit = metrics.totalBelanja - AppState.budget;
-    playWarningAlertTone();
+    SoundEngine.play('budget_exceed');
     showToast(`Tidak bisa menyelesaikan belanja! Melebihi anggaran dompet. Defisit: ${formatRupiah(deficit)} (Limit: ${formatRupiah(AppState.budget)}). Kurangi barang atau kuantitas terlebih dahulu!`, 'danger');
     highlightOverbudgetBanner();
     return;
@@ -6599,7 +7454,7 @@ async function confirmFinishShopping() {
   if (runningBar) runningBar.classList.add('d-none');
   if (instoreCard) instoreCard.style.display = 'none';
 
-  playCalmChime();
+  SoundEngine.play('checkout');
   saveLocalState();
   pushStateToCloud();
   renderAll();
@@ -6866,12 +7721,12 @@ function generateReceiptData(customReceipt = null) {
   if (elRemainingBudget) elRemainingBudget.textContent = formatRupiah(remainingVal);
 
   // Highlight Kehematan Banner
-  if (elSavingsBanner && elSavingsHighlight) {
+  if (elSavingsBanner) {
+    elSavingsBanner.style.display = 'flex';
     if (discountVal > 0) {
-      elSavingsHighlight.textContent = formatRupiah(discountVal);
-      elSavingsBanner.style.display = 'block';
+      elSavingsBanner.innerHTML = `<span class="savings-sparkle">🎉</span><span class="savings-text">Yeay! Kamu hemat <strong>${formatRupiah(discountVal)}</strong> hari ini ♡</span>`;
     } else {
-      elSavingsBanner.style.display = 'none';
+      elSavingsBanner.innerHTML = `<span class="savings-sparkle">🌸</span><span class="savings-text">Belanja hemat & terkendali bersama Smart Grocery ♡</span>`;
     }
   }
 
@@ -6891,6 +7746,15 @@ function openReceiptModal() {
     modal.style.display = 'flex';
     modal.setAttribute('aria-hidden', 'false');
   }
+  // Mascot celebratory jump on shopping complete
+  const mascot = document.getElementById('greetingMascot');
+  if (mascot) {
+    mascot.classList.remove('celebrating');
+    void mascot.offsetWidth;
+    mascot.classList.add('celebrating');
+    setTimeout(() => { if (mascot) mascot.classList.remove('celebrating'); }, 800);
+  }
+  if (typeof HapticEngine !== 'undefined') HapticEngine.success();
 }
 
 function closeReceiptModal() {
@@ -7160,6 +8024,7 @@ function openAddPantryModal() {
   const modal = document.getElementById('addPantryModal');
   if (modal) {
     modal.classList.add('active', 'show');
+    SoundEngine.play('modal_open');
   }
 }
 
@@ -7167,6 +8032,7 @@ function closeAddPantryModal() {
   const modal = document.getElementById('addPantryModal');
   if (modal) {
     modal.classList.remove('active', 'show');
+    SoundEngine.play('modal_close');
   }
 }
 
@@ -7192,7 +8058,7 @@ function handleManualPantrySubmit(e) {
   saveLocalState();
   closeAddPantryModal();
   renderPantry();
-  playCalmChime();
+  SoundEngine.play('pantry_update');
   showToast(`"${name}" disimpan ke Pantry 🧺`, 'success');
 }
 
@@ -7297,6 +8163,7 @@ function openBudgetModal() {
   updateBudgetPresetChips(AppState.budget);
   if (modal) {
     modal.classList.add('active', 'show');
+    SoundEngine.play('modal_open');
   }
 }
 
@@ -7304,6 +8171,7 @@ function closeBudgetModal() {
   const modal = document.getElementById('budgetModal');
   if (modal) {
     modal.classList.remove('active', 'show');
+    SoundEngine.play('modal_close');
   }
 }
 
@@ -7454,7 +8322,7 @@ function renderHistory() {
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--pastel-light-1);">
         <span style="font-size: 0.68rem; color: var(--text-faint); font-weight: 600;">${(r.items || []).length} jenis barang</span>
-        <button type="button" class="btn-demo-quick" style="margin: 0; padding: 4px 10px; font-size: 0.68rem; font-weight: 700; color: #E91E63;" onclick="viewHistoricalReceipt('${r.id}')">🧾 Lihat Struk Asli</button>
+        <button type="button" class="btn-demo-quick" style="margin: 0; padding: 4px 10px; font-size: 0.68rem; font-weight: 700; color: #B95679;" onclick="viewHistoricalReceipt('${r.id}')">🧾 Lihat Struk Asli</button>
       </div>
     </div>
   `).join('');
@@ -7501,6 +8369,7 @@ function openCloudSyncModal() {
   const modal = document.getElementById('cloudSyncModal');
   if (modal) {
     modal.classList.add('active', 'show');
+    SoundEngine.play('modal_open');
   }
 }
 
@@ -7508,12 +8377,14 @@ function closeCloudSyncModal() {
   const modal = document.getElementById('cloudSyncModal');
   if (modal) {
     modal.classList.remove('active', 'show');
+    SoundEngine.play('modal_close');
   }
 }
 
 function forcePushSingleUserCloud() {
   try {
     pushStateToCloud(true);
+    SoundEngine.play('sync_success');
     showToast('Data berhasil dicadangkan ke Cloud Firestore! ☁️', 'success');
   } catch (err) {
     console.error('Push cloud error:', err);
@@ -7537,6 +8408,7 @@ async function forcePullSingleUserCloud() {
     if (docSnapshot && docSnapshot.exists) {
       const data = docSnapshot.data();
       applyRemoteState(data);
+      SoundEngine.play('sync_success');
       showToast('Data berhasil dipulihkan dari Cloud! ☁️✨', 'success');
     } else {
       showToast('Belum ada cadangan data di Cloud untuk akun ini.', 'info');
@@ -7777,10 +8649,24 @@ function openProfileSettingsModal() {
     themeToggle.checked = document.body.classList.contains('dark-mode') || document.body.classList.contains('theme-dark');
   }
 
-  // 3. Populate Sound FX toggle switch
+  // 3. Populate Japanese Sound Design Settings
   const soundToggle = document.getElementById('settingsSoundToggle');
   if (soundToggle) {
     soundToggle.checked = AppState.soundEnabled !== false;
+  }
+  const soundVolSlider = document.getElementById('settingsSoundVolume');
+  if (soundVolSlider) {
+    const vol = (typeof AppState.soundVolume === 'number') ? AppState.soundVolume : 0.75;
+    const volPercent = Math.round(vol * 100);
+    soundVolSlider.value = volPercent;
+    const label = document.getElementById('soundVolumeLabel');
+    if (label) label.textContent = `Kekuatan suara mikro-interaksi (${volPercent}%)`;
+    const percent = document.getElementById('soundVolumePercent');
+    if (percent) percent.textContent = `${volPercent}%`;
+  }
+  const soundThemeSelect = document.getElementById('settingsSoundTheme');
+  if (soundThemeSelect) {
+    soundThemeSelect.value = AppState.soundTheme || 'kawaii';
   }
 
   // 4. Populate PWA status
@@ -7801,6 +8687,7 @@ function openProfileSettingsModal() {
   modal.style.display = 'flex';
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
+  SoundEngine.play('modal_open');
 }
 
 function closeProfileSettingsModal() {
@@ -7809,6 +8696,7 @@ function closeProfileSettingsModal() {
     modal.style.display = 'none';
     modal.classList.remove('open', 'active', 'show');
     modal.setAttribute('aria-hidden', 'true');
+    SoundEngine.play('modal_close');
   }
 }
 
@@ -7823,7 +8711,35 @@ function toggleSoundFromSettings(checked) {
   localStorage.setItem(STORAGE_KEYS.SOUND_ENABLED, JSON.stringify(checked));
   const btn = document.getElementById('btnSoundToggle');
   if (btn) btn.textContent = checked ? '🔊' : '🔇';
-  showToast(checked ? 'Suara Feedback Aktif 🔊' : 'Suara Dibisukan 🔇', 'info');
+  showToast(checked ? 'Suara Feedback Jepang Aktif 🌸🔊' : 'Suara Dibisukan 🔇', 'info');
+  if (checked) {
+    SoundEngine.play('welcome');
+  }
+}
+
+function changeSoundVolume(val) {
+  const num = parseInt(val, 10);
+  const vol = num / 100;
+  SoundEngine.setVolume(vol);
+  const label = document.getElementById('soundVolumeLabel');
+  if (label) label.textContent = `Kekuatan suara mikro-interaksi (${num}%)`;
+  const percent = document.getElementById('soundVolumePercent');
+  if (percent) percent.textContent = `${num}%`;
+}
+
+function changeSoundTheme(theme) {
+  SoundEngine.setTheme(theme);
+  const themeNames = {
+    kawaii: 'Japanese Soft Kawaii 🌸',
+    musicbox: 'Kotak Musik Celesta 🎵',
+    zen: 'Zen Furin & Bambu 🎐'
+  };
+  showToast(`Tema suara diubah: ${themeNames[theme] || theme}`, 'info');
+  SoundEngine.play('welcome');
+}
+
+function previewCurrentSoundTheme() {
+  SoundEngine.play('checkout');
 }
 
 function handleClearCacheAndReset() {
@@ -7860,6 +8776,7 @@ async function handleProfileLogout() {
 function switchTab(tab, force = false) {
   if (AppState.currentTab === tab && !force) return;
   AppState.currentTab = tab;
+  SoundEngine.play('nav_switch');
   try {
     localStorage.setItem('smart_grocery_current_tab', tab);
     const uid = (AppState.user && AppState.user.uid) ? AppState.user.uid : 'guest';
@@ -8181,10 +9098,15 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `app-toast toast-message ${type}`;
 
-  let icon = 'ℹ️';
-  if (type === 'danger' || type === 'error') icon = '🚨';
-  else if (type === 'success') icon = '✅';
-  else if (type === 'warning') icon = '⚠️';
+  let icon = '✨';
+  if (type === 'danger' || type === 'error') {
+    icon = '🚨';
+    SoundEngine.play('error');
+  } else if (type === 'success') {
+    icon = '🌸';
+  } else if (type === 'warning') {
+    icon = '⚠️';
+  }
 
   // Bersihkan emoji di awal teks pesan agar tidak terjadi ikon ganda dengan ikon bawaan toast
   const cleanMessage = (message || '').replace(/^([\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}]+\s*)+/u, '').trim();
@@ -8227,12 +9149,12 @@ function showToast(message, type = 'info') {
   if (!contentHtml) {
     contentHtml = `
       <div class="toast-stacked-wrap">
-        <div class="toast-desc single-flow" style="margin: 0; line-height: 1.35; font-size: 13px; font-weight: 600; color: #FFFFFF;">${escapeHtml(cleanMessage)}</div>
+        <div class="toast-desc single-flow">${escapeHtml(cleanMessage)}</div>
       </div>
     `;
   }
 
-  toast.innerHTML = `<span class="toast-icon">${icon}</span>${contentHtml}`;
+  toast.innerHTML = `<span class="toast-icon">${icon}</span>${contentHtml}<button type="button" class="toast-close-btn" aria-label="Tutup" onclick="event.stopPropagation(); this.closest('.app-toast').remove();">✕</button>`;
   container.appendChild(toast);
   attachSwipeToDismiss(toast);
 
@@ -8328,7 +9250,7 @@ function initApp() {
   if (AppState.inStoreMode) {
     if (fabIcon) fabIcon.textContent = '📋';
     if (fabText) fabText.textContent = 'Mode Rencana';
-    if (runningBar) runningBar.classList.remove('d-none');
+    if (runningBar) runningBar.classList.add('d-none'); runningBar.style.display = 'none';
     if (instoreCard) instoreCard.style.display = 'block';
   } else {
     if (fabIcon) fabIcon.textContent = '🛒';
@@ -9116,11 +10038,18 @@ function updateCartBadges() {
   const unbought = AppState.cart.filter(i => !i.checked);
   const checked = AppState.cart.filter(i => i.checked);
 
-  // Bottom Nav badge
+  // Bottom Nav badge with iOS spring bounce
   const navBadge = document.getElementById('bottomCartBadge');
   if (navBadge) {
-    navBadge.textContent = AppState.cart.length;
-    navBadge.style.display = AppState.cart.length > 0 ? 'inline-block' : 'none';
+    const prevCount = parseInt(navBadge.textContent, 10) || 0;
+    const newCount = AppState.cart.length;
+    navBadge.textContent = newCount;
+    navBadge.style.display = newCount > 0 ? 'inline-block' : 'none';
+    if (newCount !== prevCount) {
+      navBadge.classList.remove('badge-pop');
+      void navBadge.offsetWidth;
+      navBadge.classList.add('badge-pop');
+    }
   }
 
   // Segment buttons
@@ -9519,6 +10448,12 @@ if (typeof window !== 'undefined') {
   });
 
   // Global window bindings for HTML event handlers
+  window.SoundEngine = SoundEngine;
+  window.playSound = playSound;
+  window.changeSoundVolume = changeSoundVolume;
+  window.changeSoundTheme = changeSoundTheme;
+  window.previewCurrentSoundTheme = previewCurrentSoundTheme;
+  window.toggleSoundFromSettings = toggleSoundFromSettings;
   window.triggerCuteLoginConfetti = triggerCuteLoginConfetti;
   window.playCelebrationFanfare = playCelebrationFanfare;
   window.switchAuthMode = switchAuthMode;
@@ -9555,8 +10490,300 @@ if (typeof window !== 'undefined') {
   window.dismissPwaInstallBanner = dismissPwaInstallBanner;
   window.acceptPwaInstallBanner = acceptPwaInstallBanner;
   window.dismissStickySaldoCard = dismissStickySaldoCard;
+  window.attachSwipeToDismiss = attachSwipeToDismiss;
+  window.showToast = showToast;
+  window.showToastWithUndo = showToastWithUndo;
+  window.updateDashboardGreeting = updateDashboardGreeting;
+  window.updateDashboardInsights = updateDashboardInsights;
+  window.updateHeroBudgetMascot = updateHeroBudgetMascot;
+  window.triggerMascotReaction = triggerMascotReaction;
+  window.calculateShoppingStreak = calculateShoppingStreak;
+  window.calculateTotalSavings = calculateTotalSavings;
+  window.renderDashboardCategorySummary = renderDashboardCategorySummary;
   window.openCancelShoppingModal = openCancelShoppingModal;
   window.closeCancelShoppingModal = closeCancelShoppingModal;
   window.cancelShoppingSession = cancelShoppingSession;
   window.executeCancelShopping = executeCancelShopping;
+}
+
+if (typeof window !== 'undefined') {
+  window.triggerGreetingMascotReaction = triggerGreetingMascotReaction;
+}
+
+
+// =========================================================================
+// ADVANCED iOS LIQUID UX: BOTTOM SHEET DRAG-TO-DISMISS & GESTURES
+// =========================================================================
+
+/**
+ * Universal Drag-to-Dismiss Handler for iOS Bottom Sheets
+ */
+function initBottomSheetGestures() {
+  if (typeof document === 'undefined') return;
+
+  const sheetBackdrops = document.querySelectorAll(
+    '.modal-backdrop:not(.modal-dialog-centered), .profile-settings-backdrop, .receipt-modal-backdrop'
+  );
+
+  sheetBackdrops.forEach(backdrop => {
+    if (backdrop.dataset.sheetGestureAttached) return;
+    backdrop.dataset.sheetGestureAttached = 'true';
+
+    const card = backdrop.querySelector('.modal-card, .profile-settings-card, .receipt-modal-container');
+    if (!card) return;
+
+    // Inject visible drag handle if not already present
+    if (!card.querySelector('.sheet-drag-handle')) {
+      const handle = document.createElement('div');
+      handle.className = 'sheet-drag-handle';
+      handle.setAttribute('aria-hidden', 'true');
+      card.insertBefore(handle, card.firstChild);
+    }
+
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    const onStart = (clientY, target) => {
+      const isHandle = target && target.classList && target.classList.contains('sheet-drag-handle');
+      const isHeader = target && target.closest && (target.closest('.modal-header') || target.closest('.sheet-drag-handle'));
+      if (!isHandle && !isHeader && card.scrollTop > 0) return false;
+
+      startY = clientY;
+      currentY = startY;
+      isDragging = false;
+      return true;
+    };
+
+    const onMove = (clientY, e) => {
+      if (startY === 0) return;
+      currentY = clientY;
+      const deltaY = currentY - startY;
+
+      if (deltaY > 0 && card.scrollTop <= 0) {
+        if (deltaY > 6) {
+          isDragging = true;
+          if (e && e.cancelable) e.preventDefault();
+        }
+        if (isDragging) {
+          const dampedY = Math.pow(deltaY, 0.95);
+          card.style.transition = 'none';
+          card.style.transform = `translateY(${dampedY}px)`;
+          backdrop.style.backgroundColor = `rgba(35, 15, 28, ${Math.max(0.08, 0.42 * (1 - deltaY / 420))})`;
+        }
+      }
+    };
+
+    const onEnd = () => {
+      if (!isDragging) {
+        startY = 0;
+        return;
+      }
+      const deltaY = currentY - startY;
+      isDragging = false;
+      startY = 0;
+
+      if (deltaY > 80) {
+        // Dismiss sheet with fluid spring physics
+        card.style.transition = 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+        card.style.transform = 'translateY(100%)';
+        backdrop.style.transition = 'opacity 0.22s ease';
+        backdrop.style.opacity = '0';
+
+        if (typeof HapticEngine !== 'undefined') HapticEngine.light();
+        if (typeof SoundEngine !== 'undefined') SoundEngine.play('modal_close');
+
+        setTimeout(() => {
+          const id = backdrop.id;
+          if (id === 'addItemModal' && typeof closeDetailedItemModal === 'function') closeDetailedItemModal();
+          else if (id === 'quickPriceModal' && typeof closeQuickPriceModal === 'function') closeQuickPriceModal(false);
+          else if (id === 'quickDiscountPopover' && typeof closeQuickDiscountPopover === 'function') closeQuickDiscountPopover();
+          else if (id === 'budgetModal' && typeof closeBudgetModal === 'function') closeBudgetModal();
+          else if (id === 'addPantryModal' && typeof closeAddPantryModal === 'function') closeAddPantryModal();
+          else if (id === 'blacklistManagerModal' && typeof closeBlacklistManagerModal === 'function') closeBlacklistManagerModal();
+          else if (id === 'cloudSyncModal' && typeof closeCloudSyncModal === 'function') closeCloudSyncModal();
+          else if (id === 'storePickerModal' && typeof closeStorePickerModal === 'function') closeStorePickerModal();
+          else if (id === 'itemPickerModal' && typeof closeItemPickerModal === 'function') closeItemPickerModal();
+          else if (id === 'profileSettingsModal' && typeof closeProfileSettingsModal === 'function') closeProfileSettingsModal();
+          else if (id === 'receiptModal' && typeof closeReceiptModal === 'function') closeReceiptModal();
+          else if (id === 'pwaInstallGuideModal' && typeof closePwaInstallGuideModal === 'function') closePwaInstallGuideModal();
+          else {
+            backdrop.classList.remove('active', 'show', 'open');
+            backdrop.style.display = 'none';
+          }
+          card.style.transform = '';
+          card.style.transition = '';
+          backdrop.style.backgroundColor = '';
+          backdrop.style.opacity = '';
+        }, 220);
+      } else {
+        // Snap back up
+        card.style.transition = 'transform 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.25)';
+        card.style.transform = 'translateY(0)';
+        backdrop.style.transition = 'background-color 0.28s ease';
+        backdrop.style.backgroundColor = '';
+        setTimeout(() => {
+          card.style.transform = '';
+          card.style.transition = '';
+        }, 320);
+      }
+    };
+
+    card.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) onStart(e.touches[0].clientY, e.target);
+    }, { passive: true });
+
+    card.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches[0]) onMove(e.touches[0].clientY, e);
+    }, { passive: false });
+
+    card.addEventListener('touchend', onEnd, { passive: true });
+    card.addEventListener('touchcancel', onEnd, { passive: true });
+  });
+}
+
+/**
+ * Horizontal Swipe Between Top-Level Tabs
+ */
+function initSwipeBetweenTabs() {
+  if (typeof document === 'undefined') return;
+
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let isSwiping = false;
+
+  const dashboard = document.getElementById('mainDashboard');
+  if (!dashboard) return;
+
+  dashboard.addEventListener('touchstart', (e) => {
+    // Ignore swipe when modals, bottom sheets, or range sliders are active
+    if (document.querySelector('.modal-backdrop.active, .modal-backdrop.show, .profile-settings-backdrop.open, .receipt-modal-backdrop.active')) {
+      return;
+    }
+    if (e.target.closest('.quick-budget-presets, input[type="range"], .horizontal-scroll, .catalog-category-filter')) {
+      return;
+    }
+
+    if (e.touches && e.touches[0]) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      currentX = startX;
+      currentY = startY;
+      isSwiping = true;
+    }
+  }, { passive: true });
+
+  dashboard.addEventListener('touchmove', (e) => {
+    if (!isSwiping || !e.touches || !e.touches[0]) return;
+    currentX = e.touches[0].clientX;
+    currentY = e.touches[0].clientY;
+  }, { passive: true });
+
+  dashboard.addEventListener('touchend', () => {
+    if (!isSwiping) return;
+    isSwiping = false;
+
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+
+    if (Math.abs(deltaX) > 65 && Math.abs(deltaX) > 2.2 * Math.abs(deltaY)) {
+      const tabs = ['planner', 'cart', 'budget', 'pantry'];
+      const currentIndex = tabs.indexOf(AppState.currentTab || 'planner');
+      if (currentIndex === -1) return;
+
+      if (deltaX < 0 && currentIndex < tabs.length - 1) {
+        switchTab(tabs[currentIndex + 1]);
+      } else if (deltaX > 0 && currentIndex > 0) {
+        switchTab(tabs[currentIndex - 1]);
+      }
+    }
+    startX = 0;
+    startY = 0;
+  }, { passive: true });
+}
+
+/**
+ * Dynamic Glass Header Scroll Listener
+ */
+function initDynamicHeaderScroll() {
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const isScrolled = window.scrollY > 15;
+        document.body.classList.toggle('is-scrolled', isScrolled);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+/**
+ * Pull to Refresh Handler on Dashboard
+ */
+function initPullToRefresh() {
+  const ptr = document.getElementById('pullToRefreshIndicator');
+  if (!ptr) return;
+
+  let startY = 0;
+  let isPulling = false;
+
+  window.addEventListener('touchstart', (e) => {
+    if (window.scrollY === 0 && e.touches && e.touches[0]) {
+      startY = e.touches[0].clientY;
+      isPulling = false;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (startY === 0 || window.scrollY > 0) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - startY;
+
+    if (deltaY > 15 && deltaY < 120) {
+      isPulling = true;
+      ptr.classList.add('visible');
+      const icon = ptr.querySelector('.ptr-icon');
+      if (icon) icon.style.transform = `rotate(${deltaY * 3}deg)`;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => {
+    if (!isPulling) return;
+    isPulling = false;
+    startY = 0;
+
+    ptr.classList.add('refreshing');
+    if (typeof HapticEngine !== 'undefined') HapticEngine.light();
+
+    setTimeout(() => {
+      if (typeof syncFromCloud === 'function' && AppState.user) {
+        syncFromCloud();
+      } else if (typeof renderAll === 'function') {
+        renderAll();
+      }
+      if (typeof SoundEngine !== 'undefined') SoundEngine.play('sync_success');
+      ptr.classList.remove('refreshing', 'visible');
+    }, 600);
+  }, { passive: true });
+}
+
+// Auto-initialize Liquid UX systems on DOM ready & window resize
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', () => {
+    if (typeof updateNavGlider === 'function') updateNavGlider();
+  }, { passive: true });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    initDynamicHeaderScroll();
+    initBottomSheetGestures();
+    initSwipeBetweenTabs();
+    initPullToRefresh();
+    setTimeout(() => {
+      if (typeof updateNavGlider === 'function') updateNavGlider();
+    }, 150);
+  });
 }

@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=137">
+  <link rel="stylesheet" href="./css/app.css?v=152">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -148,7 +148,7 @@
         <div class="auth-switch-prompt" style="margin-top: 14px; font-size: 0.8rem; color: var(--text-subtle);">
           <span id="authSwitchPromptText">Belum punya akun?</span>
           <button type="button" id="authSwitchBtn" onclick="toggleAuthMode()"
-            style="background: none; border: none; color: #E91E63; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">
+            style="background: none; border: none; color: #B95679; font-weight: 700; cursor: pointer; text-decoration: underline; margin-left: 4px;">
             Daftar di sini
           </button>
         </div>
@@ -276,8 +276,8 @@
         <div class="header-content">
           <div class="brand-wrap">
             <div class="brand-logo-badge">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E91E63" stroke-width="2">
-                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke="#E91E63" stroke-linecap="round"
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B95679" stroke-width="2">
+                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke="#B95679" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
             </div>
@@ -300,6 +300,7 @@
           </div>
         </div>
       </header>
+      <div id="pullToRefreshIndicator" class="pull-to-refresh-indicator" aria-hidden="true"><span class="ptr-icon">🌸</span><span class="ptr-label">Tarik untuk memuat ulang...</span></div>
       <!-- ========================================================================
          TAB 1: BUDGET & RINGKASAN ANGGARAN
          ======================================================================== -->
@@ -323,7 +324,7 @@
             </div>
             <div style="text-align: right; flex-shrink: 0;">
               <span id="budgetLiveValueDisplay" class="price-tag"
-                style="font-size: clamp(0.95rem, 3.5vw, 1.15rem); font-weight: 900; color: #E91E63; white-space: nowrap;">Rp
+                style="font-size: clamp(0.95rem, 3.5vw, 1.15rem); font-weight: 900; color: #B95679; white-space: nowrap;">Rp
                 100.000</span>
               <div style="font-size: 0.65rem; color: var(--text-faint); font-weight: 700; white-space: nowrap;">Batas
                 Anggaran</div>
@@ -382,7 +383,7 @@
           <!-- Progress Track -->
           <div class="progress-section" style="margin-bottom: 14px;">
             <div class="progress-labels">
-              <span id="budgetProgressPercent" style="font-weight: 800; font-size: 0.78rem;">Pengeluaran: 0%</span>
+              <span id="budgetProgressPercent">Pengeluaran: 0%</span>
               <span id="budgetSafetyBadge" class="progress-status-badge badge-safe">● Aman</span>
             </div>
             <div class="progress-track"
@@ -516,6 +517,62 @@
           </button>
         </div>
 
+        <!-- ========================================================================
+           PERSONALIZED DASHBOARD GREETING & MASCOT COMPANION
+           ======================================================================== -->
+        <div id="dashboardGreetingSection" class="dashboard-greeting-banner">
+          <div class="greeting-content-left">
+            <h2 id="dashboardGreetingTitle" class="dashboard-greeting-title">
+              Selamat Pagi, <span id="dashboardGreetingUserName" class="greeting-name-highlight">Kakak</span>! ☀️
+            </h2>
+            <p id="dashboardGreetingSubtitle" class="dashboard-greeting-sub">
+              Yuk, atur rencana belanja hemat hari ini ✨
+            </p>
+          </div>
+          <div id="greetingMascot" class="greeting-mascot interactive touch-target state-safe" onclick="triggerGreetingMascotReaction()" role="button" tabindex="0" aria-label="Maskot Smart Grocery" title="Ketuk untuk berinteraksi dengan maskot!">
+            <!-- Dynamic Kawaii Speech Bubble -->
+            <div id="greetingMascotSpeechBubble" class="greeting-mascot-speech-bubble" style="display: none;">
+              <span id="greetingMascotSpeechText">Yeay! Belanjamu masih aman! ♡</span>
+            </div>
+
+            <svg width="56" height="56" viewBox="0 0 72 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="kawaii-mascot-svg">
+              <defs>
+                <linearGradient id="cloudGrad" x1="10" y1="12" x2="54" y2="52" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#FFFFFF" />
+                  <stop offset="60%" stop-color="#FFEBF2" />
+                  <stop offset="100%" stop-color="#F8DCE5" />
+                </linearGradient>
+                <linearGradient id="blushGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#F4BFD0" />
+                  <stop offset="100%" stop-color="#D982A2" />
+                </linearGradient>
+                <filter id="mascotGlow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#D982A2" flood-opacity="0.15" />
+                </filter>
+              </defs>
+              <g class="mascot-body-group" filter="url(#mascotGlow)">
+                <!-- Chubby Mochi Cloud Body -->
+                <path d="M54 44C58.4 44 62 40.4 62 36C62 31.9 58.9 28.5 54.9 28.1C54.1 21.6 48.6 16.5 41.9 16.5C36.6 16.5 32 19.8 30.1 24.5C28.8 23.6 27.2 23 25.5 23C21.4 23 18 26.4 18 30.5C18 31.2 18.1 31.8 18.3 32.4C14.7 33.3 12 36.6 12 40.5C12 45.2 15.8 49 20.5 49H54C58.4 49 62 45.4 62 41C62 40.6 61.9 40.3 61.8 40" fill="url(#cloudGrad)" />
+                <path d="M54 44C58.4 44 62 40.4 62 36C62 31.9 58.9 28.5 54.9 28.1C54.1 21.6 48.6 16.5 41.9 16.5C36.6 16.5 32 19.8 30.1 24.5C28.8 23.6 27.2 23 25.5 23C21.4 23 18 26.4 18 30.5C18 31.2 18.1 31.8 18.3 32.4C14.7 33.3 12 36.6 12 40.5C12 45.2 15.8 49 20.5 49H54" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" />
+                <!-- Cheeks -->
+                <ellipse cx="23" cy="38" rx="3.5" ry="2.2" fill="url(#blushGrad)" opacity="0.8" />
+                <ellipse cx="45" cy="38" rx="3.5" ry="2.2" fill="url(#blushGrad)" opacity="0.8" />
+                <!-- Eyes - Dynamic states -->
+                <g class="mascot-eyes-safe">
+                  <path d="M26.5 33.5C28 31 31 31 32.5 33.5" stroke="#4A3B43" stroke-width="2.2" stroke-linecap="round" />
+                  <path d="M37.5 33.5C39 31 42 31 43.5 33.5" stroke="#4A3B43" stroke-width="2.2" stroke-linecap="round" />
+                  <path d="M32.5 37.5C34 39 36 39 37.5 37.5" stroke="#4A3B43" stroke-width="2" stroke-linecap="round" />
+                </g>
+                <!-- Sakura Petal Hairpin -->
+                <g transform="translate(48, 17) scale(0.7)">
+                  <path d="M8 2C10 0 13 2 12 5C11 8 8 10 8 10C8 10 5 8 4 5C3 2 6 0 8 2Z" fill="#F4BFD0" />
+                  <circle cx="8" cy="5" r="1.5" fill="#B95679" />
+                </g>
+              </g>
+            </svg>
+          </div>
+        </div>
+
         <!-- MINI STICKY SALDO BAR (MUNCUL SAAT KARTU UTAMA DITUTUP / DIMINIMALKAN) -->
         <div id="stickySaldoMiniBar" class="sticky-saldo-mini-bar safe" style="display: none !important;"
           title="Ketuk untuk membuka kartu saldo lengkap">
@@ -541,6 +598,45 @@
            ======================================================================== -->
         <div id="plannerBudgetAlert" class="sticky-dashboard-tracker planner-budget-alert safe"
           title="Kotak Dashboard Pengendali Anggaran">
+          
+          <!-- Cute Kawaii Corner Mascot & Sakura Decorative Elements (Pointer-Events None, Accessible Hidden) -->
+          <div class="card-mascot-decorations" aria-hidden="true">
+            <!-- Top Right Floating Sakura Blossom & Petals -->
+            <svg class="decor-sakura-corner" width="85" height="85" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M92 8C78 14 68 28 64 42" stroke="#E6A8BE" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+              <!-- Blossom 1 -->
+              <g transform="translate(68, 12) scale(0.95)">
+                <circle cx="12" cy="12" r="3" fill="#FFE699" />
+                <circle cx="12" cy="5" r="4.5" fill="#F8DCE5" />
+                <circle cx="19" cy="9" r="4.5" fill="#F4BFD0" />
+                <circle cx="17" cy="17" r="4.5" fill="#F8DCE5" />
+                <circle cx="7" cy="17" r="4.5" fill="#F4BFD0" />
+                <circle cx="5" cy="9" r="4.5" fill="#F8DCE5" />
+              </g>
+              <!-- Floating Petal 1 -->
+              <path d="M52 28C50 24 44 26 43 30C42 34 48 35 51 33C54 31 54 30 52 28Z" fill="#F4BFD0" opacity="0.75" />
+              <!-- Floating Petal 2 -->
+              <path d="M78 45C76 42 71 44 70 48C69 52 74 53 77 51C80 49 80 47 78 45Z" fill="#F8DCE5" opacity="0.7" />
+            </svg>
+            
+            <!-- Bottom Left / Accent Kawaii Mini Cloud Companion -->
+            <svg class="decor-cloud-bottom" width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 28C9 28 7 25 7 22C7 19 9.5 17 12.5 17C13 14 15.5 11 19 11C23 11 25.5 14 26 16C27.5 15 29.5 15 31 16.5C33 18 33 20.5 33 22C35 22 37 24 37 26C37 28 35 28 33 28H12Z" fill="#FFFFFF" fill-opacity="0.65" />
+              <!-- Eyes & Smile -->
+              <circle cx="18" cy="20" r="1" fill="#7A6872" opacity="0.7" />
+              <circle cx="25" cy="20" r="1" fill="#7A6872" opacity="0.7" />
+              <path d="M21 22C21.5 22.8 22.5 22.8 23 22" stroke="#7A6872" stroke-width="0.8" stroke-linecap="round" opacity="0.7" />
+              <!-- Blushes -->
+              <circle cx="16" cy="21.5" r="1.2" fill="#F4BFD0" opacity="0.8" />
+              <circle cx="27" cy="21.5" r="1.2" fill="#F4BFD0" opacity="0.8" />
+            </svg>
+
+            <!-- Delicate Star Sparkles -->
+            <span class="decor-sparkle s1" aria-hidden="true">✦</span>
+            <span class="decor-sparkle s2" aria-hidden="true">✧</span>
+            <span class="decor-sparkle s3" aria-hidden="true">✦</span>
+          </div>
+
           <!-- Baris 1: Status Aktif (Blinking Live Pulse), Badge Saldo & Link Atur -->
           <div class="tracker-header-row">
             <div class="tracker-header-left">
@@ -593,15 +689,50 @@
             <div id="budgetSlimProgressBar" class="tracker-progress-fill" style="width: 0%; background: #10B981;"></div>
           </div>
 
-          <!-- Baris 4: Kotak Peringatan Bertingkat (Sengaja Didesain Rapi Kebawah, Bebas Overlapping & No Ellipsis) -->
-          <div id="trackerAlertNotice" class="tracker-alert-notice safe" onclick="switchTab('budget')"
-            style="cursor: pointer;" title="Klik untuk kelola anggaran belanja">
-            <div class="tracker-alert-notice-header">
-              <span id="plannerAlertIcon" class="tracker-alert-icon">💚</span>
-              <div id="plannerAlertTitle" class="tracker-alert-title">Status Saldo: Terkendali</div>
+          <!-- Baris 4: Kotak Peringatan Bertingkat & Dynamic Animated Kawaii Companion -->
+          <!-- Baris 5: INSIGHTS BLOCK (SHOPPING STREAK, TOTAL HEMAT & ALOKASI KATEGORI) -->
+          <div id="dashboardInsightsContainer" class="dashboard-insights-container">
+            <!-- Streak & Total Hemat 2-Column Grid -->
+            <div class="insights-dual-grid">
+              <div id="shoppingStreakCard" class="insight-stat-card streak-card">
+                <div class="insight-stat-top">
+                  <span class="insight-stat-icon" aria-hidden="true">🔥</span>
+                  <span class="insight-stat-label">Shopping Streak</span>
+                </div>
+                <div class="insight-stat-main">
+                  <span id="shoppingStreakValue" class="insight-stat-value">0 Hari</span>
+                </div>
+                <div class="insight-stat-footer">
+                  <span id="shoppingStreakSub" class="insight-stat-sub">Mulai belanja yuk! ✨</span>
+                </div>
+              </div>
+
+              <div id="totalHematCard" class="insight-stat-card hemat-card">
+                <div class="insight-stat-top">
+                  <span class="insight-stat-icon" aria-hidden="true">🏷️</span>
+                  <span class="insight-stat-label">Total Hemat</span>
+                </div>
+                <div class="insight-stat-main">
+                  <span id="totalHematValue" class="insight-stat-value">Rp 0</span>
+                </div>
+                <div class="insight-stat-footer">
+                  <span id="totalHematSub" class="insight-stat-sub">Dari promo &amp; diskon 🌸</span>
+                </div>
+              </div>
             </div>
-            <div id="plannerAlertDesc" class="tracker-alert-desc">
-              Total belanja Rp 0 dari batas saldo Rp 100.000 • Sisa saldo aman: Rp 100.000.
+
+            <!-- Category Spending Summary (Compact iOS Grouped List) -->
+            <div id="categorySpendingSummary" class="category-spending-card">
+              <div class="category-spending-header">
+                <div class="cat-header-title">
+                  <span class="cat-title-icon" aria-hidden="true">📊</span>
+                  <span class="cat-title-text">Alokasi Belanja Kategori</span>
+                </div>
+                <span id="categoryActiveCountPill" class="cat-count-pill">0 Kategori</span>
+              </div>
+              <div id="categorySpendingList" class="category-spending-list">
+                <!-- Dynamically populated by renderCategorySpendingSummary() -->
+              </div>
             </div>
           </div>
 
@@ -685,26 +816,6 @@
             </select>
             <button type="button" id="btnToggleCustomStore" style="display: none;"
               onclick="openStorePickerModal()"></button>
-          </div>
-
-          <!-- Divider Garis Halus -->
-          <div class="modern-store-divider"></div>
-
-          <!-- Quick 1-Click Store Switcher Bar (User Favorite Stores) -->
-          <div class="quick-store-wrapper" style="padding: 2px 4px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <span
-                style="font-size: 10px; font-weight: 700; color: var(--text-subtle); letter-spacing: 0.3px; text-transform: uppercase;">
-                ⭐ Toko Favorit Anda (1-Klik):
-              </span>
-              <button type="button" class="touch-target" onclick="openStorePickerModal()"
-                style="border: none; background: transparent; color: #E91E63; font-size: 10.5px; font-weight: 700; cursor: pointer; padding: 0;">
-                + Tambah / Cari 🔍
-              </button>
-            </div>
-            <div id="quickUserStoreBar" class="quick-user-store-bar" aria-label="Preferensi Toko Tersimpan">
-              <!-- Dinamis di-render via renderQuickUserStoreBar() -->
-            </div>
           </div>
 
           <!-- Divider Garis Halus -->
@@ -986,7 +1097,7 @@
       <!-- ========================================================================
          RUNNING CART BAR (IN-STORE MODE FLOATING BAR)
          ======================================================================== -->
-      <div id="runningCartBar" class="running-cart-bar d-none">
+      <div id="runningCartBar" class="running-cart-bar d-none" style="display: none !important;">
         <div class="running-cart-container">
           <div class="running-cart-info">
             <div
@@ -994,7 +1105,7 @@
               Keranjang Toko
             </div>
             <div
-              style="font-weight: 800; font-size: 1.05rem; color: #E91E63; display: flex; align-items: baseline; gap: 4px; line-height: 1.2;">
+              style="font-weight: 800; font-size: 1.05rem; color: #B95679; display: flex; align-items: baseline; gap: 4px; line-height: 1.2;">
               <span id="runningCartTotalVal">Rp 0</span>
               <span style="font-size: 0.72rem; color: var(--text-subtle); font-weight: 600;">(<span
                   id="runningCartCheckedCount">0</span> item)</span>
@@ -1027,6 +1138,7 @@
          ======================================================================== -->
       <nav class="bottom-nav-bar">
         <div class="bottom-nav-container">
+          <div id="navIndicatorGlider" class="nav-indicator-glider" aria-hidden="true"></div>
           <!-- Tab 1: Planner (Rencana) -->
           <button class="bottom-nav-item active touch-target" onclick="switchTab('planner')"
             title="Checklist Rencana Belanja" aria-label="Planner">
@@ -1133,7 +1245,7 @@
                 autocomplete="off"
                 style="font-size: 13px; font-weight: 700; height: 38px; padding-right: 40px; flex: 1;">
               <button type="button" class="touch-target btn-item-catalog-trigger"
-                style="position: absolute; right: 4px; width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #E91E63; border-radius: 8px;"
+                style="position: absolute; right: 4px; width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #B95679; border-radius: 8px;"
                 onclick="openItemPickerModal()" title="Buka menu katalog rekomendasi barang">
                 📋
               </button>
@@ -1167,7 +1279,7 @@
                 style="font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Harga Satuan</label>
               <input type="number" inputmode="numeric" id="detailInputPrice" class="form-control" min="0"
                 max="999999999" step="100" placeholder="Rp 0" oninput="updateDetailModalPreview()"
-                style="font-size: 13px; font-weight: 800; color: #E91E63; height: 38px;">
+                style="font-size: 13px; font-weight: 800; color: #B95679; height: 38px;">
             </div>
           </div>
 
@@ -1220,7 +1332,7 @@
                   <label class="form-label" style="margin: 0; font-size: 11px; white-space: nowrap; flex-shrink: 0;">🏷️
                     Diskon / Promo</label>
                   <span id="detailEffectivePercentBadge" class="frequent-chip"
-                    style="display: none; font-size: 0.68rem; padding: 2px 7px; font-weight: 800; background: #FCE7F3; color: #E91E63; border-color: #FBCFE8; white-space: nowrap; flex-shrink: 0;">Hemat
+                    style="display: none; font-size: 0.68rem; padding: 2px 7px; font-weight: 800; background: #FCE7F3; color: #B95679; border-color: #FBCFE8; white-space: nowrap; flex-shrink: 0;">Hemat
                     0%</span>
                 </div>
                 <div class="quick-disc-presets" id="quickDiscPresets"
@@ -1268,7 +1380,7 @@
                 <label
                   style="display: flex; align-items: center; gap: 8px; font-size: 0.76rem; font-weight: 700; color: #222222; cursor: pointer; margin: 0; white-space: nowrap;">
                   <input type="checkbox" id="detailInputIsRoutine"
-                    style="accent-color: #E91E63; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0;">
+                    style="accent-color: #B95679; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0;">
                   <span style="white-space: nowrap;">🔁 Tandai sebagai Rutin Harian</span>
                 </label>
                 <div style="font-size: 0.68rem; color: #757575; margin-left: 24px; margin-top: 2px; line-height: 1.35;">
@@ -1284,7 +1396,7 @@
                   <span style="color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Harga Akhir
                     Satuan:</span>
                   <span id="previewFinalPriceText"
-                    style="font-weight: 800; color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp 0</span>
+                    style="font-weight: 800; color: #B95679; white-space: nowrap; flex-shrink: 0;">Rp 0</span>
                 </div>
                 <div id="previewSavingsText"
                   style="color: #059669; font-weight: 700; margin-bottom: 3px; display: none; white-space: nowrap;">
@@ -1298,7 +1410,7 @@
                 <div
                   style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--pastel-light-1); padding-top: 4px; margin-top: 4px; font-weight: 800; font-size: 0.85rem; gap: 6px;">
                   <span style="white-space: nowrap; flex-shrink: 0;">Subtotal Baris:</span>
-                  <span id="previewSubtotalText" style="color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp
+                  <span id="previewSubtotalText" style="color: #B95679; white-space: nowrap; flex-shrink: 0;">Rp
                     0</span>
                 </div>
               </div>
@@ -1315,7 +1427,7 @@
     <!-- ========================================================================
        MODAL: BATALKAN SESI BELANJA (CANCEL SHOPPING MODAL)
        ======================================================================== -->
-    <div id="cancelShoppingModal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true"
+    <div id="cancelShoppingModal" class="modal-backdrop modal-dialog-centered" style="display: none;" role="dialog" aria-modal="true"
       aria-labelledby="cancelModalTitle" onclick="if(event.target===this)closeCancelShoppingModal()">
       <div class="modal-card cancel-shopping-card">
         <div class="cancel-modal-header">
@@ -1346,7 +1458,7 @@
     <!-- ========================================================================
        MODAL: KONFIRMASI HAPUS ITEM
        ======================================================================== -->
-    <div id="deleteConfirmModal" class="modal-backdrop" onclick="if(event.target===this)closeDeleteConfirmModal()">
+    <div id="deleteConfirmModal" class="modal-backdrop modal-dialog-centered" onclick="if(event.target===this)closeDeleteConfirmModal()">
       <div class="modal-card" style="text-align: center;">
         <div style="font-size: 36px; margin-bottom: 8px;">🗑️</div>
         <h3 class="serif-font"
@@ -1371,7 +1483,7 @@
     <!-- ========================================================================
        MODAL: ANTI-LIST / BLACKLIST WARNING MODAL
        ======================================================================== -->
-    <div id="blacklistWarningModal" class="modal-backdrop" onclick="if(event.target===this)cancelBlacklistAdd()">
+    <div id="blacklistWarningModal" class="modal-backdrop modal-dialog-centered" onclick="if(event.target===this)cancelBlacklistAdd()">
       <div class="modal-card">
         <div class="modal-header">
           <h3 class="serif-font" style="font-size: 1.05rem; color: var(--status-danger); line-height: 1.3;">⚠️
@@ -1459,20 +1571,6 @@
           <input type="text" id="storePickerSearchInput" class="store-picker-search-input"
             placeholder="Cari atau ketik nama toko..." oninput="handleStorePickerSearch(this.value)"
             onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomStorePicker();}" autocomplete="off">
-        </div>
-
-        <!-- Saved / Favorite Stores 1-Click Chips (Khusus Akun User Ini) -->
-        <div id="userSavedStoresSection" style="margin-bottom: 12px; margin-top: 10px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span
-              style="font-size: 0.74rem; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.5px;">
-              ⭐ Toko Favorit Anda (1-Klik)
-            </span>
-            <span id="userSavedStoresCount" style="font-size: 0.68rem; color: #64748B;"></span>
-          </div>
-          <div id="userSavedStoresChips" class="saved-stores-chips-scroll">
-            <!-- Rendered dynamically via renderUserSavedStoresChips() -->
-          </div>
         </div>
 
         <!-- Popular Preset Stores List -->
@@ -1825,7 +1923,7 @@
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
               <div>
                 <span style="font-size: 0.72rem; color: var(--text-faint);">Harga Satuan:</span>
-                <div id="scannedItemPriceText" style="font-size: 1.1rem; font-weight: 800; color: #E91E63;">Rp 37.500
+                <div id="scannedItemPriceText" style="font-size: 1.1rem; font-weight: 800; color: #B95679;">Rp 37.500
                 </div>
               </div>
               <div id="scannedItemFluctBadge" class="fluct-badge fluct-same">= Stabil</div>
@@ -1848,7 +1946,7 @@
             <div class="scanned-budget-impact">
               <div style="display: flex; justify-content: space-between; font-size: 0.76rem;">
                 <span style="color: var(--text-subtle);">Subtotal Tambahan:</span>
-                <strong id="scannedSubtotalPreview" style="color: #E91E63;">Rp 37.500</strong>
+                <strong id="scannedSubtotalPreview" style="color: #B95679;">Rp 37.500</strong>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.74rem; margin-top: 4px;">
                 <span style="color: var(--text-subtle);">Estimasi Sisa Saldo:</span>
@@ -1985,7 +2083,7 @@
             <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap;">Harga Bersih
               Satuan:</span>
             <span id="quickNetPriceText" class="price-tag"
-              style="font-size: 1.05rem; font-weight: 900; color: #E91E63; white-space: nowrap;">Rp 20.000</span>
+              style="font-size: 1.05rem; font-weight: 900; color: #B95679; white-space: nowrap;">Rp 20.000</span>
           </div>
           <div id="quickSavingsDetail"
             style="font-size: 0.74rem; font-weight: 700; color: #059669; margin-top: 3px; display: none; white-space: nowrap;">
@@ -2050,7 +2148,7 @@
           <div style="display: flex; gap: 6px; align-items: center;">
             <input type="number" inputmode="numeric" id="quickPriceInput" class="form-control"
               placeholder="Contoh: 25000" min="100" max="999999999" step="500"
-              style="font-size: 0.95rem; font-weight: 800; color: #E91E63;" oninput="updateQuickPricePreview()"
+              style="font-size: 0.95rem; font-weight: 800; color: #B95679;" oninput="updateQuickPricePreview()"
               onkeydown="if(event.key==='Enter'){event.preventDefault();saveQuickPrice();}">
             <button type="button" class="btn-demo-quick"
               style="margin: 0; padding: 8px 12px; font-size: 0.75rem; white-space: nowrap;"
@@ -2077,7 +2175,7 @@
             <span style="font-size: 0.72rem; color: var(--text-subtle); white-space: nowrap; flex-shrink: 0;">Subtotal
               Baris:</span>
             <span id="quickPriceSubtotalPreview" class="price-tag"
-              style="font-size: 1.05rem; font-weight: 900; color: #E91E63; white-space: nowrap; flex-shrink: 0;">Rp
+              style="font-size: 1.05rem; font-weight: 900; color: #B95679; white-space: nowrap; flex-shrink: 0;">Rp
               0</span>
           </div>
           <div
@@ -2151,9 +2249,9 @@
         <!-- Settings Body (Scrollable) -->
         <div class="profile-modal-body">
 
-          <!-- Kelompok 1 - Tampilan & Efek -->
+          <!-- Kelompok 1 - Tampilan -->
           <div class="settings-group">
-            <div class="settings-group-title">🎨 TAMPILAN &amp; EFEK</div>
+            <div class="settings-group-title">🎨 TAMPILAN &amp; TEMA</div>
 
             <!-- Toggle Dark Mode -->
             <div class="settings-item-row">
@@ -2166,17 +2264,64 @@
                 <span class="switch-slider"></span>
               </label>
             </div>
+          </div>
 
-            <!-- Toggle Sound FX -->
+          <!-- Kelompok Desain Suara Jepang (Japanese-Inspired Sound Design System) -->
+          <div class="settings-group" id="soundSettingsGroup">
+            <div class="settings-group-title">🌸 PENGATURAN SUARA (JAPANESE SOUND DESIGN)</div>
+
+            <!-- Sound Effects Toggle: ON/OFF -->
             <div class="settings-item-row">
               <div class="settings-item-info">
-                <div class="settings-item-label">Efek Suara Transaksi</div>
-                <div class="settings-item-desc">Audio denting saat checklist belanja &amp; selesai transaksi</div>
+                <div class="settings-item-label">Efek Suara Interaktif</div>
+                <div class="settings-item-desc">Denting marimba, lonceng kaca, dan chime lembut gaya Jepang</div>
               </div>
               <label class="switch-toggle" for="settingsSoundToggle">
                 <input type="checkbox" id="settingsSoundToggle" onchange="toggleSoundFromSettings(this.checked)">
                 <span class="switch-slider"></span>
               </label>
+            </div>
+
+            <!-- Master Volume Slider -->
+            <div class="settings-item-row" id="soundVolumeRow">
+              <div class="settings-item-info">
+                <div class="settings-item-label">Volume Utama</div>
+                <div class="settings-item-desc" id="soundVolumeLabel">Kekuatan suara mikro-interaksi (75%)</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 130px;">
+                <input type="range" id="settingsSoundVolume" min="0" max="100" value="75" step="5"
+                  class="sound-volume-slider" oninput="changeSoundVolume(this.value)" aria-label="Volume Suara">
+                <span id="soundVolumePercent" style="font-size: 11px; font-weight: 700; color: var(--text-headline); min-width: 32px; text-align: right;">75%</span>
+              </div>
+            </div>
+
+            <!-- Sound Theme Selection -->
+            <div class="settings-item-row" id="soundThemeRow">
+              <div class="settings-item-info">
+                <div class="settings-item-label">Tema Karakter Suara</div>
+                <div class="settings-item-desc">Pilihan nuansa audio aplikasi</div>
+              </div>
+              <div>
+                <select id="settingsSoundTheme" class="form-control sound-theme-select" onchange="changeSoundTheme(this.value)">
+                  <option value="kawaii" selected>🌸 Japanese Soft Kawaii (Default)</option>
+                  <option value="musicbox">🎵 Kotak Musik Celesta</option>
+                  <option value="zen">🎐 Zen Furin &amp; Bambu</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Preview Sound Button -->
+            <div class="settings-item-row" style="border-bottom: none; padding-top: 8px;">
+              <div class="settings-item-info">
+                <div class="settings-item-label">Uji Coba Denting</div>
+                <div class="settings-item-desc">Dengarkan sampel melodi tema aktif</div>
+              </div>
+              <div>
+                <button type="button" class="btn-settings-action btn-settings-primary touch-target"
+                  onclick="previewCurrentSoundTheme()" title="Dengarkan Contoh Suara">
+                  <span>▶️ Putar Preview</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2214,18 +2359,6 @@
           <!-- Kelompok 3 - Data & Privasi -->
           <div class="settings-group">
             <div class="settings-group-title">🛡️ DATA &amp; PRIVASI</div>
-
-            <!-- Load Exam Demo Scenarios -->
-            <div class="settings-item-row">
-              <div class="settings-item-info">
-                <div class="settings-item-label">Muat Data Skenario Ujian (Reset Demo)</div>
-                <div class="settings-item-desc">Kembalikan daftar belanja, anggaran, dan simulasi ke data awal evaluasi
-                </div>
-              </div>
-              <button type="button" class="btn-settings-action"
-                style="background: #FDF2F8; color: #DB2777; border-color: #FBCFE8; font-weight: 700; white-space: nowrap;"
-                onclick="resetToInitialMockData()">📦 Muat Demo</button>
-            </div>
 
             <!-- Clear Entire Cart & List -->
             <div class="settings-item-row">
@@ -2293,49 +2426,60 @@
       </div>
     </div>
 
-    <!-- MODAL STRUK BELANJA SUPERMARKET ASLI (Thermal Digital Receipt) -->
+    <!-- MODAL STRUK BELANJA SUPERMARKET ASLI (PREMIUM DIGITAL RECEIPT) -->
     <div id="receiptModal" class="receipt-modal-backdrop" style="display: none;" role="dialog" aria-modal="true"
       aria-labelledby="receiptStoreName" aria-hidden="true" onclick="if(event.target===this)closeReceiptModal()">
       <div class="receipt-modal-container">
 
-        <!-- Header Banner: Pembayaran Berhasil! -->
-        <div class="receipt-success-banner no-print">
-          <div class="receipt-success-title">
-            <span class="receipt-success-badge-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#F59E0B" stroke="#D97706" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                </path>
-              </svg>
-            </span>
-            <span>Pembayaran Berhasil!</span>
-          </div>
-          <button type="button" class="receipt-close-circle-btn" onclick="closeReceiptModal()" aria-label="Tutup Struk">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
+        <!-- Top Floating Close Button -->
+        <button type="button" class="receipt-close-circle-btn" onclick="closeReceiptModal()" aria-label="Tutup Struk">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
 
-        <!-- Thermal Paper -->
+        <!-- Digital Receipt Paper Card (Independently Scrollable) -->
         <div class="thermal-receipt-paper" id="thermalReceiptPaper">
 
-          <!-- Header Toko -->
-          <div class="receipt-header-wrap">
-            <h2 id="receiptStoreName" class="receipt-store-name">LOTTE MART GROCERY - PURI INDAH</h2>
-            <div id="receiptStoreBranch" class="receipt-store-branch">Puri Indah Mall Lt. LG • Kembangan, Jakarta Barat
+          <!-- 1. Payment Success Header -->
+          <div class="receipt-success-section">
+            <div class="receipt-success-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
             </div>
-            <div id="receiptStoreAddress" class="receipt-store-address" style="display: none;">Jl. Puri Agung No. 1,
-              Jakarta Barat • Telp: (021) 5835-8899</div>
-            <div id="receiptDateTime" class="receipt-date-time-line">Senin, 16 Nov 2026, 17.07 WIB</div>
-            <div class="receipt-trx-line">TRX: <strong id="receiptTrxNo">LOTTE-20261026-22511</strong></div>
+            <h3 class="receipt-success-headline">Pembayaran Berhasil!</h3>
+            <p class="receipt-success-subline">Terima kasih sudah belanja cerdas ♡</p>
+            <span class="receipt-header-sakura-deco" aria-hidden="true">🌸</span>
           </div>
 
-          <div class="receipt-divider-dashed"></div>
+          <!-- Perforated Ticket Divider -->
+          <div class="receipt-ticket-perforation">
+            <span class="perforation-notch left"></span>
+            <div class="perforation-line"></div>
+            <span class="perforation-notch right"></span>
+          </div>
 
-          <!-- Meta Info Transaksi & Kasir -->
+          <!-- 2. Store Information -->
+          <div class="receipt-header-wrap">
+            <h2 id="receiptStoreName" class="receipt-store-name">LOTTE MART GROCERY - PURI INDAH</h2>
+            <div id="receiptStoreBranch" class="receipt-store-branch">Puri Indah Mall Lt. LG • Kembangan, Jakarta Barat</div>
+            <div id="receiptStoreAddress" class="receipt-store-address" style="display: none;">Jl. Puri Agung No. 1, Jakarta Barat • Telp: (021) 5835-8899</div>
+            
+            <div class="receipt-meta-pills-row">
+              <span class="receipt-status-pill-lunas" id="receiptStatusBadge">● LUNAS</span>
+              <span class="receipt-date-pill" id="receiptDateTime">Senin, 16 Nov 2026, 17.07 WIB</span>
+            </div>
+            <div class="receipt-trx-chip">
+              <span class="trx-lbl">TRX:</span>
+              <strong id="receiptTrxNo">LOTTE-20261026-22511</strong>
+            </div>
+          </div>
+
+          <!-- 3. Transaction Details (Grouped Info Panel) -->
           <div class="receipt-meta-box">
             <div class="receipt-meta-row">
               <span class="receipt-meta-lbl">Pelanggan:</span>
@@ -2346,10 +2490,7 @@
               <strong id="receiptCashierName" class="receipt-meta-val">Sistem Mandiri Lotte Mart</strong>
             </div>
             <div class="receipt-meta-row receipt-meta-payment-row">
-              <div class="receipt-meta-split-lbl">
-                <span>Metode</span>
-                <span>Bayar:</span>
-              </div>
+              <span class="receipt-meta-lbl">Metode Bayar:</span>
               <div class="receipt-meta-split-val">
                 <span id="receiptPaymentMethod" class="receipt-payment-name">QRIS Lotte Mart Instant</span>
                 <span class="receipt-green-text receipt-lunas-badge">(LUNAS)</span>
@@ -2358,102 +2499,106 @@
             <span id="receiptPosNo" style="display: none;">POS-02</span>
           </div>
 
+          <!-- Perforated Divider -->
           <div class="receipt-divider-dashed"></div>
 
-          <!-- Itemized List -->
-          <div id="receiptItemsContainer" class="receipt-items-container">
-            <!-- Dinamis di-render via generateReceiptData() -->
+          <!-- 4. Itemized Purchase List -->
+          <div class="receipt-items-section">
+            <div class="receipt-section-title">RINCIAN BELANJAAN</div>
+            <div id="receiptItemsContainer" class="receipt-items-container">
+              <!-- Dynamically populated via generateReceiptData() -->
+            </div>
           </div>
 
+          <!-- Perforated Divider -->
           <div class="receipt-divider-dashed"></div>
 
-          <!-- Ringkasan Total & Pembayaran -->
+          <!-- 5. Payment Summary Card -->
           <div class="receipt-summary-box">
             <div class="receipt-summary-row">
-              <span>Subtotal Belanja:</span>
-              <span id="receiptSubtotal">Rp 0</span>
+              <span class="summary-lbl">Subtotal Belanja:</span>
+              <span id="receiptSubtotal" class="summary-val">Rp 0</span>
             </div>
             <div class="receipt-summary-row discount-row" id="receiptDiscountRow">
-              <span class="receipt-green-text">Hemat Voucher:</span>
-              <span id="receiptDiscount" class="receipt-green-text">Rp 0</span>
+              <span class="receipt-green-text summary-lbl">Hemat Voucher:</span>
+              <span id="receiptDiscount" class="receipt-green-text summary-val">-Rp 0</span>
             </div>
             <div class="receipt-summary-row" id="receiptTaxRow">
-              <span>Biaya Layanan:</span>
-              <span id="receiptTax">Rp 1.000</span>
+              <span class="summary-lbl">Biaya Layanan:</span>
+              <span id="receiptTax" class="summary-val">Rp 1.000</span>
             </div>
-            <div class="receipt-divider-dashed" style="margin: 6px 0;"></div>
-            <div class="receipt-summary-row grand-total-row">
-              <span class="receipt-grand-total-label">TOTAL AKHIR:</span>
-              <span id="receiptGrandTotal" class="receipt-grand-total-val">Rp 0</span>
+
+            <!-- Prominent Grand Total Card -->
+            <div class="receipt-grand-total-card">
+              <div class="grand-total-header">
+                <span class="grand-total-label">TOTAL AKHIR</span>
+                <span class="grand-total-sub">Sudah Termasuk Layanan</span>
+              </div>
+              <div id="receiptGrandTotal" class="receipt-grand-total-val">Rp 0</div>
             </div>
+
             <div class="receipt-summary-row" id="receiptRemainingRow" style="display: none;">
-              <span class="receipt-green-text">Sisa Saldo:</span>
-              <span id="receiptRemainingBudget" class="receipt-green-text">Rp 0</span>
+              <span class="receipt-green-text summary-lbl">Sisa Saldo:</span>
+              <span id="receiptRemainingBudget" class="receipt-green-text summary-val">Rp 0</span>
             </div>
             <span id="receiptPaymentUsed" style="display: none;">Rp 0</span>
-            <div id="receiptStatusBadge" class="receipt-status-badge" style="display: none;">LUNAS / BERHASIL</div>
-            <div id="receiptSavingsBanner" class="receipt-savings-banner" style="display: none;">
-              🎉 Selamat! Anda Hemat <span id="receiptSavingsHighlight">Rp 0</span> pada belanjaan ini
-            </div>
           </div>
 
-          <div class="receipt-divider-dashed"></div>
+          <!-- 6. Attractive Savings Highlight Banner -->
+          <div id="receiptSavingsBanner" class="receipt-savings-banner" style="display: none;">
+            <span class="savings-sparkle">🎉</span>
+            <span class="savings-text">Yeay! Kamu hemat <strong id="receiptSavingsHighlight">Rp 0</strong> hari ini ♡</span>
+          </div>
 
-          <!-- Barcode Ticks Supermarket -->
+          <!-- 7. Digital Barcode / Authentication Ticks -->
           <div class="receipt-barcode-box">
             <div class="receipt-barcode-ticks" aria-label="Barcode Transaksi">
-              | | | &nbsp; | | | | &nbsp; | | &nbsp; | | | | | &nbsp; | | | |<br>
-              | | &nbsp; | | |
+              | | | &nbsp; | | | | &nbsp; | | &nbsp; | | | | | &nbsp; | | | |
             </div>
-            <div id="receiptBarcodeNumber" class="receipt-barcode-number" style="display: none;">9823 8812 0019 4521
-            </div>
+            <div id="receiptBarcodeNumber" class="receipt-barcode-number" style="display: none;">9823 8812 0019 4521</div>
           </div>
 
-          <!-- Footer Kasir -->
+          <!-- 8. Receipt Footer -->
           <div class="receipt-footer-section">
-            <div class="receipt-footer-policy">
-              Terima kasih telah berbelanja cerdas di <span id="receiptFooterStore">Lotte Mart Puri Indah</span>! Simpan
-              struk ini sebagai bukti pembayaran sah.
+            <div class="receipt-footer-brand">
+              <span class="footer-heart">♡</span> Thank you for shopping with <strong id="receiptFooterStore">Lotte Mart Puri Indah</strong> <span class="footer-heart">♡</span>
             </div>
+            <div class="receipt-footer-tagline">Shop Smart, Live Better. ✨</div>
           </div>
 
         </div>
 
-        <!-- Tombol Aksi (No Print) -->
-        <div class="receipt-modal-actions no-print">
-          <button type="button" class="btn-receipt-pill touch-target" onclick="copyReceiptText()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            Salin Teks Struk
+        <!-- 9. Docked Action Buttons (Always Accessible) -->
+        <div class="receipt-modal-action-wrapper no-print">
+          <button type="button" class="btn-receipt-primary-finish touch-target" onclick="startNewShoppingSession()">
+            <span>🛍️</span>
+            <span>Mulai Belanja Baru</span>
           </button>
-          <button type="button" class="btn-receipt-pill touch-target" onclick="openReceiptHistory()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            Buka Riwayat
-          </button>
-        </div>
-
-        <div class="receipt-modal-subactions no-print">
-          <button type="button" class="btn-receipt-sub touch-target" onclick="startNewShoppingSession()">🛍️ Belanja
-            Baru</button>
-          <button type="button" class="btn-receipt-sub touch-target" onclick="printReceipt()">🖨️ Cetak</button>
-          <button type="button" class="btn-receipt-sub touch-target" onclick="undoFinishShopping()">↩️ Batal</button>
-          <button type="button" class="btn-receipt-sub touch-target" onclick="closeReceiptModal()">✕ Tutup</button>
+          
+          <div class="receipt-actions-grid">
+            <button type="button" class="btn-receipt-action-pill touch-target" onclick="copyReceiptText()" title="Salin Teks">
+              <span>📋</span>
+              <span>Salin Teks</span>
+            </button>
+            <button type="button" class="btn-receipt-action-pill touch-target" onclick="openReceiptHistory()" title="Buka Riwayat">
+              <span>📜</span>
+              <span>Riwayat</span>
+            </button>
+            <button type="button" class="btn-receipt-action-pill touch-target" onclick="printReceipt()" title="Cetak / Simpan PDF">
+              <span>🖨️</span>
+              <span>Cetak / PDF</span>
+            </button>
+            <button type="button" class="btn-receipt-action-pill touch-target btn-receipt-dismiss" onclick="closeReceiptModal()" title="Tutup Struk">
+              <span>✕</span>
+              <span>Tutup</span>
+            </button>
+          </div>
         </div>
 
       </div>
     </div>
 
-    <!-- ========================================================================
+        <!-- ========================================================================
        MODAL: PANDUAN INSTALASI APLIKASI (KOMPUTER & HP)
        ======================================================================== -->
     <div id="pwaInstallGuideModal" class="modal-backdrop" onclick="if(event.target===this) closePwaInstallGuideModal()">
@@ -2614,7 +2759,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/app.js?v=137"></script>
+  <script src="./js/app.js?v=152"></script>
 
   <!-- Service Worker Registration -->
   <script>
