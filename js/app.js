@@ -3440,6 +3440,18 @@ function checkAuth() {
     if (headerName) headerName.textContent = AppState.user.name;
     if (headerEmail) headerEmail.textContent = AppState.user.email || 'user@email.com';
 
+    // Check custom saved avatar first (uploaded photo or kawaii preset)
+    try {
+      const customAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + (AppState.user.uid || 'guest')) ||
+                           localStorage.getItem('smart_grocery_custom_avatar_guest');
+      if (customAvatar) {
+        AppState.user.photoURL = customAvatar;
+        AppState.user.photo = customAvatar;
+      }
+    } catch (e) {
+      console.warn('Custom avatar localStorage read error:', e);
+    }
+
     const userPhoto = AppState.user && (AppState.user.photoURL || AppState.user.photo);
     updateHeaderAvatar(userPhoto);
 
@@ -4219,6 +4231,13 @@ function renderBudget() {
 
   if (configBudgetInput) configBudgetInput.value = budget;
   if (configBudgetPeriod) configBudgetPeriod.value = AppState.budgetPeriod || 'weekly';
+  const currentPeriod = AppState.budgetPeriod || 'weekly';
+  document.querySelectorAll('.cycle-seg-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cycle === currentPeriod);
+  });
+  const cycleHint = document.getElementById('cycleActiveHint');
+  const cycleLabels = { weekly: 'Mingguan', monthly: 'Bulanan', session: 'Per Sesi Belanja' };
+  if (cycleHint) cycleHint.textContent = cycleLabels[currentPeriod] || currentPeriod;
   updateBudgetPresetChips(budget);
 
   if (totalBudgetEl) totalBudgetEl.textContent = formatRupiah(budget);
@@ -4685,7 +4704,7 @@ function getDashboardTimeGreeting() {
   } else if (hour >= 15 && hour < 18) {
     return {
       period: 'Sore',
-      badge: 'Sore santai ⛅',
+      // badge removed
       titleSuffix: 'Sore',
       emoji: '⛅',
       sub: 'Waktunya sortir kebutuhan belanja sore ini 🍓'
@@ -4693,7 +4712,7 @@ function getDashboardTimeGreeting() {
   } else {
     return {
       period: 'Malam',
-      badge: 'Malam tenang 🌙',
+      // badge removed
       titleSuffix: 'Malam',
       emoji: '🌙',
       sub: 'Yuk, evaluasi catatan belanja & hematmu hari ini 💫'
@@ -4716,7 +4735,7 @@ function updateDashboardGreeting() {
   const subEl = document.getElementById('dashboardGreetingSubtitle');
   const titleEl = document.getElementById('dashboardGreetingTitle');
 
-  if (badgeEl) badgeEl.textContent = timeInfo.badge;
+  if (badgeEl) badgeEl.remove();
   if (nameEl) nameEl.textContent = name;
   if (subEl) subEl.textContent = timeInfo.sub;
   if (titleEl) {
@@ -4979,9 +4998,29 @@ function updateHeroBudgetMascot(safetyLevel) {
     bubbleEl.classList.remove('state-safe', 'state-warning', 'state-danger');
     bubbleEl.classList.add('state-' + level);
   }
+
+  // Synchronize Sticky Mascot Companion (reacts dynamically while scrolled down)
+  const stickyCompanion = document.getElementById('stickyMascotCompanion');
+  const stickyFace = document.getElementById('stickyMascotFace');
+  const stickyText = document.getElementById('stickyMascotText');
+  if (stickyCompanion) {
+    stickyCompanion.classList.remove('state-safe', 'state-warning', 'state-danger');
+    stickyCompanion.classList.add('state-' + level);
+  }
+  if (stickyFace) {
+    stickyFace.textContent = level === 'danger' ? '🥺' : (level === 'warning' ? '⚠️' : '🌸');
+  }
+  if (stickyText) {
+    stickyText.textContent = level === 'danger' ? 'Overbudget! 🚨' : (level === 'warning' ? 'Rem Dulu! ⚠️' : 'Aman ♡');
+  }
 }
 
 function triggerGreetingMascotReaction() {
+  if (typeof getCartMetrics === 'function' && typeof updateGreetingMascotMood === 'function') {
+    const metrics = getCartMetrics();
+    const lvl = (metrics && metrics.safety && metrics.safety.level) ? metrics.safety.level : 'safe';
+    updateGreetingMascotMood(lvl);
+  }
   const greetingMascot = document.getElementById('greetingMascot');
   const bubbleEl = document.getElementById('greetingMascotSpeechBubble');
   const bubbleText = document.getElementById('greetingMascotSpeechText');
@@ -5077,8 +5116,13 @@ function attachSwipeToDismiss(toast, onDismiss) {
     toast.classList.remove('is-dragging');
 
     if (!isDragging) {
-      // Ketukan singkat tanpa drag -> langsung tutup instan
-      dismissToastWithAnimation('tap');
+      // Ketukan singkat tanpa drag tidak menutup instan: penutupan hanya via drag-to-remove
+      toast.style.removeProperty('transition');
+      if (!activeToastTimeout) {
+        activeToastTimeout = setTimeout(() => {
+          dismissToastWithAnimation('up');
+        }, 2500);
+      }
       return;
     }
 
@@ -5335,15 +5379,15 @@ function renderItems() {
     clearPlanBtn.style.display = unbought.length > 0 ? 'inline-flex' : 'none';
   }
 
-  // Empty state handling
+  // Empty state: No items at all in plan or cart
   if (AppState.cart.length === 0) {
     container.innerHTML = `
-      <div class="empty-state" style="padding: 36px 16px; text-align: center;">
-        <div style="font-size: 42px; margin-bottom: 8px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1rem; color: #222222; margin-bottom: 6px;">Daftar rencana belanja masih kosong</p>
-        <p style="font-size: 0.8rem; color: #757575; margin-bottom: 14px;">Ketik kebutuhan belanja di atas atau pilih dari katalog populer di bawah!</p>
-        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 8px 20px; font-size: 0.82rem; font-weight: 800;" onclick="startNewShoppingSession()">
+      <div class="ios-empty-state-card">
+        <div class="empty-state-mascot">🌸</div>
+        <h4 class="empty-state-headline">Rencana Belanja Masih Kosong ♡</h4>
+        <p class="empty-state-desc">Yuk catat kebutuhan belanjamu di kolom atas atau pilih langsung dari katalog populer di bawah!</p>
+        <div class="empty-state-btn-row">
+          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 9px 18px; font-size: 0.82rem; font-weight: 800; border-radius: 999px;" onclick="startNewShoppingSession()">
             🛍️ Muat Barang Rutin
           </button>
         </div>
@@ -5353,16 +5397,18 @@ function renderItems() {
     return;
   }
 
-  // If all items in plan are already moved to cart
+  // Empty state: All planned items are already moved to cart
   if (unbought.length === 0 && inCart.length > 0) {
     container.innerHTML = `
-      <div class="empty-plan-all-in-cart">
-        <div style="font-size: 38px; margin-bottom: 8px;">🎉</div>
-        <h4 style="font-size: 1rem; font-weight: 800; color: #166534; margin: 0 0 6px 0;">Semua Rencana Sudah Masuk Keranjang!</h4>
-        <p style="font-size: 0.8rem; color: #15803D; margin: 0 0 16px 0;">${inCart.length} barang rencana sudah siap di Keranjang Belanja untuk dibayar.</p>
-        <button type="button" class="btn-primary touch-target" onclick="switchTab('cart')" style="width: auto; padding: 10px 22px; font-size: 0.86rem; font-weight: 800; margin: 0 auto; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.25);">
-          🛒 Buka Keranjang Belanja (${inCart.length})
-        </button>
+      <div class="ios-empty-state-card">
+        <div class="empty-state-mascot">🎉</div>
+        <h4 class="empty-state-headline" style="color: #15803D;">Semua Rencana Sudah Masuk Keranjang!</h4>
+        <p class="empty-state-desc">${inCart.length} barang rencana sudah siap di Keranjang Belanja untuk dibayar.</p>
+        <div class="empty-state-btn-row">
+          <button type="button" class="btn-primary touch-target" onclick="switchTab('cart')" style="width: auto; padding: 10px 22px; font-size: 0.84rem; font-weight: 800; border-radius: 999px; box-shadow: 0 4px 14px rgba(22, 101, 52, 0.25);">
+            🛒 Buka Keranjang Belanja (${inCart.length})
+          </button>
+        </div>
       </div>
     `;
     updateCartBadges();
@@ -5399,58 +5445,71 @@ function renderItems() {
     const subtotal = disc.finalPrice * item.qty;
 
     html += `
-      <div class="shopee-item-card plan-item-card" data-item-id="${item.id}">
-        <div class="shopee-compact-body">
-          <div class="shopee-compact-top">
-            <div class="shopee-compact-title-wrap">
-              <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
-                ${escapeHtml(item.namaBarang)}
-              </span>
-              <div class="shopee-compact-meta-left">
-                <span class="planner-unit-badge" id="plan-unit-badge-${item.id}">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-                ${analysis.isRepurchase ? `<span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
-                <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
-                  🔁 ${item.isRoutine ? 'Rutin Harian' : 'Rutin'}
-                </button>
-              </div>
-            </div>
-            <div class="shopee-compact-actions">
-              <button type="button" class="btn-action-edit-icon touch-target" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Rincian Item">✏️</button>
-              <button type="button" class="btn-shopee-delete touch-target" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item">🗑️</button>
-            </div>
-          </div>
-
-          <div class="shopee-compact-bottom">
-            <div class="shopee-compact-price-wrap">
-              ${item.hargaSatuan > 0 ? `
-                <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga perkiraan">${formatRupiah(subtotal)}</span>
-              ` : `
-                <button type="button" class="badge-no-price touch-target" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga perkiraan">
-                  ${analysis.previousPrice ? `💡 Dulu: ${formatRupiah(analysis.previousPrice)}` : '🏷️ Belum Ada Harga'}
-                </button>
-              `}
-            </div>
-
-            <div class="shopee-compact-stepper-wrap" style="display: flex; align-items: center; gap: 10px;">
-              <div class="shopee-stepper">
-                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas">&minus;</button>
-                <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
-                       oninput="handleQtyDirectInput('${item.id}', this.value)"
-                       onblur="handleQtyBlur('${item.id}', this.value)"
-                       onclick="event.stopPropagation()">
-                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas">+</button>
-              </div>
-
-              <!-- Dedicated Touch-Target Button to Move to Cart (Crisp SVG, Pixel-Perfect Centered) -->
-              <button type="button" class="btn-move-to-cart touch-target" onclick="moveItemToCart('${item.id}'); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja" aria-label="Pindahkan ke Keranjang Belanja">
-                <svg class="btn-cart-arrow-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="9" cy="21" r="1"></circle>
-                  <circle cx="20" cy="21" r="1"></circle>
-                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                </svg>
-                <span>Ke Keranjang</span>
+      <div class="ios-product-card plan-item-card" data-item-id="${item.id}">
+        <!-- Top Section: Product Name, Routine Pill, & Icon Actions -->
+        <div class="ios-card-top-row">
+          <div class="ios-card-title-col">
+            <span class="ios-product-title" title="${escapeHtml(item.namaBarang)}">
+              ${escapeHtml(item.namaBarang)}
+            </span>
+            <div class="ios-card-tags-row">
+              <span class="ios-meta-pill unit-pill" id="plan-unit-badge-${item.id}">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+              ${analysis.isRepurchase ? `<span class="ios-meta-pill analysis-pill ${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
+              <button type="button" class="routine-toggle-pill ${item.isRoutine ? 'active' : ''}" onclick="toggleItemRoutine('${item.id}'); event.stopPropagation();" title="${item.isRoutine ? 'Barang Rutin Harian: Otomatis muncul setiap hari' : 'Jadikan Rutin Harian'}">
+                ${item.isRoutine ? '🌸 Rutin Harian' : '🔁 Rutin'}
               </button>
             </div>
+          </div>
+          <div class="ios-card-actions-col">
+            <button type="button" class="btn-ios-icon-action btn-edit touch-target" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Rincian Item" aria-label="Ubah Rincian Item">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button type="button" class="btn-ios-icon-action btn-delete touch-target" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item" aria-label="Hapus Item">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Divider -->
+        <div class="ios-card-divider"></div>
+
+        <!-- Bottom Section: Price & Custom Stepper + Add to Cart -->
+        <div class="ios-card-bottom-row">
+          <div class="ios-card-price-col">
+            ${item.hargaSatuan > 0 ? `
+              <div class="ios-price-wrap" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah perkiraan harga">
+                <span class="ios-price-label">Perkiraan:</span>
+                <span class="ios-price-value price-tag" id="subtotal-${item.id}">${formatRupiah(subtotal)}</span>
+              </div>
+            ` : `
+              <button type="button" class="badge-no-price touch-target" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" title="Klik untuk masukkan harga perkiraan">
+                ${analysis.previousPrice ? `💡 Dulu: ${formatRupiah(analysis.previousPrice)}` : '🏷️ Isi Harga'}
+              </button>
+            `}
+          </div>
+
+          <div class="ios-card-controls-col">
+            <!-- Custom iOS Quantity Stepper -->
+            <div class="ios-stepper-capsule">
+              <button type="button" class="ios-step-btn minus" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas" aria-label="Kurangi Kuantitas">&minus;</button>
+              <input type="number" inputmode="numeric" class="ios-step-input" id="qty-input-${item.id}" min="1" value="${item.qty}"
+                     oninput="handleQtyDirectInput('${item.id}', this.value)"
+                     onblur="handleQtyBlur('${item.id}', this.value)"
+                     onclick="event.stopPropagation()">
+              <button type="button" class="ios-step-btn plus" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas" aria-label="Tambah Kuantitas">+</button>
+            </div>
+
+            <!-- Dedicated Primary Add to Cart Button -->
+            <button type="button" class="btn-ios-add-cart touch-target" onclick="moveItemToCartWithFeedback('${item.id}', this); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja" aria-label="Pindahkan ke Keranjang Belanja">
+              <span>🛒</span>
+              <span>Ke Keranjang</span>
+            </button>
           </div>
         </div>
       </div>
@@ -5651,6 +5710,7 @@ function toggleItemCheck(itemId) {
   renderItems();
   renderCartSection();
   renderBudget();
+  syncCartBottomPadding();
 }
 
 /**
@@ -6260,10 +6320,18 @@ function insertParsedItem(parsed) {
 // 8B. VISUAL PRODUCT CATALOG (PRESET DATA & 1-TAP ADD)
 // =========================================================================
 const PRODUCT_CATALOG = [
-  { id: 'cat-1', name: 'Beras Rojolele 5kg', category: 'staple', icon: '🌾', price: 74000, unit: 'karung/5kg', aisle: 'Bahan Pokok', isRoutine: true },
+  { id: 'cat-1', name: 'Beras Rojolele 5kg', category: 'staple', icon: '🌾', iconSvg: 'staple_rice', price: 74000, unit: 'karung/5kg', aisle: 'Bahan Pokok', isRoutine: true },
+  { id: 'cat-croissant', name: 'Croissant Butter Sakura', category: 'staple', icon: '🥐', iconSvg: 'ribbon_croissant', price: 16000, unit: 'pcs', aisle: 'Bahan Pokok', isRoutine: true },
+  { id: 'cat-cake', name: 'Strawberry Shortcake Slice', category: 'produce', icon: '🍰', iconSvg: 'strawberry_cake', price: 28000, unit: 'slice', aisle: 'Sayur & Buah' },
+  { id: 'cat-tea', name: 'Traditional English Tea Tin', category: 'dairy-drink', icon: '🫖', iconSvg: 'english_tea_tin', price: 26500, unit: 'kaleng/100g', aisle: 'Dairy & Minuman', isRoutine: true },
+  { id: 'cat-teacup', name: 'English Rose Teacup Blend', category: 'dairy-drink', icon: '☕', iconSvg: 'rose_teacup', price: 18000, unit: 'cangkir', aisle: 'Dairy & Minuman' },
+  { id: 'cat-cupcake', name: 'Strawberry Rose Cupcake', category: 'produce', icon: '🧁', iconSvg: 'strawberry_cupcake', price: 18500, unit: 'pcs', aisle: 'Sayur & Buah' },
+  { id: 'cat-macaron', name: 'Macaron Afternoon Tea Tier', category: 'produce', icon: '🧁', iconSvg: 'macaron_tier', price: 35000, unit: 'set/3pcs', aisle: 'Sayur & Buah' },
+  { id: 'cat-cookie', name: 'Heart Jam Butter Cookie', category: 'staple', icon: '🍪', iconSvg: 'heart_cookie', price: 12000, unit: 'pack', aisle: 'Bahan Pokok' },
+  { id: 'cat-teapot', name: 'Teh Mawar Porcelain (Pot)', category: 'dairy-drink', icon: '🫖', iconSvg: 'porcelain_teapot', price: 32000, unit: 'pot', aisle: 'Dairy & Minuman' },
   { id: 'cat-2', name: 'Minyak Goreng 2L', category: 'oil-seasoning', icon: '🍳', price: 38000, unit: 'pouch/2L', aisle: 'Minyak & Bumbu', isRoutine: true },
   { id: 'cat-3', name: 'Telur Ayam 1kg', category: 'staple', icon: '🥚', price: 28000, unit: 'kg', aisle: 'Bahan Pokok', isRoutine: true },
-  { id: 'cat-4', name: 'Indomie Goreng (5 pcs)', category: 'staple', icon: '🍜', price: 15500, unit: 'pack/5pcs', aisle: 'Bahan Pokok' },
+  { id: 'cat-4', name: 'Indomie Goreng (5 pcs)', category: 'staple', icon: '🍜', iconSvg: 'staple_noodle', price: 15500, unit: 'pack/5pcs', aisle: 'Bahan Pokok' },
   { id: 'cat-5', name: 'Tepung Terigu Segitiga 1kg', category: 'staple', icon: '🍞', price: 13000, unit: 'kg', aisle: 'Bahan Pokok' },
   { id: 'cat-6', name: 'Gula Pasir Gulaku 1kg', category: 'oil-seasoning', icon: '🧂', price: 17500, unit: 'kg', aisle: 'Minyak & Bumbu', isRoutine: true },
   { id: 'cat-7', name: 'Garam Dapur 500g', category: 'oil-seasoning', icon: '🧂', price: 5000, unit: 'bungkus', aisle: 'Minyak & Bumbu', isRoutine: true },
@@ -6278,7 +6346,7 @@ const PRODUCT_CATALOG = [
   { id: 'cat-16', name: 'Apel Fuji Segar (1kg)', category: 'produce', icon: '🍎', price: 35000, unit: 'kg', aisle: 'Sayur & Buah' },
   { id: 'cat-17', name: 'Pisang Cavendish 1 Sisir', category: 'produce', icon: '🍌', price: 23000, unit: 'sisir', aisle: 'Sayur & Buah' },
   { id: 'cat-18', name: 'Tomat Segar 500g', category: 'produce', icon: '🍅', price: 7000, unit: 'pack', aisle: 'Sayur & Buah' },
-  { id: 'cat-19', name: 'Susu UHT Ultra Milk 1L', category: 'dairy-drink', icon: '🥛', price: 19500, unit: 'karton', aisle: 'Dairy & Minuman', isRoutine: true },
+  { id: 'cat-19', name: 'Susu UHT Ultra Milk 1L', category: 'dairy-drink', icon: '🥛', iconSvg: 'dairy_milk', price: 19500, unit: 'karton', aisle: 'Dairy & Minuman', isRoutine: true },
   { id: 'cat-20', name: 'Kopi Kapal Api Special Mix', category: 'dairy-drink', icon: '☕', price: 14000, unit: 'renteng', aisle: 'Dairy & Minuman' },
   { id: 'cat-21', name: 'Keju Cheddar Kraft 165g', category: 'dairy-drink', icon: '🧀', price: 22000, unit: 'kotak', aisle: 'Dairy & Minuman' },
   { id: 'cat-22', name: 'Yogurt Biokul 120ml', category: 'dairy-drink', icon: '🥣', price: 8500, unit: 'cup', aisle: 'Dairy & Minuman' }
@@ -6291,6 +6359,25 @@ let catalogExpanded = false;
 function toggleCatalogExpand() {
   catalogExpanded = !catalogExpanded;
   renderProductCatalog();
+}
+
+/**
+ * Render Thumbnail Item Katalog (Mendukung KawaiiArt SVG, image URL, atau fallback emoji)
+ */
+function renderCatalogItemThumb(item) {
+  if (item.iconSvg && typeof KawaiiArt !== 'undefined' && KawaiiArt[item.iconSvg]) {
+    return `<div class="catalog-thumb-art">${KawaiiArt[item.iconSvg]}</div>`;
+  }
+  if (item.icon && typeof item.icon === 'string') {
+    if (item.icon.startsWith('<svg')) {
+      return `<div class="catalog-thumb-art">${item.icon}</div>`;
+    }
+    if (item.icon.startsWith('data:image') || item.icon.startsWith('http') || item.icon.endsWith('.png') || item.icon.endsWith('.svg')) {
+      return `<img src="${item.icon}" alt="${escapeHtml(item.name)}" class="catalog-thumb-img" loading="lazy">`;
+    }
+    return `<span class="catalog-thumb-emoji">${item.icon}</span>`;
+  }
+  return `<span class="catalog-thumb-emoji">🛍️</span>`;
 }
 
 function renderProductCatalog() {
@@ -6353,7 +6440,7 @@ function renderProductCatalog() {
   let html = itemsToDisplay.map(item => `
     <div class="catalog-card" data-catalog-id="${escapeHtml(item.id)}">
       <div class="catalog-thumb-wrap">
-        <span>${item.icon}</span>
+        ${renderCatalogItemThumb(item)}
       </div>
       <div class="catalog-card-name" title="${escapeHtml(item.name)}">
         ${escapeHtml(item.name)}
@@ -7318,6 +7405,7 @@ function toggleShoppingMode() {
 
   renderItems();
   renderBudget();
+  syncCartBottomPadding();
 }
 
 let isFinishingShopping = false;
@@ -7780,7 +7868,6 @@ function copyReceiptText() {
   const trx = document.getElementById('receiptTrxNo')?.textContent?.trim() || 'LOTTE-20261026-22511';
   const customer = document.getElementById('receiptCustomerName')?.textContent?.trim() || 'Evelina Metta Putri MB2';
   const cashier = document.getElementById('receiptCashierName')?.textContent?.trim() || 'Sistem Mandiri Lotte Mart';
-  const method = (document.getElementById('receiptPaymentMethod')?.textContent?.trim() || 'QRIS Lotte Mart Instant') + ' (LUNAS)';
   const subtotal = document.getElementById('receiptSubtotal')?.textContent?.trim() || 'Rp 0';
   const discount = document.getElementById('receiptDiscount')?.textContent?.trim() || 'Rp 0';
   const tax = document.getElementById('receiptTax')?.textContent?.trim() || 'Rp 1.000';
@@ -7803,7 +7890,6 @@ TRX: ${trx}
 --------------------------------
 Pelanggan : ${customer}
 Kasir     : ${cashier}
-Metode    : ${method}
 --------------------------------
 ${itemsText}--------------------------------
 Subtotal Belanja : ${subtotal}
@@ -7812,8 +7898,8 @@ Biaya Layanan    : ${tax}
 --------------------------------
 TOTAL AKHIR      : ${total}
 ================================
-Terima kasih telah berbelanja cerdas di ${store}!
-Simpan struk ini sebagai bukti pembayaran sah.`;
+Terima kasih telah berbelanja dengan hati di ${store}!
+Simpan struk ini sebagai catatan belanja sah.`;
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -7940,11 +8026,11 @@ function renderPantry() {
 // 12B. VISUAL PANTRY PRODUCT CATALOG (PRESET DATA & 1-TAP ADD)
 // =========================================================================
 const PANTRY_CATALOG = [
-  { id: 'pan-cat-1', name: 'Beras 5kg', icon: '🌾', unit: 'karung/5kg', category: 'Kebutuhan Pokok', days: 90, desc: 'Bahan Pokok' },
+  { id: 'pan-cat-1', name: 'Beras 5kg', icon: '🌾', iconSvg: 'staple_rice', unit: 'karung/5kg', category: 'Kebutuhan Pokok', days: 90, desc: 'Bahan Pokok' },
   { id: 'pan-cat-2', name: 'Minyak Goreng', icon: '🍳', unit: 'pouch/2L', category: 'Minyak & Bumbu', days: 60, desc: 'Minyak Masak' },
   { id: 'pan-cat-3', name: 'Garam Dapur', icon: '🧂', unit: 'bungkus', category: 'Minyak & Bumbu', days: 180, desc: 'Bumbu Dapur' },
   { id: 'pan-cat-4', name: 'Gula Pasir', icon: '🍬', unit: 'kg', category: 'Minyak & Bumbu', days: 90, desc: 'Pemanis Dapur' },
-  { id: 'pan-cat-5', name: 'Kecap Manis', icon: '🍾', unit: 'pouch', category: 'Minyak & Bumbu', days: 90, desc: 'Bumbu Masak' },
+  { id: 'pan-cat-5', name: 'Traditional English Tea', icon: '🫖', iconSvg: 'english_tea_tin', unit: 'kaleng', category: 'Minyak & Bumbu', days: 180, desc: 'Teh Seduh' },
   { id: 'pan-cat-6', name: 'Sabun Cuci', icon: '🍋', unit: 'pouch', category: 'Kebersihan', days: 60, desc: 'Kebersihan' },
   { id: 'pan-cat-7', name: 'Pasta Gigi', icon: '🪥', unit: 'tube', category: 'Kebersihan', days: 90, desc: 'Kebersihan Diri' },
   { id: 'pan-cat-8', name: 'Deterjen Bubuk', icon: '🧺', unit: 'bag', category: 'Kebersihan', days: 90, desc: 'Cuci Pakaian' }
@@ -7967,7 +8053,7 @@ function renderPantryCatalog() {
   let html = itemsToDisplay.map(item => `
     <div class="catalog-card pantry-catalog-card" data-pantry-cat-id="${item.id}">
       <div class="catalog-thumb-wrap">
-        <span>${item.icon}</span>
+        ${renderCatalogItemThumb(item)}
       </div>
       <div class="catalog-card-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
       <div class="catalog-card-footer">
@@ -8194,7 +8280,17 @@ function handleQuickBudgetSave(e) {
   showToast(`Batas anggaran diatur ke ${formatRupiah(amount)}`, 'success');
 }
 
-function setQuickBudgetAmount(amt) {
+function setQuickBudgetAmount(amt, btnEl) {
+  if (btnEl) {
+    btnEl.classList.add('chip-tapped');
+    setTimeout(() => btnEl.classList.remove('chip-tapped'), 280);
+  } else {
+    const chip = document.querySelector(`.budget-preset-chip[data-amount="${amt}"]`);
+    if (chip) {
+      chip.classList.add('chip-tapped');
+      setTimeout(() => chip.classList.remove('chip-tapped'), 280);
+    }
+  }
   AppState.budget = amt;
   localStorage.setItem(STORAGE_KEYS.BUDGET, amt);
   const slider = document.getElementById('budgetSlider');
@@ -8225,10 +8321,15 @@ function handleBudgetSliderChange(val) {
   if (amtInput) amtInput.value = amount;
 
   renderBudget();
+  updateBudgetPresetChips(amount);
   pushStateToCloud();
 }
 
-function adjustBudgetByDelta(delta) {
+function adjustBudgetByDelta(delta, btnEl) {
+  if (btnEl) {
+    btnEl.classList.add('chip-tapped');
+    setTimeout(() => btnEl.classList.remove('chip-tapped'), 280);
+  }
   const current = AppState.budget || 100000;
   const newBudget = Math.max(10000, current + delta);
   AppState.budget = newBudget;
@@ -8243,6 +8344,7 @@ function adjustBudgetByDelta(delta) {
 
   playSoftPop();
   renderBudget();
+  updateBudgetPresetChips(newBudget);
   pushStateToCloud();
   showToast(`Batas saldo disesuaikan ke ${formatRupiah(newBudget)}`, 'info');
 }
@@ -8635,6 +8737,11 @@ function openProfileSettingsModal() {
   if (modalEmail) modalEmail.textContent = userEmail;
   updateModalAvatar(userPhoto);
   updateHeaderAvatar(userPhoto);
+
+  // Render Kawaii Art Presets (Canva Vector Style)
+  if (typeof renderAvatarPresets === 'function') {
+    renderAvatarPresets();
+  }
 
   // Update auth provider badge chip (Google vs Email)
   const authChipText = document.getElementById('modalAuthChipText');
@@ -9154,7 +9261,7 @@ function showToast(message, type = 'info') {
     `;
   }
 
-  toast.innerHTML = `<span class="toast-icon">${icon}</span>${contentHtml}<button type="button" class="toast-close-btn" aria-label="Tutup" onclick="event.stopPropagation(); this.closest('.app-toast').remove();">✕</button>`;
+  toast.innerHTML = `<span class="toast-icon">${icon}</span>${contentHtml}`;
   container.appendChild(toast);
   attachSwipeToDismiss(toast);
 
@@ -9169,9 +9276,8 @@ function showToast(message, type = 'info') {
       }
     };
   } else {
-    // Memungkinkan user menutup toast langsung dengan mengetuknya
-    toast.style.cursor = 'pointer';
-    toast.onclick = () => { toast.remove(); };
+    // Tidak menutup instan dengan sekali ketuk; interaksi penutupan hanya via drag-away (swipe-to-dismiss)
+    toast.style.cursor = 'grab';
   }
 
   // Pasang timer otomatis hilang (5 detik untuk undo, 2.5 detik untuk notifikasi biasa)
@@ -9239,6 +9345,7 @@ function initApp() {
   initTheme();
   loadLocalState();
   closeReceiptModal();
+  closeCancelShoppingModal();
   initFirestoreSync();
   setTimeout(syncLocalAccountsToCloud, 600);
   document.body.classList.toggle('in-store-mode-active', !!AppState.inStoreMode);
@@ -9847,7 +9954,7 @@ function renderCartSection() {
   const emptyCartBtn = document.getElementById('btnEmptyCart');
   const cancelShoppingBtnBottom = document.getElementById('btnCancelShoppingBottom');
   const cartActionsToolbar = document.getElementById('cartActionsToolbar');
-  const cartStickyBottomBar = document.getElementById('cartStickyBottomBar') || document.querySelector('.shopee-sticky-bottom-bar');
+  const cartStickyBottomBar = document.getElementById('cartStickyBottomBar') || document.querySelector('.cart-floating-checkout-dock');
 
   if (cartActionsToolbar) {
     if (hasInCart) {
@@ -9858,8 +9965,11 @@ function renderCartSection() {
       cartActionsToolbar.style.display = 'none';
     }
   }
+
+  // Manage checkout dock visibility based on items & active tab
   if (cartStickyBottomBar) {
-    if (hasInCart) {
+    const isCartActive = (AppState.currentTab === 'cart');
+    if (hasInCart && isCartActive) {
       cartStickyBottomBar.classList.remove('hidden');
       cartStickyBottomBar.style.display = 'flex';
     } else {
@@ -9867,6 +9977,7 @@ function renderCartSection() {
       cartStickyBottomBar.style.display = 'none';
     }
   }
+
   if (emptyCartBtn) {
     emptyCartBtn.style.display = hasInCart ? 'inline-flex' : 'none';
   }
@@ -9894,16 +10005,16 @@ function renderCartSection() {
   // Empty cart state
   if (inCartItems.length === 0) {
     container.innerHTML = `
-      <div class="empty-state" style="padding: 40px 16px; text-align: center;">
-        <div style="font-size: 44px; margin-bottom: 10px;">🛒</div>
-        <p style="font-weight: 700; font-size: 1.05rem; color: var(--text-headline, #222222); margin-bottom: 6px;">Keranjang belanja masih kosong</p>
-        <p style="font-size: 0.82rem; color: var(--text-subtle, #757575); margin-bottom: 18px; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-          ${unboughtItems.length > 0 ? `Ada ${unboughtItems.length} barang di Rencana Belanja yang siap dipindahkan ke keranjang!` : 'Belum ada barang di rencana belanja. Mulai catat kebutuhanmu!'}
+      <div class="ios-empty-state-card">
+        <div class="empty-state-mascot">🛒</div>
+        <h4 class="empty-state-headline">Keranjang Belanja Masih Kosong ♡</h4>
+        <p class="empty-state-desc">
+          ${unboughtItems.length > 0 ? `Ada ${unboughtItems.length} barang di Rencana Belanja yang siap dimasukkan ke keranjang!` : 'Belum ada barang di rencana belanja. Mulai catat kebutuhanmu!'}
         </p>
-        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <div class="empty-state-btn-row">
           ${unboughtItems.length > 0 ? `
             <button type="button" class="btn-primary touch-target" style="width: auto; padding: 10px 20px; font-size: 0.84rem; font-weight: 800; border-radius: 999px;" onclick="startShoppingFromPlan()">
-              🛍️ Pindahkan Semua (${unboughtItems.length}) ke Keranjang
+              🛍️ Masukkan Semua (${unboughtItems.length}) ke Keranjang
             </button>
           ` : ''}
           <button type="button" class="btn-demo-quick touch-target" style="width: auto; padding: 10px 20px; font-size: 0.84rem; font-weight: 700; border-radius: 999px;" onclick="switchShoppingView('planner')">
@@ -9914,6 +10025,7 @@ function renderCartSection() {
     `;
     if (selectAllCb) selectAllCb.checked = false;
     updateCartBadges();
+    syncCartBottomPadding();
     return;
   }
 
@@ -9952,48 +10064,69 @@ function renderCartSection() {
     else if (item.diskonTipe === 'tiered') promoBadge = `🔥 ${item.diskonValue}`;
 
     html += `
-      <div class="shopee-item-card checked" data-item-id="${item.id}">
-        <div class="shopee-compact-body">
-          <div class="shopee-compact-top">
-            <div class="shopee-compact-title-wrap">
-              <span class="shopee-compact-name" title="${escapeHtml(item.namaBarang)}">
+      <div class="ios-product-card cart-item-card checked" data-item-id="${item.id}">
+        <!-- Top Section: Checkbox, Product Name, Tags & Actions -->
+        <div class="ios-card-top-row">
+          <div class="cart-item-header-left">
+            <label class="ios-custom-checkbox-label" onclick="event.stopPropagation();" title="Centang / Batal Masukkan Keranjang">
+              <input type="checkbox" class="ios-custom-checkbox cart-item-cb" ${item.checked ? 'checked' : ''} onchange="moveItemToPlan('${item.id}')">
+              <span class="ios-checkbox-box"><span class="ios-checkbox-icon">✓</span></span>
+            </label>
+            <div class="ios-card-title-col">
+              <span class="ios-product-title" title="${escapeHtml(item.namaBarang)}">
                 ${escapeHtml(item.namaBarang)}
               </span>
-              <div class="shopee-compact-meta-left">
-                <span class="${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>
-                ${promoBadge ? `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">${promoBadge}</button>` : `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}')" title="Atur Diskon Cepat">🏷️ +Diskon</button>`}
+              <div class="ios-card-tags-row">
+                <span class="ios-meta-pill unit-pill" id="cart-unit-badge-${item.id}">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
+                ${analysis.isRepurchase ? `<span class="ios-meta-pill analysis-pill ${analysis.badgeClass}" title="${escapeHtml(analysis.detailText)}">${analysis.badgeText}</span>` : ''}
+                ${promoBadge ? `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}'); event.stopPropagation();">${promoBadge}</button>` : `<button type="button" class="shopee-promo-pill" onclick="openQuickDiscountPopover('${item.id}'); event.stopPropagation();">🏷️ +Diskon</button>`}
               </div>
-            </div>
-            <div class="shopee-compact-actions">
-              <button type="button" class="btn-action-edit-icon touch-target" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Item">✏️</button>
-              <button type="button" class="btn-shopee-delete touch-target" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item">🗑️</button>
             </div>
           </div>
 
-          <div class="shopee-compact-bottom">
-            <div class="shopee-compact-price-wrap">
-              <span class="subtotal-amount price-tag" id="subtotal-${item.id}" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga">${formatRupiah(subtotal)}</span>
-              <span class="planner-unit-badge" id="cart-unit-badge-${item.id}">📦 ${item.qty} ${escapeHtml(item.satuan || 'pcs')}</span>
-              ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
-            </div>
+          <div class="ios-card-actions-col">
+            <button type="button" class="btn-ios-icon-action btn-edit touch-target" onclick="openDetailedItemModal('${item.id}'); event.stopPropagation();" title="Ubah Rincian Item" aria-label="Ubah Rincian Item">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button type="button" class="btn-ios-icon-action btn-delete touch-target" onclick="confirmDeleteItem('${item.id}'); event.stopPropagation();" title="Hapus Item" aria-label="Hapus Item">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-            <div class="shopee-compact-stepper-wrap" style="display: flex; align-items: center; gap: 10px;">
-              <!-- Fat-finger safe return to plan button (Crisp SVG, Pixel-Perfect Centered) -->
-              <button type="button" class="btn-return-to-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja (belum dibeli)" aria-label="Kembalikan ke Rencana Belanja">
-                <svg class="btn-plan-arrow-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <polyline points="9 14 4 9 9 4"></polyline>
-                  <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
-                </svg>
-                <span>Ke Rencana</span>
-              </button>
-              <div class="shopee-stepper">
-                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas">&minus;</button>
-                <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
-                       oninput="handleQtyDirectInput('${item.id}', this.value)"
-                       onblur="handleQtyBlur('${item.id}', this.value)"
-                       onclick="event.stopPropagation()">
-                <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas">+</button>
-              </div>
+        <!-- Card Divider -->
+        <div class="ios-card-divider"></div>
+
+        <!-- Bottom Section: Subtotal & Return to Plan + Stepper -->
+        <div class="ios-card-bottom-row">
+          <div class="ios-card-price-col">
+            <div class="ios-price-wrap" onclick="openQuickPriceModal('${item.id}', false); event.stopPropagation();" style="cursor: pointer;" title="Klik untuk ubah harga">
+              <span class="ios-price-label">Subtotal:</span>
+              <span class="ios-price-value price-tag" id="subtotal-${item.id}">${formatRupiah(subtotal)}</span>
+            </div>
+            ${(analysis.isRepurchase && analysis.shortDetail) ? `<span class="repurchase-price-history-sub ${analysis.diffClass}" title="${escapeHtml(analysis.detailText)}">${escapeHtml(analysis.shortDetail)}</span>` : ''}
+          </div>
+
+          <div class="ios-card-controls-col">
+            <!-- Return to Plan Button -->
+            <button type="button" class="btn-ios-return-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja">
+              <span>↩️ Ke Rencana</span>
+            </button>
+
+            <!-- Custom iOS Quantity Stepper -->
+            <div class="ios-stepper-capsule">
+              <button type="button" class="ios-step-btn minus" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas" aria-label="Kurangi Kuantitas">&minus;</button>
+              <input type="number" inputmode="numeric" class="ios-step-input" id="qty-input-${item.id}" min="1" value="${item.qty}"
+                     oninput="handleQtyDirectInput('${item.id}', this.value)"
+                     onblur="handleQtyBlur('${item.id}', this.value)"
+                     onclick="event.stopPropagation()">
+              <button type="button" class="ios-step-btn plus" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas" aria-label="Tambah Kuantitas">+</button>
             </div>
           </div>
         </div>
@@ -10003,6 +10136,7 @@ function renderCartSection() {
 
   container.innerHTML = html;
   updateCartBadges();
+  syncCartBottomPadding();
 }
 
 /**
@@ -10476,6 +10610,8 @@ if (typeof window !== 'undefined') {
   window.moveItemToCart = moveItemToCart;
   window.moveItemToPlan = moveItemToPlan;
   window.startShoppingFromPlan = startShoppingFromPlan;
+  window.moveItemToCartWithFeedback = moveItemToCartWithFeedback;
+  window.syncCartBottomPadding = syncCartBottomPadding;
   window.showToastWithUndo = showToastWithUndo;
   window.toggleItemCheck = toggleItemCheck;
   window.toggleCatalogExpand = toggleCatalogExpand;
@@ -10786,4 +10922,283 @@ if (typeof window !== 'undefined') {
       if (typeof updateNavGlider === 'function') updateNavGlider();
     }, 150);
   });
+}
+
+/**
+ * Pindahkan barang dari Rencana ke Keranjang dengan Feedback Visual & Haptik
+ */
+function moveItemToCartWithFeedback(itemId, btnEl) {
+  if (btnEl) {
+    btnEl.classList.add('added-animating');
+    setTimeout(() => {
+      if (btnEl) btnEl.classList.remove('added-animating');
+    }, 450);
+  }
+
+  // Animate cart counter pills and bottom nav cart icon
+  const cartPills = document.querySelectorAll('#cartCountPill, #cartCountPill2, #cartCountPill, .bottom-nav-item[data-tab="cart"] .nav-icon');
+  cartPills.forEach(p => {
+    p.classList.add('cart-badge-bounce');
+    setTimeout(() => p.classList.remove('cart-badge-bounce'), 500);
+  });
+
+  moveItemToCart(itemId);
+}
+
+/**
+ * Sinkronisasi Padding Bawah Keranjang untuk Mencegah Tumpang Tindih dengan Checkout Dock
+ */
+function syncCartBottomPadding() {
+  const dock = document.getElementById('cartStickyBottomBar');
+  const cartList = document.getElementById('cartItemsContainer');
+  const tabCart = document.getElementById('tabCart');
+  if (!cartList || !tabCart) return;
+
+  const currentTab = AppState.currentTab || 'planner';
+  const hasInCart = AppState.cart && AppState.cart.some(i => i.checked);
+
+  if (dock) {
+    if (currentTab === 'cart' && hasInCart) {
+      dock.style.display = 'flex';
+      dock.classList.remove('hidden');
+      const dockHeight = dock.offsetHeight || 60;
+      const navBar = document.querySelector('.bottom-nav-bar');
+      const navHeight = navBar ? navBar.offsetHeight : 70;
+      const totalPad = dockHeight + navHeight + 28;
+      cartList.style.paddingBottom = totalPad + 'px';
+      tabCart.style.paddingBottom = totalPad + 'px';
+    } else {
+      dock.style.display = 'none';
+      dock.classList.add('hidden');
+      cartList.style.paddingBottom = 'calc(var(--bottom-nav-height) + 24px)';
+      tabCart.style.paddingBottom = 'calc(var(--bottom-nav-height) + 24px)';
+    }
+  }
+}
+window.addEventListener('resize', syncCartBottomPadding);
+
+
+/**
+ * Pilih Siklus Anggaran (iOS Segmented Control)
+ */
+function selectBudgetCycle(period) {
+  if (!period) return;
+  AppState.budgetPeriod = period;
+
+  // Sync hidden native select
+  const sel = document.getElementById('configBudgetPeriod');
+  if (sel) sel.value = period;
+
+  // Update segmented buttons active state
+  document.querySelectorAll('.cycle-seg-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cycle === period);
+  });
+
+  // Update label hint
+  const hint = document.getElementById('cycleActiveHint');
+  const labels = {
+    weekly: 'Mingguan',
+    monthly: 'Bulanan',
+    session: 'Per Sesi Belanja'
+  };
+  if (hint) hint.textContent = labels[period] || period;
+
+  updateBudgetConfig();
+  if (typeof SoundEngine !== 'undefined' && SoundEngine.play) {
+    SoundEngine.play('nav_switch');
+  } else if (typeof playSoftPop === 'function') {
+    playSoftPop();
+  }
+}
+window.selectBudgetCycle = selectBudgetCycle;
+
+/**
+ * =========================================================================
+ * AVATAR MANAGEMENT (CUSTOM PHOTO UPLOAD & KAWAII PRESETS)
+ * =========================================================================
+ */
+function triggerProfileAvatarUpload() {
+  if (typeof playSoftPop === 'function') playSoftPop();
+  const fileInput = document.getElementById('profileAvatarFileInput');
+  if (fileInput) fileInput.click();
+}
+
+function handleProfileAvatarUpload(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    if (typeof showToast === 'function') {
+      showToast('Harap pilih file gambar (JPG, PNG, atau WebP)!', 'warning');
+    }
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // Compress with 180x180 canvas for ultra-fast storage & zero lag
+      const canvas = document.createElement('canvas');
+      canvas.width = 180;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+
+      // Square crop centered
+      const minSide = Math.min(img.width, img.height);
+      const sx = (img.width - minSide) / 2;
+      const sy = (img.height - minSide) / 2;
+      ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, 180, 180);
+
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      applyUserAvatar(compressedDataUrl);
+
+      if (typeof showToast === 'function') {
+        showToast('Foto profil baru berhasil disimpan! 🌸', 'success');
+      }
+      if (typeof SoundEngine !== 'undefined' && SoundEngine.play) {
+        SoundEngine.play('success');
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  // Reset input value so same image can be re-selected if desired
+  if (event.target) event.target.value = '';
+}
+
+function selectAvatarPreset(emoji) {
+  if (typeof playSoftPop === 'function') playSoftPop();
+  if (!emoji) return;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFEBF2"/><stop offset="100%" stop-color="#FFD6E5"/></linearGradient></defs><circle cx="80" cy="80" r="76" fill="url(#g)" stroke="#F4BFD0" stroke-width="4"/><text x="80" y="104" font-size="70" text-anchor="middle" dominant-baseline="middle">${emoji}</text></svg>`;
+  const dataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+
+  applyUserAvatar(dataUrl);
+
+  if (typeof showToast === 'function') {
+    showToast(`Avatar ${emoji} berhasil dipilih! 🌸`, 'success');
+  }
+  if (typeof SoundEngine !== 'undefined' && SoundEngine.play) {
+    SoundEngine.play('nav_switch');
+  }
+}
+
+function selectKawaiiAvatarPreset(presetId) {
+  if (typeof playSoftPop === 'function') playSoftPop();
+  if (!presetId) return;
+
+  let dataUrl = '';
+  let presetName = presetId;
+
+  if (typeof getKawaiiArtDataUrl === 'function') {
+    dataUrl = getKawaiiArtDataUrl(presetId);
+  } else if (typeof KawaiiArt !== 'undefined' && KawaiiArt[presetId]) {
+    dataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(KawaiiArt[presetId]);
+  }
+
+  if (typeof KAWAII_AVATAR_PRESETS !== 'undefined') {
+    const found = KAWAII_AVATAR_PRESETS.find(p => p.id === presetId);
+    if (found) presetName = found.name;
+  }
+
+  if (dataUrl) {
+    applyUserAvatar(dataUrl);
+
+    // Update active highlight on presets
+    document.querySelectorAll('.btn-avatar-preset').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(`'${presetId}'`));
+    });
+
+    if (typeof showToast === 'function') {
+      showToast(`Avatar ${presetName} berhasil dipilih! 🌸`, 'success');
+    }
+    if (typeof SoundEngine !== 'undefined' && SoundEngine.play) {
+      SoundEngine.play('nav_switch');
+    }
+  }
+}
+
+function renderAvatarPresets() {
+  const grid = document.getElementById('avatarPresetsGrid');
+  if (!grid || typeof KAWAII_AVATAR_PRESETS === 'undefined' || typeof KawaiiArt === 'undefined') return;
+
+  grid.innerHTML = KAWAII_AVATAR_PRESETS.map(p => {
+    const svg = KawaiiArt[p.svgKey] || '🌸';
+    return `
+      <button type="button" class="btn-avatar-preset touch-target"
+              onclick="selectKawaiiAvatarPreset('${p.id}')"
+              title="${escapeHtml(p.title || p.name)}"
+              aria-label="${escapeHtml(p.name)}">
+        ${svg}
+      </button>
+    `;
+  }).join('');
+}
+
+function applyUserAvatar(avatarUrl) {
+  if (!avatarUrl) return;
+
+  if (!AppState.user) {
+    AppState.user = { name: 'Pengguna', email: 'user@email.com', uid: 'guest' };
+  }
+  AppState.user.photoURL = avatarUrl;
+  AppState.user.photo = avatarUrl;
+
+  const storageKey = 'smart_grocery_custom_avatar_' + (AppState.user.uid || 'guest');
+  try {
+    localStorage.setItem(storageKey, avatarUrl);
+  } catch (err) {
+    console.warn('LocalStorage avatar quota check:', err);
+  }
+
+  updateHeaderAvatar(avatarUrl);
+  updateModalAvatar(avatarUrl);
+}
+
+/**
+ * =========================================================================
+ * STICKY KAWAII MASCOT COMPANION (SCROLL BEHAVIOR & INTERACTION)
+ * =========================================================================
+ */
+function handleStickyMascotClick() {
+  if (typeof playSoftPop === 'function') playSoftPop();
+  const stickyMascot = document.getElementById('stickyMascotCompanion');
+  if (stickyMascot) {
+    stickyMascot.style.transform = 'scale(1.15)';
+    setTimeout(() => {
+      if (stickyMascot) stickyMascot.style.transform = '';
+    }, 250);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+if (typeof window !== 'undefined') {
+  window.triggerProfileAvatarUpload = triggerProfileAvatarUpload;
+  window.handleProfileAvatarUpload = handleProfileAvatarUpload;
+  window.selectAvatarPreset = selectAvatarPreset;
+  window.selectKawaiiAvatarPreset = selectKawaiiAvatarPreset;
+  window.renderAvatarPresets = renderAvatarPresets;
+  window.renderCatalogItemThumb = renderCatalogItemThumb;
+  window.applyUserAvatar = applyUserAvatar;
+  window.handleStickyMascotClick = handleStickyMascotClick;
+
+  let _stickyScrollTicking = false;
+  window.addEventListener('scroll', () => {
+    if (!_stickyScrollTicking) {
+      window.requestAnimationFrame(() => {
+        const stickyMascot = document.getElementById('stickyMascotCompanion');
+        if (stickyMascot) {
+          if (window.scrollY > 130) {
+            stickyMascot.classList.add('visible');
+          } else {
+            stickyMascot.classList.remove('visible');
+          }
+        }
+        _stickyScrollTicking = false;
+      });
+      _stickyScrollTicking = true;
+    }
+  }, { passive: true });
 }
