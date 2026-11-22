@@ -2076,6 +2076,17 @@ function loadLocalState() {
           localStorage.removeItem(STORAGE_KEYS.USER);
         } else {
           AppState.user = parsed;
+          if (AppState.user) {
+            const uid = AppState.user.uid || 'guest';
+            const customAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + uid) ||
+                                 localStorage.getItem('smart_grocery_custom_avatar_latest') ||
+                                 localStorage.getItem('smart_grocery_custom_avatar_guest');
+            if (customAvatar) {
+              AppState.user.photoURL = customAvatar;
+              AppState.user.photo = customAvatar;
+              AppState.user.customAvatar = customAvatar;
+            }
+          }
         }
       } catch (e) {
         AppState.user = null;
@@ -2300,9 +2311,12 @@ function setupAuthListener() {
         if (!AppState.user || AppState.user.uid !== user.uid) {
           handleSuccessfulAuth(user, cleanProv, false);
         } else {
-          // Sinkronisasi sesi live & avatar jika ada pembaruan dari Google
+          // Sinkronisasi sesi live & avatar jika ada pembaruan
           AppState.user.isLiveFirebaseSession = true;
-          if (user.photoURL && user.photoURL !== AppState.user.photoURL) {
+          const savedCustomAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + user.uid) ||
+                                    localStorage.getItem('smart_grocery_custom_avatar_latest') ||
+                                    localStorage.getItem('smart_grocery_custom_avatar_guest');
+          if (!savedCustomAvatar && user.photoURL && user.photoURL !== AppState.user.photoURL) {
             AppState.user.photoURL = user.photoURL;
             updateHeaderAvatar(user.photoURL);
             updateModalAvatar(user.photoURL);
@@ -2346,12 +2360,20 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
 
   const displayName = u.displayName || (u.email ? u.email.split('@')[0] : 'Pengguna');
   const uid = u.uid || getDeterministicUid(u.email, cleanProvider === 'google' ? 'google_' : 'usr_');
-  const photoURL = u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4285F4&color=fff&bold=true`;
+  
+  // Prioritaskan custom avatar tersimpan (foto upload / kawaii preset)
+  const savedCustomAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + uid) ||
+                            localStorage.getItem('smart_grocery_custom_avatar_latest') ||
+                            localStorage.getItem('smart_grocery_custom_avatar_guest') ||
+                            (AppState.user && AppState.user.customAvatar);
+
+  const photoURL = savedCustomAvatar || u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4285F4&color=fff&bold=true`;
 
   AppState.user = {
     name: displayName,
     email: u.email || 'user@email.com',
     photoURL: photoURL,
+    customAvatar: savedCustomAvatar || null,
     uid: uid,
     authProvider: cleanProvider,
     isLiveFirebaseSession: !!u.isLiveFirebaseSession,
@@ -5399,7 +5421,7 @@ function renderItems() {
         <h4 class="empty-state-headline">Rencana Belanja Masih Kosong ♡</h4>
         <p class="empty-state-desc">Yuk catat kebutuhan belanjamu di kolom atas atau pilih langsung dari katalog populer di bawah!</p>
         <div class="empty-state-btn-row">
-          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 9px 18px; font-size: 0.82rem; font-weight: 800; border-radius: 999px;" onclick="startNewShoppingSession()">
+          <button type="button" class="btn-primary touch-target" style="width: auto; padding: 10px 22px; font-size: 0.84rem; font-weight: 800; border-radius: 999px;" onclick="loadRoutineItemsToPlanner()">
             🛍️ Muat Barang Rutin
           </button>
         </div>
@@ -6493,9 +6515,13 @@ function filterCatalogCategory(category, buttonEl) {
   renderProductCatalog();
 }
 
+let catalogSearchDebounceTimer = null;
 function handleCatalogSearch(query) {
   catalogSearchQuery = query;
-  renderProductCatalog();
+  if (catalogSearchDebounceTimer) clearTimeout(catalogSearchDebounceTimer);
+  catalogSearchDebounceTimer = setTimeout(() => {
+    renderProductCatalog();
+  }, 120);
 }
 
 let lastCatalogAddTimestamp = 0;
@@ -6641,6 +6667,76 @@ function toggleItemRoutine(itemId) {
   pushStateToCloud();
   renderItems();
   renderCartSection();
+}
+
+/**
+ * Muat barang belanja rutin harian langsung ke daftar Rencana Belanja
+ */
+function loadRoutineItemsToPlanner() {
+  if (typeof playSoftPop === 'function') playSoftPop();
+
+  let routineList = [];
+  if (Array.isArray(AppState.routineItems) && AppState.routineItems.length > 0) {
+    routineList = AppState.routineItems;
+  } else if (typeof DEFAULT_ROUTINE_ITEMS !== 'undefined' && Array.isArray(DEFAULT_ROUTINE_ITEMS)) {
+    routineList = DEFAULT_ROUTINE_ITEMS;
+  }
+
+  if (!routineList || routineList.length === 0) {
+    showToast('Belum ada barang rutin yang tersimpan! Tandai barang dengan ikon 🔁 Rutin terlebih dahulu.', 'info');
+    return;
+  }
+
+  if (!Array.isArray(AppState.cart)) {
+    AppState.cart = [];
+  }
+
+  let addedCount = 0;
+  const store = AppState.currentStore || 'Supermarket';
+
+  routineList.forEach((r, idx) => {
+    const itemName = (r.namaBarang || r.name || '').trim();
+    if (!itemName) return;
+
+    // Periksa apakah barang sudah ada di rencana (yang belum dibeli / checked: false)
+    const existing = AppState.cart.find(i => (i.namaBarang || '').trim().toLowerCase() === itemName.toLowerCase() && !i.checked);
+    if (!existing) {
+      let lastPrice = null;
+      try {
+        const prevRec = findPreviousPurchaseRecord(itemName, store);
+        lastPrice = prevRec ? prevRec.price : (r.hargaSatuan || r.price || null);
+      } catch (e) {
+        lastPrice = r.hargaSatuan || r.price || null;
+      }
+
+      AppState.cart.unshift({
+        id: 'item-' + Date.now() + '-' + idx + '-' + Math.floor(Math.random() * 10000),
+        namaBarang: itemName,
+        kategori: r.kategori || r.aisle || 'Bahan Pokok',
+        satuan: r.satuan || r.unit || 'pcs',
+        qty: parseInt(r.qty, 10) || 1,
+        hargaSatuan: parseFloat(r.hargaSatuan || r.price) || 0,
+        diskonTipe: 'none',
+        diskonValue: '',
+        hargaRiwayatBulanLalu: lastPrice,
+        store: store,
+        checked: false,
+        isRoutine: true
+      });
+      addedCount++;
+    }
+  });
+
+  saveLocalState();
+  pushStateToCloud();
+  renderAll();
+
+  if (addedCount > 0) {
+    if (typeof SoundEngine !== 'undefined' && SoundEngine.play) SoundEngine.play('success');
+    showToast(`${addedCount} barang rutin berhasil dimuat ke Rencana Belanja! 🔁✨`, 'success');
+  } else {
+    showToast('Semua barang rutin harian sudah ada di rencana belanja Anda! 🌸', 'info');
+  }
 }
 
 /**
@@ -7032,9 +7128,13 @@ function adjustDetailModalQty(delta) {
   updateDetailModalPreview();
 }
 
+let detailNameDebounceTimer = null;
 function handleDetailNameInput(name) {
   const trimmed = (name || '').trim();
-  showCustomItemSuggestions(trimmed);
+  if (detailNameDebounceTimer) clearTimeout(detailNameDebounceTimer);
+  detailNameDebounceTimer = setTimeout(() => {
+    showCustomItemSuggestions(trimmed);
+  }, 100);
   if (!trimmed) {
     updateDetailModalPreview();
     return;
@@ -7360,16 +7460,7 @@ function startNewShoppingSession() {
   if (instoreCard) instoreCard.style.display = 'none';
 
   switchTab('planner', true);
-
-  if (!AppState.cart || AppState.cart.length === 0) {
-    prepareRoutineItemsForNewShopping();
-  }
-
-  playCalmChime();
-  saveLocalState();
-  pushStateToCloud();
-  renderAll();
-  showToast('Siap belanja lagi! Daftar belanja baru sudah disiapkan 🛒✨', 'success');
+  loadRoutineItemsToPlanner();
 }
 
 function toggleShoppingMode() {
@@ -11213,12 +11304,29 @@ function applyUserAvatar(avatarUrl) {
   }
   AppState.user.photoURL = avatarUrl;
   AppState.user.photo = avatarUrl;
+  AppState.user.customAvatar = avatarUrl;
 
-  const storageKey = 'smart_grocery_custom_avatar_' + (AppState.user.uid || 'guest');
+  const uid = AppState.user.uid || 'guest';
   try {
-    localStorage.setItem(storageKey, avatarUrl);
+    localStorage.setItem('smart_grocery_custom_avatar_' + uid, avatarUrl);
+    localStorage.setItem('smart_grocery_custom_avatar_guest', avatarUrl);
+    localStorage.setItem('smart_grocery_custom_avatar_latest', avatarUrl);
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(AppState.user));
+    localStorage.setItem('sgt_current_user', JSON.stringify(AppState.user));
   } catch (err) {
     console.warn('LocalStorage avatar quota check:', err);
+  }
+
+  saveLocalState();
+  if (typeof pushStateToCloud === 'function') {
+    pushStateToCloud();
+  }
+  if (typeof firestoreDb !== 'undefined' && firestoreDb && AppState.user.email) {
+    const cleanEmail = AppState.user.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    firestoreDb.collection('registered_accounts').doc(cleanEmail).set({
+      photoURL: avatarUrl,
+      customAvatar: avatarUrl
+    }, { merge: true }).catch(err => console.info('Firestore avatar sync notice:', err));
   }
 
   updateHeaderAvatar(avatarUrl);
@@ -11251,6 +11359,7 @@ if (typeof window !== 'undefined') {
   window.renderCatalogItemThumb = renderCatalogItemThumb;
   window.applyUserAvatar = applyUserAvatar;
   window.handleStickyMascotClick = handleStickyMascotClick;
+  window.loadRoutineItemsToPlanner = loadRoutineItemsToPlanner;
 
   let _stickyScrollTicking = false;
   window.addEventListener('scroll', () => {
