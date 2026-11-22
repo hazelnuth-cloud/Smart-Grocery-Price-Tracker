@@ -4279,11 +4279,11 @@ function renderBudget() {
   const budgetSubEl = document.getElementById('checkoutBudgetRemaining');
   if (budgetSubEl) {
     if (safety.sisa >= 0) {
-      budgetSubEl.textContent = `Sisa Saldo: ${formatRupiah(safety.sisa)} (${safety.level === 'warning' ? 'Rem Dulu Kak' : 'Aman'})`;
-      budgetSubEl.style.color = (safety.level === 'warning') ? '#B45309' : '#2E7D32';
+      budgetSubEl.textContent = `Sisa: ${formatRupiah(safety.sisa)}`;
+      budgetSubEl.style.color = (safety.level === 'warning') ? '#B45309' : '#166534';
     } else {
-      budgetSubEl.textContent = `Defisit: - ${formatRupiah(Math.abs(safety.sisa))}`;
-      budgetSubEl.style.color = '#EF4444';
+      budgetSubEl.textContent = `Defisit: -${formatRupiah(Math.abs(safety.sisa))}`;
+      budgetSubEl.style.color = '#DC2626';
     }
   }
   const selectedCountEl = document.getElementById('cartSelectedCountBadge');
@@ -9059,16 +9059,21 @@ function switchTab(tab, force = false) {
   if (btnCart) btnCart.classList.toggle('active', tab === 'cart');
 
   if (tab === 'cart') {
-    renderCart();
+    renderCartSection();
     syncCartBottomPadding();
   } else if (tab === 'planner') {
-    renderPlanner();
+    renderItems();
   } else if (tab === 'budget') {
     renderBudget();
   } else if (tab === 'pantry') {
-    renderPantry();
+    if (typeof renderPantry === 'function') renderPantry();
   }
+  syncCartBottomPadding();
 }
+
+// Fallback aliases to protect against any missing reference calls
+window.renderCart = renderCartSection;
+window.renderPlanner = renderItems;
 
 // =========================================================================
 // 18. RESET DEMO DATA
@@ -10106,18 +10111,13 @@ function renderCartSection() {
   // Manage checkout dock visibility based on items & active tab
   if (cartStickyBottomBar) {
     const isCartActive = (AppState.currentTab === 'cart');
-    if (isCartActive && AppState.cart && AppState.cart.length > 0) {
+    if (isCartActive && hasInCart) {
       cartStickyBottomBar.classList.remove('hidden');
       cartStickyBottomBar.style.display = 'flex';
-      const finishBtn = document.getElementById('btnFinishShopping');
+      const finishBtn = document.getElementById('btnFinishShoppingBottom');
       if (finishBtn) {
-        if (inCartItems.length === 0) {
-          finishBtn.style.opacity = '0.55';
-          finishBtn.style.pointerEvents = 'none';
-        } else {
-          finishBtn.style.opacity = '1';
-          finishBtn.style.pointerEvents = 'auto';
-        }
+        finishBtn.style.opacity = '1';
+        finishBtn.style.pointerEvents = 'auto';
       }
     } else {
       cartStickyBottomBar.classList.add('hidden');
@@ -10139,8 +10139,8 @@ function renderCartSection() {
 
   if (budgetSubEl) {
     if (metrics.safety.sisa >= 0) {
-      budgetSubEl.textContent = `Sisa: ${formatRupiah(metrics.safety.sisa)} (${metrics.safety.level === 'warning' ? 'Rem' : 'Aman'})`;
-      budgetSubEl.style.color = (metrics.safety.level === 'warning') ? '#B45309' : 'var(--status-safe)';
+      budgetSubEl.textContent = `Sisa: ${formatRupiah(metrics.safety.sisa)}`;
+      budgetSubEl.style.color = (metrics.safety.level === 'warning') ? '#B45309' : '#166534';
     } else {
       budgetSubEl.textContent = `Defisit: -${formatRupiah(Math.abs(metrics.safety.sisa))}`;
       budgetSubEl.style.color = '#DC2626';
@@ -11139,10 +11139,11 @@ function syncCartBottomPadding() {
   if (!cartList || !tabCart) return;
 
   const currentTab = AppState.currentTab || 'planner';
-  const hasItems = AppState.cart && AppState.cart.length > 0;
+  const inCartItems = (AppState.cart || []).filter(i => i.checked);
+  const hasInCart = inCartItems.length > 0;
 
   if (dock) {
-    if (currentTab === 'cart' && hasItems) {
+    if (currentTab === 'cart' && hasInCart) {
       dock.style.display = 'flex';
       dock.classList.remove('hidden');
       const dockHeight = dock.offsetHeight || 60;
