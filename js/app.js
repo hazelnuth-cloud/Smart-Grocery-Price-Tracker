@@ -5537,18 +5537,18 @@ function renderItems() {
           </div>
 
           <div class="ios-card-controls-col">
-            <!-- Custom iOS Quantity Stepper -->
-            <div class="ios-stepper-capsule">
-              <button type="button" class="ios-step-btn minus" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas" aria-label="Kurangi Kuantitas">&minus;</button>
-              <input type="number" inputmode="numeric" class="ios-step-input" id="qty-input-${item.id}" min="1" value="${item.qty}"
+            <!-- Quantity Stepper -->
+            <div class="shopee-stepper">
+              <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas" aria-label="Kurangi Kuantitas">&minus;</button>
+              <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
                      oninput="handleQtyDirectInput('${item.id}', this.value)"
                      onblur="handleQtyBlur('${item.id}', this.value)"
                      onclick="event.stopPropagation()">
-              <button type="button" class="ios-step-btn plus" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas" aria-label="Tambah Kuantitas">+</button>
+              <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas" aria-label="Tambah Kuantitas">+</button>
             </div>
 
             <!-- Dedicated Primary Add to Cart Button -->
-            <button type="button" class="btn-ios-add-cart touch-target" onclick="moveItemToCartWithFeedback('${item.id}', this); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja" aria-label="Pindahkan ke Keranjang Belanja">
+            <button type="button" class="btn-move-to-cart touch-target" onclick="moveItemToCartWithFeedback('${item.id}', this); event.stopPropagation();" title="Pindahkan barang ini ke Keranjang Belanja" aria-label="Pindahkan ke Keranjang Belanja">
               <span>🛒</span>
               <span>Keranjang</span>
             </button>
@@ -10267,18 +10267,22 @@ function renderCartSection() {
 
           <div class="ios-card-controls-col">
             <!-- Return to Plan Button -->
-            <button type="button" class="btn-ios-return-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja">
-              <span>↩️ Rencana</span>
+            <button type="button" class="btn-return-to-plan touch-target" onclick="moveItemToPlan('${item.id}'); event.stopPropagation();" title="Kembalikan barang ini ke Rencana Belanja" aria-label="Kembalikan ke Rencana Belanja">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <polyline points="9 14 4 9 9 4"></polyline>
+                <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+              </svg>
+              <span>Rencana</span>
             </button>
 
-            <!-- Custom iOS Quantity Stepper -->
-            <div class="ios-stepper-capsule">
-              <button type="button" class="ios-step-btn minus" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas" aria-label="Kurangi Kuantitas">&minus;</button>
-              <input type="number" inputmode="numeric" class="ios-step-input" id="qty-input-${item.id}" min="1" value="${item.qty}"
+            <!-- Quantity Stepper -->
+            <div class="shopee-stepper">
+              <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', -1); event.stopPropagation();" title="Kurangi Kuantitas" aria-label="Kurangi Kuantitas">&minus;</button>
+              <input type="number" inputmode="numeric" id="qty-input-${item.id}" min="1" value="${item.qty}"
                      oninput="handleQtyDirectInput('${item.id}', this.value)"
                      onblur="handleQtyBlur('${item.id}', this.value)"
                      onclick="event.stopPropagation()">
-              <button type="button" class="ios-step-btn plus" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas" aria-label="Tambah Kuantitas">+</button>
+              <button type="button" class="shopee-step-btn" onclick="updateItemQty('${item.id}', 1); event.stopPropagation();" title="Tambah Kuantitas" aria-label="Tambah Kuantitas">+</button>
             </div>
           </div>
         </div>

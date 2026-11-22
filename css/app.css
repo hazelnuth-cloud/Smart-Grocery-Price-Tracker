@@ -6796,12 +6796,15 @@ button:not(:disabled):active,
   font-size: 13.5px !important;
   font-weight: 800 !important;
   color: #2D272E !important;
-  line-height: 1.25 !important;
-  white-space: nowrap !important;
+  line-height: 1.32 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   letter-spacing: -0.15px !important;
-  display: block !important;
   max-width: 100% !important;
 }
 
@@ -6954,23 +6957,25 @@ button:not(:disabled):active,
   margin-left: auto !important;
 }
 
-/* Custom iOS Quantity Stepper (Flush Right & Elegant Capsule) */
-.ios-stepper-capsule {
+/* Custom Proportional Stepper Pill (Classic Beloved Model) */
+.ios-stepper-capsule,
+.shopee-stepper {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: rgba(255, 245, 248, 0.95) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 236, 244, 0.70)) !important;
   border: 1.2px solid rgba(244, 191, 208, 0.75) !important;
   border-radius: var(--radius-pill) !important;
-  padding: 1px 3px !important;
+  padding: 2px 3px !important;
   height: 30px !important;
   box-sizing: border-box !important;
-  box-shadow: inset 0 1px 2px rgba(185, 86, 121, 0.06) !important;
+  box-shadow: 0 2px 8px rgba(217, 130, 162, 0.08), inset 0 1px 1px #FFFFFF !important;
   flex-shrink: 0 !important;
 }
 
 .ios-stepper-capsule .ios-step-btn,
-.ios-step-btn {
+.ios-step-btn,
+.shopee-step-btn {
   width: 24px !important;
   height: 24px !important;
   min-width: 24px !important;
@@ -6978,26 +6983,27 @@ button:not(:disabled):active,
   max-width: 24px !important;
   max-height: 24px !important;
   border-radius: 50% !important;
-  background: transparent !important;
+  background: linear-gradient(135deg, rgba(244, 191, 208, 0.60), rgba(217, 130, 162, 0.75)) !important;
   border: none !important;
-  color: #B95679 !important;
+  color: #7A2846 !important;
   font-weight: 850 !important;
-  font-size: 14.5px !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform var(--transition-fast) !important;
   box-shadow: none !important;
   padding: 0 !important;
-  line-height: 1 !important;
   position: relative !important;
   flex-shrink: 0 !important;
   user-select: none !important;
   touch-action: manipulation !important;
 }
 
-.ios-step-btn::after {
+.ios-step-btn::after,
+.shopee-step-btn::after {
   content: '' !important;
   position: absolute !important;
   top: -8px !important;
@@ -7006,25 +7012,30 @@ button:not(:disabled):active,
   right: -8px !important;
 }
 
-.ios-step-btn:hover {
-  background: rgba(255, 182, 193, 0.25) !important;
+.ios-step-btn:hover,
+.shopee-step-btn:hover {
+  background: linear-gradient(135deg, #F4BFD0, #D982A2) !important;
+  color: #FFFFFF !important;
   transform: scale(1.05) !important;
 }
 
-.ios-step-btn:active {
-  transform: scale(0.88) !important;
-  background: rgba(255, 182, 193, 0.45) !important;
+.ios-step-btn:active,
+.shopee-step-btn:active {
+  transform: scale(0.90) !important;
+  background: linear-gradient(135deg, #E27396, #B95679) !important;
 }
 
-.ios-step-input {
-  width: 24px !important;
+.ios-step-input,
+.shopee-stepper input,
+.ios-stepper-capsule input {
+  width: 28px !important;
   height: 24px !important;
-  min-width: 24px !important;
-  max-width: 28px !important;
+  min-width: 28px !important;
+  max-width: 34px !important;
   text-align: center !important;
   border: none !important;
   background: transparent !important;
-  font-size: 13px !important;
+  font-size: 13.5px !important;
   font-weight: 850 !important;
   color: #2D272E !important;
   outline: none !important;
@@ -7035,19 +7046,22 @@ button:not(:disabled):active,
 }
 
 .ios-step-input::-webkit-outer-spin-button,
-.ios-step-input::-webkit-inner-spin-button {
+.ios-step-input::-webkit-inner-spin-button,
+.shopee-stepper input::-webkit-outer-spin-button,
+.shopee-stepper input::-webkit-inner-spin-button {
   -webkit-appearance: none !important;
   margin: 0 !important;
 }
 
 /* Add to Cart Button (Shopping Plan) */
+.btn-move-to-cart,
 .btn-ios-add-cart {
   height: 30px !important;
   padding: 0 10px !important;
   border-radius: var(--radius-pill) !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1.2px solid rgba(217, 130, 162, 0.6) !important;
-  color: #B95679 !important;
+  background: linear-gradient(135deg, rgba(226, 136, 165, 0.95) 0%, rgba(186, 85, 120, 0.98) 100%) !important;
+  border: 1.2px solid rgba(255, 255, 255, 0.85) !important;
+  color: #FFFFFF !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   display: inline-flex !important;
@@ -7055,21 +7069,24 @@ button:not(:disabled):active,
   gap: 4px !important;
   cursor: pointer !important;
   transition: all 0.18s ease !important;
-  box-shadow: 0 2px 8px rgba(185, 86, 121, 0.12) !important;
+  box-shadow: 0 3px 10px rgba(185, 86, 121, 0.25), inset 0 1.2px 1px rgba(255, 255, 255, 0.90) !important;
   white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
+.btn-move-to-cart:hover,
 .btn-ios-add-cart:hover {
   background: linear-gradient(135deg, #E27396 0%, #B95679 100%) !important;
   color: #FFFFFF !important;
-  border-color: transparent !important;
-  box-shadow: 0 4px 14px rgba(185, 86, 121, 0.35) !important;
+  transform: translateY(-1px) !important;
 }
 
+.btn-move-to-cart:active,
 .btn-ios-add-cart:active {
   transform: scale(0.94) !important;
 }
 
+.btn-move-to-cart.added-animating,
 .btn-ios-add-cart.added-animating {
   background: #10B981 !important;
   color: #FFFFFF !important;
@@ -7078,30 +7095,35 @@ button:not(:disabled):active,
 }
 
 /* Return to Plan Button (Shopping Cart) */
+.btn-return-to-plan,
 .btn-ios-return-plan {
   height: 30px !important;
-  padding: 0 8px !important;
+  padding: 0 9px !important;
   border-radius: var(--radius-pill) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(244, 191, 208, 0.5) !important;
-  color: #7A6872 !important;
-  font-size: 10.5px !important;
-  font-weight: 750 !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 238, 245, 0.70)) !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.65) !important;
+  color: #8A4560 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 4px !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
+  box-shadow: 0 2px 6px rgba(217, 130, 162, 0.08), inset 0 1px 1px #FFFFFF !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
 }
 
+.btn-return-to-plan:hover,
 .btn-ios-return-plan:hover {
   background: #FFF5F8 !important;
   color: #B95679 !important;
   border-color: #B95679 !important;
+  transform: translateY(-1px) !important;
 }
 
+.btn-return-to-plan:active,
 .btn-ios-return-plan:active {
   transform: scale(0.94) !important;
 }
@@ -8645,39 +8667,81 @@ body.theme-dark .btn-edit-budget:hover {
   color: #FFF0F5 !important;
 }
 
-/* 9. Quantity Stepper Controls */
+/* 9. Quantity Stepper Controls & Action Buttons */
 body.dark-mode .shopee-stepper,
 body.dark-mode .ios-stepper,
+body.dark-mode .ios-stepper-capsule,
 body.theme-dark .shopee-stepper,
-body.theme-dark .ios-stepper {
-  background: rgba(26, 12, 23, 0.85) !important;
-  border: 1px solid rgba(255, 182, 193, 0.20) !important;
+body.theme-dark .ios-stepper,
+body.theme-dark .ios-stepper-capsule {
+  background: rgba(28, 12, 25, 0.90) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.22) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 182, 193, 0.08) !important;
 }
 
 body.dark-mode .shopee-step-btn,
 body.dark-mode .ios-stepper-btn,
+body.dark-mode .ios-step-btn,
 body.theme-dark .shopee-step-btn,
-body.theme-dark .ios-stepper-btn {
-  background: rgba(45, 20, 36, 0.85) !important;
+body.theme-dark .ios-stepper-btn,
+body.theme-dark .ios-step-btn {
+  background: linear-gradient(135deg, rgba(65, 25, 52, 0.95), rgba(95, 35, 75, 0.95)) !important;
   color: #FFB7CE !important;
-  border-color: rgba(255, 182, 193, 0.18) !important;
+  border: 1px solid rgba(255, 182, 193, 0.20) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
 }
 
 body.dark-mode .shopee-step-btn:hover,
 body.dark-mode .ios-stepper-btn:hover,
+body.dark-mode .ios-step-btn:hover,
 body.theme-dark .shopee-step-btn:hover,
-body.theme-dark .ios-stepper-btn:hover {
-  background: rgba(65, 28, 52, 0.95) !important;
-  color: #FFF0F5 !important;
+body.theme-dark .ios-stepper-btn:hover,
+body.theme-dark .ios-step-btn:hover {
+  background: linear-gradient(135deg, #B95679, #D982A2) !important;
+  color: #FFFFFF !important;
 }
 
+body.dark-mode .shopee-stepper input,
+body.dark-mode .ios-stepper-capsule input,
 body.dark-mode .shopee-step-input,
 body.dark-mode .ios-step-input,
+body.theme-dark .shopee-stepper input,
+body.theme-dark .ios-stepper-capsule input,
 body.theme-dark .shopee-step-input,
 body.theme-dark .ios-step-input {
-  background: rgba(20, 9, 18, 0.90) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   color: #FFF5F8 !important;
-  border-color: rgba(255, 182, 193, 0.20) !important;
+}
+
+body.dark-mode .btn-return-to-plan,
+body.dark-mode .btn-ios-return-plan,
+body.theme-dark .btn-return-to-plan,
+body.theme-dark .btn-ios-return-plan {
+  background: rgba(35, 15, 30, 0.88) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .btn-return-to-plan:hover,
+body.dark-mode .btn-ios-return-plan:hover,
+body.theme-dark .btn-return-to-plan:hover,
+body.theme-dark .btn-ios-return-plan:hover {
+  background: rgba(55, 22, 45, 0.95) !important;
+  color: #FFF0F5 !important;
+  border-color: rgba(255, 182, 193, 0.35) !important;
+}
+
+body.dark-mode .btn-move-to-cart,
+body.dark-mode .btn-ios-add-cart,
+body.theme-dark .btn-move-to-cart,
+body.theme-dark .btn-ios-add-cart {
+  background: linear-gradient(135deg, rgba(217, 130, 162, 0.90) 0%, rgba(162, 60, 95, 0.95) 100%) !important;
+  border: 1px solid rgba(255, 182, 193, 0.35) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* 10. Form Inputs & Autocomplete Dropdown */
