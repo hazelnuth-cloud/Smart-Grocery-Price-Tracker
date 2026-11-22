@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=165">
+  <link rel="stylesheet" href="./css/app.css?v=166">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1735,26 +1735,22 @@
         </div>
 
         <!-- Single User Info Card -->
-        <div
-          style="background: var(--surface-soft); border: 1px solid var(--pastel-light-2); border-radius: var(--radius-md); padding: 14px; margin-top: 8px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-            <div
-              style="width: 40px; height: 40px; border-radius: 50%; background: #FCE7F3; border: 2px solid #F472B6; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-              👤
+        <div class="cloud-sync-user-card">
+          <div class="cloud-sync-user-header">
+            <div class="cloud-sync-avatar-wrap">
+              <div id="syncUserAccountAvatar" class="cloud-sync-avatar-circle">👤</div>
             </div>
-            <div style="flex: 1;">
-              <div id="syncUserAccountName" style="font-size: 0.95rem; font-weight: 800; color: var(--text-headline);">
-                Pengguna</div>
-              <div id="syncUserAccountEmail" style="font-size: 0.74rem; color: var(--text-subtle);">user@email.com</div>
+            <div class="cloud-sync-user-info">
+              <div id="syncUserAccountName" class="cloud-sync-user-name">Pengguna</div>
+              <div id="syncUserAccountEmail" class="cloud-sync-user-email">user@email.com</div>
             </div>
-            <div
-              style="display: flex; align-items: center; gap: 4px; background: #DCFCE7; color: #166534; font-size: 0.68rem; font-weight: 800; padding: 3px 8px; border-radius: var(--radius-pill);">
-              <span class="cloud-sync-dot" style="margin: 0; background: #16A34A;"></span>
+            <div class="cloud-sync-status-badge">
+              <span class="cloud-sync-dot"></span>
               <span>Tersambung</span>
             </div>
           </div>
 
-          <p style="font-size: 0.72rem; color: var(--text-subtle); line-height: 1.4; margin-bottom: 14px;">
+          <p class="cloud-sync-card-desc">
             Seluruh keranjang belanja, pengaturan anggaran, dan histori belanja otomatis dicadangkan secara realtime
             khusus untuk akun pribadi Anda.
           </p>
@@ -1762,19 +1758,17 @@
           <!-- Actions: Force Backup, Restore, Export JSON -->
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <button type="button" class="btn-primary touch-target"
-              style="padding: 10px; font-size: 0.8rem; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px;"
+              style="padding: 10px; font-size: 0.82rem; margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--radius-pill);"
               onclick="forcePushSingleUserCloud()">
               <span>🔄</span>
               <span>Cadangkan ke Cloud Sekarang</span>
             </button>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-              <button type="button" class="btn-demo-quick touch-target"
-                style="padding: 8px; font-size: 0.74rem; margin: 0;" onclick="forcePullSingleUserCloud()">
+              <button type="button" class="btn-cloud-secondary touch-target" onclick="forcePullSingleUserCloud()">
                 📥 Pulihkan Cloud
               </button>
-              <button type="button" class="btn-demo-quick touch-target"
-                style="padding: 8px; font-size: 0.74rem; margin: 0;" onclick="exportLocalJsonBackup()">
+              <button type="button" class="btn-cloud-secondary touch-target" onclick="exportLocalJsonBackup()">
                 💾 Unduh JSON
               </button>
             </div>
@@ -1782,8 +1776,7 @@
         </div>
 
         <!-- Advanced Firebase Settings (Optional) -->
-        <details
-          style="background: var(--surface-white); padding: 8px 10px; border-radius: var(--radius-md); font-size: 0.74rem; margin-top: 10px; margin-bottom: 12px; border: 1px solid var(--pastel-light-1);">
+        <details class="cloud-sync-details">
           <summary style="font-weight: 700; cursor: pointer; color: var(--text-subtle);">⚙️ Konfigurasi Firebase Cloud
             (Opsional)</summary>
           <div style="margin-top: 8px;">
@@ -1792,14 +1785,14 @@
               placeholder='{"apiKey":"...","projectId":"..."}'
               style="font-family: monospace; font-size: 0.68rem;"></textarea>
             <button type="button" class="btn-primary touch-target"
-              style="width: 100%; padding: 6px; font-size: 0.72rem; border-radius: var(--radius-sm); margin-top: 6px;"
+              style="width: 100%; padding: 7px; font-size: 0.74rem; border-radius: var(--radius-pill); margin-top: 6px;"
               onclick="saveCustomFirebaseConfig()">
               Simpan Konfigurasi
             </button>
           </div>
         </details>
 
-        <button type="button" class="btn-demo-quick" style="width: 100%; margin: 0;"
+        <button type="button" class="btn-modal-close-pill touch-target"
           onclick="closeCloudSyncModal()">Tutup</button>
       </div>
     </div>
@@ -2013,11 +2006,11 @@
 
             <!-- Action Buttons -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-              <button type="button" class="btn-demo-quick" style="margin: 0; min-height: 44px;"
+              <button type="button" class="btn-cloud-secondary touch-target" style="margin: 0; min-height: 44px;"
                 onclick="resetScannerForNext()">
                 🔄 Scan Lain
               </button>
-              <button type="button" id="btnConfirmScannedAdd" class="btn-primary" style="margin: 0; min-height: 44px;"
+              <button type="button" id="btnConfirmScannedAdd" class="btn-primary touch-target" style="margin: 0; min-height: 44px; border-radius: var(--radius-pill);"
                 onclick="confirmAddScannedProduct()">
                 ✅ Masukkan Keranjang
               </button>
@@ -2034,35 +2027,43 @@
           <div class="scanner-presets-chips">
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8992753210118')">
-              🧴 Minyak Tropical (Rp 37.500)
+              <span class="barcode-chip-title">🧴 Minyak Tropical</span>
+              <span class="barcode-chip-badge">Rp 37.500</span>
             </button>
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8998866200234')">
-              🥛 Ultra Milk 1L (Rp 20.500)
+              <span class="barcode-chip-title">🥛 Ultra Milk 1L</span>
+              <span class="barcode-chip-badge">Rp 20.500</span>
             </button>
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8999999001235')">
-              🍜 Indomie Goreng (Rp 3.100)
+              <span class="barcode-chip-title">🍜 Indomie Goreng</span>
+              <span class="barcode-chip-badge">Rp 3.100</span>
             </button>
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8991002101340')">
-              🧼 Sabun Lifebuoy (Rp 24.500)
+              <span class="barcode-chip-title">🧼 Sabun Lifebuoy</span>
+              <span class="barcode-chip-badge">Rp 24.500</span>
             </button>
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8993005120015')">
-              🌾 Beras Ramos 5kg (Rp 74.000)
+              <span class="barcode-chip-title">🌾 Beras Ramos 5kg</span>
+              <span class="barcode-chip-badge">Rp 74.000</span>
             </button>
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8992388102441')">
-              🥚 Telur Pack 10 (Rp 29.500)
+              <span class="barcode-chip-title">🥚 Telur Pack 10</span>
+              <span class="barcode-chip-badge">Rp 29.500</span>
             </button>
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8996001301018')">
-              ☕ Nescafe Classic (Rp 42.000)
+              <span class="barcode-chip-title">☕ Nescafe Classic</span>
+              <span class="barcode-chip-badge">Rp 42.000</span>
             </button>
             <button type="button" class="barcode-preset-chip touch-target"
               onclick="simulateBarcodeScan('8992745330112')">
-              🧂 Royco Sapi 230g (Rp 11.500)
+              <span class="barcode-chip-title">🧂 Royco Sapi 230g</span>
+              <span class="barcode-chip-badge">Rp 11.500</span>
             </button>
           </div>
         </div>
@@ -2074,10 +2075,10 @@
           </div>
           <div style="display: flex; gap: 6px;">
             <input type="text" id="manualBarcodeInput" class="form-control"
-              placeholder="Contoh: 8992753210118 atau Susu Segar" style="font-size: 0.82rem;"
+              placeholder="No. barcode atau nama barang..." style="font-size: 0.82rem;"
               onkeydown="if(event.key==='Enter')handleManualBarcodeSearch()">
             <button type="button" class="btn-primary touch-target" onclick="handleManualBarcodeSearch()"
-              style="width: auto; padding: 6px 14px; font-size: 0.8rem; margin: 0; white-space: nowrap;">
+              style="width: auto; padding: 6px 14px; font-size: 0.8rem; margin: 0; white-space: nowrap; border-radius: var(--radius-pill);">
               Cari / Scan
             </button>
           </div>
@@ -2843,8 +2844,8 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/kawaii-art.js?v=165"></script>
-  <script src="./js/app.js?v=165"></script>
+  <script src="./js/kawaii-art.js?v=166"></script>
+  <script src="./js/app.js?v=166"></script>
 
   <!-- Service Worker Registration -->
   <script>

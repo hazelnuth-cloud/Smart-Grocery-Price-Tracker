@@ -406,7 +406,7 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
   padding: 0 16px;
-  padding-top: var(--app-header-height);
+  padding-top: calc(var(--app-header-height) + 12px) !important;
   padding-bottom: calc(var(--bottom-nav-height) + 24px);
   box-sizing: border-box;
   position: relative;
@@ -1006,11 +1006,11 @@ body.theme-dark .app-header {
 
 .dashboard-greeting-title {
   font-family: var(--font-sans);
-  font-size: 19px;
+  font-size: 16.5px !important;
   font-weight: 850;
   letter-spacing: -0.025em;
   color: var(--text-headline);
-  margin: 0;
+  margin: 0 0 3px 0 !important;
   line-height: 1.25;
 }
 
@@ -2122,7 +2122,8 @@ body.theme-dark .app-header {
   border-radius: 14px;
   padding: 3px;
   gap: 3px;
-  margin-bottom: 12px;
+  margin-top: 4px !important;
+  margin-bottom: 14px !important;
   box-shadow: 0 4px 16px rgba(190, 105, 140, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 1.5px 2px rgba(190, 105, 140, 0.04);
 }
 
@@ -7098,14 +7099,17 @@ button:not(:disabled):active,
   letter-spacing: -0.2px !important;
   white-space: nowrap !important;
 }
-  letter-spacing: -0.2px !important;
-}
 
 .checkout-dock-sub {
-  font-size: 11px !important;
-  font-weight: 700 !important;
+  font-size: 10.5px !important;
+  font-weight: 750 !important;
   color: #166534 !important;
   white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  max-width: 100% !important;
+  line-height: 1.25 !important;
 }
 
 .checkout-dock-actions {
@@ -8449,23 +8453,22 @@ body.theme-dark .bottom-nav-bar {
 }
 
 .barcode-preset-chip {
-  background: #FFFFFF !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.6) !important;
-  border-radius: var(--radius-pill) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.65) !important;
+  border-radius: 14px !important;
   padding: 8px 10px !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  color: var(--text-headline, #2D272E) !important;
   text-align: left !important;
   display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 2px !important;
   cursor: pointer !important;
-  box-shadow: 0 2px 6px rgba(217, 130, 162, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(217, 130, 162, 0.08) !important;
   transition: all 0.16s ease !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  min-width: 0 !important;
 }
 
 .barcode-preset-chip:hover {
@@ -8473,10 +8476,34 @@ body.theme-dark .bottom-nav-bar {
   border-color: var(--deep-rose, #B95679) !important;
   color: var(--deep-rose, #B95679) !important;
   transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(185, 86, 121, 0.15) !important;
 }
 
 .barcode-preset-chip:active {
   transform: scale(0.97) !important;
+}
+
+.barcode-chip-title {
+  font-size: 11.5px !important;
+  font-weight: 750 !important;
+  color: var(--text-headline, #2D272E) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  width: 100% !important;
+  display: block !important;
+  line-height: 1.25 !important;
+}
+
+.barcode-chip-badge {
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #B95679 !important;
+  background: rgba(244, 191, 208, 0.25) !important;
+  padding: 1px 6px !important;
+  border-radius: var(--radius-pill) !important;
+  display: inline-block !important;
+  line-height: 1.3 !important;
 }
 
 .scanner-manual-section {
@@ -8562,4 +8589,280 @@ body.theme-dark .barcode-preset-chip:hover {
   background: rgba(72, 34, 56, 0.95) !important;
   border-color: #FF8DA9 !important;
   color: #FFB7CE !important;
+}
+
+body.dark-mode .barcode-chip-title,
+body.theme-dark .barcode-chip-title {
+  color: #FFF0F5 !important;
+}
+
+body.dark-mode .barcode-chip-badge,
+body.theme-dark .barcode-chip-badge {
+  color: #FFB7CE !important;
+  background: rgba(255, 182, 193, 0.15) !important;
+}
+
+/* ==========================================================================
+   EMPTY CART CALL-TO-ACTION PILLS
+   ========================================================================== */
+.btn-goto-planner-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 11px 24px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, #FF6584 0%, #B95679 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(185, 86, 121, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+  cursor: pointer !important;
+  transition: transform 0.16s ease, box-shadow 0.16s ease !important;
+  text-decoration: none !important;
+}
+
+.btn-goto-planner-pill:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(185, 86, 121, 0.4) !important;
+}
+
+.btn-goto-planner-pill:active {
+  transform: scale(0.96) !important;
+}
+
+.btn-goto-planner-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 10px 18px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 12.5px !important;
+  font-weight: 750 !important;
+  color: #B95679 !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.7) !important;
+  box-shadow: 0 2px 8px rgba(185, 86, 121, 0.08) !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+}
+
+.btn-goto-planner-secondary:hover {
+  background: #FFF0F5 !important;
+  border-color: #B95679 !important;
+}
+
+.btn-goto-planner-secondary:active {
+  transform: scale(0.97) !important;
+}
+
+body.dark-mode .btn-goto-planner-secondary,
+body.theme-dark .btn-goto-planner-secondary {
+  background: rgba(48, 24, 38, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.25) !important;
+  color: #FFB7CE !important;
+}
+
+/* ==========================================================================
+   CLOUD SYNC MODAL POLISH (KAWAII × IOS LIQUID GLASS)
+   ========================================================================== */
+.cloud-sync-user-card {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.6) !important;
+  border-radius: 20px !important;
+  padding: 14px !important;
+  margin-top: 10px !important;
+  box-shadow: 0 4px 16px rgba(185, 86, 121, 0.06), inset 0 1px 1px #FFFFFF !important;
+}
+
+.cloud-sync-user-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+  min-width: 0 !important;
+}
+
+.cloud-sync-avatar-wrap {
+  flex-shrink: 0 !important;
+}
+
+.cloud-sync-avatar-circle {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  background: #FCE7F3 !important;
+  border: 2px solid #F472B6 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 19px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 8px rgba(244, 114, 182, 0.25) !important;
+}
+
+.cloud-sync-user-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.cloud-sync-user-name {
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  color: var(--text-headline, #2D272E) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.25 !important;
+}
+
+.cloud-sync-user-email {
+  font-size: 11px !important;
+  color: #8A6B79 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin-top: 2px !important;
+  line-height: 1.25 !important;
+}
+
+.cloud-sync-status-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: #DCFCE7 !important;
+  color: #166534 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  padding: 4px 9px !important;
+  border-radius: var(--radius-pill) !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  border: 1px solid rgba(22, 163, 74, 0.25) !important;
+}
+
+.cloud-sync-card-desc {
+  font-size: 11.5px !important;
+  color: #8A6B79 !important;
+  line-height: 1.4 !important;
+  margin: 0 0 12px 0 !important;
+}
+
+.cloud-sync-details {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  padding: 10px 12px !important;
+  border-radius: 16px !important;
+  font-size: 11.5px !important;
+  margin-top: 10px !important;
+  margin-bottom: 12px !important;
+  border: 1px solid rgba(244, 191, 208, 0.45) !important;
+}
+
+.btn-cloud-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 9px 12px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  color: #B95679 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.6) !important;
+  box-shadow: 0 2px 8px rgba(185, 86, 121, 0.08) !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+  text-align: center !important;
+}
+
+.btn-cloud-secondary:hover {
+  background: #FFF5F8 !important;
+  border-color: #B95679 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-cloud-secondary:active {
+  transform: scale(0.97) !important;
+}
+
+.btn-modal-close-pill {
+  width: 100% !important;
+  padding: 11px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  color: #7A727D !important;
+  background: rgba(244, 191, 208, 0.18) !important;
+  border: 1px solid rgba(244, 191, 208, 0.4) !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+  margin: 0 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+.btn-modal-close-pill:hover {
+  background: rgba(244, 191, 208, 0.3) !important;
+  color: #2D272E !important;
+}
+
+.btn-modal-close-pill:active {
+  transform: scale(0.98) !important;
+}
+
+body.dark-mode .cloud-sync-user-card,
+body.theme-dark .cloud-sync-user-card {
+  background: rgba(48, 24, 38, 0.8) !important;
+  border-color: rgba(255, 182, 193, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .cloud-sync-user-name,
+body.theme-dark .cloud-sync-user-name {
+  color: #FFF0F5 !important;
+}
+
+body.dark-mode .cloud-sync-user-email,
+body.theme-dark .cloud-sync-user-email,
+body.dark-mode .cloud-sync-card-desc,
+body.theme-dark .cloud-sync-card-desc {
+  color: #D4A5B8 !important;
+}
+
+body.dark-mode .cloud-sync-status-badge,
+body.theme-dark .cloud-sync-status-badge {
+  background: rgba(22, 163, 74, 0.2) !important;
+  color: #4ADE80 !important;
+  border-color: rgba(74, 222, 128, 0.3) !important;
+}
+
+body.dark-mode .cloud-sync-details,
+body.theme-dark .cloud-sync-details {
+  background: rgba(35, 18, 28, 0.75) !important;
+  border-color: rgba(255, 182, 193, 0.18) !important;
+}
+
+body.dark-mode .btn-cloud-secondary,
+body.theme-dark .btn-cloud-secondary {
+  background: rgba(58, 28, 46, 0.88) !important;
+  border-color: rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .btn-cloud-secondary:hover,
+body.theme-dark .btn-cloud-secondary:hover {
+  background: rgba(75, 36, 60, 0.95) !important;
+}
+
+body.dark-mode .btn-modal-close-pill,
+body.theme-dark .btn-modal-close-pill {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #E2E8F0 !important;
 }

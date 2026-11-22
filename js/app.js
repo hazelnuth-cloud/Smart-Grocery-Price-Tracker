@@ -3485,8 +3485,16 @@ function checkAuth() {
 
     const syncName = document.getElementById('syncUserAccountName');
     const syncEmail = document.getElementById('syncUserAccountEmail');
+    const syncAvatar = document.getElementById('syncUserAccountAvatar');
     if (syncName) syncName.textContent = AppState.user.name;
     if (syncEmail) syncEmail.textContent = AppState.user.email || 'user@email.com';
+    if (syncAvatar) {
+      if (userPhoto && (userPhoto.startsWith('http') || userPhoto.startsWith('data:image'))) {
+        syncAvatar.innerHTML = `<img src="${userPhoto}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+      } else {
+        syncAvatar.textContent = userPhoto || '👤';
+      }
+    }
 
     // Update personalized greeting based on user name
     if (typeof updateDashboardGreeting === 'function') {
@@ -4761,7 +4769,7 @@ function updateDashboardGreeting() {
   if (nameEl) nameEl.textContent = name;
   if (subEl) subEl.textContent = timeInfo.sub;
   if (titleEl) {
-    titleEl.innerHTML = `Selamat ${timeInfo.titleSuffix}, <span id="dashboardGreetingUserName" class="greeting-name-highlight">${name}</span>! ${timeInfo.emoji}`;
+    titleEl.innerHTML = `Selamat ${timeInfo.titleSuffix}, <span id="dashboardGreetingUserName" class="greeting-name-highlight">${name}</span>!&nbsp;${timeInfo.emoji}`;
   }
 }
 
@@ -8571,8 +8579,17 @@ function openCloudSyncModal() {
   // Dynamic logged-in user profile update in sync modal
   const nameEl = document.getElementById('syncUserAccountName');
   const emailEl = document.getElementById('syncUserAccountEmail');
+  const avatarEl = document.getElementById('syncUserAccountAvatar');
   if (nameEl) nameEl.textContent = AppState.user ? AppState.user.name : 'Pengguna Tamu';
   if (emailEl) emailEl.textContent = AppState.user ? AppState.user.email : 'Belum masuk akun';
+  if (avatarEl && AppState.user) {
+    const photo = AppState.user.photo;
+    if (photo && (photo.startsWith('http') || photo.startsWith('data:image'))) {
+      avatarEl.innerHTML = `<img src="${photo}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+    } else {
+      avatarEl.textContent = photo || '👤';
+    }
+  }
 
   const modal = document.getElementById('cloudSyncModal');
   if (modal) {
@@ -10122,10 +10139,10 @@ function renderCartSection() {
 
   if (budgetSubEl) {
     if (metrics.safety.sisa >= 0) {
-      budgetSubEl.textContent = `Sisa Saldo: ${formatRupiah(metrics.safety.sisa)} (${metrics.safety.level === 'warning' ? 'Rem Dulu Kak' : 'Aman'})`;
+      budgetSubEl.textContent = `Sisa: ${formatRupiah(metrics.safety.sisa)} (${metrics.safety.level === 'warning' ? 'Rem' : 'Aman'})`;
       budgetSubEl.style.color = (metrics.safety.level === 'warning') ? '#B45309' : 'var(--status-safe)';
     } else {
-      budgetSubEl.textContent = `Defisit: - ${formatRupiah(Math.abs(metrics.safety.sisa))}`;
+      budgetSubEl.textContent = `Defisit: -${formatRupiah(Math.abs(metrics.safety.sisa))}`;
       budgetSubEl.style.color = '#DC2626';
     }
   }
@@ -10143,13 +10160,18 @@ function renderCartSection() {
         </p>
         <div class="empty-state-btn-row">
           ${unboughtItems.length > 0 ? `
-            <button type="button" class="btn-primary touch-target" style="width: auto; padding: 10px 20px; font-size: 0.84rem; font-weight: 800; border-radius: 999px;" onclick="startShoppingFromPlan()">
+            <button type="button" class="btn-primary touch-target" style="width: auto; padding: 11px 22px; font-size: 0.85rem; font-weight: 800; border-radius: 999px;" onclick="startShoppingFromPlan()">
               🛍️ Masukkan Semua (${unboughtItems.length}) ke Keranjang
             </button>
-          ` : ''}
-          <button type="button" class="btn-demo-quick touch-target" style="width: auto; padding: 10px 20px; font-size: 0.84rem; font-weight: 700; border-radius: 999px;" onclick="switchShoppingView('planner')">
-            📋 Buka Rencana Belanja
-          </button>
+            <button type="button" class="btn-goto-planner-secondary touch-target" onclick="switchShoppingView('planner')">
+              📋 Buka Rencana Belanja
+            </button>
+          ` : `
+            <button type="button" class="btn-goto-planner-pill touch-target" onclick="switchShoppingView('planner')">
+              <span>📋 Buka Rencana Belanja</span>
+              <span style="font-size: 1.1em; margin-left: 2px;">➔</span>
+            </button>
+          `}
         </div>
       </div>
     `;
