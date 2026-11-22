@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=169">
+  <link rel="stylesheet" href="./css/app.css?v=170">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1317,16 +1317,16 @@
               <label class="form-label"
                 style="font-size: 11px; font-weight: 700; color: #64748B; margin-bottom: 4px;">Jumlah (Qty)</label>
               <div class="shopee-stepper"
-                style="height: 38px; border: 1px solid #CBD5E1; border-radius: 8px; overflow: hidden; display: flex; align-items: center; background: #FFFFFF;">
+                style="height: 38px; border-radius: 8px; overflow: hidden; display: flex; align-items: center;">
                 <button type="button" class="stepper-btn shopee-step-btn"
-                  style="width: 34px; height: 38px; background: #F8FAFC; border: none; font-weight: 800; font-size: 15px; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                  style="width: 34px; height: 38px; border: none; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
                   onclick="adjustDetailModalQty(-1)">&minus;</button>
                 <input type="number" inputmode="numeric" id="detailInputQty" class="form-control shopee-step-input"
                   min="1" max="9999" value="1" required
-                  style="flex: 1; width: 44px; height: 38px; text-align: center; border: none; border-left: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0; font-size: 13px; font-weight: 800; color: #1E293B; padding: 0; border-radius: 0;"
+                  style="flex: 1; width: 44px; height: 38px; text-align: center; border: none; font-size: 13px; font-weight: 800; padding: 0; border-radius: 0;"
                   oninput="updateDetailModalPreview()">
                 <button type="button" class="stepper-btn shopee-step-btn"
-                  style="width: 34px; height: 38px; background: #F8FAFC; border: none; font-weight: 800; font-size: 15px; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                  style="width: 34px; height: 38px; border: none; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;"
                   onclick="adjustDetailModalQty(1)">+</button>
               </div>
             </div>
@@ -1341,7 +1341,7 @@
 
           <!-- Sembunyikan Seluruh Field Rumit ke Accordion Lipat -->
           <details class="advanced-options" id="detailsAdvancedOptions"
-            style="margin-bottom: 14px; border: 1px solid #F1F5F9; border-radius: 10px; padding: 6px 12px; background: #FAF7F8;">
+            style="margin-bottom: 14px; border-radius: 10px; padding: 6px 12px;">
             <summary
               style="cursor: pointer; font-size: 0.76rem; font-weight: 700; color: #64748B; padding: 4px 0; user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
               ⚙️ Detail &amp; Diskon (Opsional)</summary>
@@ -1431,8 +1431,8 @@
               </div>
 
               <!-- Opsi Rutin Harian -->
-              <div class="form-group"
-                style="margin-top: 6px; margin-bottom: 10px; background: #FFF5F7; border: 1px solid #FCE7F3; border-radius: 8px; padding: 8px 10px;">
+              <div class="form-group routine-checkbox-box"
+                style="margin-top: 6px; margin-bottom: 10px; border-radius: 8px; padding: 8px 10px;">
                 <label
                   style="display: flex; align-items: center; gap: 8px; font-size: 0.76rem; font-weight: 700; color: #222222; cursor: pointer; margin: 0; white-space: nowrap;">
                   <input type="checkbox" id="detailInputIsRoutine"
@@ -2184,7 +2184,7 @@
             </div>
           </div>
           <div class="shopee-stepper"
-            style="border: 1px solid var(--pastel-light-1); background: #FFFFFF; flex-shrink: 0;">
+            style="border: 1px solid var(--border-soft); flex-shrink: 0;">
             <button type="button" class="shopee-step-btn" onclick="adjustQuickPriceQty(-1)"
               title="Kurang">&minus;</button>
             <input type="number" inputmode="numeric" id="quickPriceQtyInput" min="1" max="9999" value="1"
@@ -2840,7 +2840,7 @@
 
   <!-- Application Logic -->
   <script src="./js/kawaii-art.js?v=168"></script>
-  <script src="./js/app.js?v=169"></script>
+  <script src="./js/app.js?v=170"></script>
 
   <!-- Service Worker Registration -->
   <script>

@@ -196,16 +196,22 @@ html.dark-mode,
 html.theme-dark,
 body.dark-mode,
 body.theme-dark {
-  --canvas-bg: linear-gradient(155deg, #180C16 0%, #20101E 40%, #2B1428 100%);
-  --surface-white: #241121;
-  --surface-cream: #2A1427;
-  --surface-soft: #341930;
-  --surface-card: rgba(36, 17, 33, 0.88);
-  --surface-glass: rgba(36, 17, 33, 0.82);
-  --surface-glass-heavy: rgba(43, 20, 39, 0.95);
+  --canvas-bg: linear-gradient(155deg, #100711 0%, #170A16 40%, #200D1E 100%);
+  --surface-white: #200D1E;
+  --surface-cream: #261124;
+  --surface-soft: #2F142D;
+  --surface-card: rgba(38, 19, 33, 0.88);
+  --surface-glass: rgba(38, 19, 33, 0.82);
+  --surface-glass-heavy: rgba(46, 21, 41, 0.95);
 
-  --border-delicate: rgba(244, 191, 208, 0.16);
-  --border-glass: rgba(255, 255, 255, 0.1);
+  --soft-pink: #341930;
+  --cream: #200D1E;
+  --card-bg: rgba(38, 19, 33, 0.88);
+  --shopee-pink: #C2567B;
+  --pink-accent-cta: #D9658A;
+
+  --border-delicate: rgba(255, 182, 193, 0.16);
+  --border-glass: rgba(255, 182, 193, 0.14);
   --border-soft: #3E1D39;
   --border-card: #4B2345;
   --border-focus: #F4BFD0;
@@ -214,7 +220,7 @@ body.theme-dark {
   --text-main: #FFF5F8;
   --text-subtle: #D4B8C5;
   --text-faint: #9A778A;
-  --text-rose: #F4BFD0;
+  --text-rose: #FF8DA9;
 
   --status-safe: #55B894;
   --status-safe-bg: rgba(85, 184, 148, 0.18);
@@ -231,16 +237,74 @@ body.theme-dark {
   --status-danger-border: rgba(217, 93, 117, 0.45);
   --status-danger-text: #FF9EAF;
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 8px 26px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.65);
-  --shadow-glass: 0 10px 30px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 26px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.7);
+  --shadow-glass: 0 10px 32px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 205, 222, 0.15);
 
   --pastel-light-1: #3E1D39;
   --pastel-light-2: #4B2345;
   --rose-contrast: #FFF5F8;
 
-  background: #180C16 !important;
+  /* Master iOS Dark Liquid Glass Material Variables */
+  --glass-liquid-base: linear-gradient(
+    145deg,
+    rgba(38, 19, 33, 0.85) 0%,
+    rgba(22, 10, 20, 0.90) 100%
+  );
+  --glass-liquid-card: linear-gradient(
+    145deg,
+    rgba(38, 19, 33, 0.88) 0%,
+    rgba(22, 10, 20, 0.92) 100%
+  );
+  --glass-liquid-subtle: linear-gradient(
+    145deg,
+    rgba(32, 16, 28, 0.75) 0%,
+    rgba(20, 9, 18, 0.85) 100%
+  );
+  --glass-liquid-pill: linear-gradient(
+    145deg,
+    rgba(48, 23, 40, 0.85) 0%,
+    rgba(28, 13, 24, 0.92) 100%
+  );
+  --glass-liquid-dock: linear-gradient(
+    180deg,
+    rgba(24, 11, 21, 0.95) 0%,
+    rgba(16, 7, 15, 0.98) 100%
+  );
+  --glass-liquid-input: linear-gradient(
+    135deg,
+    rgba(24, 11, 21, 0.88) 0%,
+    rgba(16, 7, 15, 0.94) 100%
+  );
+  --glass-liquid-modal: linear-gradient(
+    160deg,
+    rgba(34, 16, 30, 0.96) 0%,
+    rgba(18, 8, 17, 0.98) 100%
+  );
+  --glass-blur-liquid: blur(24px) saturate(190%);
+  --glass-border-liquid: 1.2px solid rgba(255, 182, 193, 0.20);
+  --glass-border-prominent: 1.5px solid rgba(255, 182, 193, 0.28);
+  --glass-border-delicate: 1px solid rgba(255, 182, 193, 0.14);
+  --glass-specular-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1.5px rgba(255, 205, 222, 0.18),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
+  --glass-specular-floating:
+    0 16px 44px rgba(0, 0, 0, 0.65),
+    0 4px 12px rgba(0, 0, 0, 0.45),
+    inset 0 1.5px 2px rgba(255, 205, 222, 0.22),
+    inset 0 -1.2px 1px rgba(0, 0, 0, 0.45);
+  --glass-specular-pill:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 205, 222, 0.18),
+    inset 0 -0.8px 1px rgba(0, 0, 0, 0.3);
+  --glass-specular-subtle:
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px rgba(255, 205, 222, 0.14);
+
+  background: #100711 !important;
   color: #FFF5F8 !important;
 }
 
@@ -903,8 +967,6 @@ body.theme-dark .app-header {
   font-size: 11px !important;
   opacity: 0.8 !important;
   flex-shrink: 0 !important;
-}
-  opacity: 0.65;
 }
 
 /* Overbudget Top Banner */
@@ -6458,17 +6520,15 @@ button:not(:disabled):active,
 
 .btn-secondary-pill {
   height: 28px !important;
-  padding: 0 8px !important;
-  font-size: 11px !important;
+  padding: 0 10px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-}
   border-radius: var(--radius-pill) !important;
   background: rgba(255, 255, 255, 0.85) !important;
   border: 1px solid rgba(244, 191, 208, 0.5) !important;
   color: #55444C !important;
-  font-size: 11.5px !important;
-  font-weight: 700 !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
@@ -8192,16 +8252,40 @@ body.theme-dark .btn-budget-add-50 {
   animation: chipTapPulse 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* ==========================================================================
-   6. COMPREHENSIVE iOS DARK LIQUID GLASS SYSTEM (No Patchy / Belang-Belang UI)
-   ========================================================================== */
-body.dark-mode,
-body.theme-dark {
-  background-color: #120A10 !important;
-  color: #F8E7EE !important;
+/* Base Light Mode Helpers for Modal Options */
+.advanced-options {
+  border: 1px solid #F1F5F9;
+  background: #FAF7F8;
+  color: #334155;
+}
+.routine-checkbox-box {
+  background: #FFF5F7;
+  border: 1px solid #FCE7F3;
 }
 
-/* 1. Header & Brand in Dark Mode */
+/* ==========================================================================
+   MASTER iOS DARK LIQUID GLASS MATERIAL SYSTEM (Zero-Patchwork / Full Blend)
+   ========================================================================== */
+
+/* 0. Canvas Viewport & Ambient Background Blend */
+body.dark-mode,
+body.theme-dark {
+  background-color: #100711 !important;
+  color: #FFF5F8 !important;
+}
+
+body.dark-mode::before,
+body.theme-dark::before {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(226, 115, 150, 0.16) 0%, transparent 55%),
+    radial-gradient(circle at 82% 16%, rgba(139, 44, 98, 0.20) 0%, transparent 50%),
+    radial-gradient(circle at 40% 55%, rgba(95, 30, 72, 0.15) 0%, transparent 60%),
+    radial-gradient(circle at 75% 85%, rgba(65, 20, 52, 0.20) 0%, transparent 50%),
+    linear-gradient(160deg, #100711 0%, #170A16 45%, #200D1E 100%) !important;
+  opacity: 1 !important;
+}
+
+/* 1. Header, Brand & Profile Trigger */
 body.dark-mode .app-header,
 body.theme-dark .app-header {
   background: transparent !important;
@@ -8211,602 +8295,732 @@ body.theme-dark .app-header {
 
 body.dark-mode.is-scrolled .app-header,
 body.theme-dark.is-scrolled .app-header {
-  background: rgba(22, 12, 18, 0.88) !important;
-  border-bottom: 1px solid rgba(255, 182, 193, 0.12) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+  background: rgba(20, 9, 18, 0.90) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 182, 193, 0.16) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
 body.dark-mode .brand-title,
 body.theme-dark .brand-title {
   color: #FFF0F5 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .brand-logo-badge,
+body.theme-dark .brand-logo-badge {
+  background: rgba(55, 26, 44, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 
 body.dark-mode .user-profile-badge,
 body.theme-dark .user-profile-badge {
-  background: rgba(45, 25, 36, 0.85) !important;
-  border-color: rgba(255, 182, 193, 0.22) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  background: rgba(45, 22, 36, 0.88) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.24) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
 }
 
 body.dark-mode .user-profile-name,
-body.theme-dark .user-profile-name {
-  color: #F8E7EE !important;
+body.dark-mode .user-header-name,
+body.theme-dark .user-profile-name,
+body.theme-dark .user-header-name {
+  color: #FFF0F5 !important;
 }
 
-/* 2. Cards & Containers in Dark Mode */
-body.dark-mode .dashboard-summary-card,
-body.theme-dark .dashboard-summary-card,
-body.dark-mode .plan-header-card,
-body.theme-dark .plan-header-card,
-body.dark-mode .store-location-card,
-body.theme-dark .store-location-card,
-body.dark-mode .budget-status-card,
-body.theme-dark .budget-status-card,
-body.dark-mode .sticky-dashboard-tracker,
-body.theme-dark .sticky-dashboard-tracker,
+body.dark-mode .user-header-avatar,
+body.dark-mode .user-header-avatar-fallback,
+body.theme-dark .user-header-avatar,
+body.theme-dark .user-header-avatar-fallback {
+  background: rgba(55, 26, 44, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+}
+
+/* 2. Greeting Mascot Bubble & Dashboards */
+body.dark-mode .greeting-mascot,
+body.theme-dark .greeting-mascot {
+  background: transparent !important;
+}
+
+body.dark-mode .greeting-mascot-speech-bubble,
+body.theme-dark .greeting-mascot-speech-bubble {
+  background: linear-gradient(135deg, rgba(46, 23, 40, 0.94), rgba(28, 14, 25, 0.96)) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.24) !important;
+  color: #FFF5F8 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 205, 222, 0.18) !important;
+}
+
+body.dark-mode .greeting-bubble-sub,
+body.theme-dark .greeting-bubble-sub {
+  color: #D4B8C5 !important;
+}
+
+body.dark-mode .mascot-sticky-pill,
+body.theme-dark .mascot-sticky-pill,
+body.dark-mode .sticky-mascot-companion,
+body.theme-dark .sticky-mascot-companion,
+body.dark-mode .sticky-mascot-bubble,
+body.theme-dark .sticky-mascot-bubble {
+  background: linear-gradient(135deg, rgba(48, 23, 40, 0.92), rgba(28, 13, 24, 0.95)) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.25) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 205, 222, 0.2) !important;
+  color: #FFF5F8 !important;
+}
+
+/* 3. Segmented Navigation Controls (Rencana / Keranjang Tab Pills) */
+body.dark-mode .shopping-view-toggle,
+body.theme-dark .shopping-view-toggle,
+body.dark-mode .planner-segmented-bar,
+body.theme-dark .planner-segmented-bar,
+body.dark-mode .auth-segmented-tabs,
+body.theme-dark .auth-segmented-tabs,
+body.dark-mode .budget-cycle-segmented-bar,
+body.theme-dark .budget-cycle-segmented-bar {
+  background: rgba(30, 14, 25, 0.85) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.18) !important;
+}
+
+body.dark-mode .view-toggle-pill,
+body.theme-dark .view-toggle-pill,
+body.dark-mode .planner-seg-btn,
+body.theme-dark .planner-seg-btn,
+body.dark-mode .auth-tab-btn,
+body.theme-dark .auth-tab-btn,
+body.dark-mode .cycle-seg-btn,
+body.theme-dark .cycle-seg-btn,
+body.dark-mode .budget-cycle-seg-btn,
+body.theme-dark .budget-cycle-seg-btn {
+  color: #D4B8C5 !important;
+}
+
+body.dark-mode .view-toggle-pill.active,
+body.theme-dark .view-toggle-pill.active,
+body.dark-mode .planner-seg-btn.active,
+body.theme-dark .planner-seg-btn.active,
+body.dark-mode .auth-tab-btn.active,
+body.theme-dark .auth-tab-btn.active,
+body.dark-mode .cycle-seg-btn.active,
+body.theme-dark .cycle-seg-btn.active,
+body.dark-mode .budget-cycle-seg-btn.active,
+body.theme-dark .budget-cycle-seg-btn.active {
+  background: linear-gradient(135deg, #B95679 0%, #8C3B57 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 4. Unified Liquid Glass Cards (All Tabs & Views) */
 body.dark-mode .ios-product-card,
 body.theme-dark .ios-product-card,
+body.dark-mode .dashboard-summary-card,
+body.theme-dark .dashboard-summary-card,
+body.dark-mode .store-location-card,
+body.theme-dark .store-location-card,
+body.dark-mode .cart-store-location-card,
+body.theme-dark .cart-store-location-card,
+body.dark-mode .plan-header-card,
+body.theme-dark .plan-header-card,
+body.dark-mode .budget-status-card,
+body.theme-dark .budget-status-card,
+body.dark-mode .budget-card,
+body.theme-dark .budget-card,
+body.dark-mode .sticky-dashboard-tracker,
+body.theme-dark .sticky-dashboard-tracker,
 body.dark-mode .category-summary-card,
 body.theme-dark .category-summary-card,
 body.dark-mode .pantry-item-card,
 body.theme-dark .pantry-item-card,
 body.dark-mode .empty-kawaii-card,
 body.theme-dark .empty-kawaii-card,
-body.dark-mode .cancel-shopping-card,
-body.theme-dark .cancel-shopping-card,
+body.dark-mode .ios-empty-state-card,
+body.theme-dark .ios-empty-state-card,
+body.dark-mode .pwa-install-banner-card,
+body.theme-dark .pwa-install-banner-card,
 body.dark-mode .cart-unbought-notice,
-body.theme-dark .cart-unbought-notice {
-  background: rgba(28, 16, 24, 0.88) !important;
-  border: 1.2px solid rgba(255, 182, 193, 0.14) !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
-  color: #F8E7EE !important;
+body.theme-dark .cart-unbought-notice,
+body.dark-mode .plan-incart-summary,
+body.theme-dark .plan-incart-summary,
+body.dark-mode .metric-box,
+body.theme-dark .metric-box {
+  background: linear-gradient(145deg, rgba(38, 19, 33, 0.88) 0%, rgba(24, 11, 21, 0.92) 100%) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.20) !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55), inset 0 1px 1.5px rgba(255, 205, 222, 0.18), inset 0 -1px 1px rgba(0, 0, 0, 0.35) !important;
+  color: #FFF5F8 !important;
 }
 
-/* 3. Card Typography & Text in Dark Mode */
+/* 5. Typography on Cards */
+body.dark-mode .ios-product-title,
+body.theme-dark .ios-product-title,
 body.dark-mode .plan-page-title,
 body.theme-dark .plan-page-title,
-body.dark-mode .ios-card-name,
-body.theme-dark .ios-card-name,
 body.dark-mode .dashboard-hero-title,
 body.theme-dark .dashboard-hero-title,
+body.dark-mode .empty-state-headline,
+body.theme-dark .empty-state-headline,
 body.dark-mode .empty-kawaii-title,
 body.theme-dark .empty-kawaii-title,
-body.dark-mode .cancel-shopping-title,
-body.theme-dark .cancel-shopping-title,
+body.dark-mode .ios-card-name,
+body.theme-dark .ios-card-name,
 body.dark-mode .store-title,
-body.theme-dark .store-title {
-  color: #FFF2F6 !important;
+body.theme-dark .store-title,
+body.dark-mode .store-name-text,
+body.theme-dark .store-name-text,
+body.dark-mode .budget-main-title,
+body.theme-dark .budget-main-title,
+body.dark-mode .budget,
+body.theme-dark .budget {
+  color: #FFF5F8 !important;
 }
 
 body.dark-mode .plan-header-subtitle,
 body.theme-dark .plan-header-subtitle,
+body.dark-mode .empty-state-desc,
+body.theme-dark .empty-state-desc,
 body.dark-mode .ios-price-label,
 body.theme-dark .ios-price-label,
-body.dark-mode .empty-kawaii-desc,
-body.theme-dark .empty-kawaii-desc,
-body.dark-mode .cancel-shopping-desc,
-body.theme-dark .cancel-shopping-desc,
-body.dark-mode .dashboard-hero-sub,
-body.theme-dark .dashboard-hero-sub,
-body.dark-mode .store-subtitle,
-body.theme-dark .store-subtitle {
-  color: #CDB4C0 !important;
-}
-
-/* 4. Badges, Chips & Pills in Dark Mode */
-body.dark-mode .plan-count-badge,
-body.theme-dark .plan-count-badge,
-body.dark-mode .ios-unit-pill,
-body.theme-dark .ios-unit-pill,
-body.dark-mode .ios-stability-pill,
-body.theme-dark .ios-stability-pill,
-body.dark-mode .plan-action-chip,
-body.theme-dark .plan-action-chip {
-  background: rgba(55, 30, 44, 0.8) !important;
-  border-color: rgba(255, 182, 193, 0.2) !important;
-  color: #FFB7CE !important;
+body.dark-mode .dashboard-sub-label,
+body.theme-dark .dashboard-sub-label,
+body.dark-mode .store-label-text,
+body.theme-dark .store-label-text {
+  color: #D4B8C5 !important;
 }
 
 body.dark-mode .ios-price-value,
 body.theme-dark .ios-price-value {
   color: #FF8DA9 !important;
+  font-weight: 850 !important;
+  text-shadow: 0 1px 4px rgba(255, 101, 132, 0.25) !important;
 }
 
-/* 5. Steppers & Controls in Dark Mode */
-body.dark-mode .ios-stepper-capsule,
-body.theme-dark .ios-stepper-capsule {
-  background: rgba(45, 24, 35, 0.95) !important;
-  border-color: rgba(255, 182, 193, 0.25) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
-}
-
-body.dark-mode .ios-step-btn,
-body.theme-dark .ios-step-btn,
-body.dark-mode .ios-stepper-capsule .ios-step-btn,
-body.theme-dark .ios-stepper-capsule .ios-step-btn {
-  background: transparent !important;
-  border: none !important;
+/* 6. Card Badges, Pills & Status Indicators */
+body.dark-mode .ios-meta-pill,
+body.theme-dark .ios-meta-pill,
+body.dark-mode .unit-pill,
+body.theme-dark .unit-pill,
+body.dark-mode .catalog-pill,
+body.theme-dark .catalog-pill,
+body.dark-mode .routine-toggle-pill,
+body.theme-dark .routine-toggle-pill,
+body.dark-mode .frequent-chip,
+body.theme-dark .frequent-chip,
+body.dark-mode .cat-trend-pill,
+body.theme-dark .cat-trend-pill,
+body.dark-mode .budget-preset-chip,
+body.theme-dark .budget-preset-chip {
+  background: rgba(55, 26, 44, 0.8) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
   color: #FFB7CE !important;
-  box-shadow: none !important;
 }
 
-body.dark-mode .ios-step-btn:hover,
-body.theme-dark .ios-step-btn:hover {
-  background: rgba(255, 182, 193, 0.2) !important;
+body.dark-mode .shopee-promo-pill,
+body.theme-dark .shopee-promo-pill,
+body.dark-mode .discount-chip,
+body.theme-dark .discount-chip {
+  background: rgba(225, 29, 72, 0.24) !important;
+  border: 1px solid rgba(251, 113, 133, 0.45) !important;
+  color: #FDA4AF !important;
 }
 
-body.dark-mode .ios-step-btn:active,
-body.theme-dark .ios-step-btn:active {
-  background: rgba(255, 182, 193, 0.35) !important;
+body.dark-mode .safe,
+body.dark-mode .badge-safe,
+body.dark-mode .progress-status-badge,
+body.theme-dark .safe,
+body.theme-dark .badge-safe,
+body.theme-dark .progress-status-badge {
+  background: rgba(85, 184, 148, 0.20) !important;
+  border-color: rgba(85, 184, 148, 0.45) !important;
+  color: #8AE1C2 !important;
 }
 
-body.dark-mode .ios-step-input,
-body.theme-dark .ios-step-input {
+body.dark-mode .warning,
+body.theme-dark .warning {
+  background: rgba(233, 180, 91, 0.20) !important;
+  border-color: rgba(233, 180, 91, 0.45) !important;
+  color: #FAD18C !important;
+}
+
+body.dark-mode .danger,
+body.dark-mode .overbudget-firm-banner,
+body.theme-dark .danger,
+body.theme-dark .overbudget-firm-banner {
+  background: rgba(217, 93, 117, 0.22) !important;
+  border-color: rgba(217, 93, 117, 0.50) !important;
+  color: #FF9EAF !important;
+}
+
+body.dark-mode .up,
+body.theme-dark .up {
+  background: rgba(225, 29, 72, 0.22) !important;
+  color: #FDA4AF !important;
+  border: 1px solid rgba(251, 113, 133, 0.4) !important;
+}
+
+/* 7. Product Card Action Buttons (Edit, Delete, Add to Cart, Return to Plan) */
+body.dark-mode .btn-ios-icon-action,
+body.theme-dark .btn-ios-icon-action,
+body.dark-mode .btn-edit,
+body.theme-dark .btn-edit {
+  background: rgba(52, 26, 42, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.24) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
+}
+
+body.dark-mode .btn-ios-icon-action:hover,
+body.theme-dark .btn-ios-icon-action:hover,
+body.dark-mode .btn-edit:hover,
+body.theme-dark .btn-edit:hover {
+  background: rgba(75, 36, 60, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.4) !important;
   color: #FFF0F5 !important;
+}
+
+body.dark-mode .btn-ios-icon-action.btn-delete:hover,
+body.theme-dark .btn-ios-icon-action.btn-delete:hover {
+  background: rgba(140, 25, 45, 0.85) !important;
+  border-color: rgba(255, 100, 130, 0.5) !important;
+  color: #FFAEC0 !important;
 }
 
 body.dark-mode .btn-ios-add-cart,
-body.theme-dark .btn-ios-add-cart,
+body.theme-dark .btn-ios-add-cart {
+  background: linear-gradient(135deg, #C2567B 0%, #8E2E53 100%) !important;
+  border: 1px solid rgba(255, 190, 205, 0.35) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(194, 86, 123, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+
 body.dark-mode .btn-ios-return-plan,
 body.theme-dark .btn-ios-return-plan {
-  background: rgba(50, 26, 39, 0.95) !important;
-  border-color: rgba(255, 182, 193, 0.3) !important;
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
   color: #FFB7CE !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
 }
 
-body.dark-mode .btn-ios-add-cart:hover,
-body.theme-dark .btn-ios-add-cart:hover,
 body.dark-mode .btn-ios-return-plan:hover,
 body.theme-dark .btn-ios-return-plan:hover {
-  background: linear-gradient(135deg, #E27396 0%, #B95679 100%) !important;
-  color: #FFFFFF !important;
+  background: rgba(70, 33, 58, 0.95) !important;
+  color: #FFF0F5 !important;
+  border-color: rgba(255, 182, 193, 0.38) !important;
 }
 
-/* 6. Budget Preset Chips in Dark Mode */
-body.dark-mode .budget-preset-chip,
-body.theme-dark .budget-preset-chip {
-  background: rgba(45, 25, 36, 0.9) !important;
-  border-color: rgba(255, 182, 193, 0.18) !important;
-  color: #F8E7EE !important;
-}
-
-body.dark-mode .budget-cycle-segmented-bar,
-body.theme-dark .budget-cycle-segmented-bar {
-  background: rgba(35, 18, 28, 0.95) !important;
-  border-color: rgba(255, 182, 193, 0.2) !important;
-}
-
-body.dark-mode .budget-cycle-seg-btn,
-body.theme-dark .budget-cycle-seg-btn {
-  color: #CDB4C0 !important;
-}
-
-body.dark-mode .budget-cycle-seg-btn.active,
-body.theme-dark .budget-cycle-seg-btn.active {
-  background: linear-gradient(135deg, #B95679, #8C3B57) !important;
-  color: #FFFFFF !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45) !important;
-}
-
-/* 7. Profile Settings Sheet in Dark Mode */
-body.dark-mode .profile-settings-sheet,
-body.theme-dark .profile-settings-sheet {
-  background: rgba(24, 13, 20, 0.95) !important;
-  border-color: rgba(255, 182, 193, 0.18) !important;
-  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.6) !important;
-}
-
-body.dark-mode .modal-profile-name,
-body.theme-dark .modal-profile-name {
-  color: #FFF2F6 !important;
-}
-
-body.dark-mode .modal-profile-email,
-body.theme-dark .modal-profile-email {
-  color: #CDB4C0 !important;
-}
-
-body.dark-mode .avatar-presets-section,
-body.theme-dark .avatar-presets-section {
-  background: rgba(38, 20, 31, 0.85) !important;
-  border-color: rgba(255, 182, 193, 0.15) !important;
-}
-
-body.dark-mode .avatar-presets-title,
-body.theme-dark .avatar-presets-title {
+/* 8. Secondary Glass Action Pills (Anti-list, Share WA, Bersihkan, Edit Budget) */
+body.dark-mode .btn-secondary-pill,
+body.theme-dark .btn-secondary-pill,
+body.dark-mode .btn-clear-plan,
+body.theme-dark .btn-clear-plan,
+body.dark-mode .btn-share-wa,
+body.theme-dark .btn-share-wa,
+body.dark-mode .btn-clear-cart,
+body.theme-dark .btn-clear-cart,
+body.dark-mode .btn-secondary,
+body.theme-dark .btn-secondary,
+body.dark-mode .btn-store-change,
+body.theme-dark .btn-store-change,
+body.dark-mode .btn-cart-store-edit,
+body.theme-dark .btn-cart-store-edit,
+body.dark-mode .btn-catalog-toggle,
+body.theme-dark .btn-catalog-toggle,
+body.dark-mode .btn-edit-budget,
+body.theme-dark .btn-edit-budget,
+body.dark-mode .tracker-budget-btn,
+body.theme-dark .tracker-budget-btn {
+  background: rgba(48, 23, 40, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
   color: #FFB7CE !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
 }
 
-body.dark-mode .btn-avatar-preset,
-body.theme-dark .btn-avatar-preset {
-  background: rgba(50, 26, 40, 0.9) !important;
+body.dark-mode .btn-secondary-pill:hover,
+body.theme-dark .btn-secondary-pill:hover,
+body.dark-mode .btn-secondary:hover,
+body.theme-dark .btn-secondary:hover,
+body.dark-mode .btn-edit-budget:hover,
+body.theme-dark .btn-edit-budget:hover {
+  background: rgba(70, 33, 58, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.38) !important;
+  color: #FFF0F5 !important;
+}
+
+/* 9. Quantity Stepper Controls */
+body.dark-mode .shopee-stepper,
+body.dark-mode .ios-stepper,
+body.theme-dark .shopee-stepper,
+body.theme-dark .ios-stepper {
+  background: rgba(26, 12, 23, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.20) !important;
+}
+
+body.dark-mode .shopee-step-btn,
+body.dark-mode .ios-stepper-btn,
+body.theme-dark .shopee-step-btn,
+body.theme-dark .ios-stepper-btn {
+  background: rgba(45, 20, 36, 0.85) !important;
+  color: #FFB7CE !important;
   border-color: rgba(255, 182, 193, 0.18) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
 }
 
-body.dark-mode .btn-avatar-preset:hover,
-body.theme-dark .btn-avatar-preset:hover {
-  background: rgba(75, 38, 60, 0.95) !important;
-  border-color: #FF8DA9 !important;
+body.dark-mode .shopee-step-btn:hover,
+body.dark-mode .ios-stepper-btn:hover,
+body.theme-dark .shopee-step-btn:hover,
+body.theme-dark .ios-stepper-btn:hover {
+  background: rgba(65, 28, 52, 0.95) !important;
+  color: #FFF0F5 !important;
 }
 
-body.dark-mode .btn-avatar-preset.active,
-body.theme-dark .btn-avatar-preset.active {
-  background: rgba(85, 40, 68, 1) !important;
+body.dark-mode .shopee-step-input,
+body.dark-mode .ios-step-input,
+body.theme-dark .shopee-step-input,
+body.theme-dark .ios-step-input {
+  background: rgba(20, 9, 18, 0.90) !important;
+  color: #FFF5F8 !important;
+  border-color: rgba(255, 182, 193, 0.20) !important;
+}
+
+/* 10. Form Inputs & Autocomplete Dropdown */
+body.dark-mode .smart-input-wrap,
+body.theme-dark .smart-input-wrap,
+body.dark-mode .form-control,
+body.theme-dark .form-control,
+body.dark-mode .budget-amount-input,
+body.theme-dark .budget-amount-input,
+body.dark-mode input[type="text"],
+body.dark-mode input[type="number"],
+body.dark-mode select,
+body.dark-mode textarea,
+body.theme-dark input[type="text"],
+body.theme-dark input[type="number"],
+body.theme-dark select,
+body.theme-dark textarea {
+  background: rgba(24, 11, 21, 0.88) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.22) !important;
+  color: #FFF5F8 !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.dark-mode .smart-input-wrap:focus-within,
+body.theme-dark .smart-input-wrap:focus-within,
+body.dark-mode .form-control:focus,
+body.theme-dark .form-control:focus {
   border-color: #FF6584 !important;
-  box-shadow: 0 0 0 2px rgba(255, 101, 132, 0.4) !important;
-}
-
-body.dark-mode .settings-group,
-body.theme-dark .settings-group {
-  background: rgba(38, 20, 31, 0.75) !important;
-  border-color: rgba(255, 182, 193, 0.12) !important;
-}
-
-body.dark-mode .settings-item-label,
-body.theme-dark .settings-item-label {
-  color: #FFF0F5 !important;
-}
-
-body.dark-mode .settings-item-desc,
-body.theme-dark .settings-item-desc {
-  color: #CDB4C0 !important;
-}
-
-/* 8. Floating Elements in Dark Mode */
-body.dark-mode .sticky-mascot-companion,
-body.theme-dark .sticky-mascot-companion {
-  background: rgba(35, 18, 28, 0.94) !important;
-  border-color: rgba(255, 182, 193, 0.22) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
-}
-
-body.dark-mode .sticky-mascot-bubble,
-body.theme-dark .sticky-mascot-bubble {
-  background: rgba(50, 26, 39, 0.95) !important;
-  border-color: rgba(255, 182, 193, 0.22) !important;
-  color: #FFB7CE !important;
-}
-
-body.dark-mode .ios-floating-checkout-dock,
-body.theme-dark .ios-floating-checkout-dock {
-  background: rgba(28, 14, 22, 0.92) !important;
-  border-color: rgba(255, 182, 193, 0.2) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
-}
-
-body.dark-mode .checkout-dock-label,
-body.theme-dark .checkout-dock-label {
-  color: #CDB4C0 !important;
-}
-
-body.dark-mode .checkout-dock-total,
-body.theme-dark .checkout-dock-total {
-  color: #FFF2F6 !important;
-}
-
-body.dark-mode .bottom-nav-bar,
-body.theme-dark .bottom-nav-bar {
-  background: rgba(22, 12, 18, 0.92) !important;
-  border-top-color: rgba(255, 182, 193, 0.12) !important;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.45) !important;
-}
-
-/* =========================================================================
-   9. MOBILE UX POLISH: BUTTONS, CHIPS, MODALS & TOAST CARDS
-   ========================================================================= */
-
-/* Button Buka Rencana Belanja / Keranjang Pill (Sakura Pink Glass) */
-.btn-goto-planner-pill {
-  width: 100% !important;
-  margin-top: 10px !important;
-  padding: 10px 16px !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 238, 245, 0.90) 100%) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1.2px solid rgba(226, 115, 150, 0.45) !important;
-  border-radius: var(--radius-pill) !important;
-  color: var(--deep-rose, #B95679) !important;
-  font-size: 12px !important;
-  font-weight: 800 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  box-shadow: 0 4px 14px rgba(217, 130, 162, 0.15), inset 0 1px 1px #FFFFFF !important;
-  cursor: pointer !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.btn-goto-planner-pill:hover {
-  background: linear-gradient(135deg, rgba(255, 240, 246, 0.98) 0%, rgba(255, 225, 238, 0.95) 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 18px rgba(217, 130, 162, 0.24) !important;
-}
-
-.btn-goto-planner-pill:active {
-  transform: scale(0.98) !important;
-}
-
-/* Modal Primary CTA Submit Button ("Simpan Perubahan" / "Tambahkan Barang") */
-.btn-modal-primary-cta,
-.btn-shopee-submit {
-  width: 100% !important;
-  height: 46px !important;
-  background: linear-gradient(135deg, #E27396 0%, #B95679 100%) !important;
-  color: #FFFFFF !important;
-  border: 1.2px solid rgba(255, 255, 255, 0.9) !important;
-  border-radius: var(--radius-pill) !important;
-  font-size: 13.5px !important;
-  font-weight: 850 !important;
-  letter-spacing: 0.3px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  box-shadow: 0 6px 20px rgba(185, 86, 121, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
-  cursor: pointer !important;
-  transition: transform 0.16s ease, box-shadow 0.16s ease !important;
-  margin-top: 12px !important;
-}
-
-.btn-modal-primary-cta:hover,
-.btn-shopee-submit:hover {
-  transform: translateY(-1px) scale(1.01) !important;
-  box-shadow: 0 8px 24px rgba(185, 86, 121, 0.45) !important;
-}
-
-.btn-modal-primary-cta:active,
-.btn-shopee-submit:active {
-  transform: scale(0.98) !important;
-}
-
-/* Plan In-Cart Summary Strip */
-.plan-incart-summary {
-  margin-top: 12px !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 240, 246, 0.92)) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1.2px solid rgba(226, 115, 150, 0.38) !important;
-  border-radius: 18px !important;
-  padding: 10px 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  box-shadow: 0 4px 14px rgba(217, 130, 162, 0.12), inset 0 1px 1px #FFFFFF !important;
-  cursor: pointer !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  gap: 8px !important;
-}
-
-.plan-incart-summary:hover {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 18px rgba(217, 130, 162, 0.2) !important;
-}
-
-.plan-incart-summary:active {
-  transform: scale(0.98) !important;
-}
-
-.plan-incart-left {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  min-width: 0 !important;
-}
-
-.plan-incart-icon {
-  font-size: 16px !important;
-  line-height: 1 !important;
-  flex-shrink: 0 !important;
-}
-
-.plan-incart-text {
-  font-size: 0.8rem !important;
-  font-weight: 650 !important;
-  color: var(--text-headline, #2D272E) !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.plan-incart-text strong {
-  font-weight: 850 !important;
-  color: var(--deep-rose, #B95679) !important;
-}
-
-.plan-incart-link {
-  font-size: 0.74rem !important;
-  font-weight: 800 !important;
-  color: var(--deep-rose, #B95679) !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-}
-
-body.dark-mode .plan-incart-summary,
-body.theme-dark .plan-incart-summary {
-  background: rgba(45, 25, 36, 0.9) !important;
-  border-color: rgba(255, 182, 193, 0.25) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark-mode .plan-incart-text,
-body.theme-dark .plan-incart-text {
-  color: #FFF0F5 !important;
-}
-
-body.dark-mode .plan-incart-text strong,
-body.theme-dark .plan-incart-text strong,
-body.dark-mode .plan-incart-link,
-body.theme-dark .plan-incart-link {
-  color: #FFB7CE !important;
-}
-
-/* Supermarket Barcode Preset Simulator Chips & Input Tray */
-.scanner-presets-section {
-  margin-top: 14px !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.5) !important;
-  border-radius: 18px !important;
-  padding: 12px 14px !important;
-}
-
-.scanner-presets-title {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  font-size: 11.5px !important;
-  font-weight: 800 !important;
-  color: #8A6B79 !important;
-  margin-bottom: 10px !important;
-}
-
-.scanner-presets-chips {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 8px !important;
-}
-
-.barcode-preset-chip {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.65) !important;
-  border-radius: 14px !important;
-  padding: 8px 10px !important;
-  text-align: left !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  gap: 2px !important;
-  cursor: pointer !important;
-  box-shadow: 0 2px 8px rgba(217, 130, 162, 0.08) !important;
-  transition: all 0.16s ease !important;
-  min-width: 0 !important;
-}
-
-.barcode-preset-chip:hover {
-  background: #FFF5F8 !important;
-  border-color: var(--deep-rose, #B95679) !important;
-  color: var(--deep-rose, #B95679) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(185, 86, 121, 0.15) !important;
-}
-
-.barcode-preset-chip:active {
-  transform: scale(0.97) !important;
-}
-
-.barcode-chip-title {
-  font-size: 11.5px !important;
-  font-weight: 750 !important;
-  color: var(--text-headline, #2D272E) !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  width: 100% !important;
-  display: block !important;
-  line-height: 1.25 !important;
-}
-
-.barcode-chip-badge {
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-  color: #B95679 !important;
-  background: rgba(244, 191, 208, 0.25) !important;
-  padding: 1px 6px !important;
-  border-radius: var(--radius-pill) !important;
-  display: inline-block !important;
-  line-height: 1.3 !important;
-}
-
-.scanner-manual-section {
-  margin-top: 14px !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.5) !important;
-  border-radius: 18px !important;
-  padding: 12px 14px !important;
-}
-
-/* Dark Mode Extensions for newly styled components */
-body.dark-mode .btn-goto-planner-pill,
-body.theme-dark .btn-goto-planner-pill {
-  background: linear-gradient(135deg, rgba(42, 22, 34, 0.95) 0%, rgba(32, 16, 25, 0.92) 100%) !important;
-  border-color: rgba(255, 182, 193, 0.25) !important;
-  color: #FFB7CE !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 12px rgba(255, 101, 132, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
 }
 
 body.dark-mode .custom-suggestions-dropdown,
 body.theme-dark .custom-suggestions-dropdown {
-  background: rgba(28, 14, 22, 0.96) !important;
-  border-color: rgba(255, 182, 193, 0.25) !important;
+  background: linear-gradient(160deg, rgba(34, 16, 30, 0.96) 0%, rgba(20, 9, 18, 0.98) 100%) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.22) !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
 }
 
 body.dark-mode .custom-suggestion-item,
 body.theme-dark .custom-suggestion-item {
-  color: #FFF2F6 !important;
-  border-bottom-color: rgba(255, 182, 193, 0.12) !important;
+  color: #FFF0F5 !important;
+  border-bottom: 1px solid rgba(255, 182, 193, 0.12) !important;
 }
 
 body.dark-mode .custom-suggestion-item:hover,
 body.theme-dark .custom-suggestion-item:hover {
-  background: rgba(65, 30, 48, 0.75) !important;
-  color: #FF8DA9 !important;
+  background: rgba(65, 28, 52, 0.85) !important;
+  color: #FFFFFF !important;
 }
 
 body.dark-mode .custom-suggestion-more,
 body.theme-dark .custom-suggestion-more {
-  background: rgba(55, 25, 42, 0.92) !important;
-  border-color: rgba(255, 101, 132, 0.4) !important;
+  background: rgba(30, 14, 25, 0.95) !important;
+  color: #FF8DA9 !important;
+  border-top: 1px solid rgba(255, 182, 193, 0.18) !important;
+}
+
+/* 11. Checkboxes & Selection Toolbar */
+body.dark-mode .ios-checkbox-box,
+body.theme-dark .ios-checkbox-box {
+  background: rgba(38, 18, 33, 0.85) !important;
+  border: 1.5px solid rgba(255, 182, 193, 0.30) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .ios-checkbox-input:checked + .ios-checkbox-box,
+body.theme-dark .ios-checkbox-input:checked + .ios-checkbox-box {
+  background: linear-gradient(135deg, #C2567B 0%, #8E2E53 100%) !important;
+  border-color: #E27396 !important;
+  box-shadow: 0 0 10px rgba(226, 115, 150, 0.4) !important;
+}
+
+body.dark-mode .cart-select-all-toolbar,
+body.theme-dark .cart-select-all-toolbar {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+body.dark-mode .ios-product-card.is-checked,
+body.theme-dark .ios-product-card.is-checked {
+  background: linear-gradient(145deg, rgba(50, 22, 42, 0.92) 0%, rgba(28, 12, 24, 0.95) 100%) !important;
+  border-color: rgba(255, 182, 193, 0.32) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 1.5px rgba(255, 205, 222, 0.22) !important;
+}
+
+/* 12. Floating Checkout Dock & Primary CTAs */
+body.dark-mode .cart-floating-checkout-dock,
+body.dark-mode .ios-floating-checkout-dock,
+body.theme-dark .cart-floating-checkout-dock,
+body.theme-dark .ios-floating-checkout-dock {
+  background: rgba(22, 10, 20, 0.94) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border-top: 1.2px solid rgba(255, 182, 193, 0.22) !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 1.5px rgba(255, 205, 222, 0.18) !important;
+}
+
+body.dark-mode .checkout-dock-label,
+body.theme-dark .checkout-dock-label {
+  color: #D4B8C5 !important;
+}
+
+body.dark-mode .checkout-dock-total,
+body.theme-dark .checkout-dock-total {
+  color: #FFF5F8 !important;
+}
+
+body.dark-mode .checkout-dock-sub,
+body.theme-dark .checkout-dock-sub {
+  color: #FF8DA9 !important;
+}
+
+body.dark-mode .btn-checkout-cancel,
+body.theme-dark .btn-checkout-cancel {
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
   color: #FFB7CE !important;
 }
 
-body.dark-mode .plan-incart-summary,
-body.theme-dark .plan-incart-summary {
-  background: rgba(35, 18, 28, 0.94) !important;
-  border-color: rgba(255, 182, 193, 0.22) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+body.dark-mode .btn-primary,
+body.dark-mode .btn-smart-submit,
+body.dark-mode .btn-start-shopping-action,
+body.dark-mode .btn-checkout-primary,
+body.dark-mode .btn-shopee-submit,
+body.dark-mode .btn-modal-primary-cta,
+body.dark-mode .btn-catalog-add,
+body.dark-mode .btn-quick-take-all,
+body.dark-mode .btn-pwa-install,
+body.theme-dark .btn-primary,
+body.theme-dark .btn-smart-submit,
+body.theme-dark .btn-start-shopping-action,
+body.theme-dark .btn-checkout-primary,
+body.theme-dark .btn-shopee-submit,
+body.theme-dark .btn-modal-primary-cta,
+body.theme-dark .btn-catalog-add,
+body.theme-dark .btn-quick-take-all,
+body.theme-dark .btn-pwa-install {
+  background: linear-gradient(135deg, #C2567B 0%, #8E2E53 100%) !important;
+  border: 1px solid rgba(255, 190, 205, 0.35) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 18px rgba(194, 86, 123, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
 }
 
-body.dark-mode .plan-incart-summary span[style*="color: #1E293B"],
-body.theme-dark .plan-incart-summary span[style*="color: #1E293B"] {
-  color: #FFF2F6 !important;
+/* 13. Modals, Bottom Sheets & Dialogs */
+body.dark-mode .modal-card,
+body.dark-mode .shopee-bottom-sheet-card,
+body.dark-mode .cancel-shopping-card,
+body.dark-mode .scanner-modal-card,
+body.dark-mode .compact-popover-card,
+body.dark-mode .store-picker-card,
+body.dark-mode .pwa-guide-card,
+body.dark-mode .modal-bubble-card,
+body.dark-mode .profile-settings-sheet,
+body.theme-dark .modal-card,
+body.theme-dark .shopee-bottom-sheet-card,
+body.theme-dark .cancel-shopping-card,
+body.theme-dark .scanner-modal-card,
+body.theme-dark .compact-popover-card,
+body.theme-dark .store-picker-card,
+body.theme-dark .pwa-guide-card,
+body.theme-dark .modal-bubble-card,
+body.theme-dark .profile-settings-sheet {
+  background: linear-gradient(160deg, rgba(34, 16, 30, 0.96) 0%, rgba(18, 8, 17, 0.98) 100%) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.22) !important;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.7), inset 0 1.5px 2px rgba(255, 205, 222, 0.20) !important;
+  color: #FFF5F8 !important;
 }
 
+body.dark-mode .modal-card::before,
+body.dark-mode .shopee-bottom-sheet-card::before,
+body.dark-mode .profile-settings-sheet::before,
+body.theme-dark .modal-card::before,
+body.theme-dark .shopee-bottom-sheet-card::before,
+body.theme-dark .profile-settings-sheet::before {
+  background: linear-gradient(180deg, rgba(255, 182, 193, 0.12) 0%, transparent 100%) !important;
+}
+
+body.dark-mode .profile-sheet-handle,
+body.theme-dark .profile-sheet-handle {
+  background: rgba(255, 182, 193, 0.3) !important;
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .profile-modal-header,
+body.dark-mode .cancel-modal-header,
+body.theme-dark .modal-header,
+body.theme-dark .profile-modal-header,
+body.theme-dark .cancel-modal-header {
+  border-bottom: 1px solid rgba(255, 182, 193, 0.14) !important;
+}
+
+body.dark-mode .modal-close-btn,
+body.dark-mode .cancel-modal-close-btn,
+body.dark-mode .tracker-close-btn,
+body.dark-mode .btn-modal-close-pill,
+body.theme-dark .modal-close-btn,
+body.theme-dark .cancel-modal-close-btn,
+body.theme-dark .tracker-close-btn,
+body.theme-dark .btn-modal-close-pill {
+  background: rgba(55, 26, 44, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.24) !important;
+  color: #FFB7CE !important;
+}
+
+/* 14. Profile Settings Sheet Sub-components */
+body.dark-mode .settings-group,
+body.dark-mode .avatar-presets-section,
+body.theme-dark .settings-group,
+body.theme-dark .avatar-presets-section {
+  background: rgba(26, 12, 23, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.18) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 205, 222, 0.10) !important;
+}
+
+body.dark-mode .modal-profile-name,
+body.theme-dark .modal-profile-name,
+body.dark-mode .settings-item-label,
+body.theme-dark .settings-item-label,
+body.dark-mode .avatar-presets-title,
+body.theme-dark .avatar-presets-title {
+  color: #FFF5F8 !important;
+}
+
+body.dark-mode .modal-profile-email,
+body.theme-dark .modal-profile-email,
+body.dark-mode .settings-item-desc,
+body.theme-dark .settings-item-desc {
+  color: #D4B8C5 !important;
+}
+
+body.dark-mode .modal-profile-avatar,
+body.dark-mode .modal-profile-avatar-fallback,
+body.theme-dark .modal-profile-avatar,
+body.theme-dark .modal-profile-avatar-fallback {
+  background: rgba(55, 26, 44, 0.90) !important;
+  border: 1.5px solid rgba(255, 182, 193, 0.30) !important;
+}
+
+body.dark-mode .btn-avatar-preset,
+body.theme-dark .btn-avatar-preset {
+  background: rgba(45, 20, 36, 0.85) !important;
+  border: 1.5px solid rgba(255, 182, 193, 0.20) !important;
+}
+
+body.dark-mode .btn-avatar-preset.active,
+body.theme-dark .btn-avatar-preset.active {
+  border-color: #FF6584 !important;
+  box-shadow: 0 0 12px rgba(255, 101, 132, 0.45), inset 0 0 4px rgba(255, 101, 132, 0.3) !important;
+  background: rgba(65, 28, 52, 0.95) !important;
+}
+
+body.dark-mode .btn-avatar-camera,
+body.dark-mode .btn-avatar-upload-text,
+body.dark-mode .btn-settings-action,
+body.dark-mode .btn-settings-primary,
+body.theme-dark .btn-avatar-camera,
+body.theme-dark .btn-avatar-upload-text,
+body.theme-dark .btn-settings-action,
+body.theme-dark .btn-settings-primary {
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.24) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .btn-modal-logout,
+body.dark-mode .btn-settings-danger,
+body.theme-dark .btn-modal-logout,
+body.theme-dark .btn-settings-danger {
+  background: rgba(55, 18, 28, 0.85) !important;
+  border: 1px solid rgba(255, 90, 115, 0.35) !important;
+  color: #FFAEC0 !important;
+}
+
+/* 15. Thermal Receipt Modal (Struk Belanja) */
+body.dark-mode .thermal-receipt-paper,
+body.theme-dark .thermal-receipt-paper {
+  background: linear-gradient(165deg, rgba(32, 15, 28, 0.97) 0%, rgba(18, 8, 17, 0.99) 100%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.24) !important;
+  color: #FFF0F5 !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), inset 0 1.5px 2px rgba(255, 205, 222, 0.20) !important;
+}
+
+body.dark-mode .receipt-grand-total-card,
+body.theme-dark .receipt-grand-total-card {
+  background: rgba(22, 10, 20, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.20) !important;
+  color: #FFF5F8 !important;
+}
+
+body.dark-mode .receipt-success-badge,
+body.theme-dark .receipt-success-badge {
+  background: rgba(22, 163, 74, 0.22) !important;
+  border: 1px solid rgba(74, 222, 128, 0.4) !important;
+  color: #4ADE80 !important;
+}
+
+body.dark-mode .btn-receipt-primary-finish,
+body.theme-dark .btn-receipt-primary-finish {
+  background: linear-gradient(135deg, #C2567B 0%, #8E2E53 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 190, 205, 0.35) !important;
+  box-shadow: 0 4px 18px rgba(194, 86, 123, 0.4) !important;
+}
+
+body.dark-mode .btn-receipt-action-pill,
+body.dark-mode .receipt-close-circle-btn,
+body.theme-dark .btn-receipt-action-pill,
+body.theme-dark .receipt-close-circle-btn {
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.24) !important;
+  color: #FFB7CE !important;
+}
+
+/* 16. Scanner Tray, Store Picker & Card Icon Wrappers */
 body.dark-mode .scanner-presets-section,
-body.theme-dark .scanner-presets-section,
 body.dark-mode .scanner-manual-section,
+body.theme-dark .scanner-presets-section,
 body.theme-dark .scanner-manual-section {
-  background: rgba(35, 18, 28, 0.85) !important;
-  border-color: rgba(255, 182, 193, 0.2) !important;
-}
-
-body.dark-mode .scanner-presets-title,
-body.theme-dark .scanner-presets-title {
-  color: #FFB7CE !important;
+  background: rgba(26, 12, 23, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.18) !important;
 }
 
 body.dark-mode .barcode-preset-chip,
-body.theme-dark .barcode-preset-chip {
-  background: rgba(48, 24, 38, 0.92) !important;
-  border-color: rgba(255, 182, 193, 0.18) !important;
-  color: #FFF0F5 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+body.dark-mode .store-picker-item,
+body.theme-dark .barcode-preset-chip,
+body.theme-dark .store-picker-item {
+  background: rgba(45, 20, 36, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
 }
 
 body.dark-mode .barcode-preset-chip:hover,
-body.theme-dark .barcode-preset-chip:hover {
-  background: rgba(72, 34, 56, 0.95) !important;
-  border-color: #FF8DA9 !important;
-  color: #FFB7CE !important;
+body.dark-mode .store-picker-item:hover,
+body.theme-dark .barcode-preset-chip:hover,
+body.theme-dark .store-picker-item:hover {
+  background: rgba(65, 28, 52, 0.95) !important;
+  color: #FFF0F5 !important;
 }
 
 body.dark-mode .barcode-chip-title,
@@ -8816,229 +9030,72 @@ body.theme-dark .barcode-chip-title {
 
 body.dark-mode .barcode-chip-badge,
 body.theme-dark .barcode-chip-badge {
-  color: #FFB7CE !important;
-  background: rgba(255, 182, 193, 0.15) !important;
+  background: rgba(225, 29, 72, 0.24) !important;
+  border-color: rgba(251, 113, 133, 0.45) !important;
+  color: #FDA4AF !important;
 }
 
-/* ==========================================================================
-   EMPTY CART CALL-TO-ACTION PILLS
-   ========================================================================== */
-.btn-goto-planner-pill {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  padding: 11px 24px !important;
-  border-radius: var(--radius-pill) !important;
-  font-size: 13.5px !important;
-  font-weight: 800 !important;
-  color: #FFFFFF !important;
-  background: linear-gradient(135deg, #FF6584 0%, #B95679 100%) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 0 4px 16px rgba(185, 86, 121, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
-  cursor: pointer !important;
-  transition: transform 0.16s ease, box-shadow 0.16s ease !important;
-  text-decoration: none !important;
+body.dark-mode .modern-store-icon-wrap,
+body.dark-mode .modern-date-icon-wrap,
+body.dark-mode .btn-scanner-icon,
+body.dark-mode .scanner-ctl-btn,
+body.theme-dark .modern-store-icon-wrap,
+body.theme-dark .modern-date-icon-wrap,
+body.theme-dark .btn-scanner-icon,
+body.theme-dark .scanner-ctl-btn {
+  background: rgba(52, 24, 42, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.24) !important;
+  color: #FF8DA9 !important;
 }
 
-.btn-goto-planner-pill:hover {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(185, 86, 121, 0.4) !important;
+body.dark-mode .catalog-thumb-wrap,
+body.theme-dark .catalog-thumb-wrap {
+  background: rgba(45, 20, 36, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
 }
 
-.btn-goto-planner-pill:active {
-  transform: scale(0.96) !important;
+body.dark-mode .cart-unbought-icon,
+body.theme-dark .cart-unbought-icon {
+  background: rgba(55, 26, 44, 0.90) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
+  color: #FF8DA9 !important;
 }
 
-.btn-goto-planner-secondary {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 10px 18px !important;
-  border-radius: var(--radius-pill) !important;
-  font-size: 12.5px !important;
-  font-weight: 750 !important;
-  color: #B95679 !important;
-  background: rgba(255, 255, 255, 0.85) !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.7) !important;
-  box-shadow: 0 2px 8px rgba(185, 86, 121, 0.08) !important;
-  cursor: pointer !important;
-  transition: all 0.16s ease !important;
+/* 17. Cancel Shopping Modal Components */
+body.dark-mode .cancel-option-card,
+body.theme-dark .cancel-option-card {
+  background: rgba(26, 12, 23, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.20) !important;
+  color: #FFF5F8 !important;
 }
 
-.btn-goto-planner-secondary:hover {
-  background: #FFF0F5 !important;
-  border-color: #B95679 !important;
+body.dark-mode .cancel-modal-icon-wrap,
+body.theme-dark .cancel-modal-icon-wrap {
+  background: rgba(60, 20, 32, 0.85) !important;
+  border: 1px solid rgba(255, 100, 130, 0.35) !important;
+  color: #FFAEC0 !important;
 }
 
-.btn-goto-planner-secondary:active {
-  transform: scale(0.97) !important;
+body.dark-mode .btn-confirm-cancel-session,
+body.theme-dark .btn-confirm-cancel-session {
+  background: rgba(140, 25, 45, 0.85) !important;
+  border: 1px solid rgba(255, 100, 130, 0.45) !important;
+  color: #FFAEC0 !important;
 }
 
-body.dark-mode .btn-goto-planner-secondary,
-body.theme-dark .btn-goto-planner-secondary {
-  background: rgba(48, 24, 38, 0.85) !important;
-  border-color: rgba(255, 182, 193, 0.25) !important;
-  color: #FFB7CE !important;
+body.dark-mode .btn-cancel-modal-dismiss,
+body.theme-dark .btn-cancel-modal-dismiss {
+  background: rgba(45, 20, 36, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
+  color: #D4B8C5 !important;
 }
 
-/* ==========================================================================
-   CLOUD SYNC MODAL POLISH (KAWAII × IOS LIQUID GLASS)
-   ========================================================================== */
-.cloud-sync-user-card {
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.6) !important;
-  border-radius: 20px !important;
-  padding: 14px !important;
-  margin-top: 10px !important;
-  box-shadow: 0 4px 16px rgba(185, 86, 121, 0.06), inset 0 1px 1px #FFFFFF !important;
-}
-
-.cloud-sync-user-header {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin-bottom: 12px !important;
-  min-width: 0 !important;
-}
-
-.cloud-sync-avatar-wrap {
-  flex-shrink: 0 !important;
-}
-
-.cloud-sync-avatar-circle {
-  width: 42px !important;
-  height: 42px !important;
-  border-radius: 50% !important;
-  background: #FCE7F3 !important;
-  border: 2px solid #F472B6 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 19px !important;
-  overflow: hidden !important;
-  box-shadow: 0 2px 8px rgba(244, 114, 182, 0.25) !important;
-}
-
-.cloud-sync-user-info {
-  flex: 1 !important;
-  min-width: 0 !important;
-}
-
-.cloud-sync-user-name {
-  font-size: 14px !important;
-  font-weight: 850 !important;
-  color: var(--text-headline, #2D272E) !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  line-height: 1.25 !important;
-}
-
-.cloud-sync-user-email {
-  font-size: 11px !important;
-  color: #8A6B79 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  margin-top: 2px !important;
-  line-height: 1.25 !important;
-}
-
-.cloud-sync-status-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  background: #DCFCE7 !important;
-  color: #166534 !important;
-  font-size: 10.5px !important;
-  font-weight: 800 !important;
-  padding: 4px 9px !important;
-  border-radius: var(--radius-pill) !important;
-  flex-shrink: 0 !important;
-  white-space: nowrap !important;
-  border: 1px solid rgba(22, 163, 74, 0.25) !important;
-}
-
-.cloud-sync-card-desc {
-  font-size: 11.5px !important;
-  color: #8A6B79 !important;
-  line-height: 1.4 !important;
-  margin: 0 0 12px 0 !important;
-}
-
-.cloud-sync-details {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(12px) !important;
-  padding: 10px 12px !important;
-  border-radius: 16px !important;
-  font-size: 11.5px !important;
-  margin-top: 10px !important;
-  margin-bottom: 12px !important;
-  border: 1px solid rgba(244, 191, 208, 0.45) !important;
-}
-
-.btn-cloud-secondary {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 9px 12px !important;
-  border-radius: var(--radius-pill) !important;
-  font-size: 12px !important;
-  font-weight: 750 !important;
-  color: #B95679 !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.6) !important;
-  box-shadow: 0 2px 8px rgba(185, 86, 121, 0.08) !important;
-  cursor: pointer !important;
-  transition: all 0.16s ease !important;
-  text-align: center !important;
-}
-
-.btn-cloud-secondary:hover {
-  background: #FFF5F8 !important;
-  border-color: #B95679 !important;
-  transform: translateY(-1px) !important;
-}
-
-.btn-cloud-secondary:active {
-  transform: scale(0.97) !important;
-}
-
-.btn-modal-close-pill {
-  width: 100% !important;
-  padding: 11px !important;
-  border-radius: var(--radius-pill) !important;
-  font-size: 13px !important;
-  font-weight: 750 !important;
-  color: #7A727D !important;
-  background: rgba(244, 191, 208, 0.18) !important;
-  border: 1px solid rgba(244, 191, 208, 0.4) !important;
-  cursor: pointer !important;
-  transition: all 0.16s ease !important;
-  margin: 0 !important;
-  text-align: center !important;
-  box-sizing: border-box !important;
-}
-
-.btn-modal-close-pill:hover {
-  background: rgba(244, 191, 208, 0.3) !important;
-  color: #2D272E !important;
-}
-
-.btn-modal-close-pill:active {
-  transform: scale(0.98) !important;
-}
-
+/* 18. Cloud Sync Components */
 body.dark-mode .cloud-sync-user-card,
 body.theme-dark .cloud-sync-user-card {
-  background: rgba(48, 24, 38, 0.8) !important;
-  border-color: rgba(255, 182, 193, 0.2) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+  background: rgba(38, 19, 33, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.20) !important;
 }
 
 body.dark-mode .cloud-sync-user-name,
@@ -9047,40 +9104,201 @@ body.theme-dark .cloud-sync-user-name {
 }
 
 body.dark-mode .cloud-sync-user-email,
-body.theme-dark .cloud-sync-user-email,
 body.dark-mode .cloud-sync-card-desc,
+body.theme-dark .cloud-sync-user-email,
 body.theme-dark .cloud-sync-card-desc {
-  color: #D4A5B8 !important;
+  color: #D4B8C5 !important;
 }
 
 body.dark-mode .cloud-sync-status-badge,
 body.theme-dark .cloud-sync-status-badge {
-  background: rgba(22, 163, 74, 0.2) !important;
+  background: rgba(22, 163, 74, 0.22) !important;
   color: #4ADE80 !important;
-  border-color: rgba(74, 222, 128, 0.3) !important;
+  border: 1px solid rgba(74, 222, 128, 0.35) !important;
 }
 
 body.dark-mode .cloud-sync-details,
 body.theme-dark .cloud-sync-details {
-  background: rgba(35, 18, 28, 0.75) !important;
-  border-color: rgba(255, 182, 193, 0.18) !important;
+  background: rgba(26, 12, 23, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.18) !important;
 }
 
 body.dark-mode .btn-cloud-secondary,
 body.theme-dark .btn-cloud-secondary {
-  background: rgba(58, 28, 46, 0.88) !important;
-  border-color: rgba(255, 182, 193, 0.22) !important;
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
   color: #FFB7CE !important;
 }
 
-body.dark-mode .btn-cloud-secondary:hover,
-body.theme-dark .btn-cloud-secondary:hover {
-  background: rgba(75, 36, 60, 0.95) !important;
+/* 19. Advanced Details Accordion & Inline Fallbacks */
+body.dark-mode .advanced-options,
+body.theme-dark .advanced-options {
+  background: rgba(26, 12, 23, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.18) !important;
+  color: #FFF5F8 !important;
 }
 
-body.dark-mode .btn-modal-close-pill,
-body.theme-dark .btn-modal-close-pill {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
-  color: #E2E8F0 !important;
+body.dark-mode .advanced-options summary,
+body.theme-dark .advanced-options summary {
+  color: #D4B8C5 !important;
+}
+
+body.dark-mode .routine-checkbox-box,
+body.theme-dark .routine-checkbox-box {
+  background: rgba(36, 16, 30, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.2) !important;
+}
+
+body.dark-mode div[style*="background: #FFF5F7"],
+body.dark-mode div[style*="background:#FFF5F7"],
+body.theme-dark div[style*="background: #FFF5F7"],
+body.theme-dark div[style*="background:#FFF5F7"] {
+  background: rgba(36, 16, 30, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.2) !important;
+}
+
+body.dark-mode div[style*="background: #FAF7F8"],
+body.dark-mode div[style*="background:#FAF7F8"],
+body.theme-dark div[style*="background: #FAF7F8"],
+body.theme-dark div[style*="background:#FAF7F8"] {
+  background: rgba(26, 12, 23, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.18) !important;
+}
+
+body.dark-mode button[style*="background: #F8FAFC"],
+body.dark-mode button[style*="background:#F8FAFC"],
+body.theme-dark button[style*="background: #F8FAFC"],
+body.theme-dark button[style*="background:#F8FAFC"] {
+  background: rgba(45, 20, 36, 0.85) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode input[style*="border-left: 1px solid #E2E8F0"],
+body.theme-dark input[style*="border-left: 1px solid #E2E8F0"] {
+  border-color: rgba(255, 182, 193, 0.2) !important;
+  color: #FFF5F8 !important;
+}
+
+/* 20. Bottom Navigation Bar */
+body.dark-mode .bottom-nav-bar,
+body.theme-dark .bottom-nav-bar {
+  background: rgba(18, 8, 17, 0.94) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border-top: 1px solid rgba(255, 182, 193, 0.16) !important;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode .bottom-nav-item,
+body.dark-mode .nav-item,
+body.theme-dark .bottom-nav-item,
+body.theme-dark .nav-item {
+  color: #B496A6 !important;
+}
+
+body.dark-mode .bottom-nav-item.active,
+body.dark-mode .nav-item.active,
+body.theme-dark .bottom-nav-item.active,
+body.theme-dark .nav-item.active {
+  color: #FF8DA9 !important;
+  text-shadow: 0 0 12px rgba(255, 101, 132, 0.45) !important;
+}
+
+body.dark-mode .bottom-nav-item.active .nav-icon-wrap svg,
+body.theme-dark .bottom-nav-item.active .nav-icon-wrap svg {
+  stroke: #FF8DA9 !important;
+}
+
+body.dark-mode .nav-indicator-glider,
+body.theme-dark .nav-indicator-glider {
+  background: linear-gradient(135deg, #C2567B 0%, #8E2E53 100%) !important;
+}
+
+body.dark-mode .nav-badge-count,
+body.theme-dark .nav-badge-count {
+  background: #FF477E !important;
+  color: #FFFFFF !important;
+}
+
+/* 21. Modal Confirmation Bubble (Custom alert/confirm) */
+body.dark-mode .modal-bubble-title,
+body.theme-dark .modal-bubble-title {
+  color: #FFF5F8 !important;
+}
+
+body.dark-mode .modal-bubble-message,
+body.theme-dark .modal-bubble-message {
+  color: #D4B8C5 !important;
+}
+
+body.dark-mode .modal-bubble-icon,
+body.theme-dark .modal-bubble-icon {
+  background: rgba(55, 26, 44, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+  color: #FF8DA9 !important;
+}
+
+body.dark-mode .btn-bubble-confirm,
+body.theme-dark .btn-bubble-confirm {
+  background: linear-gradient(135deg, #C2567B 0%, #8E2E53 100%) !important;
+  color: #FFFFFF !important;
+}
+
+body.dark-mode .btn-bubble-cancel,
+body.theme-dark .btn-bubble-cancel {
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
+}
+
+/* 22. Toasts, Alerts, Auth & Offline Badges */
+body.dark-mode .toast-container .app-toast,
+body.theme-dark .toast-container .app-toast {
+  background: linear-gradient(160deg, rgba(38, 18, 34, 0.96) 0%, rgba(22, 10, 20, 0.98) 100%) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.24) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), inset 0 1px 1.5px rgba(255, 205, 222, 0.20) !important;
+  color: #FFF5F8 !important;
+}
+
+body.dark-mode .toast-icon,
+body.theme-dark .toast-icon {
+  background: rgba(55, 26, 44, 0.9) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
+}
+
+body.dark-mode .btn-toast-undo,
+body.theme-dark .btn-toast-undo {
+  background: rgba(65, 28, 52, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.3) !important;
+  color: #FF8DA9 !important;
+}
+
+body.dark-mode .btn-google-auth,
+body.theme-dark .btn-google-auth {
+  background: rgba(38, 19, 33, 0.88) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.22) !important;
+  color: #FFF5F8 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.dark-mode .btn-google-auth:hover,
+body.theme-dark .btn-google-auth:hover {
+  background: rgba(55, 26, 44, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.4) !important;
+}
+
+body.dark-mode .auth-badge-icon,
+body.theme-dark .auth-badge-icon {
+  background: rgba(48, 22, 38, 0.88) !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .offline-badge,
+body.theme-dark .offline-badge {
+  background: linear-gradient(135deg, rgba(75, 38, 15, 0.95), rgba(45, 20, 8, 0.98)) !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.4) !important;
+  color: #FAD18C !important;
 }
