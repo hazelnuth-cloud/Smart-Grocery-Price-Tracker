@@ -5562,11 +5562,11 @@ function renderItems() {
   if (inCart.length > 0) {
     html += `
       <div class="plan-incart-summary touch-target" onclick="switchTab('cart')" title="Buka Keranjang Belanja">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 16px;">🛒</span>
-          <span style="font-size: 0.8rem; font-weight: 700; color: #1E293B;">${inCart.length} barang sudah di Keranjang</span>
+        <div class="plan-incart-left">
+          <span class="plan-incart-icon">🛒</span>
+          <span class="plan-incart-text">Ada <strong>${inCart.length} barang</strong> di Keranjang</span>
         </div>
-        <span style="font-size: 0.74rem; font-weight: 800; color: #B95679;">Buka Keranjang ➔</span>
+        <span class="plan-incart-link">Buka Keranjang ➔</span>
       </div>
     `;
   }

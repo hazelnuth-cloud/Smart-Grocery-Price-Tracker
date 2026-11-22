@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=168">
+  <link rel="stylesheet" href="./css/app.css?v=169">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -461,29 +461,29 @@
             <!-- Preset Chips (Grid 3 Kolom Simetris) -->
             <div id="quickBudgetPresetsContainer" class="quick-budget-presets"
               style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="50000"
                 onclick="setQuickBudgetAmount(50000, this)">50k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="100000"
                 onclick="setQuickBudgetAmount(100000, this)">100k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="150000"
                 onclick="setQuickBudgetAmount(150000, this)">150k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="200000"
                 onclick="setQuickBudgetAmount(200000, this)">200k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="350000"
                 onclick="setQuickBudgetAmount(350000, this)">350k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="500000"
                 onclick="setQuickBudgetAmount(500000, this)">500k</button>
             </div>
 
-            <!-- Stepper Buttons -->
+            <!-- Stepper Buttons (Distinct Colors: Add 50, Add 10, Sub 10, Sub 50) -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px;">
-              <button type="button" class="btn-budget-delta-sub frequent-chip touch-target" onclick="adjustBudgetByDelta(-50000, this)"
+              <button type="button" class="btn-budget-sub-50 touch-target" onclick="adjustBudgetByDelta(-50000, this)"
                 style="justify-content: center; font-size: 0.72rem; padding: 6px 0;">&minus; 50k</button>
-              <button type="button" class="btn-budget-delta-sub frequent-chip touch-target" onclick="adjustBudgetByDelta(-10000, this)"
+              <button type="button" class="btn-budget-sub-10 touch-target" onclick="adjustBudgetByDelta(-10000, this)"
                 style="justify-content: center; font-size: 0.72rem; padding: 6px 0;">&minus; 10k</button>
-              <button type="button" class="btn-budget-delta-add frequent-chip touch-target" onclick="adjustBudgetByDelta(10000, this)"
+              <button type="button" class="btn-budget-add-10 touch-target" onclick="adjustBudgetByDelta(10000, this)"
                 style="justify-content: center; font-size: 0.72rem; padding: 6px 0;">+ 10k</button>
-              <button type="button" class="btn-budget-delta-add frequent-chip touch-target" onclick="adjustBudgetByDelta(50000, this)"
+              <button type="button" class="btn-budget-add-50 touch-target" onclick="adjustBudgetByDelta(50000, this)"
                 style="justify-content: center; font-size: 0.72rem; padding: 6px 0;">+ 50k</button>
             </div>
 
@@ -1862,17 +1862,17 @@
               Nominal:</label>
             <div class="quick-budget-presets"
               style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="50000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="50000"
                 onclick="setModalQuickBudget(50000)">50k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="100000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="100000"
                 onclick="setModalQuickBudget(100000)">100k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="150000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="150000"
                 onclick="setModalQuickBudget(150000)">150k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="200000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="200000"
                 onclick="setModalQuickBudget(200000)">200k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="350000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="350000"
                 onclick="setModalQuickBudget(350000)">350k</button>
-              <button type="button" class="budget-preset-chip frequent-chip touch-target" data-amount="500000"
+              <button type="button" class="budget-preset-chip touch-target" data-amount="500000"
                 onclick="setModalQuickBudget(500000)">500k</button>
             </div>
           </div>
@@ -2840,7 +2840,7 @@
 
   <!-- Application Logic -->
   <script src="./js/kawaii-art.js?v=168"></script>
-  <script src="./js/app.js?v=168"></script>
+  <script src="./js/app.js?v=169"></script>
 
   <!-- Service Worker Registration -->
   <script>

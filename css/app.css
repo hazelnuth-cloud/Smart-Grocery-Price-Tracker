@@ -6902,7 +6902,7 @@ button:not(:disabled):active,
   background: rgba(255, 245, 248, 0.95) !important;
   border: 1.2px solid rgba(244, 191, 208, 0.75) !important;
   border-radius: var(--radius-pill) !important;
-  padding: 2px !important;
+  padding: 1px 3px !important;
   height: 30px !important;
   box-sizing: border-box !important;
   box-shadow: inset 0 1px 2px rgba(185, 86, 121, 0.06) !important;
@@ -6918,17 +6918,17 @@ button:not(:disabled):active,
   max-width: 24px !important;
   max-height: 24px !important;
   border-radius: 50% !important;
-  background: #FFFFFF !important;
-  border: 1px solid rgba(244, 191, 208, 0.6) !important;
+  background: transparent !important;
+  border: none !important;
   color: #B95679 !important;
   font-weight: 850 !important;
-  font-size: 13.5px !important;
+  font-size: 14.5px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
-  box-shadow: 0 1px 3px rgba(185, 86, 121, 0.14) !important;
+  box-shadow: none !important;
   padding: 0 !important;
   line-height: 1 !important;
   position: relative !important;
@@ -6947,13 +6947,13 @@ button:not(:disabled):active,
 }
 
 .ios-step-btn:hover {
-  background: #FFF5F8 !important;
-  transform: scale(1.06) !important;
+  background: rgba(255, 182, 193, 0.25) !important;
+  transform: scale(1.05) !important;
 }
 
 .ios-step-btn:active {
   transform: scale(0.88) !important;
-  background: #FFE4EC !important;
+  background: rgba(255, 182, 193, 0.45) !important;
 }
 
 .ios-step-input {
@@ -7965,7 +7965,7 @@ button:not(:disabled):active,
    ========================================================================== */
 .budget-preset-chip {
   background: rgba(255, 255, 255, 0.9) !important;
-  border: 1.2px solid rgba(244, 191, 208, 0.55) !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.6) !important;
   color: #4A3E46 !important;
   font-weight: 750 !important;
   font-size: 13px !important;
@@ -7977,6 +7977,7 @@ button:not(:disabled):active,
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  touch-action: manipulation !important;
 }
 
 .budget-preset-chip:hover {
@@ -7986,67 +7987,199 @@ button:not(:disabled):active,
   transform: translateY(-1px) !important;
 }
 
-.budget-preset-chip.active {
-  background: linear-gradient(135deg, #E27396 0%, #B95679 100%) !important;
+.budget-preset-chip.active,
+.budget-preset-chip:active,
+.budget-preset-chip.chip-tapped {
+  background: linear-gradient(135deg, #FF6584 0%, #B95679 100%) !important;
   color: #FFFFFF !important;
   border-color: transparent !important;
   font-weight: 850 !important;
-  box-shadow: 0 4px 14px rgba(185, 86, 121, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
-  transform: scale(1.02) !important;
+  box-shadow: 0 4px 14px rgba(185, 86, 121, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  transform: scale(0.96) !important;
 }
 
-/* Subtraction delta buttons (-50k, -10k) - Soft Blush Rose */
-.btn-budget-delta-sub {
-  background: rgba(254, 226, 226, 0.85) !important;
-  border: 1.2px solid rgba(244, 114, 182, 0.45) !important;
+/* ==========================================================================
+   Distinct Delta Buttons (Add 50, Add 10, Sub 10, Sub 50)
+   ========================================================================== */
+/* -50k: Rich Strawberry / Deep Coral Rose */
+.btn-budget-sub-50 {
+  background: #FFE4E6 !important;
+  border: 1.4px solid #FB7185 !important;
   color: #BE123C !important;
-  font-weight: 800 !important;
+  font-weight: 850 !important;
   border-radius: var(--radius-pill) !important;
-  box-shadow: 0 2px 6px rgba(190, 18, 60, 0.08) !important;
+  box-shadow: 0 2px 6px rgba(190, 18, 60, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  touch-action: manipulation !important;
 }
-
-.btn-budget-delta-sub:hover {
-  background: rgba(254, 205, 211, 0.95) !important;
+.btn-budget-sub-50:hover {
+  background: #FECDD3 !important;
   color: #9F1239 !important;
-  border-color: #FB7185 !important;
+  border-color: #F43F5E !important;
   transform: translateY(-1px) !important;
 }
-
-.btn-budget-delta-sub:active,
-.btn-budget-delta-sub.chip-tapped {
-  background: linear-gradient(135deg, #F87171, #E11D48) !important;
+.btn-budget-sub-50:active,
+.btn-budget-sub-50.chip-tapped {
+  background: linear-gradient(135deg, #F43F5E, #BE123C) !important;
   color: #FFFFFF !important;
   border-color: transparent !important;
   box-shadow: 0 4px 14px rgba(225, 29, 72, 0.38) !important;
-  transform: scale(0.95) !important;
+  transform: scale(0.94) !important;
 }
 
-/* Addition delta buttons (+10k, +50k) - Soft Sage Emerald */
-.btn-budget-delta-add {
-  background: rgba(220, 252, 231, 0.85) !important;
-  border: 1.2px solid rgba(134, 239, 172, 0.6) !important;
-  color: #15803D !important;
+/* -10k: Soft Peach / Pastel Blush Pink */
+.btn-budget-sub-10,
+.btn-budget-delta-sub {
+  background: #FFF1F2 !important;
+  border: 1.4px solid #FDA4AF !important;
+  color: #E11D48 !important;
   font-weight: 800 !important;
   border-radius: var(--radius-pill) !important;
-  box-shadow: 0 2px 6px rgba(21, 128, 61, 0.08) !important;
+  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  touch-action: manipulation !important;
 }
-
-.btn-budget-delta-add:hover {
-  background: rgba(187, 247, 208, 0.95) !important;
-  color: #166534 !important;
-  border-color: #4ADE80 !important;
+.btn-budget-sub-10:hover,
+.btn-budget-delta-sub:hover {
+  background: #FFE4E6 !important;
+  color: #BE123C !important;
+  border-color: #FB7185 !important;
   transform: translateY(-1px) !important;
 }
+.btn-budget-sub-10:active,
+.btn-budget-sub-10.chip-tapped,
+.btn-budget-delta-sub:active,
+.btn-budget-delta-sub.chip-tapped {
+  background: linear-gradient(135deg, #FB7185, #F43F5E) !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3) !important;
+  transform: scale(0.94) !important;
+}
 
+/* +10k: Soft Fresh Spring Mint */
+.btn-budget-add-10,
+.btn-budget-delta-add {
+  background: #ECFDF5 !important;
+  border: 1.4px solid #6EE7B7 !important;
+  color: #047857 !important;
+  font-weight: 800 !important;
+  border-radius: var(--radius-pill) !important;
+  box-shadow: 0 2px 6px rgba(4, 120, 87, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  touch-action: manipulation !important;
+}
+.btn-budget-add-10:hover,
+.btn-budget-delta-add:hover {
+  background: #D1FAE5 !important;
+  color: #065F46 !important;
+  border-color: #34D399 !important;
+  transform: translateY(-1px) !important;
+}
+.btn-budget-add-10:active,
+.btn-budget-add-10.chip-tapped,
 .btn-budget-delta-add:active,
 .btn-budget-delta-add.chip-tapped {
-  background: linear-gradient(135deg, #34D399, #059669) !important;
+  background: linear-gradient(135deg, #34D399, #10B981) !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.32) !important;
+  transform: scale(0.94) !important;
+}
+
+/* +50k: Rich Vibrant Emerald Green */
+.btn-budget-add-50 {
+  background: #D1FAE5 !important;
+  border: 1.4px solid #10B981 !important;
+  color: #065F46 !important;
+  font-weight: 850 !important;
+  border-radius: var(--radius-pill) !important;
+  box-shadow: 0 2px 6px rgba(6, 95, 70, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  touch-action: manipulation !important;
+}
+.btn-budget-add-50:hover {
+  background: #A7F3D0 !important;
+  color: #064E3B !important;
+  border-color: #059669 !important;
+  transform: translateY(-1px) !important;
+}
+.btn-budget-add-50:active,
+.btn-budget-add-50.chip-tapped {
+  background: linear-gradient(135deg, #10B981, #059669) !important;
   color: #FFFFFF !important;
   border-color: transparent !important;
   box-shadow: 0 4px 14px rgba(5, 150, 105, 0.38) !important;
-  transform: scale(0.95) !important;
+  transform: scale(0.94) !important;
+}
+
+/* Dark Mode Variants for Budget Presets & Delta Buttons */
+body.dark-mode .budget-preset-chip,
+body.theme-dark .budget-preset-chip {
+  background: rgba(45, 25, 36, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.22) !important;
+  color: #FFF0F5 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+body.dark-mode .budget-preset-chip.active,
+body.theme-dark .budget-preset-chip.active,
+body.dark-mode .budget-preset-chip:active,
+body.theme-dark .budget-preset-chip:active,
+body.dark-mode .budget-preset-chip.chip-tapped,
+body.theme-dark .budget-preset-chip.chip-tapped {
+  background: linear-gradient(135deg, #FF6584 0%, #E27396 100%) !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 16px rgba(255, 101, 132, 0.4) !important;
+}
+
+body.dark-mode .btn-budget-sub-50,
+body.theme-dark .btn-budget-sub-50 {
+  background: rgba(225, 29, 72, 0.22) !important;
+  border-color: rgba(251, 113, 133, 0.5) !important;
+  color: #FDA4AF !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+body.dark-mode .btn-budget-sub-10,
+body.theme-dark .btn-budget-sub-10,
+body.dark-mode .btn-budget-delta-sub,
+body.theme-dark .btn-budget-delta-sub {
+  background: rgba(225, 29, 72, 0.12) !important;
+  border-color: rgba(253, 164, 175, 0.35) !important;
+  color: #FECDD3 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+body.dark-mode .btn-budget-add-10,
+body.theme-dark .btn-budget-add-10,
+body.dark-mode .btn-budget-delta-add,
+body.theme-dark .btn-budget-delta-add {
+  background: rgba(16, 185, 129, 0.14) !important;
+  border-color: rgba(110, 231, 183, 0.38) !important;
+  color: #A7F3D0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+body.dark-mode .btn-budget-add-50,
+body.theme-dark .btn-budget-add-50 {
+  background: rgba(16, 185, 129, 0.25) !important;
+  border-color: rgba(16, 185, 129, 0.6) !important;
+  color: #6EE7B7 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
 }
 
 @keyframes chipTapPulse {
@@ -8191,15 +8324,20 @@ body.dark-mode .ios-step-btn,
 body.theme-dark .ios-step-btn,
 body.dark-mode .ios-stepper-capsule .ios-step-btn,
 body.theme-dark .ios-stepper-capsule .ios-step-btn {
-  background: #3D2232 !important;
-  border-color: rgba(255, 182, 193, 0.22) !important;
+  background: transparent !important;
+  border: none !important;
   color: #FFB7CE !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: none !important;
 }
 
 body.dark-mode .ios-step-btn:hover,
 body.theme-dark .ios-step-btn:hover {
-  background: #502A41 !important;
+  background: rgba(255, 182, 193, 0.2) !important;
+}
+
+body.dark-mode .ios-step-btn:active,
+body.theme-dark .ios-step-btn:active {
+  background: rgba(255, 182, 193, 0.35) !important;
 }
 
 body.dark-mode .ios-step-input,
@@ -8439,6 +8577,7 @@ body.theme-dark .bottom-nav-bar {
   box-shadow: 0 4px 14px rgba(217, 130, 162, 0.12), inset 0 1px 1px #FFFFFF !important;
   cursor: pointer !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  gap: 8px !important;
 }
 
 .plan-incart-summary:hover {
@@ -8448,6 +8587,60 @@ body.theme-dark .bottom-nav-bar {
 
 .plan-incart-summary:active {
   transform: scale(0.98) !important;
+}
+
+.plan-incart-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+
+.plan-incart-icon {
+  font-size: 16px !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+.plan-incart-text {
+  font-size: 0.8rem !important;
+  font-weight: 650 !important;
+  color: var(--text-headline, #2D272E) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.plan-incart-text strong {
+  font-weight: 850 !important;
+  color: var(--deep-rose, #B95679) !important;
+}
+
+.plan-incart-link {
+  font-size: 0.74rem !important;
+  font-weight: 800 !important;
+  color: var(--deep-rose, #B95679) !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+body.dark-mode .plan-incart-summary,
+body.theme-dark .plan-incart-summary {
+  background: rgba(45, 25, 36, 0.9) !important;
+  border-color: rgba(255, 182, 193, 0.25) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .plan-incart-text,
+body.theme-dark .plan-incart-text {
+  color: #FFF0F5 !important;
+}
+
+body.dark-mode .plan-incart-text strong,
+body.theme-dark .plan-incart-text strong,
+body.dark-mode .plan-incart-link,
+body.theme-dark .plan-incart-link {
+  color: #FFB7CE !important;
 }
 
 /* Supermarket Barcode Preset Simulator Chips & Input Tray */
