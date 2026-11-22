@@ -4108,7 +4108,7 @@ function showCustomItemSuggestions(query = '') {
     `).join('');
 
     html += `
-      <div class="custom-suggestion-more" onclick="openItemPickerModal()">
+      <div class="custom-suggestion-more touch-target" onclick="openItemPickerModal()">
         <span>📋 Buka Katalog Rekomendasi Lengkap (${allItems.length} barang) ➔</span>
       </div>
     `;
@@ -8947,7 +8947,16 @@ function switchTab(tab, force = false) {
   if (btnPlanner) btnPlanner.classList.toggle('active', tab === 'planner');
   if (btnCart) btnCart.classList.toggle('active', tab === 'cart');
 
-  renderBudget();
+  if (tab === 'cart') {
+    renderCart();
+    syncCartBottomPadding();
+  } else if (tab === 'planner') {
+    renderPlanner();
+  } else if (tab === 'budget') {
+    renderBudget();
+  } else if (tab === 'pantry') {
+    renderPantry();
+  }
 }
 
 // =========================================================================
@@ -9986,9 +9995,19 @@ function renderCartSection() {
   // Manage checkout dock visibility based on items & active tab
   if (cartStickyBottomBar) {
     const isCartActive = (AppState.currentTab === 'cart');
-    if (hasInCart && isCartActive) {
+    if (isCartActive && AppState.cart && AppState.cart.length > 0) {
       cartStickyBottomBar.classList.remove('hidden');
       cartStickyBottomBar.style.display = 'flex';
+      const finishBtn = document.getElementById('btnFinishShopping');
+      if (finishBtn) {
+        if (inCartItems.length === 0) {
+          finishBtn.style.opacity = '0.55';
+          finishBtn.style.pointerEvents = 'none';
+        } else {
+          finishBtn.style.opacity = '1';
+          finishBtn.style.pointerEvents = 'auto';
+        }
+      }
     } else {
       cartStickyBottomBar.classList.add('hidden');
       cartStickyBottomBar.style.display = 'none';
@@ -10883,6 +10902,19 @@ function initPullToRefresh() {
 
   let startY = 0;
   let isPulling = false;
+  let refreshSafetyTimer = null;
+
+  const resetIndicator = () => {
+    isPulling = false;
+    startY = 0;
+    ptr.classList.remove('refreshing', 'visible');
+    const icon = ptr.querySelector('.ptr-icon');
+    if (icon) icon.style.transform = 'none';
+    if (refreshSafetyTimer) {
+      clearTimeout(refreshSafetyTimer);
+      refreshSafetyTimer = null;
+    }
+  };
 
   window.addEventListener('touchstart', (e) => {
     if (window.scrollY === 0 && e.touches && e.touches[0]) {
@@ -10896,32 +10928,51 @@ function initPullToRefresh() {
     const currentY = e.touches[0].clientY;
     const deltaY = currentY - startY;
 
-    if (deltaY > 15 && deltaY < 120) {
+    if (deltaY > 65 && deltaY < 140) {
       isPulling = true;
       ptr.classList.add('visible');
       const icon = ptr.querySelector('.ptr-icon');
-      if (icon) icon.style.transform = `rotate(${deltaY * 3}deg)`;
+      if (icon) icon.style.transform = `rotate(${(deltaY - 65) * 4}deg)`;
+    } else if (deltaY <= 0) {
+      ptr.classList.remove('visible');
+      isPulling = false;
     }
   }, { passive: true });
 
-  window.addEventListener('touchend', () => {
-    if (!isPulling) return;
+  const finishPull = () => {
+    if (!isPulling) {
+      resetIndicator();
+      return;
+    }
     isPulling = false;
     startY = 0;
 
     ptr.classList.add('refreshing');
     if (typeof HapticEngine !== 'undefined') HapticEngine.light();
 
+    // Guaranteed safety timeout: cannot stay stuck under any circumstances
+    refreshSafetyTimer = setTimeout(() => {
+      resetIndicator();
+    }, 1200);
+
     setTimeout(() => {
-      if (typeof syncFromCloud === 'function' && AppState.user) {
-        syncFromCloud();
-      } else if (typeof renderAll === 'function') {
-        renderAll();
+      try {
+        if (typeof syncFromCloud === 'function' && AppState.user) {
+          syncFromCloud();
+        } else if (typeof renderAll === 'function') {
+          renderAll();
+        }
+        if (typeof SoundEngine !== 'undefined') SoundEngine.play('sync_success');
+      } catch (err) {
+        console.error('PTR error:', err);
+      } finally {
+        resetIndicator();
       }
-      if (typeof SoundEngine !== 'undefined') SoundEngine.play('sync_success');
-      ptr.classList.remove('refreshing', 'visible');
     }, 600);
-  }, { passive: true });
+  };
+
+  window.addEventListener('touchend', finishPull, { passive: true });
+  window.addEventListener('touchcancel', resetIndicator, { passive: true });
 }
 
 // Auto-initialize Liquid UX systems on DOM ready & window resize
@@ -10972,10 +11023,10 @@ function syncCartBottomPadding() {
   if (!cartList || !tabCart) return;
 
   const currentTab = AppState.currentTab || 'planner';
-  const hasInCart = AppState.cart && AppState.cart.some(i => i.checked);
+  const hasItems = AppState.cart && AppState.cart.length > 0;
 
   if (dock) {
-    if (currentTab === 'cart' && hasInCart) {
+    if (currentTab === 'cart' && hasItems) {
       dock.style.display = 'flex';
       dock.classList.remove('hidden');
       const dockHeight = dock.offsetHeight || 60;

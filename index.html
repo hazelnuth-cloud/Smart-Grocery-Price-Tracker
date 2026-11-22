@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=162">
+  <link rel="stylesheet" href="./css/app.css?v=163">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -40,9 +40,25 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <!-- Firebase Project Configuration -->
   <script src="./js/firebase-config.js"></script>
+  <!-- Fast Session Cache Check: Eliminates 1-2s sign-in flash on reload -->
+  <script>
+    (function() {
+      try {
+        var user = localStorage.getItem('sgt_current_user') || localStorage.getItem('smart_grocery_user') || localStorage.getItem('sgt_firebase_user');
+        if (user) {
+          var style = document.createElement('style');
+          style.id = 'fast-auth-gate-suppressor';
+          style.textContent = '#authGate { display: none !important; }';
+          document.head.appendChild(style);
+        } else {
+          document.documentElement.classList.add('needs-auth');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
-<body class="auth-locked unauthenticated">
+<body>
   <div id="appContainer" class="app-container">
 
     <!-- ========================================================================
@@ -163,8 +179,8 @@
 
       <!-- HEADER BAR: BRAND LOGO, PWA INSTALL, DARK MODE, SOUND & GREETING -->
       <header class="app-header">
-        <!-- OVERBUDGET FIRM RED BANNER (> 100% Limit) - STICKY TOP APP BANNER -->
-        <div id="overbudget-firm-banner" class="hidden overbudget-firm-banner">
+        <!-- OVERBUDGET FIRM RED BANNER - DISABLED TO PREVENT HEADER BUGS -->
+        <div id="overbudget-firm-banner" class="hidden overbudget-firm-banner" style="display: none !important;">
           <span style="font-size: 18px;">🚨</span>
           <div style="flex: 1;">
             <div style="font-weight: 900; line-height: 1.2;">Total belanja melebihi batas saldo dompet!</div>
@@ -515,9 +531,8 @@
             </div>
           </div>
 
-          <button type="button" class="btn-demo-quick touch-target" onclick="switchTab('planner')"
-            style="width: 100%; margin: 0; padding: 8px 12px; font-size: 0.78rem;">
-            <span>📋 Buka Rencana Belanja / Keranjang</span>
+          <button type="button" class="btn-goto-planner-pill touch-target" onclick="switchTab('planner')">
+            <span>📋 Buka Rencana Belanja / Keranjang ➔</span>
           </button>
         </div>
 
@@ -1458,9 +1473,8 @@
             </div>
           </details>
 
-          <!-- Tombol Simpan (Pink, Height 44px, 100% Width) -->
-          <button type="submit" id="btnSubmitDetailedItem" class="btn-shopee-submit touch-target"
-            style="white-space: nowrap;">➕ Tambahkan Barang</button>
+          <!-- Tombol Simpan (Pink, Height 46px, 100% Width) -->
+          <button type="submit" id="btnSubmitDetailedItem" class="btn-shopee-submit btn-modal-primary-cta touch-target">➕ Tambahkan Barang</button>
         </form>
       </div>
     </div>
@@ -2824,8 +2838,8 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Application Logic -->
-  <script src="./js/kawaii-art.js?v=162"></script>
-  <script src="./js/app.js?v=162"></script>
+  <script src="./js/kawaii-art.js?v=163"></script>
+  <script src="./js/app.js?v=163"></script>
 
   <!-- Service Worker Registration -->
   <script>
