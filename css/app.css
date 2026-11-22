@@ -267,7 +267,7 @@ html {
 body {
   min-height: 100vh;
   min-height: -webkit-fill-available;
-  background: var(--canvas-bg);
+  background: #FFF7FA;
   color: var(--text-main);
   font-family: var(--font-sans);
   font-size: 13.5px;
@@ -281,44 +281,48 @@ body {
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* Atmospheric Ambient Blossom Blurs (Hardware Composited, zero repaint lag) */
-body::before,
-body::after {
+/* Unified Atmospheric Seamless Ambient Canvas (GPU-Composited, Zero Repaint Lag) */
+body::before {
   content: '';
   position: fixed;
-  border-radius: 50%;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.65;
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 205, 222, 0.42) 0%, transparent 50%),
+    radial-gradient(circle at 82% 16%, rgba(250, 188, 212, 0.38) 0%, transparent 45%),
+    radial-gradient(circle at 35% 60%, rgba(252, 212, 228, 0.32) 0%, transparent 55%),
+    radial-gradient(circle at 78% 82%, rgba(248, 195, 218, 0.36) 0%, transparent 48%),
+    linear-gradient(180deg, #FFF7FA 0%, #FDF0F5 35%, #FAF0F4 70%, #F6E6EF 100%);
   transform: translateZ(0);
   will-change: transform;
-  transition: opacity var(--transition-smooth);
-}
-
-body::before {
-  top: -120px;
-  right: -100px;
-  width: 360px;
-  height: 360px;
-  background: radial-gradient(circle, rgba(244, 191, 208, 0.55) 0%, rgba(248, 220, 229, 0.2) 70%, transparent 100%);
 }
 
 body::after {
-  bottom: 80px;
-  left: -120px;
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(circle, rgba(235, 220, 231, 0.6) 0%, rgba(255, 246, 241, 0.2) 70%, transparent 100%);
+  display: none !important;
+}
+
+body.dark-mode,
+body.theme-dark {
+  background: #180C16 !important;
 }
 
 body.dark-mode::before,
 body.theme-dark::before {
-  background: radial-gradient(circle, rgba(185, 86, 121, 0.25) 0%, transparent 70%);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(185, 86, 121, 0.22) 0%, transparent 50%),
+    radial-gradient(circle at 82% 16%, rgba(120, 45, 95, 0.24) 0%, transparent 45%),
+    radial-gradient(circle at 35% 60%, rgba(90, 35, 75, 0.20) 0%, transparent 55%),
+    radial-gradient(circle at 78% 82%, rgba(65, 25, 55, 0.25) 0%, transparent 48%),
+    linear-gradient(155deg, #180C16 0%, #20101E 45%, #2B1428 100%);
 }
 
 body.dark-mode::after,
 body.theme-dark::after {
-  background: radial-gradient(circle, rgba(75, 35, 69, 0.35) 0%, transparent 70%);
+  display: none !important;
 }
 
 /* Typography Helpers */
@@ -762,14 +766,15 @@ body.theme-dark .auth-tab-btn.active {
   right: 0;
   min-height: var(--app-header-height);
   height: auto;
-  background: var(--glass-liquid-dock);
-  backdrop-filter: blur(30px) saturate(200%);
-  -webkit-backdrop-filter: blur(30px) saturate(200%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.90);
-  box-shadow: 0 4px 20px rgba(190, 105, 140, 0.08), inset 0 -1px 1px rgba(255, 255, 255, 0.40);
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid transparent !important;
+  box-shadow: none !important;
   z-index: 60;
   padding-top: env(safe-area-inset-top, 0px);
   box-sizing: border-box;
+  transition: background 0.28s ease, backdrop-filter 0.28s ease, -webkit-backdrop-filter 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease !important;
 }
 
 body.has-overbudget-banner .app-viewport {
@@ -778,7 +783,9 @@ body.has-overbudget-banner .app-viewport {
 
 body.dark-mode .app-header,
 body.theme-dark .app-header {
-  background: rgba(24, 12, 22, 0.88);
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .header-content {
@@ -929,7 +936,9 @@ body.theme-dark .app-header {
   overflow: hidden;
   pointer-events: none;
   z-index: -1;
-  opacity: 0.85;
+  opacity: 0.75;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0) 100%);
 }
 
 .flower-petals-3d-field {
@@ -6050,11 +6059,11 @@ body.theme-dark .shopee-bottom-sheet-card::before {
 }
 
 body.is-scrolled .app-header {
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(28px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.98) !important;
-  box-shadow: 0 6px 24px rgba(217, 130, 162, 0.16) !important;
+  background: rgba(255, 248, 251, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(244, 191, 208, 0.45) !important;
+  box-shadow: 0 4px 20px rgba(185, 86, 121, 0.10) !important;
 }
 
 /* 2. Fluid Tab Content Transitions */
@@ -8053,6 +8062,13 @@ body.theme-dark {
 /* 1. Header & Brand in Dark Mode */
 body.dark-mode .app-header,
 body.theme-dark .app-header {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode.is-scrolled .app-header,
+body.theme-dark.is-scrolled .app-header {
   background: rgba(22, 12, 18, 0.88) !important;
   border-bottom: 1px solid rgba(255, 182, 193, 0.12) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
