@@ -7936,7 +7936,9 @@ function openReceiptModal() {
     modal.classList.add('active', 'show');
     modal.style.display = 'flex';
     modal.setAttribute('aria-hidden', 'false');
+    modal.scrollTop = 0;
   }
+  document.body.style.overflow = 'hidden';
   // Mascot celebratory jump on shopping complete
   const mascot = document.getElementById('greetingMascot');
   if (mascot) {
@@ -7955,6 +7957,7 @@ function closeReceiptModal() {
     modal.style.display = 'none';
     modal.setAttribute('aria-hidden', 'true');
   }
+  document.body.style.overflow = '';
 }
 
 function printReceipt() {
@@ -10785,14 +10788,14 @@ function initBottomSheetGestures() {
   if (typeof document === 'undefined') return;
 
   const sheetBackdrops = document.querySelectorAll(
-    '.modal-backdrop:not(.modal-dialog-centered), .profile-settings-backdrop, .receipt-modal-backdrop'
+    '.modal-backdrop:not(.modal-dialog-centered), .profile-settings-backdrop'
   );
 
   sheetBackdrops.forEach(backdrop => {
     if (backdrop.dataset.sheetGestureAttached) return;
     backdrop.dataset.sheetGestureAttached = 'true';
 
-    const card = backdrop.querySelector('.modal-card, .profile-settings-card, .receipt-modal-container');
+    const card = backdrop.querySelector('.modal-card, .profile-settings-card');
     if (!card) return;
 
     // Inject visible drag handle if not already present

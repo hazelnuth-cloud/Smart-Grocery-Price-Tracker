@@ -5435,14 +5435,17 @@ body.theme-dark .shopee-bottom-sheet-card::before {
   inset: 0 !important;
   z-index: 10020 !important;
   background: rgba(30, 15, 25, 0.55) !important;
-  backdrop-filter: blur(24px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   display: none;
   align-items: flex-start !important;
   justify-content: center !important;
-  padding: max(20px, env(safe-area-inset-top, 20px)) 16px max(32px, env(safe-area-inset-bottom, 32px)) !important;
+  padding: max(20px, env(safe-area-inset-top, 20px)) 16px max(40px, env(safe-area-inset-bottom, 40px)) !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  scroll-behavior: auto !important;
   box-sizing: border-box !important;
 }
 
@@ -5461,6 +5464,8 @@ body.theme-dark .shopee-bottom-sheet-card::before {
   gap: 10px !important;
   animation: modalPopIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   box-sizing: border-box !important;
+  touch-action: pan-y !important;
+  pointer-events: auto !important;
 }
 
 /* Floating Top Close Button */
