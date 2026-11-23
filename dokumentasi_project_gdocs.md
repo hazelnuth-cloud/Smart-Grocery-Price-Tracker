@@ -6,15 +6,15 @@
 
 ### IDENTITAS DOKUMEN & PENYUSUN
 
-*   **Nama Siswa / Pengembang**: Evelina Metta Putri
-*   **Kelas**: 12 MIPA
-*   **Sekolah**: SMA Mutiara Bangsa 2 Tangerang
-*   **Tahun Ajaran**: 2026 / 2027 (Semester Ganjil)
-*   **Mata Pelajaran**: Informatika / Pengembangan Web Mandiri
-*   **Tugas**: Practical Test (PT) Pertemuan 18~19 — Dokumentasi Project & User Manual Produk
-*   **Live Web Deployment**: [https://artgrocery-ashen.vercel.app](https://artgrocery-ashen.vercel.app)
-*   **GitHub Repository**: [https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker](https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker)
-*   **Status Verifikasi Pengujian**: 100% Lulus Uji Fungsi (Zero Bug, Zero Layout Shift, PWA Compliant)
+| 🏷️ **LEMBAR IDENTITAS SISWA & PENILAIAN PRAKTIKUM** |
+| :--- |
+| **Nama Pengembang / Siswa**: Evelina Metta Putri <br>**Kelas**: 12 MIPA <br>**Sekolah**: SMA Mutiara Bangsa 2 Tangerang <br>**Tahun Ajaran**: 2026 / 2027 (Semester Ganjil) <br>**Mata Pelajaran**: Informatika / Laboratorium Web Mandiri (ICT Codehub) <br>**Tugas Penilaian**: Practical Test (PT) Pertemuan 18~19 — Dokumentasi Project & User Manual Produk <br>**Live Web Deployment**: [https://artgrocery-ashen.vercel.app](https://artgrocery-ashen.vercel.app) <br>**GitHub Repository**: [https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker](https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker) <br>**Status Evaluasi Mandiri**: 100% Lulus Uji Fungsi (Zero Bug, Zero Layout Shift, PWA Compliant) |
+
+---
+
+| 🎯 **MISI UTAMA PROJECT (PRACTICAL TEST INFORMATIKA KELAS 12)** |
+| :--- |
+| **Smart Grocery Price Tracker** dirancang untuk menanggulangi kendala klasik konsumen saat berbelanja bahan pokok (*overspending*, diskon semu, dan *cashier shock*) melalui penerapan *Local-First Reactive Architecture*, algoritma diskon kompound realtime, dan sistem navigasi ramah sentuhan (*defensive mobile UX*). Dokumen ini menyajikan manual operasional komprehensif agar pengguna dan tim penilai dapat mengoperasikan seluruh fitur secara mandiri. |
 
 ---
 
@@ -340,18 +340,17 @@ Pengembangan aplikasi **Smart Grocery Price Tracker** telah berhasil menuntaskan
 
 ## LAMPIRAN & TAUTAN RESMI DOKUMEN
 
-Berikut adalah tautan resmi pengujian dan artefak kode sumber proyek yang dapat diakses secara langsung:
-
-*   **Tautan Live Website (Vercel)**:  
-    [https://artgrocery-ashen.vercel.app](https://artgrocery-ashen.vercel.app)
-*   **Tautan Repositori GitHub**:  
-    [https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker](https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker)
-*   **Tautan Dokumen Google Docs**:  
-    Tautan resmi Google Docs dengan status akses *"Anyone with the link can view"* yang dibuat langsung melalui integrasi Google Workspace CLI.
+| 📦 **DELIVERABLE PENILAIAN PRAKTIKUM (PT PERTEMUAN 18~19)** |
+| :--- |
+| • **Link Share Google Docs**: Tautan dokumen project aktif dengan akses *"Anyone with the link can view"*. <br>• **Link Live Website**: [https://artgrocery-ashen.vercel.app](https://artgrocery-ashen.vercel.app) <br>• **Link GitHub Repository**: [https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker](https://github.com/hazelnuth-cloud/Smart-Grocery-Price-Tracker) <br>• **Batas Waktu Pengumpulan**: Sebelum sesi evaluasi praktikum berakhir. |
 
 ### QR Code Akses Cepat Live Website
 Untuk mempermudah penguji membuka aplikasi pada perangkat ponsel secara langsung tanpa mengetik URL, silakan pindai kode QR berikut:
 
 ![QR Code Akses Cepat Live Website Smart Grocery](img/qrcode.png)
 
-*Dokumentasi ini disahkan dan diselesaikan secara mandiri oleh Evelina Metta Putri (Kelas 12 MIPA) sebagai pemenuhan nilai Practical Test Pertemuan 18~19 Informatika SMA Mutiara Bangsa 2 Tangerang.*
+---
+
+| 🏫 **ICT CODEHUB • SMA MUTIARA BANGSA 2 TANGERANG** |
+| :--- |
+| **Laboratorium Komputer &bull; Kurikulum Informatika 2026/2027** <br>*Modul P18~P19: Practical Test (PT) &bull; Dokumen Penilaian Praktik Mandiri &bull; Disusun secara mandiri oleh Evelina Metta Putri (Kelas 12 MIPA)* |
