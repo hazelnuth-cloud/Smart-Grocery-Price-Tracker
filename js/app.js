@@ -1908,21 +1908,8 @@ function loadUserIsolatedState(uid) {
         AppState.cart = [];
       }
     } else {
-      // Seamless migration from guest session or load default items so user never sees empty slate unexpectedly
-      const guestCart = localStorage.getItem('grocery_cart_guest');
-      if (guestCart) {
-        try {
-          const parsed = JSON.parse(guestCart);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            AppState.cart = parsed;
-            localStorage.setItem('grocery_cart_' + uid, guestCart);
-          }
-        } catch (e) {}
-      }
-      if (!AppState.cart || AppState.cart.length === 0) {
-        AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
-        localStorage.setItem('grocery_cart_' + uid, JSON.stringify(AppState.cart));
-      }
+      // Only demo_user_101 loads mock cart items; other users start with clean cart as expected
+      AppState.cart = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS)) : [];
     }
 
     // 2. User-isolated store
@@ -2436,22 +2423,8 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
   const isInitialized = localStorage.getItem('grocery_user_initialized_' + uid) === 'true';
 
   if (!isExistingLocalUser && !isInitialized && uid !== 'demo_user_101') {
-    // Preserve active session items or guest items rather than clearing out
-    if (!AppState.cart || AppState.cart.length === 0) {
-      const guestCart = localStorage.getItem('grocery_cart_guest');
-      if (guestCart) {
-        try {
-          const parsed = JSON.parse(guestCart);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            AppState.cart = parsed;
-          }
-        } catch (e) {}
-      }
-    }
-    if (!AppState.cart || AppState.cart.length === 0) {
-      AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
-    }
-    localStorage.setItem('grocery_cart_' + uid, JSON.stringify(AppState.cart));
+    // Brand new account: start clean as user expects
+    AppState.cart = [];
     AppState.receipts = [];
     AppState.pantry = [];
     AppState.budget = 100000;

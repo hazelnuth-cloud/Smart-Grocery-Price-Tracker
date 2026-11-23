@@ -7527,23 +7527,33 @@ button:not(:disabled):active,
 
 /* 7. Beautiful Kawaii Empty States */
 .ios-empty-state-card {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(16px) !important;
-  border: 1.2px dashed rgba(244, 191, 208, 0.6) !important;
+  background: rgba(255, 255, 255, 0.90) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1.2px solid rgba(255, 255, 255, 0.95) !important;
   border-radius: 24px !important;
-  padding: 36px 20px !important;
+  padding: 34px 20px !important;
   text-align: center !important;
-  margin: 16px 0 !important;
+  margin: 14px 0 16px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 8px !important;
-  box-shadow: 0 4px 20px rgba(185, 86, 121, 0.06) !important;
+  gap: 10px !important;
+  box-shadow: 0 8px 28px rgba(185, 86, 121, 0.08), inset 0 1px 1px #FFFFFF !important;
 }
 
 .empty-state-mascot {
-  font-size: 44px !important;
-  margin-bottom: 2px !important;
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(255, 240, 246, 0.95) 0%, rgba(255, 225, 238, 0.85) 100%) !important;
+  border: 1.5px solid rgba(244, 191, 208, 0.65) !important;
+  box-shadow: 0 4px 16px rgba(217, 130, 162, 0.18), inset 0 1px 1px #FFFFFF !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 30px !important;
+  margin-bottom: 4px !important;
   animation: emptyFloat 3s ease-in-out infinite !important;
 }
 
@@ -7554,18 +7564,20 @@ button:not(:disabled):active,
 
 .empty-state-headline {
   font-family: var(--font-serif) !important;
-  font-size: 1.05rem !important;
+  font-size: 1.1rem !important;
   font-weight: 850 !important;
   color: var(--text-headline, #2D272E) !important;
   margin: 0 !important;
+  letter-spacing: -0.2px !important;
 }
 
 .empty-state-desc {
   font-size: 12.5px !important;
   color: #8A6B79 !important;
-  margin: 0 0 10px 0 !important;
+  margin: 0 0 12px 0 !important;
   max-width: 300px !important;
   line-height: 1.4 !important;
+  font-weight: 550 !important;
 }
 
 .empty-state-btn-row {
@@ -7574,6 +7586,88 @@ button:not(:disabled):active,
   gap: 8px !important;
   flex-wrap: wrap !important;
   justify-content: center !important;
+}
+
+/* ==========================================================================
+   BUTTON: BUKA RENCANA BELANJA PILL (SAKURA PINK LIQUID GLASS)
+   ========================================================================== */
+.btn-goto-planner-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 11px 22px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #B95679 !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 238, 245, 0.92) 100%) !important;
+  border: 1.2px solid rgba(226, 115, 150, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(217, 130, 162, 0.16), inset 0 1px 1px #FFFFFF !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  text-decoration: none !important;
+}
+
+.btn-goto-planner-pill:hover {
+  background: linear-gradient(135deg, rgba(255, 240, 246, 0.98) 0%, rgba(255, 225, 238, 0.95) 100%) !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 20px rgba(217, 130, 162, 0.25) !important;
+  color: #9D3C5E !important;
+  border-color: #B95679 !important;
+}
+
+.btn-goto-planner-pill:active {
+  transform: scale(0.97) !important;
+}
+
+.btn-goto-planner-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 10px 18px !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  color: #B95679 !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1.2px solid rgba(244, 191, 208, 0.70) !important;
+  box-shadow: 0 2px 8px rgba(185, 86, 121, 0.08) !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+}
+
+.btn-goto-planner-secondary:hover {
+  background: #FFF0F5 !important;
+  border-color: #B95679 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-goto-planner-secondary:active {
+  transform: scale(0.96) !important;
+}
+
+body.dark-mode .btn-goto-planner-pill,
+body.theme-dark .btn-goto-planner-pill {
+  background: linear-gradient(135deg, rgba(55, 26, 44, 0.95) 0%, rgba(38, 18, 30, 0.92) 100%) !important;
+  border-color: rgba(255, 182, 193, 0.28) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
+}
+
+body.dark-mode .btn-goto-planner-secondary,
+body.theme-dark .btn-goto-planner-secondary {
+  background: rgba(48, 24, 38, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.25) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .empty-state-mascot,
+body.theme-dark .empty-state-mascot {
+  background: linear-gradient(135deg, rgba(60, 28, 48, 0.9) 0%, rgba(40, 18, 32, 0.85) 100%) !important;
+  border-color: rgba(255, 182, 193, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 205, 222, 0.15) !important;
 }
 
 /* ==========================================================================
