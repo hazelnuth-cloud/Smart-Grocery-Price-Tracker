@@ -8,28 +8,28 @@ const HapticEngine = {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(10);
       }
-    } catch (_) {}
+    } catch (_) { }
   },
   medium() {
     try {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(18);
       }
-    } catch (_) {}
+    } catch (_) { }
   },
   success() {
     try {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([15, 50, 15]);
       }
-    } catch (_) {}
+    } catch (_) { }
   },
   warning() {
     try {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([25, 40, 25]);
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 };
 
@@ -733,7 +733,7 @@ function saveUserCustomItem({ name, category, unit, price, isRoutine = false }) 
 
   const cleanCategory = category || detectCategory(cleanName);
   const existingIdx = AppState.userCustomItems.findIndex(ci => ci.name.toLowerCase() === cleanName.toLowerCase());
-  
+
   const customObj = {
     id: existingIdx !== -1 ? AppState.userCustomItems[existingIdx].id : ('custom-prod-' + cleanName.toLowerCase().replace(/[^a-z0-9]/g, '-')),
     name: cleanName,
@@ -1019,7 +1019,7 @@ const SoundEngine = {
           this.hasPlayedWelcome = true;
           setTimeout(() => this.play('welcome'), 120);
         }
-      }).catch(() => {});
+      }).catch(() => { });
     } else if (!this.hasPlayedWelcome && AppState && AppState.soundEnabled) {
       this.hasPlayedWelcome = true;
       setTimeout(() => this.play('welcome'), 120);
@@ -1032,7 +1032,7 @@ const SoundEngine = {
     if (AppState) AppState.soundVolume = clamped;
     try {
       localStorage.setItem('smart_grocery_sound_volume', clamped.toString());
-    } catch (e) {}
+    } catch (e) { }
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setValueAtTime(clamped, this.ctx.currentTime);
     }
@@ -1042,7 +1042,7 @@ const SoundEngine = {
     if (AppState) AppState.soundTheme = theme;
     try {
       localStorage.setItem('smart_grocery_sound_theme', theme);
-    } catch (e) {}
+    } catch (e) { }
   },
 
   play(type) {
@@ -1908,8 +1908,21 @@ function loadUserIsolatedState(uid) {
         AppState.cart = [];
       }
     } else {
-      // Only demo_user_101 loads mock cart items
-      AppState.cart = (uid === 'demo_user_101') ? JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS)) : [];
+      // Seamless migration from guest session or load default items so user never sees empty slate unexpectedly
+      const guestCart = localStorage.getItem('grocery_cart_guest');
+      if (guestCart) {
+        try {
+          const parsed = JSON.parse(guestCart);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            AppState.cart = parsed;
+            localStorage.setItem('grocery_cart_' + uid, guestCart);
+          }
+        } catch (e) {}
+      }
+      if (!AppState.cart || AppState.cart.length === 0) {
+        AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
+        localStorage.setItem('grocery_cart_' + uid, JSON.stringify(AppState.cart));
+      }
     }
 
     // 2. User-isolated store
@@ -2079,8 +2092,8 @@ function loadLocalState() {
           if (AppState.user) {
             const uid = AppState.user.uid || 'guest';
             const customAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + uid) ||
-                                 localStorage.getItem('smart_grocery_custom_avatar_latest') ||
-                                 localStorage.getItem('smart_grocery_custom_avatar_guest');
+              localStorage.getItem('smart_grocery_custom_avatar_latest') ||
+              localStorage.getItem('smart_grocery_custom_avatar_guest');
             if (customAvatar) {
               AppState.user.photoURL = customAvatar;
               AppState.user.photo = customAvatar;
@@ -2314,8 +2327,8 @@ function setupAuthListener() {
           // Sinkronisasi sesi live & avatar jika ada pembaruan
           AppState.user.isLiveFirebaseSession = true;
           const savedCustomAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + user.uid) ||
-                                    localStorage.getItem('smart_grocery_custom_avatar_latest') ||
-                                    localStorage.getItem('smart_grocery_custom_avatar_guest');
+            localStorage.getItem('smart_grocery_custom_avatar_latest') ||
+            localStorage.getItem('smart_grocery_custom_avatar_guest');
           if (!savedCustomAvatar && user.photoURL && user.photoURL !== AppState.user.photoURL) {
             AppState.user.photoURL = user.photoURL;
             updateHeaderAvatar(user.photoURL);
@@ -2360,12 +2373,12 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
 
   const displayName = u.displayName || (u.email ? u.email.split('@')[0] : 'Pengguna');
   const uid = u.uid || getDeterministicUid(u.email, cleanProvider === 'google' ? 'google_' : 'usr_');
-  
+
   // Prioritaskan custom avatar tersimpan (foto upload / kawaii preset)
   const savedCustomAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + uid) ||
-                            localStorage.getItem('smart_grocery_custom_avatar_latest') ||
-                            localStorage.getItem('smart_grocery_custom_avatar_guest') ||
-                            (AppState.user && AppState.user.customAvatar);
+    localStorage.getItem('smart_grocery_custom_avatar_latest') ||
+    localStorage.getItem('smart_grocery_custom_avatar_guest') ||
+    (AppState.user && AppState.user.customAvatar);
 
   const photoURL = savedCustomAvatar || u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4285F4&color=fff&bold=true`;
 
@@ -2423,8 +2436,22 @@ function handleSuccessfulAuth(u, providerType, notify = true) {
   const isInitialized = localStorage.getItem('grocery_user_initialized_' + uid) === 'true';
 
   if (!isExistingLocalUser && !isInitialized && uid !== 'demo_user_101') {
-    // Brand new account: start completely clean with empty cart and default budget
-    AppState.cart = [];
+    // Preserve active session items or guest items rather than clearing out
+    if (!AppState.cart || AppState.cart.length === 0) {
+      const guestCart = localStorage.getItem('grocery_cart_guest');
+      if (guestCart) {
+        try {
+          const parsed = JSON.parse(guestCart);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            AppState.cart = parsed;
+          }
+        } catch (e) {}
+      }
+    }
+    if (!AppState.cart || AppState.cart.length === 0) {
+      AppState.cart = JSON.parse(JSON.stringify(DEFAULT_CART_ITEMS));
+    }
+    localStorage.setItem('grocery_cart_' + uid, JSON.stringify(AppState.cart));
     AppState.receipts = [];
     AppState.pantry = [];
     AppState.budget = 100000;
@@ -3465,7 +3492,7 @@ function checkAuth() {
     // Check custom saved avatar first (uploaded photo or kawaii preset)
     try {
       const customAvatar = localStorage.getItem('smart_grocery_custom_avatar_' + (AppState.user.uid || 'guest')) ||
-                           localStorage.getItem('smart_grocery_custom_avatar_guest');
+        localStorage.getItem('smart_grocery_custom_avatar_guest');
       if (customAvatar) {
         AppState.user.photoURL = customAvatar;
         AppState.user.photo = customAvatar;
@@ -5418,7 +5445,21 @@ function renderItems() {
 
   const clearPlanBtn = document.getElementById('btnClearPlan');
   if (clearPlanBtn) {
-    clearPlanBtn.style.display = unbought.length > 0 ? 'inline-flex' : 'none';
+    if (unbought.length > 0) {
+      clearPlanBtn.style.setProperty('display', 'inline-flex', 'important');
+    } else {
+      clearPlanBtn.style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  const startShoppingBtn = document.querySelector('.btn-start-shopping-action');
+  if (startShoppingBtn) {
+    if (unbought.length > 0) {
+      startShoppingBtn.style.opacity = '1';
+      startShoppingBtn.style.pointerEvents = 'auto';
+    } else {
+      startShoppingBtn.style.opacity = '0.65';
+    }
   }
 
   // Empty state: No items at all in plan or cart
@@ -11224,9 +11265,9 @@ function handleProfileAvatarUpload(event) {
   }
 
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const img = new Image();
-    img.onload = function() {
+    img.onload = function () {
       // Compress with 180x180 canvas for ultra-fast storage & zero lag
       const canvas = document.createElement('canvas');
       canvas.width = 180;

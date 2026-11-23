@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=171">
+  <link rel="stylesheet" href="./css/app.css?v=172">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1522,11 +1522,11 @@
           bayar.
         </p>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button type="button" class="btn-demo-quick" style="margin-top: 0; white-space: nowrap;"
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
+          <button type="button" class="btn-modal-cancel touch-target" style="width: 100%; margin: 0; white-space: nowrap;"
             onclick="closeDeleteConfirmModal()">Batal</button>
-          <button type="button" class="btn-primary"
-            style="margin-top: 0; background: var(--status-danger); white-space: nowrap;"
+          <button type="button" class="btn-primary touch-target"
+            style="width: 100%; margin: 0; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: var(--radius-pill); white-space: nowrap; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);"
             onclick="executeDeleteItem()">Ya, Hapus</button>
         </div>
       </div>
@@ -2840,7 +2840,7 @@
 
   <!-- Application Logic -->
   <script src="./js/kawaii-art.js?v=168"></script>
-  <script src="./js/app.js?v=171"></script>
+  <script src="./js/app.js?v=172"></script>
 
   <!-- Service Worker Registration -->
   <script>
