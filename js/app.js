@@ -4280,10 +4280,10 @@ function renderBudget() {
   if (budgetSubEl) {
     if (safety.sisa >= 0) {
       budgetSubEl.textContent = `Sisa: ${formatRupiah(safety.sisa)}`;
-      budgetSubEl.style.color = (safety.level === 'warning') ? '#B45309' : '#166534';
+      budgetSubEl.style.color = (safety.level === 'warning') ? 'var(--status-warn-text, #B45309)' : 'var(--status-safe-text, #166534)';
     } else {
       budgetSubEl.textContent = `Defisit: -${formatRupiah(Math.abs(safety.sisa))}`;
-      budgetSubEl.style.color = '#DC2626';
+      budgetSubEl.style.color = 'var(--status-danger-text, #DC2626)';
     }
   }
   const selectedCountEl = document.getElementById('cartSelectedCountBadge');
@@ -5415,6 +5415,8 @@ function renderItems() {
   const unbought = AppState.cart.filter(i => !i.checked);
   const inCart = AppState.cart.filter(i => i.checked);
   if (unboughtCountEl) unboughtCountEl.textContent = unbought.length;
+  const planCountBadge = document.getElementById('planItemCountBadge');
+  if (planCountBadge) planCountBadge.textContent = `${unbought.length} item`;
 
   const clearPlanBtn = document.getElementById('btnClearPlan');
   if (clearPlanBtn) {
@@ -5485,7 +5487,7 @@ function renderItems() {
       currentCategory = item.kategori || item.category;
       const aisle = AISLE_METADATA[currentCategory] || { title: currentCategory || 'Pantry', icon: '📍' };
       html += `
-        <div class="aisle-header" style="margin: 14px 0 6px; font-weight: 800; font-size: 0.82rem; color: #222222; display: flex; align-items: center; gap: 6px;">
+        <div class="aisle-header" style="margin: 14px 0 6px; font-weight: 800; font-size: 0.82rem; color: var(--text-headline); display: flex; align-items: center; gap: 6px;">
           <span>${aisle.icon}</span>
           <span>${aisle.title}</span>
         </div>
@@ -7071,8 +7073,14 @@ function setDiscountTypeSelection(type, val = '') {
   const groupSingle = document.getElementById('groupDiscountSingle');
   const groupTiered = document.getElementById('groupDiscountTiered');
 
+  const isDark = document.body.classList.contains('dark-mode') || document.body.classList.contains('theme-dark');
+
   if (type === 'single') {
-    if (btnSingle) { btnSingle.style.background = '#FEF3C7'; btnSingle.style.borderColor = '#F59E0B'; btnSingle.style.color = '#92400E'; }
+    if (btnSingle) {
+      btnSingle.style.background = isDark ? 'rgba(245, 158, 11, 0.22)' : '#FEF3C7';
+      btnSingle.style.borderColor = isDark ? 'rgba(245, 158, 11, 0.5)' : '#F59E0B';
+      btnSingle.style.color = isDark ? '#FCD34D' : '#92400E';
+    }
     if (groupSingle) groupSingle.style.display = 'block';
     if (groupTiered) groupTiered.style.display = 'none';
     if (val) {
@@ -7080,7 +7088,11 @@ function setDiscountTypeSelection(type, val = '') {
       if (el) el.value = val;
     }
   } else if (type === 'tiered') {
-    if (btnTiered) { btnTiered.style.background = '#F3E8FF'; btnTiered.style.borderColor = '#A855F7'; btnTiered.style.color = '#6B21A8'; }
+    if (btnTiered) {
+      btnTiered.style.background = isDark ? 'rgba(168, 85, 247, 0.22)' : '#F3E8FF';
+      btnTiered.style.borderColor = isDark ? 'rgba(168, 85, 247, 0.5)' : '#A855F7';
+      btnTiered.style.color = isDark ? '#E9D5FF' : '#6B21A8';
+    }
     if (groupSingle) groupSingle.style.display = 'none';
     if (groupTiered) groupTiered.style.display = 'block';
     if (val) {
@@ -10154,10 +10166,10 @@ function renderCartSection() {
   if (budgetSubEl) {
     if (metrics.safety.sisa >= 0) {
       budgetSubEl.textContent = `Sisa: ${formatRupiah(metrics.safety.sisa)}`;
-      budgetSubEl.style.color = (metrics.safety.level === 'warning') ? '#B45309' : '#166534';
+      budgetSubEl.style.color = (metrics.safety.level === 'warning') ? 'var(--status-warn-text, #B45309)' : 'var(--status-safe-text, #166534)';
     } else {
       budgetSubEl.textContent = `Defisit: -${formatRupiah(Math.abs(metrics.safety.sisa))}`;
-      budgetSubEl.style.color = '#DC2626';
+      budgetSubEl.style.color = 'var(--status-danger-text, #DC2626)';
     }
   }
 
@@ -10370,6 +10382,9 @@ function updateCartBadges() {
   });
   const selectedCountEl = document.getElementById('cartSelectedCountBadge');
   if (selectedCountEl) selectedCountEl.textContent = `${checked.length} item`;
+
+  const planCountBadge = document.getElementById('planItemCountBadge');
+  if (planCountBadge) planCountBadge.textContent = `${unbought.length} item`;
 
   const checkoutBtnCount = document.getElementById('checkoutBtnCount');
   if (checkoutBtnCount) checkoutBtnCount.textContent = `(${checked.length})`;

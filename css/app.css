@@ -9739,3 +9739,253 @@ body.theme-dark .offline-badge {
   border-bottom: 1px solid rgba(245, 158, 11, 0.4) !important;
   color: #FAD18C !important;
 }
+
+/* ==========================================================================
+   23. MASTER DARK MODE TYPOGRAPHY, CONTRAST & LIQUID GLASS POLISH
+   Eliminates all dark-on-dark / black text in dark mode across every screen
+   ========================================================================== */
+
+/* A. High Contrast Primary Headlines (#FFF5F8) */
+body.dark-mode .cart-store-name,
+body.theme-dark .cart-store-name,
+body.dark-mode .ios-checkbox-text,
+body.theme-dark .ios-checkbox-text,
+body.dark-mode .ios-product-title,
+body.theme-dark .ios-product-title,
+body.dark-mode .plan-header-title,
+body.theme-dark .plan-header-title,
+body.dark-mode .cancel-modal-title,
+body.theme-dark .cancel-modal-title,
+body.dark-mode .cancel-option-title,
+body.theme-dark .cancel-option-title,
+body.dark-mode .pwa-banner-title,
+body.theme-dark .pwa-banner-title,
+body.dark-mode .aisle-header,
+body.theme-dark .aisle-header,
+body.dark-mode .receipt-success-headline,
+body.theme-dark .receipt-success-headline,
+body.dark-mode .receipt-trx-chip strong,
+body.theme-dark .receipt-trx-chip strong,
+body.dark-mode .receipt-meta-val,
+body.theme-dark .receipt-meta-val,
+body.dark-mode .receipt-item-name,
+body.theme-dark .receipt-item-name,
+body.dark-mode .receipt-item-subtotal,
+body.theme-dark .receipt-item-subtotal,
+body.dark-mode .receipt-summary-row .summary-val,
+body.theme-dark .receipt-summary-row .summary-val,
+body.dark-mode .empty-state-headline,
+body.theme-dark .empty-state-headline,
+body.dark-mode .checkout-dock-amount,
+body.theme-dark .checkout-dock-amount {
+  color: #FFF5F8 !important;
+}
+
+/* B. High Contrast Secondary & Meta Typography (#D4B8C5) */
+body.dark-mode .cart-store-micro-label,
+body.theme-dark .cart-store-micro-label,
+body.dark-mode .cart-unbought-text,
+body.theme-dark .cart-unbought-text,
+body.dark-mode .plan-header-subtitle,
+body.theme-dark .plan-header-subtitle,
+body.dark-mode .ios-price-label,
+body.theme-dark .ios-price-label,
+body.dark-mode .repurchase-price-history-sub,
+body.theme-dark .repurchase-price-history-sub,
+body.dark-mode .checkout-dock-label,
+body.theme-dark .checkout-dock-label,
+body.dark-mode .empty-state-desc,
+body.theme-dark .empty-state-desc,
+body.dark-mode .cancel-modal-subtitle,
+body.theme-dark .cancel-modal-subtitle,
+body.dark-mode .cancel-option-desc,
+body.theme-dark .cancel-option-desc,
+body.dark-mode .cancel-empty-text,
+body.theme-dark .cancel-empty-text,
+body.dark-mode .pwa-banner-subtitle,
+body.theme-dark .pwa-banner-subtitle,
+body.dark-mode .toast-desc,
+body.theme-dark .toast-desc,
+body.dark-mode .custom-suggestion-desc,
+body.theme-dark .custom-suggestion-desc,
+body.dark-mode .cycle-seg-btn,
+body.theme-dark .cycle-seg-btn,
+body.dark-mode .receipt-success-subline,
+body.theme-dark .receipt-success-subline,
+body.dark-mode .receipt-store-branch,
+body.theme-dark .receipt-store-branch,
+body.dark-mode .receipt-date-pill,
+body.theme-dark .receipt-date-pill,
+body.dark-mode .receipt-trx-chip,
+body.theme-dark .receipt-trx-chip,
+body.dark-mode .receipt-meta-lbl,
+body.theme-dark .receipt-meta-lbl,
+body.dark-mode .receipt-section-title,
+body.theme-dark .receipt-section-title,
+body.dark-mode .receipt-item-calc,
+body.theme-dark .receipt-item-calc,
+body.dark-mode .receipt-summary-row .summary-lbl,
+body.theme-dark .receipt-summary-row .summary-lbl,
+body.dark-mode .receipt-barcode-ticks,
+body.theme-dark .receipt-barcode-ticks,
+body.dark-mode .receipt-footer-brand,
+body.theme-dark .receipt-footer-brand {
+  color: #D4B8C5 !important;
+}
+
+/* C. Quantity Stepper Numbers & Controls */
+body.dark-mode .ios-step-input,
+body.dark-mode .shopee-stepper input,
+body.dark-mode .ios-stepper-capsule input,
+body.theme-dark .ios-step-input,
+body.theme-dark .shopee-stepper input,
+body.theme-dark .ios-stepper-capsule input {
+  color: #FFF5F8 !important;
+  background: transparent !important;
+}
+
+body.dark-mode .shopee-step-btn,
+body.theme-dark .shopee-step-btn {
+  color: #FF8DA9 !important;
+  background: rgba(65, 26, 48, 0.6) !important;
+}
+
+/* D. Badges & Counter Pills */
+body.dark-mode .cart-item-count-badge,
+body.theme-dark .cart-item-count-badge,
+body.dark-mode .plan-item-count-badge,
+body.theme-dark .plan-item-count-badge {
+  background: rgba(255, 182, 193, 0.15) !important;
+  color: #FFB7CE !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+}
+
+body.dark-mode .ios-meta-pill.unit-pill,
+body.theme-dark .ios-meta-pill.unit-pill,
+body.dark-mode [id^="cart-unit-badge-"],
+body.theme-dark [id^="cart-unit-badge-"],
+body.dark-mode .planner-unit-badge,
+body.theme-dark .planner-unit-badge {
+  background: rgba(245, 158, 11, 0.18) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #FCD34D !important;
+}
+
+body.dark-mode .ios-meta-pill.analysis-pill,
+body.theme-dark .ios-meta-pill.analysis-pill {
+  background: rgba(255, 182, 193, 0.15) !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .ios-meta-pill.analysis-pill.cheaper,
+body.theme-dark .ios-meta-pill.analysis-pill.cheaper {
+  background: rgba(34, 197, 94, 0.18) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  color: #8AE1C2 !important;
+}
+
+body.dark-mode .ios-meta-pill.analysis-pill.pricier,
+body.theme-dark .ios-meta-pill.analysis-pill.pricier {
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  color: #FF9EAF !important;
+}
+
+body.dark-mode .shopee-promo-pill,
+body.theme-dark .shopee-promo-pill {
+  background: rgba(244, 63, 94, 0.22) !important;
+  border: 1.2px solid rgba(251, 113, 133, 0.45) !important;
+  color: #FFD4E2 !important;
+  font-weight: 750 !important;
+}
+
+/* E. Action Buttons & Icons (Pencil, Trash, Secondary Pills, Kosongkan) */
+body.dark-mode .btn-clear-cart,
+body.theme-dark .btn-clear-cart,
+body.dark-mode .btn-clear-plan,
+body.theme-dark .btn-clear-plan,
+body.dark-mode .btn-secondary-pill,
+body.theme-dark .btn-secondary-pill {
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .btn-clear-cart .btn-clear-cart-text,
+body.theme-dark .btn-clear-cart .btn-clear-cart-text {
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .btn-cart-store-edit,
+body.theme-dark .btn-cart-store-edit {
+  background: rgba(55, 24, 44, 0.75) !important;
+  border-color: rgba(255, 182, 193, 0.25) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .btn-ios-icon-action,
+body.theme-dark .btn-ios-icon-action {
+  background: rgba(55, 24, 44, 0.85) !important;
+  border-color: rgba(255, 182, 193, 0.22) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .btn-ios-icon-action:hover,
+body.theme-dark .btn-ios-icon-action:hover {
+  background: rgba(75, 30, 60, 0.95) !important;
+  color: #FFF0F5 !important;
+  border-color: rgba(255, 182, 193, 0.35) !important;
+}
+
+/* F. Cancel Shopping Session & Modal Actions */
+body.dark-mode .btn-cancel-shopping-bottom,
+body.theme-dark .btn-cancel-shopping-bottom,
+body.dark-mode .btn-checkout-cancel,
+body.theme-dark .btn-checkout-cancel {
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.25) !important;
+  color: #FFB7CE !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .btn-cancel-shopping-bottom:hover,
+body.theme-dark .btn-cancel-shopping-bottom:hover,
+body.dark-mode .btn-checkout-cancel:hover,
+body.theme-dark .btn-checkout-cancel:hover {
+  background: rgba(70, 28, 52, 0.95) !important;
+  border-color: rgba(255, 182, 193, 0.4) !important;
+  color: #FFF0F5 !important;
+}
+
+body.dark-mode .cancel-option-card,
+body.theme-dark .cancel-option-card {
+  background: rgba(38, 18, 32, 0.88) !important;
+  border: 1.2px solid rgba(255, 182, 193, 0.18) !important;
+}
+
+body.dark-mode .cancel-modal-close-btn,
+body.theme-dark .cancel-modal-close-btn,
+body.dark-mode .btn-pwa-dismiss,
+body.theme-dark .btn-pwa-dismiss,
+body.dark-mode .btn-receipt-dismiss,
+body.theme-dark .btn-receipt-dismiss {
+  background: rgba(50, 22, 38, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+  color: #FFB7CE !important;
+}
+
+body.dark-mode .btn-receipt-action-pill,
+body.theme-dark .btn-receipt-action-pill {
+  background: rgba(55, 26, 44, 0.85) !important;
+  border: 1px solid rgba(255, 182, 193, 0.25) !important;
+  color: #FFF5F8 !important;
+}
+
+body.dark-mode .grand-total-label,
+body.theme-dark .grand-total-label {
+  color: #FF8DA9 !important;
+}
+
