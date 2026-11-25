@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=174">
+  <link rel="stylesheet" href="./css/app.css?v=175">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -307,7 +307,7 @@
             <button type="button" id="userProfileTrigger" class="user-profile-badge touch-target"
               onclick="openProfileSettingsModal()" title="Profil &amp; Pengaturan Akun">
               <img id="headerUserAvatar" src="" alt="Avatar" class="user-header-avatar hidden" style="display: none;"
-                onerror="handleHeaderAvatarError()">
+                onerror="if(typeof handleHeaderAvatarError==='function')handleHeaderAvatarError()">
               <span id="headerUserAvatarFallback" class="user-header-avatar-fallback">👤</span>
               <span id="headerUserName" class="user-header-name">Pengguna</span>
               <span id="headerUserEmail" class="user-email-badge hidden" style="display: none;">user@email.com</span>
@@ -1898,7 +1898,7 @@
         <div class="modal-header">
           <div>
             <h3 class="serif-font"
-              style="font-size: 1.15rem; color: #222222; margin: 0; display: flex; align-items: center; gap: 6px;">
+              style="font-size: 1.15rem; color: var(--text-headline); margin: 0; display: flex; align-items: center; gap: 6px;">
               <span>📷</span>
               <span>Scan Barcode Produk</span>
             </h3>
@@ -2274,7 +2274,7 @@
             title="Tutup Pengaturan">✕</button>
           <div class="profile-avatar-wrap">
             <img id="modalUserAvatar" src="" alt="Foto Profil" class="modal-profile-avatar hidden"
-              style="display: none;" onerror="handleModalAvatarError()">
+              style="display: none;" onerror="if(typeof handleModalAvatarError==='function')handleModalAvatarError()">
             <div id="modalUserAvatarFallback" class="modal-profile-avatar-fallback">👤</div>
             <span class="profile-online-badge" title="Akun Aktif Online"></span>
             <button type="button" class="btn-avatar-camera" onclick="triggerProfileAvatarUpload()" title="Ganti Foto Profil">📷</button>
