@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=176">
+  <link rel="stylesheet" href="./css/app.css?v=177">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -114,6 +114,32 @@
         <!-- Inline Auth Alert Box -->
         <div id="authAlertBox" class="auth-alert-box" style="display: none;"></div>
 
+        <!-- Pending Google Email Verification Panel -->
+        <div id="authVerifyPanel" class="auth-verify-panel" style="display: none;">
+          <div class="auth-verify-icon" aria-hidden="true">📩</div>
+          <div class="auth-verify-title">Verifikasi Email Google Diperlukan</div>
+          <p class="auth-verify-desc">
+            Link verifikasi telah dikirim ke <strong id="authVerifyEmailDisplay">email@gmail.com</strong>.
+            Buka kotak masuk Gmail Anda &amp; klik tautan verifikasi untuk memastikan email resmi terdaftar di Google.
+          </p>
+          <div class="auth-verify-actions">
+            <button type="button" id="btnCheckEmailVerify" class="btn-primary touch-target"
+              onclick="checkPendingEmailVerification()">
+              ✅ Sudah Verifikasi, Masuk
+            </button>
+            <div class="auth-verify-sub-actions">
+              <button type="button" id="btnResendEmailVerify" class="auth-verify-link-btn touch-target"
+                onclick="resendPendingEmailVerification()">
+                Kirim Ulang Link
+              </button>
+              <button type="button" class="auth-verify-link-btn touch-target"
+                onclick="cancelPendingEmailVerification()">
+                Ganti Email
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Auth Form (Sign In & Sign Up) -->
         <form id="authForm" onsubmit="handleAuthSubmit(event)">
           <!-- Name field (shown on Sign Up mode) -->
@@ -123,8 +149,11 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Email Pribadi *</label>
-            <input type="email" id="authEmailInput" class="form-control" placeholder="nama@email.com" required>
+            <label id="authEmailLabel" class="form-label">Email Google *</label>
+            <input type="email" id="authEmailInput" class="form-control" placeholder="nama@gmail.com" required>
+            <div id="authEmailHint" class="auth-email-hint" style="display: none;">
+              🔒 Pendaftaran wajib memakai email resmi terdaftar Google (<code>@gmail.com</code> / Google Workspace aktif) &amp; verifikasi kotak masuk.
+            </div>
           </div>
 
           <div class="form-group" style="margin-bottom: 16px;">
@@ -2839,7 +2868,7 @@
 
   <!-- Application Logic -->
   <script src="./js/kawaii-art.js?v=168"></script>
-  <script src="./js/app.js?v=174"></script>
+  <script src="./js/app.js?v=175"></script>
 
   <!-- Service Worker Registration -->
   <script>

@@ -2289,6 +2289,64 @@ function setupFirestoreListener() {
   });
 }
 
+const PENDING_EMAIL_VERIFY_KEY = 'smart_grocery_pending_verify_email';
+const GOOGLE_ENFORCEMENT_EPOCH = Date.UTC(2026, 10, 25); // Enforce verified Google email for new sign-ups from 2026-11-25
+
+function getPendingEmailVerify() {
+  try {
+    const raw = localStorage.getItem(PENDING_EMAIL_VERIFY_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setPendingEmailVerify(email, name, uid) {
+  try {
+    localStorage.setItem(PENDING_EMAIL_VERIFY_KEY, JSON.stringify({
+      email: (email || '').toLowerCase().trim(),
+      name: name || '',
+      uid: uid || '',
+      ts: Date.now()
+    }));
+  } catch (e) { }
+}
+
+function clearPendingEmailVerify() {
+  try {
+    localStorage.removeItem(PENDING_EMAIL_VERIFY_KEY);
+  } catch (e) { }
+}
+
+function isPostEnforcementFirebaseUser(fbUser) {
+  if (!fbUser || !fbUser.metadata || !fbUser.metadata.creationTime) return false;
+  const createdMs = Date.parse(fbUser.metadata.creationTime);
+  return !isNaN(createdMs) && createdMs >= GOOGLE_ENFORCEMENT_EPOCH;
+}
+
+function showEmailVerificationPanel(email, showNotice = true) {
+  const panel = document.getElementById('authVerifyPanel');
+  const emailDisplay = document.getElementById('authVerifyEmailDisplay');
+  const authForm = document.getElementById('authForm');
+  if (emailDisplay) emailDisplay.textContent = email || 'email@gmail.com';
+  if (panel) panel.style.display = 'block';
+  if (authForm) authForm.style.display = 'none';
+  if (showNotice) {
+    setAuthAlert(
+      `Email <strong>${escapeHtml(email || '')}</strong> wajib diverifikasi lewat inbox Gmail / Google Anda terlebih dahulu sebelum masuk.`,
+      'warning',
+      true
+    );
+  }
+}
+
+function hideEmailVerificationPanel() {
+  const panel = document.getElementById('authVerifyPanel');
+  const authForm = document.getElementById('authForm');
+  if (panel) panel.style.display = 'none';
+  if (authForm) authForm.style.display = 'block';
+}
+
 function setupAuthListener() {
   if (typeof firebase === 'undefined' || !firebase.auth) return;
 
@@ -2307,8 +2365,18 @@ function setupAuthListener() {
           : 'google';
         const cleanProv = rawProv.includes('google') ? 'google' : (rawProv.includes('password') || rawProv.includes('email')) ? 'email' : 'google';
 
+        // Block unverified newly registered email/password sessions until Google inbox verification completes
+        const pending = getPendingEmailVerify();
+        const isMatchingPending = !!(pending && user.email && pending.email === user.email.toLowerCase().trim());
+        if (cleanProv === 'email' && !user.emailVerified && (isMatchingPending || isPostEnforcementFirebaseUser(user))) {
+          showEmailVerificationPanel(user.email, false);
+          return;
+        }
+
         // Only switch if no user or different user
         if (!AppState.user || AppState.user.uid !== user.uid) {
+          clearPendingEmailVerify();
+          hideEmailVerificationPanel();
           handleSuccessfulAuth(user, cleanProv, false);
         } else {
           // Sinkronisasi sesi live & avatar jika ada pembaruan
@@ -2323,8 +2391,11 @@ function setupAuthListener() {
           }
         }
       } else {
-        // DO NOT log out on initial null or pending Firebase state during page refresh!
-        // Logout should only occur via explicit user action (e.g. clicking 'Keluar Akun').
+        // Restore verification panel if user reloaded while waiting to verify Google email
+        const pending = getPendingEmailVerify();
+        if (pending && pending.email && (!AppState.user || !AppState.user.uid)) {
+          showEmailVerificationPanel(pending.email, false);
+        }
       }
     });
   } catch (err) {
@@ -2333,20 +2404,61 @@ function setupAuthListener() {
 }
 
 async function handleRedirectResult() {
-  if (typeof firebase !== 'undefined' && firebase.auth) {
-    try {
-      const result = await firebase.auth().getRedirectResult();
-      try { sessionStorage.removeItem('pending_google_redirect'); } catch (e) { }
-      if (result && result.user) {
-        result.user.isLiveFirebaseSession = true;
+  if (typeof firebase === 'undefined' || !firebase.auth) return;
+
+  let hadPendingRedirect = false;
+  try {
+    const flag = sessionStorage.getItem('pending_google_redirect');
+    const ts = parseInt(sessionStorage.getItem('pending_google_redirect_ts') || '0', 10);
+    hadPendingRedirect = (flag === 'true') && (!ts || (Date.now() - ts) < 10 * 60 * 1000);
+    sessionStorage.removeItem('pending_google_redirect');
+    sessionStorage.removeItem('pending_google_redirect_ts');
+  } catch (e) { }
+
+  try {
+    const result = await firebase.auth().getRedirectResult();
+    if (result && result.user) {
+      result.user.isLiveFirebaseSession = true;
+      clearPendingEmailVerify();
+      hideEmailVerificationPanel();
+      if (!AppState.user || AppState.user.uid !== result.user.uid) {
         handleSuccessfulAuth(result.user, 'google', true);
       }
-    } catch (err) {
-      try { sessionStorage.removeItem('pending_google_redirect'); } catch (e) { }
-      if (err.code && err.code !== 'auth/null-user') {
-        console.warn('Redirect sign-in notice:', err.code, err.message);
-        showToast(getAuthErrorMessage(err), 'error');
-      }
+      return;
+    }
+
+    // Fallback check when mobile browsers partition third-party iframe storage and drop redirect credential silently
+    if (hadPendingRedirect) {
+      setTimeout(() => {
+        const fbCurr = firebase.auth().currentUser;
+        if (fbCurr) {
+          fbCurr.isLiveFirebaseSession = true;
+          clearPendingEmailVerify();
+          hideEmailVerificationPanel();
+          if (!AppState.user || AppState.user.uid !== fbCurr.uid) {
+            handleSuccessfulAuth(fbCurr, 'google', true);
+          }
+        } else if (!AppState.user || !AppState.user.uid) {
+          setAuthAlert(
+            '<strong>Sesi masuk Google terputus di peramban perangkat ini.</strong><br>' +
+            'Cookie pihak ketiga / penyimpanan redirect sedang diblokir oleh mode privat atau peramban perangkat ini.<br><br>' +
+            '💡 <strong>Solusi Cepat:</strong><br>' +
+            '1. Gunakan browser reguler (<strong>Chrome / Safari</strong>), bukan mode Samaran / browser dalam aplikasi.<br>' +
+            '2. Izinkan Pop-up &amp; Cookie untuk situs ini, lalu ketuk <strong>"Lanjutkan dengan Google"</strong> kembali.',
+            'warning',
+            true
+          );
+          showToast('Sesi Google terputus oleh pemblokir cookie browser. Izinkan pop-up & coba lagi 🌐', 'warning');
+          highlightGoogleButton();
+        }
+      }, 1200);
+    }
+  } catch (err) {
+    if (err.code && err.code !== 'auth/null-user') {
+      console.warn('Redirect sign-in notice:', err.code, err.message);
+      const friendlyMsg = getAuthErrorMessage(err);
+      setAuthAlert(friendlyMsg, 'danger');
+      showToast(friendlyMsg, 'error');
     }
   }
 }
@@ -2615,12 +2727,13 @@ function saveSavedGoogleAccounts(accounts) {
   }
 }
 
-function setAuthAlert(message, type = 'warning') {
+function setAuthAlert(message, type = 'warning', allowHtml = false) {
   const alertBox = document.getElementById('authAlertBox');
   if (!alertBox) return;
   alertBox.className = `auth-alert-box alert-${type}`;
   const icon = (type === 'danger') ? '❌' : (type === 'success') ? '✅' : '⚠️';
-  alertBox.innerHTML = `<span>${icon}</span> <span>${escapeHtml(message)}</span>`;
+  const body = allowHtml ? message : escapeHtml(message);
+  alertBox.innerHTML = `<span style="flex-shrink:0;">${icon}</span> <span style="flex:1;min-width:0;">${body}</span>`;
   alertBox.style.display = 'flex';
 }
 
@@ -2635,10 +2748,14 @@ function clearAuthAlert() {
 function switchAuthMode(mode) {
   AppState.authMode = mode;
   clearAuthAlert();
+  hideEmailVerificationPanel();
   const tabSignIn = document.getElementById('tabAuthSignIn');
   const tabSignUp = document.getElementById('tabAuthSignUp');
   const authNameGroup = document.getElementById('authNameGroup');
   const authNameInput = document.getElementById('authNameInput');
+  const authEmailLabel = document.getElementById('authEmailLabel');
+  const authEmailInput = document.getElementById('authEmailInput');
+  const authEmailHint = document.getElementById('authEmailHint');
   const authSubmitBtn = document.getElementById('authSubmitBtn');
   const googleBtnText = document.getElementById('googleBtnText');
   const authDividerText = document.getElementById('authDividerText');
@@ -2650,12 +2767,15 @@ function switchAuthMode(mode) {
     if (tabSignUp) tabSignUp.classList.add('active');
     if (authNameGroup) authNameGroup.style.display = 'block';
     if (authNameInput) authNameInput.setAttribute('required', 'required');
+    if (authEmailLabel) authEmailLabel.textContent = 'Email Resmi Google *';
+    if (authEmailInput) authEmailInput.placeholder = 'nama@gmail.com';
+    if (authEmailHint) authEmailHint.style.display = 'block';
     if (authSubmitBtn) {
       const span = authSubmitBtn.querySelector('span');
-      if (span) span.textContent = 'Daftar Akun Baru';
+      if (span) span.textContent = 'Daftar & Verifikasi Email Google';
     }
     if (googleBtnText) googleBtnText.textContent = 'Daftar dengan Google';
-    if (authDividerText) authDividerText.textContent = 'atau daftar dengan email';
+    if (authDividerText) authDividerText.textContent = 'atau daftar dengan email Google';
     if (authSwitchPromptText) authSwitchPromptText.textContent = 'Sudah punya akun?';
     if (authSwitchBtn) authSwitchBtn.textContent = 'Masuk di sini';
   } else {
@@ -2664,6 +2784,9 @@ function switchAuthMode(mode) {
     if (tabSignUp) tabSignUp.classList.remove('active');
     if (authNameGroup) authNameGroup.style.display = 'none';
     if (authNameInput) authNameInput.removeAttribute('required');
+    if (authEmailLabel) authEmailLabel.textContent = 'Email Google *';
+    if (authEmailInput) authEmailInput.placeholder = 'nama@gmail.com';
+    if (authEmailHint) authEmailHint.style.display = 'none';
     if (authSubmitBtn) {
       const span = authSubmitBtn.querySelector('span');
       if (span) span.textContent = 'Masuk ke Dashboard';
@@ -2704,16 +2827,32 @@ function getAuthErrorMessage(err) {
   if (!err) return 'Terjadi kesalahan saat masuk.';
   switch (err.code) {
     case 'auth/unauthorized-domain':
-      return 'Domain aplikasi belum terdaftar di Firebase Authorized Domains. Pastikan membuka dari domain resmi.';
+      return 'Domain aplikasi belum terdaftar di Firebase Authorized Domains. Pastikan membuka dari link resmi smartgrocery-ashen.vercel.app.';
     case 'auth/operation-not-supported-in-this-environment':
-      return 'Lingkungan peramban membatasi pop-up OAuth. Mengalihkan ke login resmi Google...';
+      return 'Lingkungan peramban membatasi pop-up OAuth. Mengalihkan ke halaman masuk resmi Google...';
     case 'auth/popup-blocked':
-      return 'Pop-up diblokir peramban. Mengalihkan ke login resmi Google...';
+      return 'Pop-up diblokir peramban. Mengalihkan ke halaman masuk resmi Google...';
     case 'auth/popup-closed-by-user':
     case 'auth/cancelled-popup-request':
       return 'Masuk dengan Google dibatalkan.';
+    case 'auth/account-exists-with-different-credential':
+      return 'Email ini sudah terdaftar dengan metode login lain. Silakan masuk via Google atau gunakan kata sandi akun tersebut.';
+    case 'auth/web-storage-unsupported':
+      return 'Cookie / penyimpanan browser dinonaktifkan. Aktifkan cookie agar login Google dapat disimpan.';
+    case 'auth/redirect-cancelled-by-user':
+      return 'Proses pengalihan login Google dibatalkan.';
+    case 'auth/redirect-operation-pending':
+      return 'Permintaan login Google sebelumnya masih diproses. Silakan muat ulang atau coba beberapa detik lagi.';
+    case 'auth/too-many-requests':
+      return 'Terlalu banyak percobaan login. Tunggu sebentar sebelum mencoba lagi.';
+    case 'auth/invalid-email':
+      return 'Format alamat email tidak valid.';
+    case 'auth/email-already-in-use':
+      return 'Email ini sudah terdaftar. Silakan masuk melalui tab Masuk atau tombol Google di atas.';
+    case 'auth/weak-password':
+      return 'Kata sandi terlalu lemah. Gunakan minimal 6 karakter.';
     case 'auth/network-request-failed':
-      return 'Koneksi jaringan terputus. Silakan coba lagi.';
+      return 'Koneksi jaringan terputus. Periksa internet Anda dan coba lagi.';
     case 'auth/user-disabled':
       return 'Akun Google ini telah dinonaktifkan.';
     case 'auth/operation-not-allowed':
@@ -2734,23 +2873,25 @@ async function loginWithGoogle() {
       '<strong>Google Sign-In memerlukan server web (http/https).</strong><br>' +
       'Kebijakan keamanan Google OAuth memblokir login dari file lokal (<code>file:///</code>).<br><br>' +
       '💡 <strong>Solusi:</strong><br>' +
-      '1. Buka via link web resmi: <a href="https://artgrocery-ashen.vercel.app" target="_blank" style="color: #BE185D; font-weight: 800; text-decoration: underline;">artgrocery-ashen.vercel.app</a><br>' +
-      '2. Atau gunakan opsi <strong>Masuk dengan Email &amp; Kata Sandi</strong> atau <strong>Akun Demo</strong> di bawah.',
-      'warning'
+      '1. Buka via link web resmi: <a href="https://smartgrocery-ashen.vercel.app" target="_blank" rel="noopener noreferrer" style="color: #BE185D; font-weight: 800; text-decoration: underline;">smartgrocery-ashen.vercel.app</a><br>' +
+      '2. Atau gunakan opsi <strong>Masuk dengan Email Google Terverifikasi</strong> di bawah.',
+      'warning',
+      true
     );
     showToast('Buka via web resmi untuk masuk dengan Google 🌐', 'warning');
     return;
   }
 
-  // 2. Deteksi In-App Browser (WhatsApp, Instagram, Facebook, Line, TikTok) yang diblokir oleh Google
+  // 2. Deteksi In-App Browser & Android WebView (WhatsApp, Instagram, TikTok, Line, Telegram, dll.)
   const ua = (typeof navigator !== 'undefined' && (navigator.userAgent || navigator.vendor || window.opera)) || '';
-  const isInAppBrowser = /FBAN|FBAV|Instagram|Line|WhatsApp|MicroMessenger/i.test(ua);
+  const isInAppBrowser = /FBAN|FBAV|Instagram|Line\/|WhatsApp|MicroMessenger|TikTok|BytedanceWebview|Musical_ly|Telegram|Twitter|Shopee|; wv\)/i.test(ua);
   if (isInAppBrowser) {
     setAuthAlert(
-      '<strong>Google Sign-In diblokir di peramban internal WhatsApp/Instagram.</strong><br>' +
-      'Google melarang autentikasi di dalam in-app browser demi keamanan akun Anda.<br><br>' +
-      '💡 <strong>Solusi Mudah:</strong> Ketuk tombol titik tiga (⋮) atau bagikan di pojok atas, lalu pilih <strong>"Buka di Browser"</strong> (Chrome atau Safari) untuk masuk lancar.',
-      'warning'
+      '<strong>Google Sign-In diblokir oleh peramban dalam aplikasi (WhatsApp/Instagram/TikTok).</strong><br>' +
+      'Kebijakan keamanan Google OAuth melarang login di dalam in-app browser.<br><br>' +
+      '💡 <strong>Solusi Mudah:</strong> Ketuk ikon titik tiga (⋮) atau Bagikan di pojok atas, lalu pilih <strong>"Buka di Browser"</strong> (Chrome atau Safari).',
+      'warning',
+      true
     );
     showToast('Buka di Chrome/Safari untuk masuk dengan Google 🌐', 'warning');
     return;
@@ -2763,10 +2904,10 @@ async function loginWithGoogle() {
     return;
   }
 
-  // 4. State UI: Kunci tombol & tampilkan status loading untuk mencegah tap ganda (anti-double tap)
-  const googleBtn = document.querySelector('.btn-google-auth');
+  // 4. State UI: Kunci tombol & tampilkan status loading (anti-double tap + watchdog anti-stuck mobile)
+  const googleBtn = document.getElementById('btnGoogleAuth') || document.querySelector('.btn-google-auth');
   const googleBtnText = document.getElementById('googleBtnText');
-  const originalText = googleBtnText ? googleBtnText.textContent : 'Lanjutkan dengan Google';
+  const originalText = 'Lanjutkan dengan Google';
 
   if (googleBtn) {
     googleBtn.disabled = true;
@@ -2777,19 +2918,50 @@ async function loginWithGoogle() {
     googleBtnText.textContent = 'Menghubungkan ke Google... ⏳';
   }
 
+  let finished = false;
+  let focusRecoveryTimer = null;
+  let hardWatchdogTimer = null;
+
   const restoreBtn = () => {
+    finished = true;
+    if (focusRecoveryTimer) { clearTimeout(focusRecoveryTimer); focusRecoveryTimer = null; }
+    if (hardWatchdogTimer) { clearTimeout(hardWatchdogTimer); hardWatchdogTimer = null; }
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', onVisibilityReturn);
+    }
     if (googleBtn) {
       googleBtn.disabled = false;
       googleBtn.style.opacity = '';
       googleBtn.style.pointerEvents = '';
     }
     if (googleBtnText) {
-      googleBtnText.textContent = originalText;
+      googleBtnText.textContent = (AppState.authMode === 'signup') ? 'Daftar dengan Google' : originalText;
     }
   };
 
+  const onVisibilityReturn = () => {
+    if (finished || document.hidden) return;
+    if (focusRecoveryTimer) clearTimeout(focusRecoveryTimer);
+    focusRecoveryTimer = setTimeout(() => {
+      if (!finished && !firebase.auth().currentUser && (!AppState.user || !AppState.user.uid)) {
+        restoreBtn();
+        setAuthAlert('Jendela login Google tertutup sebelum selesai. Ketuk "Lanjutkan dengan Google" lagi dan pastikan Pop-up tidak diblokir.', 'warning');
+      }
+    }, 3500);
+  };
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', onVisibilityReturn);
+  }
+  hardWatchdogTimer = setTimeout(() => {
+    if (!finished && !firebase.auth().currentUser && (!AppState.user || !AppState.user.uid)) {
+      restoreBtn();
+      setAuthAlert('Koneksi ke jendela login Google habis waktu. Pastikan Pop-up diizinkan atau coba muat ulang halaman.', 'warning');
+    }
+  }, 45000);
+
   const provider = (typeof window.initGoogleAuthProvider === 'function')
-    ? window.initGoogleAuthProvider(false)
+    ? window.initGoogleAuthProvider(true)
     : new firebase.auth.GoogleAuthProvider();
 
   if (!provider) {
@@ -2798,58 +2970,62 @@ async function loginWithGoogle() {
     return;
   }
 
-  // 5. Pastikan persistensi sesi lokal aktif
-  try {
-    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-  } catch (persErr) {
-    console.warn('Firebase setPersistence notice:', persErr);
-  }
-
-  // 6. POPUP-FIRST UNTUK SEMUA PERANGKAT (HP, Laptop & PWA)
-  // Popup di event tap langsung TIDAK DIBLOKIR browser HP & kebal dari masalah third-party cookie/Storage Partitioning
+  // 5. PENTING UNTUK MOBILE/SAFARI: Panggil signInWithPopup LANGSUNG secara sinkron di tap handler
+  // (JANGAN await setPersistence di sini agar gesture tap tidak hangus pada Safari iOS / Mobile Chrome!)
   showToast('Menghubungkan ke Google...', 'info');
   try {
     const result = await firebase.auth().signInWithPopup(provider);
     if (result && result.user) {
       result.user.isLiveFirebaseSession = true;
+      clearPendingEmailVerify();
+      hideEmailVerificationPanel();
       handleSuccessfulAuth(result.user, 'google', true);
     }
     restoreBtn();
   } catch (popupError) {
     console.warn('Firebase signInWithPopup notice:', popupError);
 
-    // Pengguna membatalkan sendiri jendela pop-up
     if (popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
       showToast('Masuk dengan Google dibatalkan.', 'info');
       restoreBtn();
       return;
     }
 
-    // 7. Fallback otomatis ke signInWithRedirect HANYA jika pop-up diblokir secara ketat
+    // 6. Fallback otomatis ke signInWithRedirect HANYA jika pop-up diblokir atau env tidak mendukung pop-up
+    const errMsgLower = (popupError.message || '').toLowerCase();
     if (
       popupError.code === 'auth/operation-not-supported-in-this-environment' ||
       popupError.code === 'auth/popup-blocked' ||
       popupError.code === 'auth/internal-error' ||
-      (popupError.message && popupError.message.toLowerCase().includes('supported')) ||
-      (popupError.message && popupError.message.toLowerCase().includes('popup'))
+      errMsgLower.includes('supported') ||
+      errMsgLower.includes('popup') ||
+      errMsgLower.includes('blocked')
     ) {
       showToast('Mengalihkan ke halaman masuk resmi Google...', 'info');
       try {
-        try { sessionStorage.setItem('pending_google_redirect', 'true'); } catch (e) { }
+        try {
+          sessionStorage.setItem('pending_google_redirect', 'true');
+          sessionStorage.setItem('pending_google_redirect_ts', String(Date.now()));
+        } catch (e) { }
         await firebase.auth().signInWithRedirect(provider);
       } catch (redirErr) {
-        try { sessionStorage.removeItem('pending_google_redirect'); } catch (e) { }
+        try {
+          sessionStorage.removeItem('pending_google_redirect');
+          sessionStorage.removeItem('pending_google_redirect_ts');
+        } catch (e) { }
         restoreBtn();
         console.error('Firebase signInWithRedirect fallback error:', redirErr);
-        showToast(getAuthErrorMessage(redirErr), 'error');
-        setAuthAlert(getAuthErrorMessage(redirErr), 'danger');
+        const msg = getAuthErrorMessage(redirErr);
+        showToast(msg, 'error');
+        setAuthAlert(msg, 'danger');
       }
       return;
     }
 
     restoreBtn();
-    showToast(getAuthErrorMessage(popupError), 'error');
-    setAuthAlert(getAuthErrorMessage(popupError), 'danger');
+    const msg = getAuthErrorMessage(popupError);
+    showToast(msg, 'error');
+    setAuthAlert(msg, 'danger');
   }
 }
 
@@ -2866,17 +3042,17 @@ async function syncLocalAccountsToCloud() {
 
     if (!users || users.length === 0) return;
 
+    const hasActiveAuth = !!(firebase.auth && firebase.auth().currentUser) || !!getPendingEmailVerify();
+
     for (const u of users) {
       if (!u || !u.email) continue;
       const cleanEmail = u.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
 
-      // 1. Cadangkan ke Cloud Firestore collection 'registered_accounts'
       if (firestoreDb) {
         try {
           await firestoreDb.collection('registered_accounts').doc(cleanEmail).set({
             name: u.name || cleanEmail,
             email: u.email.toLowerCase().trim(),
-            password: u.password || '',
             uid: u.uid || getDeterministicUid(u.email, 'usr_'),
             photoURL: u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'User')}&background=E91E63&color=fff&bold=true`,
             authProvider: u.authProvider || 'email',
@@ -2887,14 +3063,11 @@ async function syncLocalAccountsToCloud() {
         }
       }
 
-      // 2. Daftarkan ke Firebase Auth jika belum terdaftar
-      if (firebase.auth && u.password && u.password.length >= 6) {
+      // Jangan diam-diam membuat akun Auth baru di background jika sedang ada sesi aktif atau menunggu verifikasi
+      if (!hasActiveAuth && firebase.auth && u.password && u.password.length >= 6 && !u.requiresGoogleVerification) {
         try {
           await firebase.auth().createUserWithEmailAndPassword(u.email, u.password);
-          console.log('Akun berhasil dicadangkan ke Firebase Auth:', u.email);
-        } catch (authErr) {
-          // auth/email-already-in-use berarti sudah ada di Firebase Auth
-        }
+        } catch (authErr) { }
       }
     }
   } catch (err) {
@@ -2960,6 +3133,210 @@ function highlightGoogleButton() {
   }
 }
 
+const OFFICIAL_GOOGLE_CONSUMER_DOMAINS = new Set(['gmail.com', 'googlemail.com']);
+const COMMON_GOOGLE_TYPOS = {
+  'gamil.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'gmal.com': 'gmail.com',
+  'gnail.com': 'gmail.com',
+  'gmaill.com': 'gmail.com',
+  'gmail.co': 'gmail.com',
+  'gmail.con': 'gmail.com',
+  'gmail.cm': 'gmail.com',
+  'gmail.om': 'gmail.com',
+  'googlemail.co': 'googlemail.com',
+  'googlemail.con': 'googlemail.com'
+};
+const NON_GOOGLE_EMAIL_DOMAINS = new Set([
+  'yahoo.com', 'yahoo.co.id', 'ymail.com', 'rocketmail.com',
+  'outlook.com', 'hotmail.com', 'hotmail.co.id', 'live.com', 'msn.com',
+  'icloud.com', 'me.com', 'mac.com',
+  'proton.me', 'protonmail.com', 'pm.me',
+  'zoho.com', 'zohomail.com', 'yandex.com', 'yandex.ru', 'mail.ru', 'gmx.com', 'aol.com',
+  'mailinator.com', 'tempmail.com', '10minutemail.com', 'guerrillamail.com', 'yopmail.com',
+  'sharklasers.com', 'trashmail.com', 'dispostable.com', 'getnada.com', 'fakeinbox.com'
+]);
+
+/**
+ * Verifikasi via Google DNS-over-HTTPS apakah domain kustom (mis. Google Workspace) menggunakan server MX resmi Google.
+ * @param {string} domain
+ * @returns {Promise<{ok:boolean, reason?:string}>}
+ */
+async function checkGoogleWorkspaceMx(domain) {
+  if (!domain || typeof fetch !== 'function') return { ok: false, reason: 'unavailable' };
+  const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), 4500) : null;
+  try {
+    const resp = await fetch(
+      `https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=MX`,
+      ctrl ? { signal: ctrl.signal } : undefined
+    );
+    if (!resp.ok) return { ok: false, reason: 'dns_error' };
+    const data = await resp.json();
+    if (data.Status !== 0 || !Array.isArray(data.Answer) || data.Answer.length === 0) {
+      return { ok: false, reason: 'no_mx' };
+    }
+    const hasGoogleMx = data.Answer.some(rec => {
+      const val = (rec.data || '').toLowerCase();
+      return val.includes('.google.com') || val.includes('.googlemail.com') || val.endsWith('google.com.');
+    });
+    return hasGoogleMx ? { ok: true } : { ok: false, reason: 'non_google_mx' };
+  } catch (e) {
+    return { ok: false, reason: 'network_error' };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/**
+ * Validasi wajib: Pendaftaran hanya diizinkan memakai email resmi terdaftar Google
+ * (@gmail.com / @googlemail.com, atau domain Google Workspace dengan MX resmi Google).
+ * @param {string} email
+ * @returns {Promise<{ok:boolean, message?:string}>}
+ */
+async function verifyOfficialGoogleEmail(email) {
+  const trimmed = (email || '').trim().toLowerCase();
+  if (!isValidEmail(trimmed)) {
+    return {
+      ok: false,
+      message: 'Format email tidak valid! Gunakan email Google resmi Anda (contoh: nama@gmail.com).'
+    };
+  }
+
+  const domain = trimmed.split('@')[1];
+  if (COMMON_GOOGLE_TYPOS[domain]) {
+    const local = trimmed.split('@')[0];
+    return {
+      ok: false,
+      message: `Mungkin maksud Anda "${local}@${COMMON_GOOGLE_TYPOS[domain]}"? Harap perbaiki domain email Google Anda.`
+    };
+  }
+
+  if (OFFICIAL_GOOGLE_CONSUMER_DOMAINS.has(domain)) {
+    return { ok: true };
+  }
+
+  if (NON_GOOGLE_EMAIL_DOMAINS.has(domain)) {
+    return {
+      ok: false,
+      message: `Domain "${domain}" bukan layanan email Google. Pendaftaran wajib menggunakan email resmi Google (@gmail.com) atau masuk dengan Google.`
+    };
+  }
+
+  // Domain kustom/institusi: wajib terbukti memakai Google Workspace MX resmi
+  const mxCheck = await checkGoogleWorkspaceMx(domain);
+  if (mxCheck.ok) {
+    return { ok: true };
+  }
+
+  return {
+    ok: false,
+    message: mxCheck.reason === 'network_error' || mxCheck.reason === 'dns_error' || mxCheck.reason === 'unavailable'
+      ? `Tidak dapat memverifikasi domain "${domain}" sebagai Google Workspace. Gunakan akun @gmail.com resmi atau ketuk "Daftar dengan Google" di atas.`
+      : `Pendaftaran ditolak: domain "${domain}" bukan email resmi terdaftar Google. Gunakan akun @gmail.com aktif atau domain Google Workspace resmi.`
+  };
+}
+
+let lastVerificationEmailSentAt = 0;
+
+async function checkPendingEmailVerification() {
+  clearAuthAlert();
+  if (typeof firebase === 'undefined' || !firebase.auth) {
+    setAuthAlert('Layanan Firebase tidak aktif. Periksa koneksi internet Anda.', 'danger');
+    return;
+  }
+
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    const pending = getPendingEmailVerify();
+    hideEmailVerificationPanel();
+    switchAuthMode('signin');
+    if (pending && pending.email) {
+      const emailInput = document.getElementById('authEmailInput');
+      if (emailInput) emailInput.value = pending.email;
+    }
+    setAuthAlert('Silakan masukkan email & kata sandi Anda di tab Masuk untuk mengecek status verifikasi, atau ketuk "Lanjutkan dengan Google".', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('btnCheckEmailVerify');
+  if (btn) { btn.disabled = true; btn.textContent = 'Memeriksa verifikasi... ⏳'; }
+  try {
+    await user.reload();
+    const freshUser = firebase.auth().currentUser || user;
+    if (!freshUser.emailVerified) {
+      setAuthAlert(
+        `Email <strong>${escapeHtml(freshUser.email)}</strong> belum terverifikasi. Buka Gmail Anda, klik tautan verifikasi resmi yang kami kirim (cek juga folder Spam/Promosi), lalu tekan tombol Cek lagi.`,
+        'warning',
+        true
+      );
+      showToast('Email belum diverifikasi di Gmail Anda.', 'warning');
+      return;
+    }
+
+    const email = (freshUser.email || '').toLowerCase().trim();
+    const cleanEmail = email.replace(/[^a-z0-9]/g, '_');
+    const pending = getPendingEmailVerify();
+    const name = freshUser.displayName || (pending && pending.name) || email.split('@')[0];
+
+    if (firestoreDb) {
+      try {
+        await firestoreDb.collection('registered_accounts').doc(cleanEmail).set({
+          emailVerified: true,
+          verifiedAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (e) { }
+    }
+
+    const users = getRegisteredUsers();
+    const idx = users.findIndex(u => u.email && u.email.toLowerCase() === email);
+    if (idx >= 0) {
+      users[idx].emailVerified = true;
+      saveRegisteredUsers(users);
+    }
+
+    clearPendingEmailVerify();
+    hideEmailVerificationPanel();
+    freshUser.isLiveFirebaseSession = true;
+    handleSuccessfulAuth(freshUser, 'email', true);
+    showToast(`Verifikasi berhasil! Selamat datang, ${name} ✨`, 'success');
+  } catch (err) {
+    setAuthAlert(getAuthErrorMessage(err), 'danger');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Sudah Verifikasi, Masuk'; }
+  }
+}
+
+async function resendPendingEmailVerification() {
+  if (typeof firebase === 'undefined' || !firebase.auth || !firebase.auth().currentUser) {
+    setAuthAlert('Sesi pendaftaran tidak ditemukan. Silakan masuk ulang untuk mengirim ulang link verifikasi.', 'warning');
+    return;
+  }
+  const now = Date.now();
+  if (now - lastVerificationEmailSentAt < 30000) {
+    const waitSec = Math.ceil((30000 - (now - lastVerificationEmailSentAt)) / 1000);
+    showToast(`Tunggu ${waitSec} detik sebelum mengirim ulang email.`, 'info');
+    return;
+  }
+  try {
+    await firebase.auth().currentUser.sendEmailVerification();
+    lastVerificationEmailSentAt = Date.now();
+    setAuthAlert(`Link verifikasi baru telah dikirim ke ${firebase.auth().currentUser.email}. Periksa kotak masuk Gmail Anda.`, 'success');
+    showToast('Email verifikasi berhasil dikirim ulang 📩', 'success');
+  } catch (err) {
+    setAuthAlert(getAuthErrorMessage(err), 'danger');
+  }
+}
+
+function cancelPendingEmailVerification() {
+  clearPendingEmailVerify();
+  hideEmailVerificationPanel();
+  clearAuthAlert();
+  if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+    try { firebase.auth().signOut(); } catch (e) { }
+  }
+}
+
 async function handleAuthSubmit(e) {
   e.preventDefault();
   clearAuthAlert();
@@ -2967,6 +3344,9 @@ async function handleAuthSubmit(e) {
   const nameInput = document.getElementById('authNameInput');
   const emailInput = document.getElementById('authEmailInput');
   const passInput = document.getElementById('authPassInput');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const submitSpan = submitBtn ? submitBtn.querySelector('span') : null;
+  const origSubmitLabel = submitSpan ? submitSpan.textContent : '';
 
   const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
   const pass = passInput ? passInput.value.trim() : '';
@@ -2980,11 +3360,9 @@ async function handleAuthSubmit(e) {
 
   // Validasi format email secara ketat (mencegah email ngasal)
   if (!isValidEmail(email)) {
-    setAuthAlert('Format email tidak valid! Harap gunakan alamat email aktif yang benar (contoh: nama@gmail.com).', 'warning');
+    setAuthAlert('Format email tidak valid! Harap gunakan alamat email Google resmi yang benar (contoh: nama@gmail.com).', 'warning');
     showToast('Format email tidak valid!', 'warning');
-    if (emailInput) {
-      emailInput.focus();
-    }
+    if (emailInput) emailInput.focus();
     return;
   }
 
@@ -2997,167 +3375,169 @@ async function handleAuthSubmit(e) {
 
   const cleanEmail = email.replace(/[^a-z0-9]/g, '_');
 
-  if (AppState.authMode === 'signup') {
-    // ---------------------------------------------------------------------
-    // SIGN UP FLOW (CROSS-DEVICE CLOUD SYNC)
-    // ---------------------------------------------------------------------
-    if (!name) {
-      name = email.split('@')[0];
-      name = name.charAt(0).toUpperCase() + name.slice(1);
-    }
+  if (submitBtn) submitBtn.disabled = true;
+  if (submitSpan) submitSpan.textContent = (AppState.authMode === 'signup') ? 'Memverifikasi Email Google... ⏳' : 'Memproses Masuk... ⏳';
 
-    // 1. Cek duplikasi lokal
-    const users = getRegisteredUsers();
-    const existingLocal = users.find(u => u.email && u.email.toLowerCase() === email);
-    if (existingLocal) {
-      if (existingLocal.authProvider === 'google' || !existingLocal.password) {
-        setAuthAlert(`Email "${email}" sudah terdaftar menggunakan Akun Google. Harap masuk menggunakan tombol "Lanjutkan dengan Google" di atas!`, 'warning');
-        showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
+  try {
+    if (AppState.authMode === 'signup') {
+      // ---------------------------------------------------------------------
+      // SIGN UP FLOW (WAJIB EMAIL RESMI TERDAFTAR GOOGLE + VERIFIKASI INBOX)
+      // ---------------------------------------------------------------------
+      if (!name) {
+        name = email.split('@')[0];
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+      }
+
+      // 0. Pastikan koneksi internet & Firebase Auth aktif (blokir pendaftaran palsu offline)
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        setAuthAlert('Pendaftaran akun wajib terhubung internet untuk verifikasi email resmi Google.', 'danger');
+        showToast('Membutuhkan koneksi internet untuk mendaftar!', 'error');
+        return;
+      }
+
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        setAuthAlert('Layanan Firebase Authentication belum siap. Muat ulang halaman atau periksa koneksi Anda.', 'danger');
+        showToast('Layanan Firebase tidak terjangkau.', 'error');
+        return;
+      }
+
+      // 1. Wajib domain resmi Google (@gmail.com / @googlemail.com / Google Workspace MX terverifikasi)
+      const googleEmailCheck = await verifyOfficialGoogleEmail(email);
+      if (!googleEmailCheck.ok) {
+        setAuthAlert(googleEmailCheck.message, 'danger');
+        showToast('Wajib menggunakan email resmi Google!', 'warning');
         highlightGoogleButton();
-      } else {
-        setAuthAlert(`Email "${email}" sudah terdaftar! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
-        showToast('Email sudah terdaftar, silakan Masuk', 'warning');
-        switchAuthMode('signin');
-        if (emailInput) emailInput.value = email;
-        if (passInput) {
-          passInput.value = '';
-          passInput.focus();
+        if (emailInput) emailInput.focus();
+        return;
+      }
+
+      // 2. Cek duplikasi lokal & Cloud Firestore
+      const users = getRegisteredUsers();
+      const existingLocal = users.find(u => u.email && u.email.toLowerCase() === email);
+      if (existingLocal) {
+        if (existingLocal.authProvider === 'google' || !existingLocal.password) {
+          setAuthAlert(`Email "${email}" sudah terdaftar menggunakan Akun Google. Harap masuk menggunakan tombol "Daftar/Lanjutkan dengan Google" di atas!`, 'warning');
+          showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
+          highlightGoogleButton();
+        } else {
+          setAuthAlert(`Email "${email}" sudah terdaftar! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
+          showToast('Email sudah terdaftar, silakan Masuk', 'warning');
+          switchAuthMode('signin');
+          if (emailInput) emailInput.value = email;
+          if (passInput) { passInput.value = ''; passInput.focus(); }
         }
+        return;
+      }
+
+      if (firestoreDb) {
+        try {
+          const docSnap = await firestoreDb.collection('registered_accounts').doc(cleanEmail).get();
+          if (docSnap.exists) {
+            const remoteUser = docSnap.data();
+            if (remoteUser && (remoteUser.authProvider === 'google' || !remoteUser.password)) {
+              setAuthAlert(`Email "${email}" sudah terdaftar di Cloud menggunakan Akun Google. Harap masuk menggunakan tombol "Lanjutkan dengan Google" di atas!`, 'warning');
+              showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
+              highlightGoogleButton();
+            } else {
+              setAuthAlert(`Email "${email}" sudah terdaftar di Cloud! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
+              showToast('Email sudah terdaftar, silakan Masuk', 'warning');
+              switchAuthMode('signin');
+              if (emailInput) emailInput.value = email;
+              if (passInput) { passInput.value = ''; passInput.focus(); }
+            }
+            return;
+          }
+        } catch (fsErr) {
+          console.warn('Firestore duplicate check notice:', fsErr);
+        }
+      }
+
+      // 3. Daftarkan ke Firebase Auth & kirim email verifikasi wajib ke Gmail pengguna
+      let cred = null;
+      try {
+        cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+      } catch (fbErr) {
+        console.info('Firebase Auth signup note:', fbErr.code || fbErr.message);
+        if (fbErr.code === 'auth/email-already-in-use') {
+          setAuthAlert(`Email "${email}" sudah terdaftar di server. Silakan masuk lewat tab "Masuk" atau tombol Google di atas.`, 'warning');
+          showToast('Email sudah terdaftar, silakan Masuk', 'warning');
+          switchAuthMode('signin');
+          return;
+        }
+        const msg = getAuthErrorMessage(fbErr);
+        setAuthAlert(msg, 'danger');
+        showToast(msg, 'error');
+        return;
+      }
+
+      if (!cred || !cred.user) {
+        setAuthAlert('Gagal membuat akun Firebase. Silakan coba lagi atau gunakan tombol Google di atas.', 'danger');
+        return;
+      }
+
+      const fbUid = cred.user.uid;
+      try {
+        if (cred.user.updateProfile) await cred.user.updateProfile({ displayName: name });
+      } catch (e) { }
+
+      try {
+        await cred.user.sendEmailVerification();
+        lastVerificationEmailSentAt = Date.now();
+      } catch (verErr) {
+        console.warn('sendEmailVerification notice:', verErr);
+      }
+
+      const photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E91E63&color=fff&bold=true`;
+      const newUser = {
+        name,
+        email,
+        uid: fbUid,
+        photoURL,
+        authProvider: 'email',
+        requiresGoogleVerification: true,
+        emailVerified: !!cred.user.emailVerified,
+        isLiveFirebaseSession: true,
+        createdAt: new Date().toISOString()
+      };
+
+      users.push({ ...newUser, password: pass });
+      saveRegisteredUsers(users);
+
+      if (firestoreDb) {
+        try {
+          await firestoreDb.collection('registered_accounts').doc(cleanEmail).set(newUser, { merge: true });
+        } catch (fsErr) {
+          console.warn('Firestore signup profile notice:', fsErr);
+        }
+      }
+
+      // Jika sudah terverifikasi otomatis (jarang untuk password), langsung masuk; jika belum, tahan di panel verifikasi!
+      if (cred.user.emailVerified) {
+        clearPendingEmailVerify();
+        cred.user.isLiveFirebaseSession = true;
+        handleSuccessfulAuth(cred.user, 'email', true);
+      } else {
+        setPendingEmailVerify(email, name, fbUid);
+        showEmailVerificationPanel(email, true);
+        showToast('Link verifikasi dikirim ke Gmail Anda! Cek inbox untuk mengaktifkan akun 📩', 'info');
       }
       return;
     }
 
-    // 2. Cek duplikasi di Cloud Firestore jika online
-    if (firestoreDb) {
-      try {
-        const docSnap = await firestoreDb.collection('registered_accounts').doc(cleanEmail).get();
-        if (docSnap.exists) {
-          const remoteUser = docSnap.data();
-          if (remoteUser && (remoteUser.authProvider === 'google' || !remoteUser.password)) {
-            setAuthAlert(`Email "${email}" sudah terdaftar di Cloud menggunakan Akun Google. Harap masuk menggunakan tombol "Lanjutkan dengan Google" di atas!`, 'warning');
-            showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
-            highlightGoogleButton();
-          } else {
-            setAuthAlert(`Email "${email}" sudah terdaftar di Cloud! Silakan beralih ke tab "Masuk" untuk login.`, 'warning');
-            showToast('Email sudah terdaftar, silakan Masuk', 'warning');
-            switchAuthMode('signin');
-            if (emailInput) emailInput.value = email;
-            if (passInput) {
-              passInput.value = '';
-              passInput.focus();
-            }
-          }
-          return;
-        }
-      } catch (fsErr) {
-        console.warn('Firestore duplicate check notice:', fsErr);
-      }
-    }
-
-    // 3. Daftarkan ke live Firebase Authentication
-    let isLive = false;
-    let fbUid = null;
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-      try {
-        const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
-        if (cred && cred.user) {
-          isLive = true;
-          fbUid = cred.user.uid;
-          if (cred.user.updateProfile) {
-            await cred.user.updateProfile({ displayName: name });
-          }
-        }
-      } catch (fbErr) {
-        console.info('Firebase Auth signup note:', fbErr.code || fbErr.message);
-        if (fbErr.code === 'auth/email-already-in-use') {
-          setAuthAlert(`Email "${email}" sudah terdaftar di server. Silakan beralih ke tab Masuk.`, 'warning');
-          showToast('Email sudah terdaftar di server, silakan Masuk', 'warning');
-          switchAuthMode('signin');
-          return;
-        }
-      }
-    }
-
-    const uid = fbUid || getDeterministicUid(email, 'usr_');
-    const photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=E91E63&color=fff&bold=true`;
-
-    const newUser = {
-      name,
-      email,
-      password: pass,
-      uid,
-      photoURL,
-      authProvider: 'email',
-      isLiveFirebaseSession: isLive,
-      createdAt: new Date().toISOString()
-    };
-
-    // 4. Simpan ke database pengguna lokal
-    users.push(newUser);
-    saveRegisteredUsers(users);
-
-    // 5. Simpan ke Cloud Firestore agar langsung tersinkronisasi ke laptop/perangkat lain
-    if (firestoreDb) {
-      try {
-        await firestoreDb.collection('registered_accounts').doc(cleanEmail).set(newUser, { merge: true });
-        console.log('Profil akun tersimpan di Cloud Firestore:', cleanEmail);
-      } catch (fsErr) {
-        console.warn('Gagal menyimpan profil akun ke Firestore:', fsErr);
-      }
-    }
-
-    AppState.user = {
-      name,
-      email,
-      uid,
-      photoURL,
-      authProvider: 'email',
-      isLiveFirebaseSession: isLive,
-      loggedAt: new Date().toISOString()
-    };
-
-    // Clean slate for brand-new registered account: empty cart, fresh 100k budget, zero warnings
-    AppState.cart = [];
-    AppState.receipts = [];
-    AppState.pantry = [];
-    AppState.budget = 100000;
-    AppState.budgetPeriod = 'weekly';
-    AppState.routineItems = [];
-    AppState.previousSafetyLevel = null;
-    localStorage.setItem('grocery_user_initialized_' + uid, 'true');
-    const todayStr = new Date().toISOString().split('T')[0];
-    localStorage.setItem('last_planner_reset_date_' + uid, todayStr);
-    localStorage.setItem('last_planner_reset_date', todayStr);
-
-    loadUserIsolatedState(uid);
-    AppState.previousSafetyLevel = null;
-
-    const overbudgetBanner = document.getElementById('overbudget-firm-banner');
-    if (overbudgetBanner) overbudgetBanner.classList.add('hidden');
-    const overbudgetSlimBadge = document.getElementById('overbudget-slim-badge');
-    if (overbudgetSlimBadge) overbudgetSlimBadge.style.display = 'none';
-
-    saveLocalState();
-    playCelebrationFanfare();
-    triggerCuteLoginConfetti();
-    checkAuth();
-    setupFirestoreListener();
-    showToast(`Akun berhasil dibuat! Selamat datang, ${name} ✨`, 'success');
-  } else {
     // ---------------------------------------------------------------------
-    // SIGN IN FLOW (CROSS-DEVICE CLOUD SUPPORT)
+    // SIGN IN FLOW (CROSS-DEVICE CLOUD SUPPORT + GUARD UNVERIFIED SIGNUP)
     // ---------------------------------------------------------------------
     let isLive = false;
     let fbUser = null;
     let fbErrorCode = null;
 
-    // 1. Coba login via Firebase Authentication (Server Resmi)
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
         if (cred && cred.user) {
+          try { await cred.user.reload(); } catch (e) { }
           isLive = true;
-          fbUser = cred.user;
+          fbUser = firebase.auth().currentUser || cred.user;
         }
       } catch (fbErr) {
         fbErrorCode = fbErr.code;
@@ -3165,11 +3545,9 @@ async function handleAuthSubmit(e) {
       }
     }
 
-    // 2. Cek di registri lokal (localStorage)
     const users = getRegisteredUsers();
     let foundUser = users.find(u => u.email && u.email.toLowerCase() === email);
 
-    // 3. Jika belum ada di lokal (misal baru buka di laptop), ambil dari Cloud Firestore!
     if (!foundUser && firestoreDb) {
       try {
         const docSnap = await firestoreDb.collection('registered_accounts').doc(cleanEmail).get();
@@ -3177,10 +3555,8 @@ async function handleAuthSubmit(e) {
           const remoteUser = docSnap.data();
           if (remoteUser && remoteUser.email) {
             foundUser = remoteUser;
-            // Cache ke lokal browser agar berikutnya instan
             users.push(remoteUser);
             saveRegisteredUsers(users);
-            console.log('Akun berhasil diunduh dari Cloud Firestore ke perangkat ini:', cleanEmail);
           }
         }
       } catch (fsErr) {
@@ -3188,41 +3564,56 @@ async function handleAuthSubmit(e) {
       }
     }
 
-    // 4. Validasi Akun Google vs Akun Email/Password Manual
-    if (foundUser) {
-      // PERLINDUNGAN UTAMA: Jika akun terdaftar via Google (tidak memiliki password manual lokal/server)
-      if (foundUser.authProvider === 'google' || !foundUser.password) {
-        setAuthAlert(`Email "${email}" terdaftar menggunakan Akun Google. Harap masuk dengan mengetuk tombol "Lanjutkan dengan Google" di atas!`, 'warning');
-        showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
-        highlightGoogleButton();
-        if (passInput) passInput.value = '';
+    if (foundUser && (foundUser.authProvider === 'google' || (!foundUser.password && !fbUser))) {
+      setAuthAlert(`Email "${email}" terdaftar menggunakan Akun Google. Harap masuk dengan mengetuk tombol "Lanjutkan dengan Google" di atas!`, 'warning');
+      showToast('Akun ini terdaftar via Google. Silakan masuk via Google!', 'warning');
+      highlightGoogleButton();
+      if (passInput) passInput.value = '';
+      return;
+    }
+
+    if (fbErrorCode === 'auth/wrong-password' || fbErrorCode === 'auth/invalid-credential') {
+      setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan periksa kembali kata sandi Anda!', 'danger');
+      showToast('Kata sandi salah!', 'danger');
+      if (passInput) { passInput.value = ''; passInput.focus(); }
+      return;
+    }
+
+    if (fbUser) {
+      const pending = getPendingEmailVerify();
+      const matchesPending = !!(pending && pending.email === email);
+      const mustVerify = !fbUser.emailVerified && (
+        matchesPending ||
+        (foundUser && foundUser.requiresGoogleVerification && !foundUser.emailVerified) ||
+        isPostEnforcementFirebaseUser(fbUser)
+      );
+
+      if (mustVerify) {
+        setPendingEmailVerify(email, fbUser.displayName || (foundUser && foundUser.name) || '', fbUser.uid);
+        showEmailVerificationPanel(email, true);
+        showToast('Harap verifikasi email Google Anda terlebih dahulu 📩', 'warning');
         return;
       }
 
-      // Validasi kata sandi untuk akun email/password biasa
+      clearPendingEmailVerify();
+      hideEmailVerificationPanel();
+      fbUser.isLiveFirebaseSession = true;
+      handleSuccessfulAuth(fbUser, 'email', true);
+      return;
+    }
+
+    if (foundUser) {
       if (foundUser.password !== pass) {
         setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan periksa kembali kata sandi Anda!', 'danger');
         showToast('Kata sandi salah!', 'danger');
-        if (passInput) {
-          passInput.value = '';
-          passInput.focus();
-        }
+        if (passInput) { passInput.value = ''; passInput.focus(); }
         return;
       }
 
-      // Jika belum aktif di Firebase Auth, sinkronkan secara seamless
-      if (!isLive && typeof firebase !== 'undefined' && firebase.auth && pass && pass.length >= 6) {
-        try {
-          const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
-          if (cred && cred.user) isLive = true;
-        } catch (e) {
-          if (e.code === 'auth/email-already-in-use') {
-            try {
-              const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
-              if (cred && cred.user) isLive = true;
-            } catch (e2) { }
-          }
-        }
+      if (foundUser.requiresGoogleVerification && !foundUser.emailVerified) {
+        setAuthAlert('Akun ini belum menyelesaikan verifikasi email Google. Pastikan terhubung internet atau masuk lewat tombol Google di atas.', 'warning');
+        showToast('Akun belum terverifikasi!', 'warning');
+        return;
       }
 
       AppState.user = {
@@ -3245,27 +3636,12 @@ async function handleAuthSubmit(e) {
       return;
     }
 
-    // Jika kata sandi salah dari Firebase Auth
-    if (fbErrorCode === 'auth/wrong-password' || fbErrorCode === 'auth/invalid-credential') {
-      setAuthAlert('Kata sandi yang Anda masukkan salah. Silakan periksa kembali kata sandi Anda!', 'danger');
-      showToast('Kata sandi salah!', 'danger');
-      if (passInput) {
-        passInput.value = '';
-        passInput.focus();
-      }
-      return;
-    }
-
-    if (fbUser) {
-      fbUser.isLiveFirebaseSession = true;
-      handleSuccessfulAuth(fbUser, 'email', true);
-      return;
-    }
-
-    // Pengguna tidak ditemukan di manapun
-    setAuthAlert(`Email "${email}" belum terdaftar! Silakan pilih tab "Daftar" untuk membuat akun baru.`, 'warning');
+    setAuthAlert(`Email "${email}" belum terdaftar! Silakan pilih tab "Daftar" menggunakan email resmi Google atau ketuk "Lanjutkan dengan Google".`, 'warning');
     showToast('Email belum terdaftar. Silakan buat akun baru!', 'warning');
     if (emailInput) emailInput.focus();
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+    if (submitSpan) submitSpan.textContent = origSubmitLabel || ((AppState.authMode === 'signup') ? 'Daftar & Verifikasi Email Google' : 'Masuk ke Dashboard');
   }
 }
 
@@ -3319,6 +3695,8 @@ function loginDemoAccount() {
 
 function promptLogout(notify = true) {
   hidePwaInstallBanner();
+  clearPendingEmailVerify();
+  hideEmailVerificationPanel();
   // Requirement 3: Stop onSnapshot listener upon logout
   if (unsubscribeFirestore) {
     try { unsubscribeFirestore(); } catch (e) { }
@@ -10779,6 +11157,9 @@ if (typeof window !== 'undefined') {
   window.toggleAuthMode = toggleAuthMode;
   window.loginWithGoogle = loginWithGoogle;
   window.handleAuthSubmit = handleAuthSubmit;
+  window.checkPendingEmailVerification = checkPendingEmailVerification;
+  window.resendPendingEmailVerification = resendPendingEmailVerification;
+  window.cancelPendingEmailVerification = cancelPendingEmailVerification;
   window.syncLocalAccountsToCloud = syncLocalAccountsToCloud;
   window.loginDemoAccount = loginDemoAccount;
   window.handleProfileLogout = handleProfileLogout;

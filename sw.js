@@ -2,7 +2,7 @@
  * Service Worker for Smart Grocery Tracker & Budget Planner
  * Production-ready offline caching for supermarket in-store experience
  */
-const CACHE_NAME = 'sgt-cache-v146';
+const CACHE_NAME = 'sgt-cache-v147';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -47,6 +47,14 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+  try {
+    const reqUrl = new URL(event.request.url);
+    if (reqUrl.origin !== self.location.origin || reqUrl.pathname.startsWith('/__/')) {
+      return;
+    }
+  } catch (e) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
