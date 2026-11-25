@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=175">
+  <link rel="stylesheet" href="./css/app.css?v=176">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -761,56 +761,55 @@
             <div id="budgetSlimProgressBar" class="tracker-progress-fill" style="width: 0%; background: #10B981;"></div>
           </div>
 
-          <!-- Baris 4: Kotak Peringatan Bertingkat & Dynamic Animated Kawaii Companion -->
-          <!-- Baris 5: INSIGHTS BLOCK (SHOPPING STREAK, TOTAL HEMAT & ALOKASI KATEGORI) -->
-          <div id="dashboardInsightsContainer" class="dashboard-insights-container">
-            <!-- Streak & Total Hemat 2-Column Grid -->
-            <div class="insights-dual-grid">
-              <div id="shoppingStreakCard" class="insight-stat-card streak-card">
-                <div class="insight-stat-top">
-                  <span class="insight-stat-icon" aria-hidden="true">🔥</span>
-                  <span class="insight-stat-label">Shopping Streak</span>
-                </div>
-                <div class="insight-stat-main">
-                  <span id="shoppingStreakValue" class="insight-stat-value">0 Hari</span>
-                </div>
-                <div class="insight-stat-footer">
-                  <span id="shoppingStreakSub" class="insight-stat-sub">Mulai belanja yuk! ✨</span>
-                </div>
-              </div>
+          <!-- Hidden Compatibility Hook -->
+          <div id="overbudget-slim-badge" style="display: none !important;">
+            <strong id="overbudget-slim-diff">Rp 0</strong>
+          </div>
+        </div>
 
-              <div id="totalHematCard" class="insight-stat-card hemat-card">
-                <div class="insight-stat-top">
-                  <span class="insight-stat-icon" aria-hidden="true">🏷️</span>
-                  <span class="insight-stat-label">Total Hemat</span>
-                </div>
-                <div class="insight-stat-main">
-                  <span id="totalHematValue" class="insight-stat-value">Rp 0</span>
-                </div>
-                <div class="insight-stat-footer">
-                  <span id="totalHematSub" class="insight-stat-sub">Dari promo &amp; diskon 🌸</span>
-                </div>
+        <!-- Baris 5: INSIGHTS BLOCK (SHOPPING STREAK, TOTAL HEMAT & ALOKASI KATEGORI) -->
+        <div id="dashboardInsightsContainer" class="dashboard-insights-container">
+          <!-- Streak & Total Hemat 2-Column Grid -->
+          <div class="insights-dual-grid">
+            <div id="shoppingStreakCard" class="insight-stat-card streak-card">
+              <div class="insight-stat-top">
+                <span class="insight-stat-icon" aria-hidden="true">🔥</span>
+                <span class="insight-stat-label">Shopping Streak</span>
+              </div>
+              <div class="insight-stat-main">
+                <span id="shoppingStreakValue" class="insight-stat-value">0 Hari</span>
+              </div>
+              <div class="insight-stat-footer">
+                <span id="shoppingStreakSub" class="insight-stat-sub">Mulai belanja yuk! ✨</span>
               </div>
             </div>
 
-            <!-- Category Spending Summary (Compact iOS Grouped List) -->
-            <div id="categorySpendingSummary" class="category-spending-card">
-              <div class="category-spending-header">
-                <div class="cat-header-title">
-                  <span class="cat-title-icon" aria-hidden="true">📊</span>
-                  <span class="cat-title-text">Alokasi Belanja Kategori</span>
-                </div>
-                <span id="categoryActiveCountPill" class="cat-count-pill">0 Kategori</span>
+            <div id="totalHematCard" class="insight-stat-card hemat-card">
+              <div class="insight-stat-top">
+                <span class="insight-stat-icon" aria-hidden="true">🏷️</span>
+                <span class="insight-stat-label">Total Hemat</span>
               </div>
-              <div id="categorySpendingList" class="category-spending-list">
-                <!-- Dynamically populated by renderCategorySpendingSummary() -->
+              <div class="insight-stat-main">
+                <span id="totalHematValue" class="insight-stat-value">Rp 0</span>
+              </div>
+              <div class="insight-stat-footer">
+                <span id="totalHematSub" class="insight-stat-sub">Dari promo &amp; diskon 🌸</span>
               </div>
             </div>
           </div>
 
-          <!-- Hidden Compatibility Hook -->
-          <div id="overbudget-slim-badge" style="display: none !important;">
-            <strong id="overbudget-slim-diff">Rp 0</strong>
+          <!-- Category Spending Summary (Compact iOS Grouped List) -->
+          <div id="categorySpendingSummary" class="category-spending-card">
+            <div class="category-spending-header">
+              <div class="cat-header-title">
+                <span class="cat-title-icon" aria-hidden="true">📊</span>
+                <span class="cat-title-text">Alokasi Belanja Kategori</span>
+              </div>
+              <span id="categoryActiveCountPill" class="cat-count-pill">0 Kategori</span>
+            </div>
+            <div id="categorySpendingList" class="category-spending-list">
+              <!-- Dynamically populated by renderCategorySpendingSummary() -->
+            </div>
           </div>
         </div>
 
