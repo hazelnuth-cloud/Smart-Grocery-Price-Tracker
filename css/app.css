@@ -1310,8 +1310,115 @@ body.theme-dark .app-header {
   top: -6px;
   right: -6px;
   pointer-events: none;
-  opacity: 0.82;
-  filter: drop-shadow(0 2px 6px rgba(217, 130, 162, 0.12));
+  opacity: 0.9;
+  filter: drop-shadow(0 2px 6px rgba(217, 130, 162, 0.16));
+}
+
+.decor-sakura-mid {
+  position: absolute;
+  bottom: 4px;
+  left: 52%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.tracker-floral-garland {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 2px 10px 2px 4px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 240, 246, 0.65);
+  border: 1px solid rgba(244, 191, 208, 0.45);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+
+.tracker-floral-svg {
+  display: block;
+  overflow: visible;
+}
+
+.floral-blossom {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sakuraBloomBreath 4.2s ease-in-out infinite;
+}
+
+.floral-bloom-1 { animation-delay: 0s; }
+.floral-bloom-2 { animation-delay: 0.9s; }
+.floral-bloom-3 { animation-delay: 1.8s; }
+.blossom-corner-main { animation-delay: 0.4s; }
+.blossom-corner-mini { animation-delay: 1.4s; }
+.blossom-mid-a { animation-delay: 2.1s; }
+
+.floral-petal {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.petal-sway-1 {
+  animation: sakuraPetalSway 3.8s ease-in-out infinite alternate;
+}
+
+.petal-sway-2 {
+  animation: sakuraPetalSway 4.4s ease-in-out infinite alternate-reverse;
+}
+
+.petal-drift-a {
+  animation: sakuraPetalDriftA 5.2s ease-in-out infinite alternate;
+}
+
+.petal-drift-b {
+  animation: sakuraPetalDriftB 6s ease-in-out infinite alternate;
+}
+
+@keyframes sakuraBloomBreath {
+  0%, 100% {
+    transform: scale(0.95) rotate(-4deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(8deg);
+  }
+}
+
+@keyframes sakuraPetalSway {
+  0% {
+    transform: translate(0, 0) rotate(-6deg);
+  }
+  100% {
+    transform: translate(2.5px, -2px) rotate(10deg);
+  }
+}
+
+@keyframes sakuraPetalDriftA {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0.95);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate(-5px, 4px) rotate(16deg) scale(1.08);
+    opacity: 0.92;
+  }
+}
+
+@keyframes sakuraPetalDriftB {
+  0% {
+    transform: translate(0, 0) rotate(4deg) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(4px, -4px) rotate(-14deg) scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+body.dark-mode .tracker-floral-garland,
+body.theme-dark .tracker-floral-garland {
+  background: rgba(58, 24, 46, 0.72);
+  border-color: rgba(255, 182, 193, 0.25);
+  box-shadow: inset 0 1px 1px rgba(255, 205, 222, 0.14);
 }
 
 .decor-cloud-bottom {
@@ -1319,7 +1426,8 @@ body.theme-dark .app-header {
   bottom: 6px;
   left: 10px;
   pointer-events: none;
-  opacity: 0.55;
+  opacity: 0.65;
+  animation: sakuraPetalSway 5s ease-in-out infinite alternate;
 }
 
 .decor-sparkle {
@@ -2140,7 +2248,10 @@ body.theme-dark .app-header {
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .kawaii-mascot-svg,
-  .decor-sparkle {
+  .decor-sparkle,
+  .floral-blossom,
+  .floral-petal,
+  .decor-cloud-bottom {
     animation: none !important;
   }
 }

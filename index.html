@@ -32,7 +32,7 @@
     rel="stylesheet">
 
   <!-- Custom Core Mobile CSS (Design Tokens, Dark Mode & Mobile Ergonomics) -->
-  <link rel="stylesheet" href="./css/app.css?v=177">
+  <link rel="stylesheet" href="./css/app.css?v=178">
 
   <!-- Firebase SDK CDN (Cloud Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -700,24 +700,52 @@
         <div id="plannerBudgetAlert" class="sticky-dashboard-tracker planner-budget-alert safe"
           title="Kotak Dashboard Pengendali Anggaran">
           
-          <!-- Cute Kawaii Corner Mascot & Sakura Decorative Elements (Pointer-Events None, Accessible Hidden) -->
+          <!-- Cute Kawaii Corner Mascot & Animated Sakura Floral Elements (Pointer-Events None, Accessible Hidden) -->
           <div class="card-mascot-decorations" aria-hidden="true">
             <!-- Top Right Floating Sakura Blossom & Petals -->
-            <svg class="decor-sakura-corner" width="85" height="85" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M92 8C78 14 68 28 64 42" stroke="#E6A8BE" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
-              <!-- Blossom 1 -->
-              <g transform="translate(68, 12) scale(0.95)">
-                <circle cx="12" cy="12" r="3" fill="#FFE699" />
-                <circle cx="12" cy="5" r="4.5" fill="#F8DCE5" />
-                <circle cx="19" cy="9" r="4.5" fill="#F4BFD0" />
-                <circle cx="17" cy="17" r="4.5" fill="#F8DCE5" />
-                <circle cx="7" cy="17" r="4.5" fill="#F4BFD0" />
-                <circle cx="5" cy="9" r="4.5" fill="#F8DCE5" />
+            <svg class="decor-sakura-corner" width="92" height="92" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M94 6C78 14 68 28 62 44" stroke="#E6A8BE" stroke-width="1.5" stroke-linecap="round" opacity="0.45" />
+              <!-- Blossom 1 (Gently Blooming) -->
+              <g transform="translate(68, 12)">
+                <g class="floral-blossom blossom-corner-main">
+                  <circle cx="12" cy="5" r="4.8" fill="#F8DCE5" />
+                  <circle cx="19" cy="9" r="4.8" fill="#F4BFD0" />
+                  <circle cx="17" cy="17" r="4.8" fill="#F8DCE5" />
+                  <circle cx="7" cy="17" r="4.8" fill="#F4BFD0" />
+                  <circle cx="5" cy="9" r="4.8" fill="#F8DCE5" />
+                  <circle cx="12" cy="12" r="3.1" fill="#FFE699" />
+                </g>
               </g>
-              <!-- Floating Petal 1 -->
-              <path d="M52 28C50 24 44 26 43 30C42 34 48 35 51 33C54 31 54 30 52 28Z" fill="#F4BFD0" opacity="0.75" />
-              <!-- Floating Petal 2 -->
-              <path d="M78 45C76 42 71 44 70 48C69 52 74 53 77 51C80 49 80 47 78 45Z" fill="#F8DCE5" opacity="0.7" />
+              <!-- Blossom 2 (Mini Bud) -->
+              <g transform="translate(46, 8) scale(0.65)">
+                <g class="floral-blossom blossom-corner-mini">
+                  <circle cx="12" cy="5" r="4.5" fill="#FCE7F3" />
+                  <circle cx="19" cy="9" r="4.5" fill="#F9A8D4" />
+                  <circle cx="17" cy="17" r="4.5" fill="#FCE7F3" />
+                  <circle cx="7" cy="17" r="4.5" fill="#F9A8D4" />
+                  <circle cx="5" cy="9" r="4.5" fill="#FCE7F3" />
+                  <circle cx="12" cy="12" r="2.8" fill="#FDE68A" />
+                </g>
+              </g>
+              <!-- Floating Petals -->
+              <path class="floral-petal petal-drift-a" d="M52 28C50 24 44 26 43 30C42 34 48 35 51 33C54 31 54 30 52 28Z" fill="#F4BFD0" opacity="0.82" />
+              <path class="floral-petal petal-drift-b" d="M78 45C76 42 71 44 70 48C69 52 74 53 77 51C80 49 80 47 78 45Z" fill="#F8DCE5" opacity="0.78" />
+            </svg>
+
+            <!-- Center-Left Soft Animated Floral Sprig -->
+            <svg class="decor-sakura-mid" width="110" height="58" viewBox="0 0 110 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g transform="translate(18, 12)">
+                <g class="floral-blossom blossom-mid-a">
+                  <circle cx="10" cy="4" r="3.6" fill="#FCE7F3" />
+                  <circle cx="15.5" cy="7.5" r="3.6" fill="#F4BFD0" />
+                  <circle cx="14" cy="14" r="3.6" fill="#FCE7F3" />
+                  <circle cx="6" cy="14" r="3.6" fill="#F4BFD0" />
+                  <circle cx="4.5" cy="7.5" r="3.6" fill="#FCE7F3" />
+                  <circle cx="10" cy="9.5" r="2.2" fill="#FFE699" />
+                </g>
+              </g>
+              <path class="floral-petal petal-drift-b" d="M62 22C60 19 55 21 55 24C55 27 59 28 62 26C64 24 64 23 62 22Z" fill="#F4BFD0" opacity="0.68" />
+              <path class="floral-petal petal-drift-a" d="M88 38C86 35 81 37 81 40C81 43 85 44 88 42C90 40 90 39 88 38Z" fill="#F9A8D4" opacity="0.58" />
             </svg>
             
             <!-- Bottom Left / Accent Kawaii Mini Cloud Companion -->
@@ -738,18 +766,54 @@
             <span class="decor-sparkle s3" aria-hidden="true">✦</span>
           </div>
 
-          <!-- Baris 1: Status Aktif (Blinking Live Pulse), Badge Saldo & Link Atur -->
+          <!-- Baris 1: Animated Sakura Floral Garland & Action Controls -->
           <div class="tracker-header-row">
             <div class="tracker-header-left">
-              <!-- Active / Online Status Pill with Glowing Blinking Animation -->
-              <div id="cloud-sync-status-pill" class="cloud-sync-pill status-online touch-target"
-                onclick="openCloudSyncModal()" title="Status Koneksi &amp; Cloud Sync">
-                <span id="cloud-sync-dot" class="cloud-sync-dot online pulsing"></span>
-                <span id="cloud-sync-text" class="cloud-sync-text">Aktif</span>
+              <div class="tracker-floral-garland" aria-hidden="true">
+                <svg class="tracker-floral-svg" width="136" height="28" viewBox="0 0 136 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Soft Vine Curve -->
+                  <path d="M8 18C34 9 62 21 92 12C108 7 120 10 128 14" stroke="rgba(217, 130, 162, 0.48)" stroke-width="1.4" stroke-linecap="round" />
+                  <!-- Leaf accents -->
+                  <path class="floral-petal petal-sway-1" d="M34 13C36 9 41 9 42 12C39 14 36 14 34 13Z" fill="#86EFAC" opacity="0.85" />
+                  <path class="floral-petal petal-sway-2" d="M77 16C79 12 84 12 85 15C82 17 79 17 77 16Z" fill="#86EFAC" opacity="0.8" />
+                  <!-- Sakura Flower 1 -->
+                  <g transform="translate(18, 14)">
+                    <g class="floral-blossom floral-bloom-1">
+                      <circle cx="0" cy="-5" r="3.3" fill="#FBCFE8" />
+                      <circle cx="4.8" cy="-1.5" r="3.3" fill="#F472B6" opacity="0.82" />
+                      <circle cx="3" cy="4" r="3.3" fill="#FBCFE8" />
+                      <circle cx="-3" cy="4" r="3.3" fill="#F472B6" opacity="0.82" />
+                      <circle cx="-4.8" cy="-1.5" r="3.3" fill="#FBCFE8" />
+                      <circle cx="0" cy="0" r="2.2" fill="#FDE047" />
+                    </g>
+                  </g>
+                  <!-- Sakura Flower 2 -->
+                  <g transform="translate(60, 15) scale(0.9)">
+                    <g class="floral-blossom floral-bloom-2">
+                      <circle cx="0" cy="-5" r="3.3" fill="#F9A8D4" />
+                      <circle cx="4.8" cy="-1.5" r="3.3" fill="#FCE7F3" />
+                      <circle cx="3" cy="4" r="3.3" fill="#F9A8D4" />
+                      <circle cx="-3" cy="4" r="3.3" fill="#FCE7F3" />
+                      <circle cx="-4.8" cy="-1.5" r="3.3" fill="#F9A8D4" />
+                      <circle cx="0" cy="0" r="2.2" fill="#FDE047" />
+                    </g>
+                  </g>
+                  <!-- Sakura Flower 3 -->
+                  <g transform="translate(104, 12) scale(0.94)">
+                    <g class="floral-blossom floral-bloom-3">
+                      <circle cx="0" cy="-5" r="3.3" fill="#FCE7F3" />
+                      <circle cx="4.8" cy="-1.5" r="3.3" fill="#F472B6" opacity="0.82" />
+                      <circle cx="3" cy="4" r="3.3" fill="#FCE7F3" />
+                      <circle cx="-3" cy="4" r="3.3" fill="#F472B6" opacity="0.82" />
+                      <circle cx="-4.8" cy="-1.5" r="3.3" fill="#FCE7F3" />
+                      <circle cx="0" cy="0" r="2.1" fill="#FDE047" />
+                    </g>
+                  </g>
+                  <!-- Floating Tiny Petals -->
+                  <path class="floral-petal petal-sway-1" d="M122 8C124 5 128 6 128 9C126 11 123 10 122 8Z" fill="#F472B6" opacity="0.8" />
+                  <path class="floral-petal petal-sway-2" d="M40 21C42 19 45 20 45 22C43 24 40 23 40 21Z" fill="#F4BFD0" opacity="0.9" />
+                </svg>
               </div>
-
-              <!-- Safety / Budget Level Badge -->
-              <div id="plannerAlertBadge" class="planner-alert-badge badge-safe">Aman</div>
             </div>
 
             <div class="tracker-header-right">
